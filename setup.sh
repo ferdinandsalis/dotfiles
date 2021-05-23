@@ -81,7 +81,7 @@ echo "this may take a while.. as well"
 echo "---------------------------------------------------------"
 
 if [ "$(uname)" == "Darwin" ]; then
-  source "$DOTFILES/configs/.macos"
+  source "$DOTFILES/macos/.config"
 
   echo "Installing brew bundle"
   brew tap Homebrew/bundle
@@ -93,9 +93,9 @@ if [ "$(uname)" == "Darwin" ]; then
 fi
 
 # Install n node version manager program
-curl -L https://git.io/n-install | bash
+# curl -L https://git.io/n-install | bash
 # Install rust
-curl https://sh.rustup.rs -sSf | sh
+# curl https://sh.rustup.rs -sSf | sh
 
 setup_fzf
 

@@ -22,7 +22,7 @@ elseif uname.sysname == "Linux" then
 end
 
 vim.g.dotfiles = "~/.doftfiles"
-vim.g.vim_dir = "~/.config/nvim"
+vim.g.vim_dir = "~/.dotfiles/nvim"
 
 ------------------------------------------------------------------------
 -- Leader bindings

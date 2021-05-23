@@ -1,7 +1,7 @@
 alias ls='exa'
-alias l='exa -lb --git --group-directories-first'
+alias l='exa -lb --git --group-directories-first --icons'
 alias ll='exa -lbG --git --group-directories-first'
-alias la='exa -lba --git --group-directories-first'
+alias la='exa -lba --git --group-directories-first --icons'
 alias lx='exa -lbahFHigUmuS@ --git --group-directories-first'
 
 # specialty views

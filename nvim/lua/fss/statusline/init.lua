@@ -117,7 +117,7 @@ function _G.statusline()
   local curwin = vim.g.statusline_winid or 0
   local curbuf = vim.api.nvim_win_get_buf(curwin)
 
-  -- TODO reduce the available space whenever we add
+  -- TODO: reduce the available space whenever we add
   -- a component so we can use it to determine what to add
   local available_space = vim.api.nvim_win_get_width(curwin)
 
@@ -177,7 +177,7 @@ function _G.statusline()
     {utils.item_if(file_modified, ctx.modified, "StModified"), 1},
     {readonly_item, 2},
     {utils.item(utils.mode()), 0},
-    {utils.item(utils.search_count(), "StCount"), 1},
+    -- {utils.item(utils.search_count(), "StCount"), 1},
     {dir_item, 3},
     {parent_item, 2},
     {file_item, 0},

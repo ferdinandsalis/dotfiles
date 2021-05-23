@@ -204,28 +204,9 @@ require("packer").startup(
               status.register_progress()
             end
           },
-          -- use {
-          --   "kosayoda/nvim-lightbulb",
-          --   config = function()
-          --     fss.augroup(
-          --       "NvimLightbulb",
-          --       {
-          --         {
-          --           events = {"CursorHold", "CursorHoldI"},
-          --           targets = {"*"},
-          --           command = function()
-          --             require("nvim-lightbulb").update_lightbulb {
-          --               sign = {enabled = false},
-          --               virtual_text = {enabled = true}
-          --             }
-          --           end
-          --         }
-          --       }
-          --     )
-          --   end
-          -- },
           {
             "glepnir/lspsaga.nvim",
+            opt = true,
             config = conf("lspsaga")
           },
           {
@@ -240,6 +221,8 @@ require("packer").startup(
           }
         }
       }
+
+      use "ray-x/lsp_signature.nvim"
 
       use {
         "nvim-treesitter/nvim-treesitter",
@@ -268,6 +251,11 @@ require("packer").startup(
           require("spellsitter").setup {hl = "SpellBad", captures = {"comment"}}
         end
       }
+
+      use "romgrk/nvim-treesitter-context"
+      use "windwp/nvim-ts-autotag"
+      use "JoosepAlviste/nvim-ts-context-commentstring"
+      use "p00f/nvim-ts-rainbow"
 
       use {
         "folke/trouble.nvim",
@@ -303,11 +291,6 @@ require("packer").startup(
       }
 
       use "folke/tokyonight.nvim"
-      -- use "shaunsingh/nord.nvim"
-      -- use "marko-cerovac/material.nvim"
-      use "JoosepAlviste/nvim-ts-context-commentstring"
-      use "windwp/nvim-ts-autotag"
-      use "p00f/nvim-ts-rainbow"
       use "mtdl9/vim-log-highlighting"
 
       -- TODO: this breaks when used with sessions but keep an eye on it
@@ -469,17 +452,10 @@ require("packer").startup(
       use {"itchyny/vim-highlighturl", config = [[vim.g.highlighturl_guifg = "NONE"]]}
 
       use {
-        "rrethy/vim-hexokinase",
-        run = "make hexokinase",
-        ft = {
-          "lua",
-          "css",
-          "html",
-          "javascript",
-          "javascriptreact",
-          "typescript",
-          "typescriptreact"
-        }
+        "norcalli/nvim-colorizer.lua",
+        config = function()
+          require("colorizer").setup()
+        end
       }
 
       use "kevinhwang91/nvim-bqf" -- Better quick fix
@@ -576,7 +552,7 @@ require("packer").startup(
 
       ---}}}
 
-      -- use {"soywod/himalaya", rtp = "vim"}
+      use {"soywod/himalaya", rtp = "vim"}
 
       --------------------------------------------------------------------------------
       -- Profiling {{{

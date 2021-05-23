@@ -24,9 +24,16 @@ return function()
       enable = true,
       ignore_install = {"verilog"}
     },
+    context_commentstring = {
+      enable = true
+    },
+    autotag = {
+      enable = true
+    },
     rainbow = {
       enable = true,
-      disable = {"lua", "json"}
+      disable = {"lua", "json"},
+      extended_mode = true
     },
     incremental_selection = {
       enable = true,

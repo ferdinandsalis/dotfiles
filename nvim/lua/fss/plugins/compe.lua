@@ -47,7 +47,7 @@ return function()
       nvim_lsp = true,
       nvim_lua = true,
       treesitter = false, -- quite slow
-      emoji = false,
+      emoji = {kind = "ﲃ", filetypes = {"markdown"}},
       tabnine = {priority = 1200}
     }
   }
@@ -55,7 +55,7 @@ return function()
   local imap = fss.imap
   local smap = fss.smap
   local inoremap = fss.inoremap
-  local opts = {expr = true}
+  local opts = {expr = true, silent = true}
 
   inoremap("<C-Space>", "compe#complete()", opts)
   inoremap("<C-e>", "compe#close('<C-e>')", opts)

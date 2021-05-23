@@ -23,21 +23,22 @@ local function setup_autocommands(client, _)
         {
           events = {"CursorHold"},
           targets = {"<buffer>"},
-          command = "lua vim.lsp.buf.document_highlight()"
+          command = vim.lsp.buf.document_highlight
         },
         {
           events = {"CursorHoldI"},
           targets = {"<buffer>"},
-          command = "lua vim.lsp.buf.document_highlight()"
+          command = vim.lsp.buf.document_highlight
         },
         {
           events = {"CursorMoved"},
           targets = {"<buffer>"},
-          command = "lua vim.lsp.buf.clear_references()"
+          command = vim.lsp.buf.clear_references
         }
       }
     )
   end
+
   if client and client.resolved_capabilities.document_formatting then
     -- format on save
     fss.augroup(
@@ -134,31 +135,31 @@ function fss.lsp.tagfunc(pattern, flags)
 end
 
 require("vim.lsp.protocol").CompletionItemKind = {
-  " Text", -- Text
-  " Method", -- Method
-  "ƒ Function", -- Function
-  " Constructor", -- Constructor
+  "  Text", -- Text
+  "  Method", -- Method
+  "ƒ  Function", -- Function
+  "  Constructor", -- Constructor
   "識 Field", -- Field
-  " Variable", -- Variable
-  "\u{f0e8} Class", -- Class
-  "ﰮ Interface", -- Interface
-  " Module", -- Module
-  " Property", -- Property
-  " Unit", -- Unit
-  " Value", -- Value
+  "  Variable", -- Variable
+  "ﰮ  Interface", -- Interface
+  "  Module", -- Module
+  "  Property", -- Property
+  "  Unit", -- Unit
+  "  Value", -- Value
   "了 Enum", -- Enum
-  " Keyword", -- Keyword
-  " Snippet", -- Snippet
-  " Color", -- Color
-  " File", -- File
+  "  Keyword", -- Keyword
+  "  Snippet", -- Snippet
+  "  Color", -- Color
+  "  File", -- File
   "渚 Reference", -- Reference
-  " Folder", -- Folder
-  " Enum", -- Enum
-  " Constant", -- Constant
-  " Struct", -- Struct
+  "  Folder", -- Folder
+  "  Enum", -- Enum
+  "  Constant", -- Constant
+  "  Struct", -- Struct
   "鬒 Event", -- Event
-  "\u{03a8} Operator", -- Operator
-  " Type Parameter" -- TypeParameter
+  "  Type Parameter", -- TypeParameter
+  "\u{f0e8} Class", -- Class
+  "\u{03a8} Operator" -- Operator
 }
 
 function fss.lsp.on_attach(client, bufnr)
@@ -168,6 +169,16 @@ function fss.lsp.on_attach(client, bufnr)
   if client.resolved_capabilities.goto_definition then
     vim.api.nvim_buf_set_option(bufnr, "tagfunc", "v:lua.fss.lsp.tagfunc")
   end
+
+  require("lsp_signature").on_attach(
+    {
+      bind = true,
+      handler_opts = {
+        border = "single"
+      }
+    }
+  )
+
   require("lsp-status").on_attach(client)
 end
 
