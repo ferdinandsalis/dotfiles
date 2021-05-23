@@ -1,0 +1,147 @@
+alias ls='exa'
+alias l='exa -lb --git --group-directories-first'
+alias ll='exa -lbG --git --group-directories-first'
+alias la='exa -lba --git --group-directories-first'
+alias lx='exa -lbahFHigUmuS@ --git --group-directories-first'
+
+# specialty views
+alias lS='exa -1'                                                              # one column, just names
+alias lt='exa --tree --level=2'
+
+alias zshrc='${=EDITOR} ${ZDOTDIR:-$HOME}/.zshrc' # Quick access to the .zshrc file
+alias grep='grep --color'
+alias top="vtop"
+alias x="exit" # Exit Terminal
+alias t=_t
+alias del="rm -rf"
+alias dots="cd $DOTFILES"
+alias coding="cd $PROJECTS_DIR"
+alias lp="lsp"
+alias v='nvim'
+alias minimalvim="nvim -u ~/minimal.vim"
+alias vi='nvim'
+alias nv='nvim'
+# This allow using neovim remote when nvim is called from inside a running vim instance
+if [ -n "$NVIM_LISTEN_ADDRESS" ]; then
+    alias nvim=nvr -cc split --remote-wait +'set bufhidden=wipe'
+fi
+alias cl='clear'
+alias restart="exec $SHELL"
+alias src='restart'
+alias dnd='do-not-disturb toggle'
+alias ez="nvim ~/.zshrc"
+alias ev="nvim ~/.vimrc"
+alias et="nvim ~/.tmux.conf"
+alias ns="clear && npm start"
+alias nt="clear && npm test"
+alias yt="clear && yarn test"
+alias ys="clear && yarn start"
+
+alias md="mkdir -p"
+
+alias esy="nocorrect esy"
+alias ta="tmux attach -t"
+alias td="tmux detach"
+alias tls="tmux ls"
+alias tkss="killall tmux"
+alias tkill="tmux kill-session -t"
+# IP addresses
+alias ip="dig +short myip.opendns.com @resolver1.opendns.com"
+alias localip="ipconfig getifaddr en0"
+
+# suffix aliases set the program type to use to open
+# a particular file with an extension
+alias -s js=nvim
+alias -s html=nvim
+alias -s css=nvim
+
+alias serve='python -m SimpleHTTPServer'
+alias fuckit='export THEFUCK_REQUIRE_CONFIRMATION=False; fuck; export THEFUCK_REQUIRE_CONFIRMATION=True'
+
+if which kitty >/dev/null; then
+  alias icat="kitty +kitten icat"
+fi
+
+if [[ `uname` == 'Linux' ]]; then
+  # https://stackoverflow.com/questions/53298843/how-do-i-install-bundletool
+  alias bundletool='java -jar ~/bundletool-all.jar'
+  alias o='a -e xdg-open' # quick opening files with xdg-open
+  alias open='xdg-open'
+elif [[ `uname` == 'Darwin' ]]; then
+  alias brewfile="cd $DOTFILES/.config/homebrew/ && brew bundle dump --force"
+  alias brewupdate="brew bundle dump --force"
+fi
+
+# Check if main exists and use instead of master
+function git_main_branch() {
+  local branch
+  for branch in main trunk; do
+    if command git show-ref -q --verify refs/heads/$branch; then
+      echo $branch
+      return
+    fi
+  done
+  echo master
+}
+
+# -------------------------------------------------------------------------------
+# Git aliases
+# -------------------------------------------------------------------------------
+# source: https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/git/git.plugin.zsh#L53
+# NOTE: a lot of these commands are single quoted ON PURPOSE to prevent them
+# from being evaluated immediately rather than in the shell when the alias is
+# expanded
+alias g="git"
+alias gss="git status -s"
+alias gst="git status"
+alias gc="git commit"
+alias gd="git diff"
+alias gco="git checkout"
+alias ga='git add'
+alias gaa='git add --all'
+alias gcb='git checkout -b'
+alias gb='git branch'
+alias gbD='git branch -D'
+alias gbl='git blame -b -w'
+alias gbr='git branch --remote'
+alias gc='git commit -v'
+alias gd='git diff'
+alias gf='git fetch'
+alias gfa='git fetch --all --prune'
+alias gfo='git fetch origin'
+alias gm='git merge'
+alias gma='git merge --abort'
+alias gmom='git merge origin/$(git_main_branch)'
+alias gp='git push'
+alias gbda='git branch --no-color --merged | command grep -vE "^(\+|\*|\s*($(git_main_branch)|development|develop|devel|dev)\s*$)" | command xargs -n 1 git branch -d'
+alias gpristine='git reset --hard && git clean -dffx'
+alias gcl='git clone --recurse-submodules'
+alias gl='git pull'
+alias glum='git pull upstream $(git_main_branch)'
+alias grhh='git reset --hard'
+alias groh='git reset origin/$(git_current_branch) --hard'
+alias grbi='git rebase -i'
+alias grbm='git rebase $(git_main_branch)'
+alias gcm='git checkout $(git_main_branch)'
+alias gstp="git stash pop"
+alias gsts="git stash show -p"
+
+function grename() {
+  if [[ -z "$1" || -z "$2" ]]; then
+    echo "Usage: $0 old_branch new_branch"
+    return 1
+  fi
+
+  # Rename branch locally
+  git branch -m "$1" "$2"
+  # Rename branch in origin remote
+  if git push origin :"$1"; then
+    git push --set-upstream origin "$2"
+  fi
+}
+
+
+function gdnolock() {
+  git diff "$@" ":(exclude)package-lock.json" ":(exclude)*.lock"
+}
+compdef _git gdnolock=git-diff

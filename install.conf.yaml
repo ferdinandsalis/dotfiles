@@ -1,0 +1,26 @@
+- defaults:
+    link:
+      create: true
+      relink: true
+
+- clean: ["~"]
+
+- link:
+    ~/.dotfiles: ""
+    ~/.zshrc: zsh/zshrc
+    ~/.zshenv: zsh/zshenv
+    ~/.gitconfig: git/gitconfig
+    ~/.gitmessage: git/gitmessage
+    ~/.config/nvim: nvim
+    ~/.config/kitty:
+      force: true
+      path: kitty
+    ~/.config/karabiner:
+      force: true
+      path: karabiner
+    ~/.config/himalaya:
+      force: true
+      path: himalaya
+
+- shell:
+    - [git submodule update --init --recursive, Installing submodules]
