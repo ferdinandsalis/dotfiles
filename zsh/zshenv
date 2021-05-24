@@ -7,10 +7,24 @@ export DOTFILES=$HOME/.dotfiles
 export PROJECTS_DIR=$HOME/Desktop/projects
 export PERSONAL_PROJECTS_DIR=$PROJECTS_DIR/personal
 
+if which yarn >/dev/null; then
+  path+=("$(yarn global bin)")
+fi
+
+path+=(
+  "/usr/local/bin"
+  "$HOME/.npm/bin"
+  "$HOME/.local/bin"
+)
+
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
 export MANPATH="/usr/local/man:$MANPATH"
+
+if [ -f "$HOME/.environment.secret.sh" ]; then
+  source $HOME/.environment.secret.sh
+fi
 
 # Compilation flags
 # export ARCHFLAGS="-arch arm64"
@@ -26,13 +40,16 @@ fi
 
 export USE_EDITOR=$EDITOR
 
+export SSH_KEY_PATH="~/.ssh/rsa_id"
+
+export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=241'
+
 if ! type "$bat" > /dev/null; then
-    export BAT_THEME="Nord"
+  export BAT_THEME="TwoDark"
 fi
 
 # Fuzzy Finder
 export FZF_DEFAULT_COMMAND='rg --files --no-ignore-vcs --hidden'
 export FZF_DEFAULT_OPTS="--history=$HOME/.fzf_history"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-
-# export PATH="$(yarn global bin):$PATH"
+export FZF_TMUX=0
