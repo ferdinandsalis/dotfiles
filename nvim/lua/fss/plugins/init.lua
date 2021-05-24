@@ -552,7 +552,22 @@ require("packer").startup(
 
       ---}}}
 
-      use {"soywod/himalaya", rtp = "vim"}
+      use {
+        "soywod/himalaya", --- Email in nvim
+        rtp = "vim",
+        run = "curl -sSL https://raw.githubusercontent.com/soywod/himalaya/master/install.sh | PREFIX=~/.local sh",
+        config = function()
+          require("which-key").register(
+            {
+              e = {
+                name = "+email",
+                l = {"<Cmd>Himalaya<CR>", "list"}
+              }
+            },
+            {prefix = "<localleader>"}
+          )
+        end
+      }
 
       --------------------------------------------------------------------------------
       -- Profiling {{{
