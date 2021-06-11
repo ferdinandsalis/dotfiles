@@ -1,5 +1,7 @@
 -- This is all taken from https://github.com/akinsho/dotfiles
 -- with some minor modifications
+-- NOTE: this is set by nvim by default but maybe too late
+vim.cmd("syntax enable")
 
 vim.api.nvim_exec(
   [[

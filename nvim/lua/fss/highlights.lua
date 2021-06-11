@@ -6,19 +6,35 @@ local M = {}
 
 local ts_playground_loaded, ts_hl_info
 
------------------------------------------------------------------------------
--- Color Scheme {{{1
-
-vim.g.tokyonight_style = "storm"
-vim.g.tokyonight_italic_functions = true
-vim.g.tokyonight_sidebars = {"qf", "terminal", "packer"}
-
-local ok, msg = pcall(vim.cmd, "colorscheme tokyonight")
-if not ok then
-  fss.echomsg(msg)
+---Convert a hex color to rgb
+---@param color string
+---@return number
+---@return number
+---@return number
+local function hex_to_rgb(color)
+  local hex = color:gsub("#", "")
+  return tonumber(hex:sub(1, 2), 16), tonumber(hex:sub(3, 4), 16), tonumber(hex:sub(5), 16)
 end
 
--- }}}
+local function alter(attr, percent)
+  return math.floor(attr * (100 + percent) / 100)
+end
+
+---@source https://stackoverflow.com/q/5560248
+---@see: https://stackoverflow.com/a/37797380
+---Darken a specified hex color
+---@param color string
+---@param percent number
+---@return string
+function M.darken_color(color, percent)
+  local r, g, b = hex_to_rgb(color)
+  if not r or not g or not b then
+    return "NONE"
+  end
+  r, g, b = alter(r, percent), alter(g, percent), alter(b, percent)
+  r, g, b = math.min(r, 255), math.min(g, 255), math.min(b, 255)
+  return string.format("#%02x%02x%02x", r, g, b)
+end
 
 -----------------------------------------------------------------------------//
 -- CREDIT: @Cocophon
@@ -107,7 +123,7 @@ function M.adopt_winhighlight(win_id, target, name, default)
   return name
 end
 
---- TODO eventually move to using `nvim_set_hl`
+--- TODO: eventually move to using `nvim_set_hl`
 --- however for the time being that expects colors
 --- to be specified as rgb not hex
 ---@param name string
@@ -132,7 +148,10 @@ function M.highlight(name, opts)
           table.insert(cmd, fmt("%s=", k) .. v)
         end
       end
-      vim.cmd(table.concat(cmd, " "))
+      local ok, msg = pcall(vim.cmd, table.concat(cmd, " "))
+      if not ok then
+        vim.notify(fmt("Failed to set %s because: %s", name, msg))
+      end
     end
   end
 end
@@ -141,6 +160,9 @@ local gui_attr = {"underline", "bold", "undercurl", "italic"}
 local attrs = {fg = "foreground", bg = "background"}
 
 function M.hl_value(grp, attr)
+  if not grp then
+    return vim.notify("Cannot get a highlight without specifying a group")
+  end
   attr = attrs[attr] or attr
   local hl = api.nvim_get_hl_by_name(grp, true)
   if attr == "gui" then
@@ -163,8 +185,20 @@ function M.all(hls)
   end
 end
 
+-----------------------------------------------------------------------------//
+-- Color Scheme {{{1
+-----------------------------------------------------------------------------//
+vim.g.tokyonight_style = "storm"
+vim.g.tokyonight_italic_functions = true
+vim.g.tokyonight_sidebars = {"qf", "terminal", "packer"}
+
+local ok, msg = pcall(vim.cmd, "colorscheme tokyonight")
+if not ok then
+  return vim.notify(msg, vim.log.levels.ERROR)
+end
+
 ---------------------------------------------------------------------------------
--- Plugin highlights {{{
+-- Plugin highlights
 ---------------------------------------------------------------------------------
 local function plugin_highlights()
   local normal_bg = M.hl_value("Normal", "bg")
@@ -176,6 +210,7 @@ local function plugin_highlights()
   M.highlight("TelescopePathSeparator", {link = "Directory"})
   M.highlight("TelescopeQueryFilter", {link = "IncSearch"})
   M.highlight("CompeDocumentation", {link = "Pmenu"})
+  M.highlight("BqfPreviewBorder", {guifg = modal_border_color})
 
   M.all(
     {
@@ -188,7 +223,7 @@ local function plugin_highlights()
       {"TelescopePromptBorder", {guibg = normal_bg, guifg = modal_border_color}},
       {"TelescopePreviewBorder", {guibg = normal_bg, guifg = modal_border_color}},
       {"TelescopePreviewNormal", {guibg = normal_bg, guifg = normal_fg}},
-      -- nvim-ts-rainbow
+      -- -- nvim-ts-rainbow
       {"rainbowcol1", {guifg = "#a3be8c"}},
       {"rainbowcol2", {guifg = "#99c2c1"}},
       {"rainbowcol3", {guifg = "#8fbcbb"}},
@@ -198,9 +233,6 @@ local function plugin_highlights()
       {"rainbowcol7", {guifg = "#4e6f97"}},
       -- bqf
       {"BqfPreviewBorder", {guifg = modal_border_color}}
-      -- indent-blankline
-      -- {"IndentBlanklineChar", {guifg = "#3b4252"}},
-      -- {"IndentBlanklineContextChar", {guifg = "#4c566a"}},
     }
   )
 
@@ -231,6 +263,7 @@ local function general_overrides()
   M.all(
     {
       {"CursorLineNr", {gui = "bold"}},
+      {"ColorColumn", {guibg = cursor_line_bg}},
       {"Comment", {gui = "italic"}},
       {"Credit", {gui = "bold"}},
       {"NormalFloat", {link = "Normal"}},
@@ -247,23 +280,30 @@ local function general_overrides()
       {"TSKeyword", {link = "Statement"}},
       {"TSParameter", {gui = "italic,bold"}},
       -- LSP
-      {"LspReferenceText", {guibg = cursor_line_bg}},
-      {"LspReferenceRead", {guibg = cursor_line_bg}},
+      {"LspReferenceText", {gui = "underline"}},
+      {"LspReferenceRead", {gui = "underline"}},
       -- Notifications
       {"NvimNotificationError", {link = "ErrorMsg"}},
-      {"NvimNotificationInfo", {link = "Directory"}}
+      {"NvimNotificationInfo", {link = "Directory"}},
+      -- Diff
+      {"DiffAdd", {guibg = "#26332c", guifg = "NONE"}},
+      {"DiffDelete", {guibg = "#572E33", guifg = "#5c6370", gui = "NONE"}},
+      {"DiffChange", {guibg = "#273842", guifg = "NONE"}},
+      {"DiffText", {guibg = "#314753", guifg = "NONE"}},
+      {"diffAdded", {link = "DiffAdd", force = true}},
+      {"diffChanged", {link = "DiffChange", force = true}},
+      {"diffRemoved", {link = "DiffDelete", force = true}},
+      {"diffBDiffer", {link = "WarningMsg", force = true}},
+      {"diffCommon", {link = "WarningMsg", force = true}},
+      {"diffDiffer", {link = "WarningMsg", force = true}},
+      {"diffFile", {link = "Directory", force = true}},
+      {"diffIdentical", {link = "WarningMsg", force = true}},
+      {"diffIndexLine", {link = "Number", force = true}},
+      {"diffIsA", {link = "WarningMsg", force = true}},
+      {"diffNoEOL", {link = "WarningMsg", force = true}},
+      {"diffOnly", {link = "WarningMsg", force = true}}
     }
   )
-end
-
-function M.darken_color(color, amount)
-  local success, module = pcall(require, "bufferline")
-  if not success then
-    vim.notify("Failed to load bufferline", 2, {})
-    return color
-  else
-    return module.shade_color(color, amount)
-  end
 end
 
 local function set_sidebar_highlight()
@@ -284,7 +324,7 @@ end
 
 local sidebar_fts = {"NvimTree"}
 
-function M.on_sidebar_enter()
+local function on_sidebar_enter()
   local highlights =
     table.concat(
     {
@@ -322,25 +362,29 @@ local function colorscheme_overrides()
   end
 end
 
-function M.apply_user_highlights()
+local function user_highlights()
   plugin_highlights()
   general_overrides()
   colorscheme_overrides()
   set_sidebar_highlight()
 end
 
+---NOTE: apply user highlights when nvim first starts
+--- then whenever the colorscheme changes
+user_highlights()
+
 fss.augroup(
-  "PanelHighlights",
+  "UserHighlights",
   {
     {
-      events = {"VimEnter", "ColorScheme"},
+      events = {"ColorScheme"},
       targets = {"*"},
-      command = M.apply_user_highlights
+      command = user_highlights
     },
     {
       events = {"FileType"},
       targets = sidebar_fts,
-      command = M.on_sidebar_enter
+      command = on_sidebar_enter
     }
   }
 )

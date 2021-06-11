@@ -1,5 +1,4 @@
 local fn = vim.fn
-local has = fss.has
 local fmt = string.format
 
 local PACKER_COMPILED_PATH = fn.stdpath("cache") .. "/packer/packer_compiled.vim"
@@ -35,8 +34,9 @@ fss.augroup(
 fss.nnoremap("<leader>ps", [[<Cmd>PackerSync<CR>]])
 fss.nnoremap("<leader>pc", [[<Cmd>PackerClean<CR>]])
 
-local openssl_dir = has("mac") and "/opt/homebrew/Cellar/openssl@1.1/1.1.1k" or "/usr/"
-
+---Require a plugin config
+---@param name string
+---@return function
 local function conf(name)
   return require(string.format("fss.plugins.%s", name))
 end
@@ -46,38 +46,80 @@ require("packer").startup(
     function(use, use_rocks)
       use {"wbthomason/packer.nvim", opt = true}
 
-      -- General:
+      -- -- General:
       use_rocks "penlight"
+
+      -- use "ahmedkhalf/lsp-rooter.nvim"
+      use {
+        "airblade/vim-rooter",
+        config = function()
+          vim.g.rooter_silent_chdir = 0
+          vim.g.rooter_patterns = {".git", "samconfig.toml", "package.json"}
+        end
+      }
+
+      use {
+        "rmagatti/goto-preview",
+        config = function()
+          require("goto-preview").setup {
+            default_mappings = true
+          }
+        end
+      }
+
+      use {
+        "camspiers/snap",
+        rocks = {"fzy"},
+        config = function()
+          local snap = require("snap")
+          local limit = snap.get("consumer.limit")
+          local vimgrep = snap.get("select.vimgrep")
+          snap.register.map(
+            {"n"},
+            {"<leader>fs"},
+            function()
+              snap.run {
+                prompt = "Grep",
+                producer = limit(10000, snap.get "producer.ripgrep.vimgrep"),
+                select = vimgrep.select,
+                multiselect = vimgrep.multiselect,
+                views = {snap.get("preview.vimgrep")}
+              }
+            end
+          )
+        end
+      }
+
+      use {
+        "nvim-telescope/telescope.nvim",
+        event = "CursorHold",
+        config = conf("telescope"),
+        requires = {
+          "nvim-lua/popup.nvim",
+          "nvim-telescope/telescope-fzf-writer.nvim",
+          {"nvim-telescope/telescope-fzf-native.nvim", run = "make"},
+          {
+            "nvim-telescope/telescope-frecency.nvim",
+            requires = "tami5/sql.nvim",
+            after = "telescope.nvim"
+          }
+        }
+      }
 
       use {"folke/which-key.nvim", config = conf("whichkey")}
       use "nvim-lua/popup.nvim"
       use "nvim-lua/plenary.nvim"
       use "mhinz/vim-grepper"
       use "kyazdani42/nvim-web-devicons"
-      use {"mhinz/vim-sayonara", cmd = "Sayonara"}
-
-      -- use {
-      --   "airblade/vim-rooter",
-      --   config = function()
-      --     vim.g.rooter_silent_chdir = 0
-      --     vim.g.rooter_patterns = {".git", "samconfig.toml", "package.json"}
-      --   end
-      -- }
-
-      use {"ahmedkhalf/lsp-rooter.nvim"}
 
       use {
         "vim-test/vim-test",
-        cmd = {"TestFile", "TestNearest", "TestSuite"},
-        keys = {"<localleader>tf", "<localleader>tn", "<localleader>ts"},
         config = function()
           vim.cmd [[
             let test#strategy = "neovim"
             let test#neovim#term_position = "vert botright"
-            let g:test#runnder_commands = ['Jest']
-            let g:test#javascript#jest#executable = 'npx jest'
+            let g:test#javascript#jest#executable = 'yarn test'
             let g:test#javascript#runner = 'jest'
-            let g:test#javascript#jest#file_pattern = '.test\.js'
           ]]
           require("which-key").register(
             {
@@ -93,13 +135,23 @@ require("packer").startup(
       }
 
       -- use {
-      --   "rmagatti/auto-session",
-      --   config = function()
-      --     require("auto-session").setup {
-      --       auto_session_root_dir = vim.fn.stdpath("data") .. "/session/auto/"
-      --     }
-      --   end
+      --   "rcarriga/vim-ultest",
+      --   opt = true,
+      --   cmd = {"Ultest", "UltestNearest"},
+      --   requires = {"vim-test/vim-test"},
+      --   run = ":UpdateRemotePlugins"
       -- }
+
+      use {
+        "rmagatti/auto-session",
+        config = function()
+          require("auto-session").setup {
+            auto_session_root_dir = vim.fn.stdpath("data") .. "/session/auto/"
+          }
+        end
+      }
+
+      use {"rmagatti/session-lens", after = "telescope.nvim"}
 
       use {
         "akinsho/nvim-toggleterm.lua",
@@ -125,8 +177,7 @@ require("packer").startup(
           }
         end
       }
-
-      use {"tpope/vim-projectionist", config = conf("projectionist")}
+      -- use {"tpope/vim-projectionist", config = conf("projectionist")}
       use "tpope/vim-eunuch"
       use "tpope/vim-repeat"
       use {
@@ -147,44 +198,20 @@ require("packer").startup(
         config = conf("compe"),
         event = "InsertEnter"
       }
-
-      use {
-        "tzachar/compe-tabnine",
-        run = "./install.sh",
-        after = "nvim-compe",
-        requires = "hrsh7th/nvim-compe"
-      }
-
-      use {
-        "hrsh7th/vim-vsnip",
-        -- config = conf("vim-vsnip"),
-        event = "InsertEnter",
-        requires = {"rafamadriz/friendly-snippets", "hrsh7th/nvim-compe"}
-      }
-
-      use {
-        "nvim-telescope/telescope.nvim",
-        event = "CursorHold",
-        config = conf("telescope"),
-        requires = {
-          "nvim-lua/popup.nvim",
-          "nvim-telescope/telescope-fzf-writer.nvim",
-          {"nvim-telescope/telescope-fzf-native.nvim", run = "make"},
-          {
-            "nvim-telescope/telescope-frecency.nvim",
-            requires = "tami5/sql.nvim",
-            after = "telescope.nvim"
-          },
-          {
-            "nvim-telescope/telescope-arecibo.nvim",
-            rocks = {{"openssl", env = {OPENSSL_DIR = openssl_dir}}, "lua-http-parser"}
-          }
-        }
-      }
-
-      -- use {"rmagatti/session-lens", after = "telescope.nvim"}
-
+      -- use {
+      --   "tzachar/compe-tabnine",
+      --   run = "./install.sh",
+      --   after = "nvim-compe",
+      --   requires = "hrsh7th/nvim-compe"
+      -- }
+      -- use {
+      --   "hrsh7th/vim-vsnip",
+      --   event = "InsertEnter",
+      --   requires = {"rafamadriz/friendly-snippets", "hrsh7th/nvim-compe"}
+      -- }
       -- Language & Syntax:
+      --
+      use "folke/lua-dev.nvim"
 
       use {
         "neovim/nvim-lspconfig",
@@ -205,13 +232,31 @@ require("packer").startup(
             end
           },
           {
+            "kosayoda/nvim-lightbulb",
+            config = function()
+              fss.augroup(
+                "NvimLightbulb",
+                {
+                  {
+                    events = {"CursorHold", "CursorHoldI"},
+                    targets = {"*"},
+                    command = function()
+                      require("nvim-lightbulb").update_lightbulb {
+                        sign = {enabled = false},
+                        virtual_text = {enabled = true}
+                      }
+                    end
+                  }
+                }
+              )
+            end
+          },
+          {
             "glepnir/lspsaga.nvim",
-            opt = true,
             config = conf("lspsaga")
           },
           {
             "kabouzeid/nvim-lspinstall",
-            opt = true,
             config = function()
               require("lspinstall").post_install_hook = function()
                 fss.lsp.setup_servers()
@@ -221,9 +266,8 @@ require("packer").startup(
           }
         }
       }
-
-      use "ray-x/lsp_signature.nvim"
-
+      use {"ray-x/lsp_signature.nvim"}
+      -- Syntax
       use {
         "nvim-treesitter/nvim-treesitter",
         run = ":TSUpdate",
@@ -237,13 +281,28 @@ require("packer").startup(
           }
         }
       }
-
       use {
         "nvim-treesitter/nvim-treesitter-textobjects",
-        after = "nvim-treesitter",
         requires = "nvim-treesitter"
       }
-
+      use "RRethy/nvim-treesitter-textsubjects"
+      use {
+        "p00f/nvim-ts-rainbow",
+        requires = "nvim-treesitter"
+      }
+      use {
+        "mizlan/iswap.nvim",
+        cmd = "ISwap",
+        keys = "<localleader>sw",
+        config = function()
+          require("iswap").setup {}
+          require("which-key").register(
+            {
+              ["<localleader>sw"] = {"<Cmd>ISwap<CR>", "swap arguments,parameters etc."}
+            }
+          )
+        end
+      }
       use {
         "lewis6991/spellsitter.nvim",
         opt = true,
@@ -251,12 +310,7 @@ require("packer").startup(
           require("spellsitter").setup {hl = "SpellBad", captures = {"comment"}}
         end
       }
-
-      use "romgrk/nvim-treesitter-context"
       use "windwp/nvim-ts-autotag"
-      use "JoosepAlviste/nvim-ts-context-commentstring"
-      use "p00f/nvim-ts-rainbow"
-
       use {
         "folke/trouble.nvim",
         keys = {"<leader>ld"},
@@ -281,7 +335,6 @@ require("packer").startup(
           require("trouble").setup {auto_close = true, auto_preview = false}
         end
       }
-
       use {
         "folke/todo-comments.nvim",
         requires = "nvim-lua/plenary.nvim",
@@ -289,11 +342,10 @@ require("packer").startup(
           require("todo-comments").setup {}
         end
       }
-
       use "folke/tokyonight.nvim"
       use "mtdl9/vim-log-highlighting"
 
-      -- TODO: this breaks when used with sessions but keep an eye on it
+      -- NOTE: this breaks when used with sessions but keep an eye on it
       use {
         "sunjon/Shade.nvim",
         opt = true,
@@ -307,18 +359,16 @@ require("packer").startup(
       --------------------------------------------------------------------------------
 
       use {"TimUntersberger/neogit", config = conf("neogit")}
-
-      use {
-        "ruifm/gitlinker.nvim",
-        requires = "plenary.nvim",
-        setup = function()
-          require("which-key").register({["<localleader>gu"] = "gitlinker: get line url"})
-        end,
-        config = function()
-          require("gitlinker").setup {opts = {mappings = "<localleader>gu"}}
-        end
-      }
-
+      -- use {
+      --   "ruifm/gitlinker.nvim",
+      --   requires = "plenary.nvim",
+      --   setup = function()
+      --     require("which-key").register({["<localleader>gu"] = "gitlinker: get line url"})
+      --   end,
+      --   config = function()
+      --     require("gitlinker").setup {opts = {mappings = "<localleader>gu"}}
+      --   end
+      -- }
       use {
         "sindrets/diffview.nvim",
         cmd = "DiffviewOpen",
@@ -327,7 +377,8 @@ require("packer").startup(
         config = function()
           local cb = require("diffview.config").diffview_callback
           require("which-key").register(
-            {["<localleader>gd"] = {"<Cmd>DiffviewOpen<CR>", "diffview: diff ref"}}
+            {gd = {"<Cmd>DiffviewOpen<CR>", "diff ref"}},
+            {prefix = "<localleader>"}
           )
           require("diffview").setup(
             {
@@ -346,19 +397,23 @@ require("packer").startup(
                   ["<leader>e"] = cb("focus_files"),
                   ["<leader>b"] = cb("toggle_files")
                 },
-                view = {q = "<Cmd>DiffviewClose<CR>"}
+                view = {
+                  ["q"] = "<Cmd>DiffviewClose<CR>",
+                  ["<tab>"] = cb("select_next_entry"), -- Open the diff for the next file
+                  ["<s-tab>"] = cb("select_prev_entry"), -- Open the diff for the previous file
+                  ["<leader>e"] = cb("focus_files"), -- Bring focus to the files panel
+                  ["<leader>b"] = cb("toggle_files") -- Toggle the files panel.
+                }
               }
             }
           )
         end
       }
-
       use {
         "lewis6991/gitsigns.nvim",
         config = conf("gitsigns"),
         requires = {"nvim-lua/plenary.nvim"}
       }
-
       use {
         "rhysd/conflict-marker.vim",
         config = function()
@@ -369,7 +424,6 @@ require("packer").startup(
           vim.g.conflict_marker_end = "^>>>>>>> .*$"
         end
       }
-
       use {
         "pwntester/octo.nvim",
         cmd = "Octo",
@@ -401,13 +455,11 @@ require("packer").startup(
         config = conf("indentline"),
         branch = "lua"
       }
-
       use {
         "akinsho/nvim-bufferline.lua",
         config = conf("bufferline"),
         requires = "kyazdani42/nvim-web-devicons"
       }
-
       use {
         "karb94/neoscroll.nvim",
         config = function()
@@ -416,13 +468,11 @@ require("packer").startup(
           }
         end
       }
-
       use {
         "kyazdani42/nvim-tree.lua",
         config = conf("tree"),
         requires = "nvim-web-devicons"
       }
-
       use {
         "folke/zen-mode.nvim",
         cmd = {"ZenMode"},
@@ -446,21 +496,13 @@ require("packer").startup(
           )
         end
       }
-
-      -- use("justinmk/vim-dirvish")
-
-      use {"itchyny/vim-highlighturl", config = [[vim.g.highlighturl_guifg = "NONE"]]}
-
       use {
         "norcalli/nvim-colorizer.lua",
         config = function()
           require("colorizer").setup()
         end
       }
-
       use "kevinhwang91/nvim-bqf" -- Better quick fix
-      use "junegunn/goyo.vim"
-      use "junegunn/limelight.vim"
 
       --------------------------------------------------------------------------------
       -- Editing {{{
@@ -471,15 +513,12 @@ require("packer").startup(
         keys = {{"n", "s"}},
         config = function()
           local hop = require("hop")
-          -- remove h,j,k,l from hops list of keys
-          hop.setup {keys = "etovxqpdygfbzcisuran"}
+          hop.setup {keys = "etovxqpdygfbzcisuran"} -- remove h,j,k,l from hops list of keys
           fss.nnoremap("s", hop.hint_char1)
         end
       }
-
-      use "junegunn/vim-easy-align"
+      use {"junegunn/vim-easy-align", cmd = "EasyAlign"}
       use "tversteeg/registers.nvim"
-
       use {
         "mbbill/undotree",
         cmd = "UndotreeToggle",
@@ -492,7 +531,6 @@ require("packer").startup(
           )
         end
       }
-
       use {
         "windwp/nvim-autopairs",
         config = function()
@@ -501,12 +539,6 @@ require("packer").startup(
           }
         end
       }
-
-      -- use {
-      --   "AndrewRadev/tagalong.vim",
-      --   ft = {"typescriptreact", "javascriptreact", "html"}
-      -- }
-
       use {
         "tpope/vim-surround",
         config = function()
@@ -514,34 +546,33 @@ require("packer").startup(
           fss.vmap("s", "<Plug>VSurround")
         end
       }
-
       use "AndrewRadev/splitjoin.vim"
-
       use {
-        "AndrewRadev/sideways.vim",
+        "AndrewRadev/dsf.vim",
         config = function()
-          vim.g.sideways_add_item_cursor_restore = 1
+          vim.g.dsf_no_mappings = 1
           require("which-key").register(
             {
-              ["]w"] = {"<cmd>SidewaysLeft<cr>", "move argument left"},
-              ["[w"] = {"<cmd>SidewaysRight<cr>", "move argument right"},
-              ["<localleader>s"] = {
-                name = "+sideways",
-                i = {"<Plug>SidewaysArgumentInsertBefore", "insert argument before"},
-                a = {"<Plug>SidewaysArgumentAppendAfter", "insert argument after"},
-                I = {"<Plug>SidewaysArgumentInsertFirst", "insert argument first"},
-                A = {"<Plug>SidewaysArgumentAppendLast", "insert argument last"}
+              d = {
+                name = "+dsf: function text object",
+                s = {
+                  f = {"<Plug>DsfDelete", "delete surrounding function"},
+                  nf = {"<Plug>DsfNextDelete", "delete next surrounding function"}
+                }
+              },
+              c = {
+                name = "+dsf: function text object",
+                s = {
+                  f = {"<Plug>DsfChange", "change surrounding function"},
+                  nf = {"<Plug>DsfNextChange", "change next surrounding function"}
+                }
               }
             }
           )
         end
       }
-
       use {"b3nj5m1n/kommentary", config = conf("kommentary")}
       use "arecarn/vim-fold-cycle"
-      use "machakann/vim-highlightedyank"
-      use "romainl/vim-cool"
-
       use {
         "winston0410/range-highlight.nvim",
         opt = true,
@@ -551,7 +582,19 @@ require("packer").startup(
       }
 
       ---}}}
-
+      use {
+        "vhyrro/neorg",
+        opt = true,
+        requires = {"nvim-lua/plenary.nvim"},
+        config = function()
+          require("neorg").setup {
+            load = {
+              ["core.defaults"] = {}, -- Load all the default modules
+              ["core.norg.concealer"] = {} -- Enhances the text editing experience by using icons
+            }
+          }
+        end
+      }
       use {
         "soywod/himalaya", --- Email in nvim
         rtp = "vim",
@@ -580,6 +623,7 @@ require("packer").startup(
     config = {
       compile_path = PACKER_COMPILED_PATH,
       display = {
+        prompt_border = fss.style.border.curved,
         open_cmd = "silent topleft 65vnew Packer"
       },
       profile = {
@@ -589,6 +633,21 @@ require("packer").startup(
     }
   }
 )
+
+fss.command {
+  "PackerCompiledEdit",
+  function()
+    vim.cmd(fmt("edit %s", PACKER_COMPILED_PATH))
+  end
+}
+
+fss.command {
+  "PackerCompiledDelete",
+  function()
+    vim.fn.delete(PACKER_COMPILED_PATH)
+    vim.notify(fmt("Deleted %s"))
+  end
+}
 
 if not vim.g.packer_compiled_loaded then
   vim.cmd(fmt("source %s", PACKER_COMPILED_PATH))

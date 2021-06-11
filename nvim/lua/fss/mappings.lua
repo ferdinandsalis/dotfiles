@@ -66,7 +66,15 @@ nnoremap("<leader>nf", [[:e <C-R>=expand("%:p:h") . "/" <CR>]], {silent = false}
 nnoremap("<leader>ns", [[:vsp <C-R>=expand("%:p:h") . "/" <CR>]], {silent = false})
 
 -- Save
-nnoremap("<c-s>", "<cmd>silent w | lua vim.notify('Saved '..vim.fn.expand('%:t'))<cr>")
+nnoremap(
+  "<c-s>",
+  function()
+    -- NOTE: this uses write specifically because we need to trigger a filesystem event
+    -- even if the file isn't change so that things like hot reload work
+    vim.cmd("silent! write")
+    fss.notify("Saved " .. vim.fn.expand("%:t"), {timeout = 1000})
+  end
+)
 
 ------------------------------------------------------------------------------
 -- Folds

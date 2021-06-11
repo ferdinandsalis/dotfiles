@@ -119,7 +119,10 @@ function fss.truthy(value)
   return value > 0
 end
 
-function fss.is_empty(item)
+---Determine if a value of any type is empty
+---@param item any
+---@return boolean
+function fss.empty(item)
   if not item then
     return true
   end
@@ -288,6 +291,15 @@ local notification_hl =
 ---@param opts table
 function fss.notify(lines, opts)
   lines = type(lines) == "string" and {lines} or lines
+  lines =
+    vim.tbl_flatten(
+    vim.tbl_map(
+      function(line)
+        return vim.split(line, "\n")
+      end,
+      lines
+    )
+  )
   opts = opts or {}
   local highlights = {"NormalFloat:Normal"}
   local level = opts.log_level or 1
@@ -320,7 +332,7 @@ function fss.notify(lines, opts)
       anchor = "SE",
       style = "minimal",
       focusable = false,
-      border = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}
+      border = fss.style.border.curved
     }
   )
 

@@ -2,7 +2,6 @@ local H = require("fss.highlights")
 local icons_loaded, devicons
 
 local fn = vim.fn
-local exists = fn.exists
 local expand = fn.expand
 local strwidth = fn.strwidth
 local fnamemodify = fn.fnamemodify
@@ -15,17 +14,6 @@ local function get_toggleterm_name(_, bufnum)
   local terminal_prefix = "Terminal(" .. shell .. ")["
   return terminal_prefix .. fn.getbufvar(bufnum, "toggle_number") .. "]"
 end
-
-M.palette = {
-  dark_red = "#db4b4b",
-  green = "#9ece6a",
-  light_yellow = "#e0af68",
-  dark_blue = "#3d59a1",
-  magenta = "#bb9af7",
-  comment_grey = "#565f89",
-  whitesmoke = "#3b4261",
-  bright_blue = "#7aa2f7"
-}
 
 local plain_filetypes = {
   "help",
@@ -164,8 +152,7 @@ end
 --- @param ctx table
 function M.is_plain(ctx)
   return contains(plain_filetypes, ctx.filetype) or contains(plain_buftypes, ctx.buftype) or
-    ctx.preview or
-    exists("#goyo") > 0
+    ctx.preview
 end
 
 --- This function allow me to specify titles for special case buffers
@@ -274,6 +261,7 @@ end
 
 --- @param ctx table
 --- @param opts table
+--- @return string, string
 local function filetype(ctx, opts)
   local ft_exception = exceptions.filetypes[ctx.filetype]
   if ft_exception then
@@ -358,7 +346,7 @@ function M.file(ctx, minimal)
   local directory, parent, file = filename(ctx)
 
   -- Depending on which filename segments are empty we select a section to add the file icon to
-  local dir_empty, parent_empty = fss.is_empty(directory), fss.is_empty(parent)
+  local dir_empty, parent_empty = fss.empty(directory), fss.empty(parent)
   local to_update =
     dir_empty and parent_empty and file_opts or dir_empty and parent_opts or dir_opts
 
@@ -378,10 +366,11 @@ function M.diagnostic_info(context)
   end
   local get_count = vim.lsp.diagnostic.get_count
 
+  local icons = fss.style.icons
   return {
-    error = {count = get_count(buf, "Error"), sign = "✗"},
-    warning = {count = get_count(buf, "Warning"), sign = ""},
-    info = {count = get_count(buf, "Information"), sign = ""}
+    error = {count = get_count(buf, "Error"), sign = icons.error},
+    warning = {count = get_count(buf, "Warning"), sign = icons.warning},
+    info = {count = get_count(buf, "Information"), sign = icons.info}
   }
 end
 
@@ -576,6 +565,11 @@ end
 -----------------------------------------------------------------------------//
 -- Git/Github helper functions
 -----------------------------------------------------------------------------//
+
+---A thin wrapper around nvim's job api
+---@param interval number
+---@param task function
+---@param on_complete function?
 local function job(interval, task, on_complete)
   vim.defer_fn(task, 2000)
   local pending_job
@@ -625,8 +619,10 @@ function M.github_notifications()
   end
 end
 
+---check if in a git repository
+---@return boolean
 local function is_git_repo()
-  return fn.isdirectory(fn.getcwd() .. "/" .. ".git")
+  return fn.isdirectory(fn.getcwd() .. "/" .. ".git") > 0
 end
 
 --- @param result table
@@ -668,8 +664,10 @@ function M.git_update_toggle()
   if on then
     M.git_updates()
   end
-  local status = on and 0 or 1
-  fn.timer_pause(vim.g.git_statusline_updates_timer, status)
+  if vim.g.git_statusline_updates_timer then
+    local status = on and 0 or 1
+    fn.timer_pause(vim.g.git_statusline_updates_timer, status)
+  end
 end
 
 --- starts a timer to check for the whether

@@ -7,9 +7,10 @@ endfunction
 " force quickfix to open beneath all other splits
 wincmd J
 
-setlocal number
+setlocal nonumber
 setlocal norelativenumber
 setlocal nowrap
+setlocal signcolumn=yes
 setlocal colorcolumn=
 set nobuflisted " quickfix buffers should not pop up when doing :bn or :bp
 call s:adjust_height(1, 10)
@@ -29,8 +30,9 @@ nnoremap <buffer> H :colder<CR>
 nnoremap <buffer> L :cnewer<CR>
 
 nnoremap <silent><buffer><nowait> P :pclose!<CR>
-nnoremap <silent><buffer><nowait> p :lua require('as.quickfix').toggle()<CR>
+nnoremap <silent><buffer><nowait> p :lua require('fss.quickfix').toggle()<CR>
 
 " Resources and inspiration
 " 1. https://github.com/ronakg/quickr-preview.vim/blob/357229d656c0340b096a16920e82cff703f1fe93/after/ftplugin/qf.vim#L215
-" 2. https://github.com/romainl/vim-qf/blob/2e385e6d157314cb7d0385f8da0e1594a06873c5/autoload/qf.vim#L22
+" 2.
+" https://github.com/romainl/vim-qf/blob/2e385e6d157314cb7d0385f8da0e1594a06873c5/autoload/qf.vim#L22

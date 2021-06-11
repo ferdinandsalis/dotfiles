@@ -437,6 +437,10 @@ if exists zoxide; then
   eval "$(zoxide init zsh)"
 fi
 
+if [[ ! "$(exists nvr)" && "$(exists pip3)" ]]; then
+  pip3 install neovim-remote
+fi
+
 #-------------------------------------------------------------------------------
 #               Mappings
 #-------------------------------------------------------------------------------
@@ -449,3 +453,4 @@ bindkey '^U' autosuggest-accept
 
 ulimit -S -n 2048
 
+export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"

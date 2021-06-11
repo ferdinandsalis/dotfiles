@@ -1,6 +1,12 @@
 return function()
   local wk = require("which-key")
-  wk.setup {}
+  wk.setup {
+    plugins = {
+      spelling = {
+        enabled = true
+      }
+    }
+  }
 
   wk.register(
     {
@@ -48,7 +54,7 @@ return function()
         e = {
           name = "+edit",
           v = "open vimrc in a new buffer",
-          z = "open zshrc in a new buffer",
+          z = "open zshrc in a new buffer"
         },
         o = {
           name = "+only",

@@ -36,13 +36,20 @@ return function()
     return (tab_num == last_tab and is_log) or (tab_num ~= last_tab and not is_log)
   end
 
-  local highlights = require('fss.highlights')
+  local highlights = require("fss.highlights")
   local bg_color = highlights.darken_color(highlights.hl_value("Normal", "bg"), -10)
 
   require("bufferline").setup(
     {
       options = {
         mappings = false,
+        sort_by = function(a, b)
+          local astat = vim.loop.fs_stat(a.path)
+          local bstat = vim.loop.fs_stat(b.path)
+          local mod_a = astat and astat.mtime.sec or 0
+          local mod_b = bstat and bstat.mtime.sec or 0
+          return mod_a > mod_b
+        end,
         diagnostics = "nvim_lsp",
         diagnostics_indicator = diagnostics_indicator,
         custom_filter = custom_filter,
@@ -71,12 +78,12 @@ return function()
         max_name_length = 18,
         max_prefix_length = 15,
         tab_size = 20,
+        right_mouse_command = "vert sbuffer %d",
         show_close_icon = false,
         show_buffer_close_icons = true,
         persist_buffer_sort = true,
         separator_style = {"", ""},
-        always_show_bufferline = true,
-        sort_by = "extension"
+        always_show_bufferline = true
       },
       highlights = {
         fill = {guibg = bg_color}

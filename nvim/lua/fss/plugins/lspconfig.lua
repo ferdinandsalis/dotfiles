@@ -80,7 +80,7 @@ local function setup_mappings(client, bufnr)
   nnoremap(
     "]c",
     function()
-      vim.lsp.diagnostic.goto_prev {popup_opts = {border = "single"}}
+      vim.lsp.diagnostic.goto_prev {popup_opts = {border = fss.style.border.curved}}
     end,
     opts
   )
@@ -88,7 +88,7 @@ local function setup_mappings(client, bufnr)
   nnoremap(
     "[c",
     function()
-      vim.lsp.diagnostic.goto_next {popup_opts = {border = "single"}}
+      vim.lsp.diagnostic.goto_next {popup_opts = {border = fss.style.border.curved}}
     end,
     opts
   )
@@ -96,14 +96,22 @@ local function setup_mappings(client, bufnr)
   nnoremap("K", vim.lsp.buf.hover, opts)
   nnoremap("gI", vim.lsp.buf.incoming_calls, opts)
   nnoremap("gr", vim.lsp.buf.references, opts)
-  nnoremap("<leader>rn", vim.lsp.buf.rename, opts)
+
+  if client.supports_method("textDocument/rename") then
+    nnoremap("<leader>rn", vim.lsp.buf.rename, opts)
+  end
+
   nnoremap("<leader>cs", vim.lsp.buf.document_symbol, opts)
   nnoremap("<leader>cw", vim.lsp.buf.workspace_symbol, opts)
   nnoremap("<leader>rf", vim.lsp.buf.formatting, opts)
   require("which-key").register(
     {
       ["<leader>rf"] = "lsp: format buffer",
-      ["gr"] = "lsp: references"
+      ["<leader>ca"] = "lsp: code action",
+      ["<leader>gd"] = "lsp: go to type definition",
+      ["gr"] = "lsp: references",
+      ["gi"] = "lsp: implementation",
+      ["gI"] = "lsp: incoming calls"
     }
   )
 end
@@ -135,31 +143,31 @@ function fss.lsp.tagfunc(pattern, flags)
 end
 
 require("vim.lsp.protocol").CompletionItemKind = {
-  "  Text", -- Text
-  "  Method", -- Method
-  "ƒ  Function", -- Function
-  "  Constructor", -- Constructor
+  " Text", -- Text
+  " Method", -- Method
+  "ƒ Function", -- Function
+  " Constructor", -- Constructor
   "識 Field", -- Field
-  "  Variable", -- Variable
-  "ﰮ  Interface", -- Interface
-  "  Module", -- Module
-  "  Property", -- Property
-  "  Unit", -- Unit
-  "  Value", -- Value
+  " Variable", -- Variable
+  " Class", -- Class
+  "ﰮ Interface", -- Interface
+  " Module", -- Module
+  " Property", -- Property
+  " Unit", -- Unit
+  " Value", -- Value
   "了 Enum", -- Enum
-  "  Keyword", -- Keyword
-  "  Snippet", -- Snippet
-  "  Color", -- Color
-  "  File", -- File
+  " Keyword", -- Keyword
+  " Snippet", -- Snippet
+  " Color", -- Color
+  " File", -- File
   "渚 Reference", -- Reference
-  "  Folder", -- Folder
-  "  Enum", -- Enum
-  "  Constant", -- Constant
-  "  Struct", -- Struct
+  " Folder", -- Folder
+  " Enum", -- Enum
+  " Constant", -- Constant
+  " Struct", -- Struct
   "鬒 Event", -- Event
-  "  Type Parameter", -- TypeParameter
-  "\u{f0e8} Class", -- Class
-  "\u{03a8} Operator" -- Operator
+  "\u{03a8} Operator", -- Operator
+  " Type Parameter" -- TypeParameter
 }
 
 function fss.lsp.on_attach(client, bufnr)
@@ -167,18 +175,18 @@ function fss.lsp.on_attach(client, bufnr)
   setup_mappings(client, bufnr)
 
   if client.resolved_capabilities.goto_definition then
-    vim.api.nvim_buf_set_option(bufnr, "tagfunc", "v:lua.fss.lsp.tagfunc")
+    vim.bo[bufnr].tagfunc = "v:lua.fss.lsp.tagfunc"
   end
 
   require("lsp_signature").on_attach(
     {
       bind = true,
+      hint_enable = false,
       handler_opts = {
-        border = "single"
+        border = fss.style.border.curved
       }
     }
   )
-
   require("lsp-status").on_attach(client)
 end
 
@@ -206,6 +214,37 @@ local function get_lua_runtime()
 end
 
 fss.lsp.servers = {
+  lua = function()
+    --- NOTE: This is the secret sauce that allows reading requires and variables
+    --- between different modules in the nvim lua context
+    --- @see https://gist.github.com/folke/fe5d28423ea5380929c3f7ce674c41d8
+    --- if I ever decide to move away from lua dev then use the above
+    return require("lua-dev").setup {
+      library = {
+        vimruntime = false,
+        plugins = false
+      },
+      lspconfig = {
+        settings = {
+          Lua = {
+            diagnostics = {
+              globals = {
+                "vim",
+                "describe",
+                "it",
+                "before_each",
+                "after_each",
+                "pending",
+                "teardown"
+              }
+            }
+            -- Await resolution of https://github.com/sumneko/lua-language-server/issues/543
+            -- completion = {keywordSnippet = "Both", callSnippet = "Both"}
+          }
+        }
+      }
+    }
+  end,
   typescript = function()
     return {
       init_options = {
@@ -225,44 +264,9 @@ fss.lsp.servers = {
       end
     }
   end,
-  lua = function()
-    return {
-      settings = {
-        Lua = {
-          diagnostics = {
-            globals = {"fss", "vim", "describe", "it", "before_each", "after_each", "pending"}
-          },
-          completion = {keywordSnippet = "Both"},
-          runtime = {
-            version = "LuaJIT",
-            path = vim.split(package.path, ";")
-          },
-          workspace = {
-            maxPreload = 2000,
-            preloadFileSize = 1000,
-            library = get_lua_runtime()
-          }
-        }
-      }
-    }
-  end,
-  json = function()
-    return {
-      default_config = {
-        cmd = {"vscode-json-languageserver", "--stdio"},
-        filetypes = {"json"},
-        init_options = {
-          provideFormatter = true
-        }
-      }
-    }
-  end,
   diagnosticls = function()
     return {
-      rootMarkers = {".git/"},
       filetypes = {
-        "javascript",
-        "javascriptreact",
         "markdown",
         "html",
         "css",
@@ -285,8 +289,6 @@ fss.lsp.servers = {
         },
         formatFiletypes = {
           markdown = "prettier",
-          javascriptreact = "prettier",
-          javascript = "prettier",
           html = "prettier",
           css = "prettier",
           yaml = "prettier",
@@ -299,7 +301,6 @@ fss.lsp.servers = {
 }
 
 function fss.lsp.setup_servers()
-  vim.cmd "packadd nvim-lspinstall" -- Important!
   local lspinstall = require("lspinstall")
   local lspconfig = require("lspconfig")
 
@@ -324,8 +325,7 @@ function fss.lsp.setup_servers()
         "additionalTextEdits"
       }
     }
-    config.capabilities = fss.deep_merge(config.capabilities, status_capabilities)
-
+    config.capabilities = fss.deep_merge(status_capabilities, config.capabilities)
     lspconfig[server].setup(config)
   end
 end
@@ -359,12 +359,21 @@ return function()
   -----------------------------------------------------------------------------//
   -- Signs
   -----------------------------------------------------------------------------//
+  local icons = fss.style.icons
   vim.fn.sign_define(
     {
-      {name = "LspDiagnosticsSignError", text = "✗", texthl = "LspDiagnosticsSignError"},
-      {name = "LspDiagnosticsSignHint", text = "", texthl = "LspDiagnosticsSignHint"},
-      {name = "LspDiagnosticsSignWarning", text = "", texthl = "LspDiagnosticsSignWarning"},
-      {name = "LspDiagnosticsSignInformation", text = "", texthl = "LspDiagnosticsSignInformation"}
+      {name = "LspDiagnosticsSignError", text = icons.error, texthl = "LspDiagnosticsSignError"},
+      {name = "LspDiagnosticsSignHint", text = icons.hint, texthl = "LspDiagnosticsSignHint"},
+      {
+        name = "LspDiagnosticsSignWarning",
+        text = icons.warning,
+        texthl = "LspDiagnosticsSignWarning"
+      },
+      {
+        name = "LspDiagnosticsSignInformation",
+        text = icons.info,
+        texthl = "LspDiagnosticsSignInformation"
+      }
     }
   )
 
@@ -382,8 +391,15 @@ return function()
     }
   )
 
-  -- NOTE: the hover handler returns the bufnr,winnr so can be use for mappings
-  vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {border = "single"})
+  local max_width = math.max(math.floor(vim.o.columns * 0.4), 100)
+  local max_height = math.max(math.floor(vim.o.lines * 0.3), 30)
+
+  -- NOTE: the hover handler returns the bufnr,winnr so can be used for mappings
+  vim.lsp.handlers["textDocument/hover"] =
+    vim.lsp.with(
+    vim.lsp.handlers.hover,
+    {border = fss.style.border.curved, max_width = max_width, max_height = max_height}
+  )
 
   fss.lsp.setup_servers()
 end

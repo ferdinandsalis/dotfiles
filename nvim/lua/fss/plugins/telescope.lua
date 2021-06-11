@@ -1,77 +1,86 @@
 return function()
-  local nnoremap = fss.nnoremap
-  local command = fss.command
   local telescope = require("telescope")
   local actions = require("telescope.actions")
-  local builtins = require("telescope.builtin")
   local themes = require("telescope.themes")
-  local action_state = require("telescope.actions.state")
 
   telescope.setup {
     defaults = {
       prompt_prefix = "❯ ",
-      layout_defaults = {
-        horizontal = {
-          width_padding = 0.2,
-          height_padding = 0.2,
-          preview_width = 0.6
-        },
-        vertical = {
-          width_padding = 0.15,
-          height_padding = 1,
-          preview_height = 0.5
-        }
-      },
       mappings = {
         i = {
-          ["<C-j>"] = actions.move_selection_next,
-          ["<C-k>"] = actions.move_selection_previous,
+          ["<c-c>"] = function()
+            vim.cmd("stopinsert!")
+          end,
           ["<esc>"] = actions.close,
           ["<c-s>"] = actions.select_horizontal
         }
       },
       file_ignore_patterns = {"%.jpg", "%.jpeg", "%.png", "%.otf", "%.ttf"},
-      winblend = 8,
-      layout_strategy = "horizontal"
+      -- set this value to 'flex' once telescope/#823 is merged
+      layout_strategy = "horizontal",
+      winblend = 7
     },
     extensions = {
       frecency = {
         workspaces = {
           ["conf"] = vim.env.DOTFILES,
           ["project"] = vim.env.PROJECTS_DIR,
-          ["wiki"] = vim.g.wiki_path
         }
       },
       fzf_writer = {
         minimum_grep_characters = 2,
         minimum_files_characters = 2,
         use_highlighter = true
+      },
+      fzf = {
+        override_generic_sorter = true, -- override the generic sorter
+        override_file_sorter = true -- override the file sorter
+      }
+    },
+    pickers = {
+      buffers = {
+        sort_lastused = true,
+        show_all_buffers = true,
+        mappings = {
+          i = {["<c-x>"] = "delete_buffer"},
+          n = {["<c-x>"] = "delete_buffer"}
+        }
+      },
+      find_files = {
+        hidden = true,
+        layout_config = {
+          preview_width = 0.65
+        }
+      },
+      git_branches = {
+        theme = "dropdown"
+      },
+      reloader = {
+        theme = "dropdown"
       }
     }
   }
 
-  -- telescope.load_extension("fzf")
-  -- telescope.load_extension("arecibo")
+  telescope.load_extension("fzf")
+
+  --- NOTE: this must be required after setting up telescope
+  --- otherwise the result will be cached without the updates
+  --- from the setup call
+  local builtins = require("telescope.builtin")
 
   local function dotfiles()
     builtins.find_files {
       prompt_title = "~ dotfiles ~",
-      shorten_path = false,
       cwd = vim.g.dotfiles,
-      hidden = true,
-      layout_strategy = "horizontal",
-      file_ignore_patterns = {".git/.*"}
+      file_ignore_patterns = {".git/.*", "dotbot/.*"}
     }
   end
 
   local function nvim_config()
     builtins.find_files {
       prompt_title = "~ nvim config ~",
-      shorten_path = false,
       cwd = vim.g.vim_dir,
-      hidden = true,
-      layout_strategy = "horizontal",
-      file_ignore_patterns = {".git/.*"}
+      file_ignore_patterns = {".git/.*", "dotbot/.*"}
     }
   end
 
@@ -96,8 +105,10 @@ return function()
     elseif is_within(vim.g.dotfiles) then
       dotfiles()
     elseif vim.fn.isdirectory(".git") > 0 then
+      -- if in a git project, use :Telescope git_files
       builtins.git_files()
     else
+      -- otherwise, use :Telescope find_files
       builtins.find_files()
     end
   end
@@ -113,57 +124,27 @@ return function()
     )
   end
 
-  local function websearch()
-    telescope.extensions.arecibo.websearch(
-      themes.get_dropdown {
-        winblend = 10,
-        border = true,
-        previewer = false,
-        shorten_path = false
+  require("which-key").register(
+    {
+      ["<C-P>"] = {files, "open project files"},
+      ["<leader>f"] = {
+        name = "+telescope",
+        a = {builtins.builtin, "builtins"},
+        b = {builtins.git_branches, "branches"},
+        c = {builtins.git_commits, "commits"},
+        d = {dotfiles, "dotfiles"},
+        f = {builtins.find_files, "files"},
+        o = {builtins.buffers, "buffers"},
+        m = {builtins.man_pages, "man pages"},
+        h = {frecency, "history"},
+        n = {nvim_config, "nvim config"},
+        r = {builtins.reloader, "module reloader"},
+        w = {builtins.lsp_dynamic_workspace_symbols, "workspace symbols", silent = false},
+        ["?"] = {builtins.help_tags, "help"}
+      },
+      ["<leader>c"] = {
+        d = {builtins.lsp_workspace_diagnostics, "telescope: workspace diagnostics"}
       }
-    )
-  end
-
-  local function buffers()
-    builtins.buffers {
-      sort_lastused = true,
-      show_all_buffers = true,
-      attach_mappings = function(prompt_bufnr, map)
-        local delete_buf = function()
-          local selection = action_state.get_selected_entry()
-          actions.close(prompt_bufnr)
-          vim.api.nvim_buf_delete(selection.bufnr, {force = true})
-        end
-        map("i", "<c-x>", delete_buf)
-        return true
-      end
     }
-  end
-
-  local function workspace_symbols()
-    builtins.lsp_workspace_symbols {
-      query = vim.fn.input("Query > ")
-    }
-  end
-
-  nnoremap("<C-P>", files)
-  command {"TelescopeFindFiles", files}
-  nnoremap("<leader>fa", "<cmd>Telescope<cr>")
-  nnoremap("<leader>ff", "<cmd>Telescope find_files<cr>")
-  nnoremap("<leader>fd", dotfiles)
-  nnoremap("<leader>fn", nvim_config)
-  nnoremap("<leader>fo", buffers)
-  --- Git
-  nnoremap("<leader>fb", "<cmd>Telescope git_branches theme=get_dropdown<cr>")
-  nnoremap("<leader>fc", "<cmd>Telescope git_commits<cr>")
-  --- LSP
-  nnoremap("<leader>cd", "<cmd>Telescope lsp_workspace_diagnostics<cr>")
-  nnoremap("<leader>ws", workspace_symbols, {silent = false})
-  --- Extensions
-  nnoremap("<leader>fh", frecency)
-  command {"TelescopeFrecent", frecency}
-  nnoremap("<leader>fw", websearch)
-  nnoremap("<leader>fr", "<cmd>Telescope reloader theme=get_dropdown<cr>")
-  nnoremap("<leader>fs", telescope.extensions.fzf_writer.staged_grep)
-  nnoremap("<leader>f?", "<cmd>Telescope help_tags<cr>")
+  )
 end

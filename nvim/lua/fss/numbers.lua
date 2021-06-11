@@ -1,5 +1,3 @@
--- Inspiration
--- 1. vim-relativity
 -- 2. numbers.vim - https://github.com/myusuf3/numbers.vim/blob/master/plugin/numbers.vim
 
 local api = vim.api
@@ -33,12 +31,11 @@ vim.g.number_buftype_exclusions = {
   "terminal",
   "help",
   "nofile",
-  "acwrite"
-}
-
-vim.g.number_buftype_ignored = {
+  "acwrite",
   "quickfix"
 }
+
+vim.g.number_buftype_ignored = {"quickfix"}
 
 local function is_floating_win()
   return vim.fn.win_gettype() == "popup"
@@ -76,10 +73,8 @@ local function is_blocked()
     end
   end
 
-  for _, buftype in ipairs(vim.g.number_buftype_exclusions) do
-    if vim.bo.buftype == buftype then
-      return true
-    end
+  if vim.tbl_contains(vim.g.number_buftype_exclusions, vim.bo.buftype) then
+    return true
   end
   return false
 end
@@ -123,7 +118,7 @@ fss.augroup(
       command = enable_relative_number
     },
     {
-      events = {"FocusLost", "BufLeave", "InsertEnter"},
+      events = {"FocusLost", "BufLeave", "InsertEnter", "TermOpen"},
       targets = {"*"},
       command = disable_relative_number
     }

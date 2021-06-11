@@ -9,7 +9,7 @@
 local utils = require("fss.statusline.utils")
 local H = require("fss.highlights")
 
-local P = utils.palette
+local P = fss.style.palette
 local M = {}
 
 --- NOTE: Unicode characters including vim devicons should NOT be highlighted
@@ -18,7 +18,7 @@ local M = {}
 --- terminal emulators like kitty handle this by fetching nerd fonts elsewhere
 --- but this is not universal across terminals so should be avoided
 local function colors()
-  local error_color = "#db4b4b"
+  local error_color = P.dark_red
   local indicator_color = P.bright_blue
   local bg_color = H.darken_color(H.hl_value("Normal", "bg"), -16)
   local normal_fg = H.hl_value("Normal", "fg")
@@ -31,37 +31,29 @@ local function colors()
   local inc_search_bg = H.hl_value("Search", "bg")
 
   H.all {
-    {"StMetadata", {guifg = comment_fg, guibg = bg_color, gui = "italic"}},
+    {"StMetadata", {guifg = comment_fg, guibg = bg_color}},
     {"StMetadataPrefix", {guibg = bg_color, guifg = comment_fg}},
     {"StIndicator", {guibg = bg_color, guifg = indicator_color}},
     {"StModified", {guifg = string_fg, guibg = bg_color}},
     {"StGreen", {guifg = string_fg, guibg = bg_color}},
     {"StNumber", {guifg = number_fg, guibg = bg_color}},
-    {"StCount", {guifg = "bg", guibg = indicator_color, gui = "bold"}},
+    {"StCount", {guifg = normal_fg, guibg = P.whitesmoke, gui = "bold"}},
     {"StPrefix", {guibg = pmenu_bg, guifg = normal_fg}},
     {"StPrefixSep", {guibg = bg_color, guifg = pmenu_bg}},
     {"StDirectory", {guibg = bg_color, guifg = comment_fg, gui = "italic"}},
     {"StParentDirectory", {guibg = bg_color, guifg = string_fg, gui = "bold"}},
     {"StDim", {guibg = bg_color, guifg = comment_fg}},
-    {"StTitle", {guibg = bg_color, guifg = normal_fg, gui = "bold,italic"}},
+    {"StTitle", {guibg = bg_color, guifg = normal_fg, gui = "bold"}},
     {"StComment", {guibg = bg_color, guifg = comment_fg, gui = comment_gui}},
-    {"StItem", {guibg = normal_fg, guifg = bg_color, gui = "italic"}},
-    {"StSep", {guifg = normal_fg}},
     {"StInfo", {guifg = P.dark_blue, guibg = bg_color, gui = "bold"}},
-    {"StInfoSep", {guifg = pmenu_bg}},
     {"StInactive", {guifg = bg_color, guibg = P.comment_grey}},
     {"StInactiveSep", {guibg = bg_color, guifg = P.comment_grey}},
     {"StatusLine", {guibg = bg_color}},
     {"StatusLineNC", {guibg = bg_color, gui = "NONE"}},
     {"StWarning", {guifg = warning_fg, guibg = bg_color}},
-    {"StWarningSep", {guifg = pmenu_bg, guibg = bg_color}},
     {"StError", {guifg = error_color, guibg = bg_color}},
-    {"StErrorSep", {guifg = pmenu_bg, guibg = bg_color}},
-    {"StFilename", {guibg = bg_color, guifg = "#c0caf5", gui = "bold"}},
-    {
-      "StFilenameInactive",
-      {guifg = P.comment_grey, guibg = bg_color, gui = "italic,bold"}
-    },
+    {"StFilename", {guibg = bg_color, guifg = P.white, gui = "bold"}},
+    {"StFilenameInactive", {guifg = P.comment_grey, guibg = bg_color, gui = "bold"}},
     {"StModeNormal", {guibg = bg_color, guifg = P.whitesmoke, gui = "bold"}},
     {"StModeInsert", {guibg = bg_color, guifg = P.dark_blue, gui = "bold"}},
     {"StModeVisual", {guibg = bg_color, guifg = P.magenta, gui = "bold"}},
@@ -109,6 +101,9 @@ end
 local separator = {"%="}
 local end_marker = {"%<"}
 
+local item = utils.item
+local item_if = utils.item_if
+
 ---A very over-engineered statusline, heavily inspired by doom-modeline
 ---@return string
 function _G.statusline()
@@ -117,7 +112,7 @@ function _G.statusline()
   local curwin = vim.g.statusline_winid or 0
   local curbuf = vim.api.nvim_win_get_buf(curwin)
 
-  -- TODO: reduce the available space whenever we add
+  -- TODO reduce the available space whenever we add
   -- a component so we can use it to determine what to add
   local available_space = vim.api.nvim_win_get_width(curwin)
 
@@ -149,7 +144,7 @@ function _G.statusline()
   local add = make_status(statusline)
 
   add(
-    {utils.item_if("▌", not minimal, "StIndicator", {before = "", after = ""}), 0},
+    {item_if("▌", not minimal, "StIndicator", {before = "", after = ""}), 0},
     {utils.spacer(1), 0}
   )
   ----------------------------------------------------------------------------//
@@ -171,19 +166,32 @@ function _G.statusline()
     return display(statusline, available_space)
   end
   -----------------------------------------------------------------------------//
+  -- Variables
+  -----------------------------------------------------------------------------//
+  local status = vim.b.gitsigns_status_dict or {}
+  local updates = vim.g.git_statusline_updates or {}
+  local ahead = updates.ahead and tonumber(updates.ahead) or 0
+  local behind = updates.behind and tonumber(updates.behind) or 0
+
+  -- Github notifications
+  local notifications = vim.g.github_notifications
+
+  -- LSP Diagnostics
+  local diagnostics = utils.diagnostic_info(ctx)
+  -----------------------------------------------------------------------------//
   -- Left section
   -----------------------------------------------------------------------------//
   add(
-    {utils.item_if(file_modified, ctx.modified, "StModified"), 1},
+    {item_if(file_modified, ctx.modified, "StModified"), 1},
     {readonly_item, 2},
-    {utils.item(utils.mode()), 0},
-    -- {utils.item(utils.search_count(), "StCount"), 1},
+    {item(utils.mode()), 0},
+    {item(utils.search_count(), "StCount"), 1},
     {dir_item, 3},
     {parent_item, 2},
     {file_item, 0},
     -- LSP Status
     {
-      utils.item(
+      item(
         utils.current_function(),
         "StMetadata",
         {before = "  ", prefix = "", prefix_color = "StIdentifier"}
@@ -192,7 +200,7 @@ function _G.statusline()
     },
     -- Local plugin dev indicator
     {
-      utils.item_if(
+      item_if(
         available_space > 100 and "local dev" or "",
         vim.env.DEVELOPING ~= nil,
         "StComment",
@@ -200,30 +208,21 @@ function _G.statusline()
       ),
       2
     },
-    {separator}
-  )
-  -----------------------------------------------------------------------------//
-  -- Middle section
-  -----------------------------------------------------------------------------//
-  -- Neovim allows unlimited alignment sections so we can put things in the
-  -- middle of our statusline - https://neovim.io/doc/user/vim_diff.html#vim-differences
-  -----------------------------------------------------------------------------//
-  add(
+    {separator},
+    -----------------------------------------------------------------------------//
+    -- Middle section
+    -----------------------------------------------------------------------------//
+    -- Neovim allows unlimited alignment sections so we can put things in the
+    -- middle of our statusline - https://neovim.io/doc/user/vim_diff.html#vim-differences
+    -----------------------------------------------------------------------------//
     -- Start of the right side layout
-    {separator}
-  )
-  -----------------------------------------------------------------------------//
-  -- Right section
-  -----------------------------------------------------------------------------//
-  -- Github notifications
-  local notifications = vim.g.github_notifications
-
-  -- LSP Diagnostics
-  local diagnostics = utils.diagnostic_info(ctx)
-  add(
-    {utils.item(utils.lsp_status(), "StMetadata", {max_size = 30}), 4},
+    {separator},
+    -----------------------------------------------------------------------------//
+    -- Right section
+    -----------------------------------------------------------------------------//
+    {item(utils.lsp_status(), "StMetadata"), 4},
     {
-      utils.item_if(
+      item_if(
         diagnostics.error.count,
         diagnostics.error,
         "StError",
@@ -232,7 +231,7 @@ function _G.statusline()
       1
     },
     {
-      utils.item_if(
+      item_if(
         diagnostics.warning.count,
         diagnostics.warning,
         "StWarning",
@@ -241,36 +240,24 @@ function _G.statusline()
       3
     },
     {
-      utils.item_if(
-        diagnostics.info.count,
-        diagnostics.info,
-        "StGreen",
-        {prefix = diagnostics.info.sign}
-      ),
+      item_if(diagnostics.info.count, diagnostics.info, "StInfo", {prefix = diagnostics.info.sign}),
       4
     },
-    {utils.item(notifications, "StTitle", {prefix = ""}), 3}
-  )
-
-  local status = vim.b.gitsigns_status_dict or {}
-  local updates = vim.g.git_statusline_updates or {}
-  local ahead = updates.ahead and tonumber(updates.ahead) or 0
-  local behind = updates.behind and tonumber(updates.behind) or 0
-  add(
+    {item(notifications, "StTitle", {prefix = ""}), 3},
     -- Git Status
-    {utils.item(status.head, "StInfo", {prefix = ""}), 1},
-    {utils.item(status.changed, "StTitle", {prefix = "", prefix_color = "StWarning"}), 3},
-    {utils.item(status.removed, "StTitle", {prefix = "", prefix_color = "StError"}), 3},
-    {utils.item(status.added, "StTitle", {prefix = "", prefix_color = "StGreen"}), 3},
+    {item(status.head, "StBlue", {prefix = "", prefix_color = "StOrange"}), 1},
+    {item(status.changed, "StTitle", {prefix = "", prefix_color = "StWarning"}), 3},
+    {item(status.removed, "StTitle", {prefix = "", prefix_color = "StError"}), 3},
+    {item(status.added, "StTitle", {prefix = "", prefix_color = "StGreen"}), 3},
     {
-      utils.item(
+      item(
         ahead,
         "StTitle",
         {prefix = "⇡", prefix_color = "StGreen", after = behind > 0 and "" or " ", before = ""}
       ),
       5
     },
-    {utils.item(behind, "StTitle", {prefix = "⇣", prefix_color = "StNumber", after = " "}), 5},
+    {item(behind, "StTitle", {prefix = "⇣", prefix_color = "StNumber", after = " "}), 5},
     -- Current line number/total line number,  alternatives 
     {
       utils.line_info(
@@ -286,17 +273,16 @@ function _G.statusline()
     },
     -- (Unexpected) Indentation
     {
-      utils.item_if(
+      item_if(
         ctx.shiftwidth,
         ctx.shiftwidth > 2 or not ctx.expandtab,
         "StTitle",
         {prefix = ctx.expandtab and "Ξ" or "⇥", prefix_color = "PmenuSbar"}
       ),
       6
-    }
+    },
+    {end_marker}
   )
-
-  add({end_marker})
   -- removes 5 columns to add some padding
   return display(statusline, available_space - 5)
 end
