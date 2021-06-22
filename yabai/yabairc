@@ -6,8 +6,8 @@ yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
 
 # ====== Variables =============================
 
-padding="12"
-gap="12"
+padding="0"
+gap="0"
 
 normal_border_color="4C566A"
 focused_border_color="88C0D0"
@@ -21,19 +21,17 @@ yabai -m config top_padding                 "${padding}"
 yabai -m config bottom_padding              "${padding}"
 yabai -m config left_padding                "${padding}"
 yabai -m config right_padding               "${padding}"
-yabai -m config window_gap                  "${gap}"
 
 yabai -m config mouse_follows_focus         off
 yabai -m config focus_follows_mouse         off
-
 yabai -m config mouse_modifier              fn
 yabai -m config mouse_action1               move
 yabai -m config mouse_action2               resize
 
+yabai -m config window_gap                  "${gap}"
 yabai -m config window_opacity              off
 yabai -m config window_topmost              on
-
-yabai -m config window_shadow               off
+yabai -m config window_shadow               float
 
 yabai -m config active_window_opacity       1.0
 yabai -m config normal_window_opacity       1.0
@@ -43,7 +41,7 @@ yabai -m config auto_balance                off
 # ====== Border settings =======================
 
 # Add spacing for external bar
-# yabai -m config external_bar all:26:0
+yabai -m config external_bar all:26:0
 
 yabai -m config window_border               off
 yabai -m config window_border_width         0
@@ -58,8 +56,9 @@ yabai -m space 2 --label "Comms"
 yabai -m space 3 --label "Tools"
 yabai -m space 4 --label "Media"
 yabai -m space 5 --label "Social"
+yabai -m space 5 --label "Other"
 
-yabai -m config --space 2 layout float
+# yabai -m config --space 2 layout float
 
 # ====== Rules =========================
 
@@ -73,10 +72,10 @@ yabai -m rule --add app="Messages" manage=off
 yabai -m rule --add app="Signal" manage=off
 
 # Social
-# yabai -m rule --add app="Discord" space=5
-# yabai -m rule --add app="Messages" space=5
-# yabai -m rule --add app="Signal" space=5
-# yabai -m rule --add app="MailMate" space=5
+yabai -m rule --add app="Discord" space=5
+yabai -m rule --add app="Messages" space=5
+yabai -m rule --add app="Signal" space=5
+yabai -m rule --add app="MailMate" space=5
 
 echo "yabai configuration loaded.."
 

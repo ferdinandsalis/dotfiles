@@ -15,6 +15,7 @@
     ~/.config/direnv: direnv
     ~/.config/yabai: yabai
     ~/.config/skhd: skhd
+    ~/.config/spacebar: spacebar
     ~/.config/kitty:
       force: true
       path: kitty

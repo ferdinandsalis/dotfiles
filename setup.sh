@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# TODO: Do I need to start yabai, skhk and spacebar services?
+
 check_pkg_exists() {
   for p in "${packages[@]}"; do
     if hash "$p" 2>/dev/null
