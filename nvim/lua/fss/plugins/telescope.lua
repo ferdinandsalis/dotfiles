@@ -24,13 +24,8 @@ return function()
       frecency = {
         workspaces = {
           ["conf"] = vim.env.DOTFILES,
-          ["project"] = vim.env.PROJECTS_DIR,
+          ["project"] = vim.env.PROJECTS_DIR
         }
-      },
-      fzf_writer = {
-        minimum_grep_characters = 2,
-        minimum_files_characters = 2,
-        use_highlighter = true
       },
       fzf = {
         override_generic_sorter = true, -- override the generic sorter
@@ -70,7 +65,7 @@ return function()
 
   local function dotfiles()
     builtins.find_files {
-      prompt_title = "~ dotfiles ~",
+      prompt_title = "dotfiles",
       cwd = vim.g.dotfiles,
       file_ignore_patterns = {".git/.*", "dotbot/.*"}
     }
@@ -78,7 +73,7 @@ return function()
 
   local function nvim_config()
     builtins.find_files {
-      prompt_title = "~ nvim config ~",
+      prompt_title = "nvim",
       cwd = vim.g.vim_dir,
       file_ignore_patterns = {".git/.*", "dotbot/.*"}
     }
@@ -133,7 +128,6 @@ return function()
         b = {builtins.git_branches, "branches"},
         c = {builtins.git_commits, "commits"},
         d = {dotfiles, "dotfiles"},
-        f = {builtins.find_files, "files"},
         o = {builtins.buffers, "buffers"},
         m = {builtins.man_pages, "man pages"},
         h = {frecency, "history"},

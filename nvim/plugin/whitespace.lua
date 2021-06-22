@@ -33,7 +33,7 @@ local function toggle_trailing(mode)
   end
 end
 
-H.highlight("ExtraWhitespace", {guifg = "red"})
+H.set_hl("ExtraWhitespace", {guifg = "red"})
 
 fss.augroup(
   "WhitespaceMatch",
@@ -42,7 +42,7 @@ fss.augroup(
       events = {"ColorScheme"},
       targets = {"*"},
       command = function()
-        H.highlight("ExtraWhitespace", {guifg = "red"})
+        H.set_hl("ExtraWhitespace", {guifg = "red"})
       end
     },
     {

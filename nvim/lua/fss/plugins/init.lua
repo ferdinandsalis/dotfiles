@@ -3,19 +3,27 @@ local fmt = string.format
 
 local PACKER_COMPILED_PATH = fn.stdpath("cache") .. "/packer/packer_compiled.vim"
 
-local function setup_packer()
-  local install_path = fn.stdpath("data") .. "/site/pack/packer/opt/packer.nvim"
-  if fn.empty(fn.glob(install_path)) > 0 then
-    print("Downloading packer.nvim...")
-    print(fn.system({"git", "clone", "https://github.com/wbthomason/packer.nvim", install_path}))
-    vim.cmd("packadd packer.nvim")
-    require("packer").sync()
-  else
-    vim.cmd("packadd packer.nvim")
-  end
+-----------------------------------------------------------------------------//
+-- Bootstrap Packer {{{
+-----------------------------------------------------------------------------//
+-- Make sure packer is installed on the current machine and load
+-- the dev or upstream version depending on if we are at work or not
+-- NOTE: install packer as an opt plugin since it's loaded conditionally on my local machine
+-- it needs to be installed as optional so the install dir is consistent across machines
+local install_path = fmt("%s/site/pack/packer/opt/packer.nvim", fn.stdpath "data")
+if fn.empty(fn.glob(install_path)) > 0 then
+  vim.notify "Downloading packer.nvim..."
+  vim.notify(fn.system {"git", "clone", "https://github.com/wbthomason/packer.nvim", install_path})
+  vim.cmd "packadd! packer.nvim"
+  require("packer").sync()
+else
+  local name = vim.env.DEVELOPING and "local-packer.nvim" or "packer.nvim"
+  vim.cmd(fmt("packadd! %s", name))
 end
+-- }}}
 
-setup_packer()
+-- cfilter plugin allows filter down an existing quickfix list
+vim.cmd "packadd! cfilter"
 
 fss.augroup(
   "PackerSetupInit",
@@ -26,7 +34,7 @@ fss.augroup(
       command = function()
         fss.invalidate("fss.plugins", true)
         require("packer").compile()
-        vim.notify("packer compiled ...")
+        vim.notify "packer compiled..."
       end
     }
   }
@@ -41,6 +49,8 @@ local function conf(name)
   return require(string.format("fss.plugins.%s", name))
 end
 
+-- NOTE: luarocks install on every single PackerInstall https://github.com/wbthomason/packer.nvim/issues/180
+
 require("packer").startup(
   {
     function(use, use_rocks)
@@ -49,12 +59,15 @@ require("packer").startup(
       -- -- General:
       use_rocks "penlight"
 
-      -- use "ahmedkhalf/lsp-rooter.nvim"
       use {
         "airblade/vim-rooter",
         config = function()
           vim.g.rooter_silent_chdir = 0
-          vim.g.rooter_patterns = {".git", "samconfig.toml", "package.json"}
+          vim.g.rooter_patterns = {
+            ".git",
+            "samconfig.toml",
+            "package.json"
+          }
         end
       }
 
@@ -70,20 +83,44 @@ require("packer").startup(
       use {
         "camspiers/snap",
         rocks = {"fzy"},
+        keys = {"<leader>ff", "<leader>fs"},
         config = function()
           local snap = require("snap")
           local limit = snap.get("consumer.limit")
           local vimgrep = snap.get("select.vimgrep")
+          local fzf = snap.get("consumer.fzf")
           snap.register.map(
             {"n"},
             {"<leader>fs"},
             function()
               snap.run {
                 prompt = "Grep",
-                producer = limit(10000, snap.get "producer.ripgrep.vimgrep"),
+                producer = snap.get("producer.ripgrep.vimgrep").args {"--hidden"},
+                next = {consumer = fzf, config = {prompt = "FZF >"}},
                 select = vimgrep.select,
                 multiselect = vimgrep.multiselect,
-                views = {snap.get("preview.vimgrep")}
+                views = {
+                  snap.get("preview.vimgrep")
+                }
+              }
+            end
+          )
+          snap.register.map(
+            {"n"},
+            {"<leader>ff"},
+            function()
+              snap.run {
+                prompt = "Files",
+                reverse = true,
+                producer = fzf(
+                  snap.get "consumer.try"(
+                    snap.get "producer.git.file",
+                    snap.get("producer.ripgrep.file").hidden
+                  )
+                ),
+                select = snap.get("select.file").select,
+                multiselect = snap.get("select.file").multiselect,
+                views = {snap.get("preview.file")}
               }
             end
           )
@@ -93,10 +130,10 @@ require("packer").startup(
       use {
         "nvim-telescope/telescope.nvim",
         event = "CursorHold",
+        keys = {"<c-p>"},
         config = conf("telescope"),
         requires = {
           "nvim-lua/popup.nvim",
-          "nvim-telescope/telescope-fzf-writer.nvim",
           {"nvim-telescope/telescope-fzf-native.nvim", run = "make"},
           {
             "nvim-telescope/telescope-frecency.nvim",
@@ -107,7 +144,6 @@ require("packer").startup(
       }
 
       use {"folke/which-key.nvim", config = conf("whichkey")}
-      use "nvim-lua/popup.nvim"
       use "nvim-lua/plenary.nvim"
       use "mhinz/vim-grepper"
       use "kyazdani42/nvim-web-devicons"
@@ -125,9 +161,18 @@ require("packer").startup(
             {
               ["<localleader>t"] = {
                 name = "+vim-test",
-                f = {"<cmd>TestFile<CR>", "test: file"},
-                n = {"<cmd>TestNearest<CR>", "test: nearest"},
-                s = {"<cmd>TestSuite<CR>", "test: suite"}
+                f = {
+                  "<cmd>TestFile<CR>",
+                  "test: file"
+                },
+                n = {
+                  "<cmd>TestNearest<CR>",
+                  "test: nearest"
+                },
+                s = {
+                  "<cmd>TestSuite<CR>",
+                  "test: suite"
+                }
               }
             }
           )
@@ -151,13 +196,27 @@ require("packer").startup(
         end
       }
 
-      use {"rmagatti/session-lens", after = "telescope.nvim"}
+      use {
+        "rmagatti/session-lens",
+        after = "telescope.nvim",
+        config = function()
+          local session_lens = require("session-lens")
+          require("which-key").register(
+            {
+              ["<leader>fS"] = {
+                session_lens.search_session,
+                "sessions"
+              }
+            }
+          )
+        end
+      }
 
       use {
         "akinsho/nvim-toggleterm.lua",
         keys = [[<c-\>]],
         config = function()
-          local large_screen = vim.o.columns > 200
+          local large_screen = vim.o.columns > 240
           require("toggleterm").setup {
             size = function(term)
               if term.direction == "horizontal" then
@@ -172,12 +231,13 @@ require("packer").startup(
             shading_factor = 0.5,
             direction = large_screen and "vertical" or "horizontal",
             float_opts = {
-              border = "single"
+              border = "rounded"
             }
           }
         end
       }
       -- use {"tpope/vim-projectionist", config = conf("projectionist")}
+      -- use "tpope/vim-sleuth"
       use "tpope/vim-eunuch"
       use "tpope/vim-repeat"
       use {
@@ -186,7 +246,7 @@ require("packer").startup(
           local opts = {silent = false}
           fss.nnoremap("<localleader>[", ":S/<C-R><C-W>//<LEFT>", opts)
           fss.nnoremap("<localleader>]", ":%S/<C-r><C-w>//c<left><left>", opts)
-          fss.vnoremap("<localleader>[", [["zy:%S/<C-r><C-o>"//c<left><left>]], opts)
+          fss.xnoremap("<localleader>[", [["zy:%S/<C-r><C-o>"//c<left><left>]], opts)
         end
       }
       -- sets searchable path for filetypes like go so 'gf' works
@@ -198,17 +258,11 @@ require("packer").startup(
         config = conf("compe"),
         event = "InsertEnter"
       }
-      -- use {
-      --   "tzachar/compe-tabnine",
-      --   run = "./install.sh",
-      --   after = "nvim-compe",
-      --   requires = "hrsh7th/nvim-compe"
-      -- }
-      -- use {
-      --   "hrsh7th/vim-vsnip",
-      --   event = "InsertEnter",
-      --   requires = {"rafamadriz/friendly-snippets", "hrsh7th/nvim-compe"}
-      -- }
+      use {
+        "hrsh7th/vim-vsnip",
+        event = "InsertEnter",
+        requires = {"rafamadriz/friendly-snippets", "hrsh7th/nvim-compe"}
+      }
       -- Language & Syntax:
       --
       use "folke/lua-dev.nvim"
@@ -229,26 +283,6 @@ require("packer").startup(
                 status_symbol = " "
               }
               status.register_progress()
-            end
-          },
-          {
-            "kosayoda/nvim-lightbulb",
-            config = function()
-              fss.augroup(
-                "NvimLightbulb",
-                {
-                  {
-                    events = {"CursorHold", "CursorHoldI"},
-                    targets = {"*"},
-                    command = function()
-                      require("nvim-lightbulb").update_lightbulb {
-                        sign = {enabled = false},
-                        virtual_text = {enabled = true}
-                      }
-                    end
-                  }
-                }
-              )
             end
           },
           {
@@ -298,7 +332,10 @@ require("packer").startup(
           require("iswap").setup {}
           require("which-key").register(
             {
-              ["<localleader>sw"] = {"<Cmd>ISwap<CR>", "swap arguments,parameters etc."}
+              ["<localleader>sw"] = {
+                "<Cmd>ISwap<CR>",
+                "swap arguments,parameters etc."
+              }
             }
           )
         end
@@ -307,7 +344,10 @@ require("packer").startup(
         "lewis6991/spellsitter.nvim",
         opt = true,
         config = function()
-          require("spellsitter").setup {hl = "SpellBad", captures = {"comment"}}
+          require("spellsitter").setup {
+            hl = "SpellBad",
+            captures = {"comment"}
+          }
         end
       }
       use "windwp/nvim-ts-autotag"
@@ -323,16 +363,25 @@ require("packer").startup(
                 "<cmd>TroubleToggle lsp_workspace_diagnostics<CR>",
                 "lsp trouble: toggle"
               },
-              ["<leader>lr"] = {"<cmd>TroubleToggle lsp_references<cr>", "lsp trouble: references"}
+              ["<leader>lr"] = {
+                "<cmd>TroubleToggle lsp_references<cr>",
+                "lsp trouble: references"
+              }
             }
           )
           require("fss.highlights").all {
             {"TroubleNormal", {link = "PanelBackground"}},
             {"TroubleText", {link = "PanelBackground"}},
             {"TroubleIndent", {link = "PanelVertSplit"}},
-            {"TroubleFoldIcon", {guifg = "yellow", gui = "bold"}}
+            {
+              "TroubleFoldIcon",
+              {guifg = "yellow", gui = "bold"}
+            }
           }
-          require("trouble").setup {auto_close = true, auto_preview = false}
+          require("trouble").setup {
+            auto_close = true,
+            auto_preview = false
+          }
         end
       }
       use {
@@ -435,7 +484,10 @@ require("packer").startup(
               o = {
                 name = "+octo",
                 p = {
-                  l = {"<cmd>Octo pr list<CR>", "PR List"}
+                  l = {
+                    "<cmd>Octo pr list<CR>",
+                    "PR List"
+                  }
                 }
               }
             },
@@ -464,7 +516,16 @@ require("packer").startup(
         "karb94/neoscroll.nvim",
         config = function()
           require("neoscroll").setup {
-            mappings = {"<C-u>", "<C-d>", "<C-b>", "<C-f>", "<C-y>", "zt", "zz", "zb"}
+            mappings = {
+              "<C-u>",
+              "<C-d>",
+              "<C-b>",
+              "<C-f>",
+              "<C-y>",
+              "zt",
+              "zz",
+              "zb"
+            }
           }
         end
       }
@@ -473,6 +534,7 @@ require("packer").startup(
         config = conf("tree"),
         requires = "nvim-web-devicons"
       }
+      use "justinmk/vim-dirvish"
       use {
         "folke/zen-mode.nvim",
         cmd = {"ZenMode"},
@@ -508,15 +570,7 @@ require("packer").startup(
       -- Editing {{{
       --------------------------------------------------------------------------------
 
-      use {
-        "phaazon/hop.nvim",
-        keys = {{"n", "s"}},
-        config = function()
-          local hop = require("hop")
-          hop.setup {keys = "etovxqpdygfbzcisuran"} -- remove h,j,k,l from hops list of keys
-          fss.nnoremap("s", hop.hint_char1)
-        end
-      }
+      use "ggandor/lightspeed.nvim"
       use {"junegunn/vim-easy-align", cmd = "EasyAlign"}
       use "tversteeg/registers.nvim"
       use {
@@ -524,13 +578,19 @@ require("packer").startup(
         cmd = "UndotreeToggle",
         keys = "<leader>u",
         config = function()
-          vim.g.undotree_TreeNodeShape = "◦" -- Alternative: '◉'
+          vim.g.undotree_TreeNodeShape = "◉" -- Alternative: '◦'
           vim.g.undotree_SetFocusWhenToggle = 1
           require("which-key").register(
-            {["<leader>u"] = {"<cmd>UndotreeToggle<CR>", "toggle undotree"}}
+            {
+              ["<leader>u"] = {
+                "<cmd>UndotreeToggle<CR>",
+                "toggle undotree"
+              }
+            }
           )
         end
       }
+      use "kshenoy/vim-signature"
       use {
         "windwp/nvim-autopairs",
         config = function()
@@ -542,8 +602,8 @@ require("packer").startup(
       use {
         "tpope/vim-surround",
         config = function()
-          fss.vmap("s", "<Plug>VSurround")
-          fss.vmap("s", "<Plug>VSurround")
+          fss.xmap("s", "<Plug>VSurround")
+          fss.xmap("s", "<Plug>VSurround")
         end
       }
       use "AndrewRadev/splitjoin.vim"
@@ -556,15 +616,27 @@ require("packer").startup(
               d = {
                 name = "+dsf: function text object",
                 s = {
-                  f = {"<Plug>DsfDelete", "delete surrounding function"},
-                  nf = {"<Plug>DsfNextDelete", "delete next surrounding function"}
+                  f = {
+                    "<Plug>DsfDelete",
+                    "delete surrounding function"
+                  },
+                  nf = {
+                    "<Plug>DsfNextDelete",
+                    "delete next surrounding function"
+                  }
                 }
               },
               c = {
                 name = "+dsf: function text object",
                 s = {
-                  f = {"<Plug>DsfChange", "change surrounding function"},
-                  nf = {"<Plug>DsfNextChange", "change next surrounding function"}
+                  f = {
+                    "<Plug>DsfChange",
+                    "change surrounding function"
+                  },
+                  nf = {
+                    "<Plug>DsfNextChange",
+                    "change next surrounding function"
+                  }
                 }
               }
             }
@@ -623,7 +695,7 @@ require("packer").startup(
     config = {
       compile_path = PACKER_COMPILED_PATH,
       display = {
-        prompt_border = fss.style.border.curved,
+        prompt_border = "rounded",
         open_cmd = "silent topleft 65vnew Packer"
       },
       profile = {

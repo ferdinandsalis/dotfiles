@@ -37,7 +37,7 @@ return function()
   end
 
   local highlights = require("fss.highlights")
-  local bg_color = highlights.darken_color(highlights.hl_value("Normal", "bg"), -10)
+  local bg_color = highlights.darken_color(highlights.get_hl("Normal", "bg"), -10)
 
   require("bufferline").setup(
     {

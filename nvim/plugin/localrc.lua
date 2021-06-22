@@ -3,9 +3,7 @@ local luv = vim.loop
 local sep = "/"
 local default_target = ".localrc.lua"
 
-local M = {
-  found_rc = nil
-}
+local found_rc = nil
 
 local function notify(msg, level, delay)
   vim.defer_fn(
@@ -16,11 +14,16 @@ local function notify(msg, level, delay)
   )
 end
 
-function M.open()
-  if M.found_rc then
-    vim.cmd("vsplit " .. M.found_rc)
+local function reload(path)
+  vim.cmd("luafile " .. path)
+  notify("Reloaded " .. path)
+end
+
+local function open()
+  if found_rc then
+    vim.cmd("vsplit " .. found_rc)
   else
-    notify("No LocalRC found")
+    notify "No LocalRC found"
   end
 end
 
@@ -38,7 +41,7 @@ local function setup_localrc(path)
         events = {"BufWritePost"},
         target = {path},
         command = function()
-          M.reload(path)
+          reload(path)
         end
       }
     }
@@ -56,19 +59,14 @@ local function load_rc(path)
   notify(message)
 end
 
-function M.reload(path)
-  vim.cmd("luafile " .. path)
-  notify("Reloaded " .. path)
-end
-
 ---@param path string|nil
 ---@param target string|nil
-function M.load(path, target)
+local function load(path, target)
   path = path and #path > 0 and path or vim.fn.getcwd()
   target = target or default_target
 
   local found
-  local is_home = path == os.getenv("HOME")
+  local is_home = path == os.getenv "HOME"
   if is_home then
     return
   end
@@ -90,31 +88,22 @@ function M.load(path, target)
   until not entry or found
   if found then
     local rc_path = path .. sep .. found.name
-    M.found_rc = rc_path
+    found_rc = rc_path
     load_rc(rc_path)
   elseif not is_home then
-    M.load(get_parent(path), target)
+    load(get_parent(path), target)
   end
 end
 
---- trigger loading of localrc
-function M.setup()
-  fss.augroup(
-    "LoadLocalInit",
+fss.augroup(
+  "LoadLocalInit",
+  {
     {
-      {
-        events = {"VimEnter"},
-        targets = {"*"},
-        command = [[lua require("fss.localrc").load()]]
-      }
+      events = {"VimEnter"},
+      targets = {"*"},
+      command = load
     }
-  )
-  fss.command {
-    "LocalrcEdit",
-    function()
-      require("fss.localrc").open()
-    end
   }
-end
+)
 
-return M
+fss.command {"LocalrcEdit", open}

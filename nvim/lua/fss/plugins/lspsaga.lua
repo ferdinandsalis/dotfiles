@@ -16,7 +16,7 @@ return function()
     }
   }
 
-  require("fss.highlights").highlight("LspSagaLightbulb", {guifg = "NONE", guibg = "NONE"})
+  require("fss.highlights").set_hl("LspSagaLightbulb", {guifg = "NONE", guibg = "NONE"})
 
   -- jump diagnostic
   fss.inoremap("<c-k>", "<cmd>lua require('lspsaga.signaturehelp').signature_help()<CR>")

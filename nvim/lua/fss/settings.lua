@@ -8,7 +8,7 @@ vim.opt.shortmess = {
   o = true, -- file-read message overwrites previous
   O = true, -- file-read message overwrites previous
   T = true, -- truncate non-file messages in middle
-  f = true, -- (file x of x) instead of just (x of x
+  f = true, -- (file x of x) instead of just (x of x)
   F = true, -- Don't give file info when editing a file, NOTE: this breaks autocommand messages
   s = true,
   c = true,
@@ -80,11 +80,12 @@ vim.opt.formatoptions = {
 vim.opt.foldtext = "v:lua.folds()"
 vim.opt.foldopen = vim.opt.foldopen + "search"
 vim.opt.foldlevelstart = 10
-vim.opt.foldmethod = "indent"
+vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+vim.opt.foldmethod = "expr"
 -----------------------------------------------------------------------------//
 -- Quickfix {{{1
 -----------------------------------------------------------------------------//
--- vim.o.quickfixtextfunc = "v:lua.fss.qftf"
+vim.o.quickfixtextfunc = "v:lua.fss.qftf"
 -----------------------------------------------------------------------------//
 -- Grepprg {{{1
 -----------------------------------------------------------------------------//
@@ -134,7 +135,6 @@ vim.opt.wildignore = {
   "*.rar",
   "*.tar.xz",
   -- Cache
-  ".sass-cache",
   "*/vendor/gems/*",
   "*/vendor/cache/*",
   "*/.bundle/*",

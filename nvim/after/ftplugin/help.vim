@@ -9,9 +9,7 @@ setlocal concealcursor=nc
 " if this a vim help file rather than one I'm creating
 " add mappings otherwise do not
 if &buftype == 'help' && expand('%') =~# '^'.$VIMRUNTIME
-  " automatically move window to the left
-  autocmd! BufWinEnter <buffer> wincmd L | vertical resize 80
-
+  autocmd BufWinEnter <buffer> wincmd L | vertical resize 80
   nnoremap <buffer> q :<c-u>q<cr>
   nnoremap <buffer> <CR> <C-]>
   nnoremap <buffer> <BS> <C-T>

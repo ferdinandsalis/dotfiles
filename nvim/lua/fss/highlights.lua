@@ -1,10 +1,8 @@
-local fn = vim.fn
 local api = vim.api
 local fmt = string.format
+local P = fss.style.palette
 
 local M = {}
-
-local ts_playground_loaded, ts_hl_info
 
 ---Convert a hex color to rgb
 ---@param color string
@@ -36,36 +34,6 @@ function M.darken_color(color, percent)
   return string.format("#%02x%02x%02x", r, g, b)
 end
 
------------------------------------------------------------------------------//
--- CREDIT: @Cocophon
--- This function allows you to see the syntax highlight token of the cursor word and that token's links
----> https://github.com/cocopon/pgmnt.vim/blob/master/autoload/pgmnt/dev.vim
------------------------------------------------------------------------------//
-local function hi_chain(syn_id)
-  local name = fn.synIDattr(syn_id, "name")
-  local names = {}
-  table.insert(names, name)
-  local original = fn.synIDtrans(syn_id)
-  if syn_id ~= original then
-    table.insert(names, fn.synIDattr(original, "name"))
-  end
-
-  return names
-end
-
-function M.token_inspect()
-  if not ts_playground_loaded then
-    ts_playground_loaded, ts_hl_info = pcall(require, "nvim-treesitter-playground.hl-info")
-  end
-  if vim.tbl_contains(fss.ts.get_filetypes(), vim.bo.filetype) then
-    ts_hl_info.show_hl_captures()
-  else
-    local syn_id = fn.synID(fn.line("."), fn.col("."), 1)
-    local names = hi_chain(syn_id)
-    fss.echomsg(fn.join(names, " -> "))
-  end
-end
-
 --- Check if the current window has a winhighlight
 --- which includes the specific target highlight
 --- @param win_id integer
@@ -73,24 +41,13 @@ end
 function M.has_win_highlight(win_id, ...)
   local win_hl = vim.wo[win_id].winhighlight
   local has_match = false
-  for _, target in ipairs({...}) do
+  for _, target in ipairs {...} do
     if win_hl:match(target) ~= nil then
       has_match = true
       break
     end
   end
   return (win_hl ~= nil and has_match), win_hl
-end
-
-local function find(haystack, matcher)
-  local found
-  for _, needle in ipairs(haystack) do
-    if matcher(needle) then
-      found = needle
-      break
-    end
-  end
-  return found
 end
 
 ---A mechanism to allow inheritance of the winhighlight of a specific
@@ -106,7 +63,7 @@ function M.adopt_winhighlight(win_id, target, name, default)
   if not hl_exists then
     local parts = vim.split(win_hl, ",")
     local found =
-      find(
+      fss.find(
       parts,
       function(part)
         return part:match(target)
@@ -114,41 +71,26 @@ function M.adopt_winhighlight(win_id, target, name, default)
     )
     if found then
       local hl_group = vim.split(found, ":")[2]
-      local bg = M.hl_value(hl_group, "bg")
-      local fg = M.hl_value(default, "fg")
-      local gui = M.hl_value(default, "gui")
-      M.highlight(name, {guibg = bg, guifg = fg, gui = gui})
+      local bg = M.get_hl(hl_group, "bg")
+      local fg = M.get_hl(default, "fg")
+      local gui = M.get_hl(default, "gui")
+      M.set_hl(name, {guibg = bg, guifg = fg, gui = gui})
     end
   end
   return name
 end
 
---- TODO: eventually move to using `nvim_set_hl`
---- however for the time being that expects colors
---- to be specified as rgb not hex
+--- NOTE: vim.highlight's link and create are private, so
+--- eventually move to using `nvim_set_hl`
 ---@param name string
 ---@param opts table
-function M.highlight(name, opts)
-  local keys = {
-    gui = true,
-    guifg = true,
-    guibg = true,
-    guisp = true,
-    cterm = true,
-    blend = true
-  }
-  local force = opts.force or false
-  if name and not vim.tbl_isempty(opts) then
-    if opts.link and opts.link ~= "" then
-      vim.cmd("highlight" .. (force and "!" or "") .. " link " .. name .. " " .. opts.link)
+function M.set_hl(name, opts)
+  assert(name and opts, "Both 'name' and 'opts' must be specified")
+  if not vim.tbl_isempty(opts) then
+    if opts.link then
+      vim.highlight.link(name, opts.link, opts.force)
     else
-      local cmd = {"highlight", name}
-      for k, v in pairs(opts) do
-        if keys[k] and keys[k] ~= "" then
-          table.insert(cmd, fmt("%s=", k) .. v)
-        end
-      end
-      local ok, msg = pcall(vim.cmd, table.concat(cmd, " "))
+      local ok, msg = pcall(vim.highlight.create, name, opts)
       if not ok then
         vim.notify(fmt("Failed to set %s because: %s", name, msg))
       end
@@ -156,32 +98,58 @@ function M.highlight(name, opts)
   end
 end
 
-local gui_attr = {"underline", "bold", "undercurl", "italic"}
-local attrs = {fg = "foreground", bg = "background"}
-
-function M.hl_value(grp, attr)
-  if not grp then
-    return vim.notify("Cannot get a highlight without specifying a group")
+---convert a table of gui values into a string
+---@param hl table<string, string>
+---@return string
+local function flatten_gui(hl)
+  local gui_attr = {"underline", "bold", "undercurl", "italic"}
+  local gui = {}
+  for name, value in pairs(hl) do
+    if value and vim.tbl_contains(gui_attr, name) then
+      table.insert(gui, name)
+    end
   end
+  return table.concat(gui, ",")
+end
+
+---Get the value a highlight group
+---this function is a small wrapper around `nvim_get_hl_by_name`
+---which handles errors, fallbacks as well as returning a gui value
+---in the right format
+---@param grp string
+---@param attr string
+---@param fallback string
+---@return string
+function M.get_hl(grp, attr, fallback)
+  assert(grp, "Cannot get a highlight without specifying a group")
+  local attrs = {fg = "foreground", bg = "background"}
   attr = attrs[attr] or attr
   local hl = api.nvim_get_hl_by_name(grp, true)
   if attr == "gui" then
-    local gui = {}
-    for name, value in pairs(hl) do
-      if value and vim.tbl_contains(gui_attr, name) then
-        table.insert(gui, name)
-      end
-    end
-    return table.concat(gui, ",")
+    return flatten_gui(hl)
   end
-  local color = hl[attr]
+  local color = hl[attr] or fallback
+  -- convert the decimal rgba value from the hl by name to a 6 character hex + padding if needed
+  if not color then
+    vim.notify(fmt("%s %s does not exist", grp, attr))
+    return "NONE"
+  end
   -- convert the decimal rgba value from the hl by name to a 6 character hex + padding if needed
   return "#" .. bit.tohex(color, 6)
 end
 
+function M.clear_hl(name)
+  if not name then
+    return
+  end
+  vim.cmd(fmt("highlight clear %s", name))
+end
+
+---Apply a list of highlights
+---@param hls table[]
 function M.all(hls)
   for _, hl in ipairs(hls) do
-    M.highlight(unpack(hl))
+    M.set_hl(unpack(hl))
   end
 end
 
@@ -191,26 +159,22 @@ end
 vim.g.tokyonight_style = "storm"
 vim.g.tokyonight_italic_functions = true
 vim.g.tokyonight_sidebars = {"qf", "terminal", "packer"}
-
-local ok, msg = pcall(vim.cmd, "colorscheme tokyonight")
-if not ok then
-  return vim.notify(msg, vim.log.levels.ERROR)
-end
+vim.cmd "colorscheme tokyonight"
 
 ---------------------------------------------------------------------------------
 -- Plugin highlights
 ---------------------------------------------------------------------------------
 local function plugin_highlights()
-  local normal_bg = M.hl_value("Normal", "bg")
-  local normal_fg = M.hl_value("Normal", "fg")
-  local comment_fg = M.hl_value("Comment", "fg")
+  local normal_bg = M.get_hl("Normal", "bg")
+  local normal_fg = M.get_hl("Normal", "fg")
+  local comment_fg = M.get_hl("Comment", "fg")
   local bg_color = M.darken_color(normal_bg, -10)
   local modal_border_color = comment_fg
 
-  M.highlight("TelescopePathSeparator", {link = "Directory"})
-  M.highlight("TelescopeQueryFilter", {link = "IncSearch"})
-  M.highlight("CompeDocumentation", {link = "Pmenu"})
-  M.highlight("BqfPreviewBorder", {guifg = modal_border_color})
+  M.set_hl("TelescopePathSeparator", {link = "Directory"})
+  M.set_hl("TelescopeQueryFilter", {link = "IncSearch"})
+  M.set_hl("CompeDocumentation", {link = "Pmenu"})
+  M.set_hl("BqfPreviewBorder", {guifg = modal_border_color})
 
   M.all(
     {
@@ -255,10 +219,10 @@ end
 -- General highlights
 ---------------------------------------------------------------------------------
 local function general_overrides()
-  local cursor_line_bg = M.hl_value("CursorLine", "bg")
-  local normal_fg = M.hl_value("Normal", "fg")
-  local bg_color = M.darken_color(M.hl_value("Normal", "bg"), -10)
-  local comment_fg = M.hl_value("Comment", "fg")
+  local cursor_line_bg = M.get_hl("CursorLine", "bg")
+  local normal_fg = M.get_hl("Normal", "fg")
+  local bg_color = M.darken_color(M.get_hl("Normal", "bg"), -10)
+  local comment_fg = M.get_hl("Comment", "fg")
 
   M.all(
     {
@@ -307,9 +271,9 @@ local function general_overrides()
 end
 
 local function set_sidebar_highlight()
-  local split_color = M.hl_value("VertSplit", "fg")
-  local bg_color = M.darken_color(M.hl_value("Normal", "bg"), -10)
-  local st_color = M.darken_color(M.hl_value("Normal", "bg"), -16)
+  local split_color = M.get_hl("VertSplit", "fg")
+  local bg_color = M.darken_color(M.get_hl("Normal", "bg"), -10)
+  local st_color = M.darken_color(M.get_hl("Normal", "bg"), -16)
   local hls = {
     {"PanelBackground", {guibg = bg_color}},
     {"PanelHeading", {guibg = bg_color, gui = "bold"}},
@@ -318,7 +282,7 @@ local function set_sidebar_highlight()
     {"PanelSt", {guibg = st_color}}
   }
   for _, grp in ipairs(hls) do
-    M.highlight(unpack(grp))
+    M.set_hl(unpack(grp))
   end
 end
 
@@ -340,17 +304,10 @@ local function on_sidebar_enter()
   vim.cmd("setlocal winhighlight=" .. highlights)
 end
 
-function M.clear_hl(name)
-  if not name then
-    return
-  end
-  vim.cmd(fmt("highlight clear %s", name))
-end
-
 local function colorscheme_overrides()
   if vim.g.colors_name == "tokyonight" then
-    local keyword_fg = M.hl_value("Keyword", "fg")
-    local dark_bg = M.darken_color(M.hl_value("Normal", "bg"), -6)
+    local keyword_fg = M.get_hl("Keyword", "fg")
+    local dark_bg = M.darken_color(M.get_hl("Normal", "bg"), -6)
     M.all {
       {"TSVariable", {guifg = "NONE"}},
       {"WhichKeyFloat", {link = "PanelBackground"}},

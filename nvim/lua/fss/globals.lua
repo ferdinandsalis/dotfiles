@@ -1,12 +1,110 @@
--- Inspired by @tjdevries' astraunauta.nvim/ @TimUntersberger's config
+local fn = vim.fn
+local api = vim.api
+local fmt = string.format
+-----------------------------------------------------------------------------//
+-- Global namespace
+-----------------------------------------------------------------------------//
+--- Inspired by @tjdevries' astraunauta.nvim/ @TimUntersberger's config
 --- store all callbacks in one global table so they are able to survive re-requiring this file
-
-_AsGlobalCallbacks = _AsGlobalCallbacks or {}
+_G.__as_global_callbacks = __as_global_callbacks or {}
 
 _G.fss = {
-  _store = _AsGlobalCallbacks
+  _store = __as_global_callbacks
 }
 
+-----------------------------------------------------------------------------//
+-- UI
+-----------------------------------------------------------------------------//
+-- Consistent store of various UI items to reuse throughout my config
+fss.style = {
+  icons = {
+    error = "✗",
+    warning = "",
+    info = "",
+    hint = ""
+  },
+  border = {
+    curved = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}
+  },
+  palette = {
+    white = "#c0caf5",
+    dark_red = "#db4b4b",
+    green = "#9ece6a",
+    light_yellow = "#e0af68",
+    dark_blue = "#3d59a1",
+    magenta = "#bb9af7",
+    comment_grey = "#565f89",
+    whitesmoke = "#3b4261",
+    bright_blue = "#7aa2f7"
+  }
+}
+
+-----------------------------------------------------------------------------//
+-- Messaging
+-----------------------------------------------------------------------------//
+
+if vim.notify then
+  ---Override of vim.notify to open floating window
+  --@param message of the notification to show to the user
+  --@param log_level Optional log level
+  --@param opts Dictionary with optional options (timeout, etc)
+  vim.notify = function(message, log_level, _)
+    assert(message, "The message key of vim.notify should be a string")
+    fss.notify(message, { timeout = 5000, log_level = log_level })
+  end
+end
+
+-----------------------------------------------------------------------------//
+-- Debugging
+-----------------------------------------------------------------------------//
+if pcall(require, "plenary") then
+  RELOAD = require("plenary.reload").reload_module
+
+  R = function(name)
+    RELOAD(name)
+    return require(name)
+  end
+end
+
+-- inspect the contents of an object very quickly
+-- in your code or from the command-line:
+-- USAGE:
+-- in lua: dump({1, 2, 3})
+-- in commandline: :lua dump(vim.loop)
+---@vararg any
+function P(...)
+  local objects = vim.tbl_map(vim.inspect, { ... })
+  print(unpack(objects))
+end
+
+local installed
+---Check if a plugin is on the system not whether or not it is loaded
+---@param plugin_name string
+---@return boolean
+function fss.plugin_installed(plugin_name)
+  if not installed then
+    local dirs = fn.expand(fn.stdpath "data" .. "/site/pack/packer/start/*", true, true)
+    local opt = fn.expand(fn.stdpath "data" .. "/site/pack/packer/opt/*", true, true)
+    vim.list_extend(dirs, opt)
+    installed = vim.tbl_map(function(path)
+      return fn.fnamemodify(path, ":t")
+    end, dirs)
+  end
+  return vim.tbl_contains(installed, plugin_name)
+end
+
+---NOTE: this plugin returns the currently loaded state of a plugin given
+---given certain assumptions i.e. it will only be true if the plugin has been
+---loaded e.g. lazy loading will return false
+---@param plugin_name string
+---@return boolean?
+function _G.plugin_loaded(plugin_name)
+  local plugins = _G.packer_plugins or {}
+  return plugins[plugin_name] and plugins[plugin_name].loaded
+end
+-----------------------------------------------------------------------------//
+-- Utils
+-----------------------------------------------------------------------------//
 function fss._create(f)
   table.insert(fss._store, f)
   return #fss._store
@@ -16,13 +114,18 @@ function fss._execute(id, args)
   fss._store[id](args)
 end
 
-local fn = vim.fn
-local api = vim.api
-local fmt = string.format
+---@class Autocmd
+---@field events string[] list of autocommand events
+---@field targets string[] list of autocommand patterns
+---@field modifiers string[] e.g. nested, once
+---@field command string | function
 
+---Create an autocommand
+---@param name string
+---@param commands Autocmd[]
 function fss.augroup(name, commands)
   vim.cmd("augroup " .. name)
-  vim.cmd("autocmd!")
+  vim.cmd "autocmd!"
   for _, c in ipairs(commands) do
     local command = c.command
     if type(command) == "function" then
@@ -39,7 +142,7 @@ function fss.augroup(name, commands)
       )
     )
   end
-  vim.cmd("augroup END")
+  vim.cmd "augroup END"
 end
 
 ---Check if a cmd is executable
@@ -56,7 +159,7 @@ function fss.echomsg(msg, hl)
     return
   end
   if msg_type == "string" then
-    msg = {{msg, hl}}
+    msg = { { msg, hl } }
   end
   vim.api.nvim_echo(msg, true, {})
 end
@@ -82,19 +185,16 @@ function fss.profile(filename)
   fn.mkdir(base, "p")
   local success, profile = pcall(require, "plenary.profile.lua_profiler")
   if not success then
-    vim.api.nvim_echo({"Plenary is not installed.", "Title"}, true, {})
+    vim.api.nvim_echo({ "Plenary is not installed.", "Title" }, true, {})
   end
   profile.start()
   return function()
     profile.stop()
     local logfile = base .. filename .. ".log"
     profile.report(logfile)
-    vim.defer_fn(
-      function()
-        vim.cmd("tabedit " .. logfile)
-      end,
-      1000
-    )
+    vim.defer_fn(function()
+      vim.cmd("tabedit " .. logfile)
+    end, 1000)
   end
 end
 
@@ -117,6 +217,22 @@ end
 function fss.truthy(value)
   assert(type(value) == "number", fmt("Value should be a number but you passed %s", value))
   return value > 0
+end
+
+---Find an item in a list
+---@generic T
+---@param haystack T[]
+---@param matcher fun(arg: T):boolean
+---@return T
+function fss.find(haystack, matcher)
+  local found
+  for _, needle in ipairs(haystack) do
+    if matcher(needle) then
+      found = needle
+      break
+    end
+  end
+  return found
 end
 
 ---Determine if a value of any type is empty
@@ -161,16 +277,16 @@ end
 
 local function validate_mappings(lhs, rhs, opts)
   vim.validate {
-    lhs = {lhs, "string"},
+    lhs = { lhs, "string" },
     rhs = {
       rhs,
       function(a)
         local arg_type = type(a)
         return arg_type == "string" or arg_type == "function"
       end,
-      "right hand side"
+      "right hand side",
     },
-    opts = {opts, validate_opts, "mapping options are incorrect"}
+    opts = { opts, validate_opts, "mapping options are incorrect" },
   }
 end
 
@@ -216,7 +332,9 @@ local function make_mapper(mode, o)
   end
 end
 
-local map_opts = {noremap = false, silent = true}
+local map_opts = { noremap = false, silent = true }
+local noremap_opts = { noremap = true, silent = true }
+
 fss.nmap = make_mapper("n", map_opts)
 fss.xmap = make_mapper("x", map_opts)
 fss.imap = make_mapper("i", map_opts)
@@ -224,9 +342,8 @@ fss.vmap = make_mapper("v", map_opts)
 fss.omap = make_mapper("o", map_opts)
 fss.tmap = make_mapper("t", map_opts)
 fss.smap = make_mapper("s", map_opts)
-fss.cmap = make_mapper("c", {noremap = false, silent = false})
+fss.cmap = make_mapper("c", { noremap = false, silent = false })
 
-local noremap_opts = {noremap = true, silent = true}
 fss.nnoremap = make_mapper("n", noremap_opts)
 fss.xnoremap = make_mapper("x", noremap_opts)
 fss.vnoremap = make_mapper("v", noremap_opts)
@@ -234,7 +351,7 @@ fss.inoremap = make_mapper("i", noremap_opts)
 fss.onoremap = make_mapper("o", noremap_opts)
 fss.tnoremap = make_mapper("t", noremap_opts)
 fss.snoremap = make_mapper("s", noremap_opts)
-fss.cnoremap = make_mapper("c", {noremap = true, silent = false})
+fss.cnoremap = make_mapper("c", { noremap = true, silent = false })
 
 function fss.command(args)
   local nargs = args.nargs or 0
@@ -273,35 +390,25 @@ local function get_last_notification()
   end
 end
 
-local notification_hl =
-  setmetatable(
-  {
-    [2] = {"FloatBorder:NvimNotificationError", "NormalFloat:NvimNotificationError"},
-    [1] = {"FloatBorder:NvimNotificationInfo", "NormalFloat:NvimNotificationInfo"}
-  },
-  {
-    __index = function(t, _)
-      return t[1]
-    end
-  }
-)
+local notification_hl = setmetatable({
+  [2] = { "FloatBorder:NvimNotificationError", "NormalFloat:NvimNotificationError" },
+  [1] = { "FloatBorder:NvimNotificationInfo", "NormalFloat:NvimNotificationInfo" },
+}, {
+  __index = function(t, _)
+    return t[1]
+  end,
+})
 
 ---Utility function to create a notification message
 ---@param lines string[] | string
 ---@param opts table
 function fss.notify(lines, opts)
-  lines = type(lines) == "string" and {lines} or lines
-  lines =
-    vim.tbl_flatten(
-    vim.tbl_map(
-      function(line)
-        return vim.split(line, "\n")
-      end,
-      lines
-    )
-  )
+  lines = type(lines) == "string" and { lines } or lines
+  lines = vim.tbl_flatten(vim.tbl_map(function(line)
+    return vim.split(line, "\n")
+  end, lines))
   opts = opts or {}
-  local highlights = {"NormalFloat:Normal"}
+  local highlights = { "NormalFloat:Normal" }
   local level = opts.log_level or 1
   local timeout = opts.timeout or 5000
 
@@ -319,22 +426,17 @@ function fss.notify(lines, opts)
   local height = #lines
   local prev = get_last_notification()
   local row = prev and prev.row[false] - prev.height - 2 or vim.o.lines - vim.o.cmdheight - 3
-  local win =
-    api.nvim_open_win(
-    buf,
-    false,
-    {
-      relative = "editor",
-      width = width + 2,
-      height = height,
-      col = vim.o.columns - 2,
-      row = row,
-      anchor = "SE",
-      style = "minimal",
-      focusable = false,
-      border = fss.style.border.curved
-    }
-  )
+  local win = api.nvim_open_win(buf, false, {
+    relative = "editor",
+    width = width + 2,
+    height = height,
+    col = vim.o.columns - 2,
+    row = row,
+    anchor = "SE",
+    style = "minimal",
+    focusable = false,
+    border = "rounded",
+  })
 
   local level_hl = notification_hl[level]
 
@@ -344,13 +446,10 @@ function fss.notify(lines, opts)
   vim.bo[buf].filetype = "vim-notify"
   vim.wo[win].wrap = true
   if timeout then
-    vim.defer_fn(
-      function()
-        if api.nvim_win_is_valid(win) then
-          api.nvim_win_close(win, true)
-        end
-      end,
-      timeout
-    )
+    vim.defer_fn(function()
+      if api.nvim_win_is_valid(win) then
+        api.nvim_win_close(win, true)
+      end
+    end, timeout)
   end
 end

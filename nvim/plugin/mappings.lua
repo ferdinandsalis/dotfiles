@@ -49,8 +49,6 @@ vnoremap(".", ":norm.<CR>")
 -- Paste in visual mode multiple times
 xnoremap("p", "pgvy")
 
-nnoremap("<leader>E", require("fss.highlights").token_inspect, {silent = false})
-
 -- Conditionally modify character at end of line
 nnoremap("<localleader>,", "<cmd>call utils#modify_line_end_delimiter(',')<cr>")
 nnoremap("<localleader>;", "<cmd>call utils#modify_line_end_delimiter(';')<cr>")
@@ -346,7 +344,6 @@ command {
   end
 }
 
-command {"Token", require("fss.highlights").token_inspect}
 command {"Todo", [[noautocmd silent! grep! 'TODO\|FIXME' | copen]]}
 
 -- source https://superuser.com/a/540519

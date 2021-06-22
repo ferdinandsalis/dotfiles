@@ -3,6 +3,8 @@ local M = {
   kitty = {}
 }
 
+local highlights_loaded, H = pcall(require, "fss.highlights")
+
 local fn = vim.fn
 local fmt = string.format
 local loaded, devicons = pcall(require, "nvim-web-devicons")
@@ -51,4 +53,16 @@ function M.tmux.clear_pane_title()
   fn.jobstart("tmux set-window-option automatic-rename on")
 end
 
-return M
+return setmetatable(
+  M,
+  {
+    __index = function(t, k)
+      local func = t[k]
+      if type(func) == "function" then
+        if highlights_loaded then
+          func()
+        end
+      end
+    end
+  }
+)

@@ -3,6 +3,15 @@ local api = vim.api
 local fmt = string.format
 local contains = vim.tbl_contains
 
+vim.api.nvim_exec(
+  [[
+  augroup vimrc -- Ensure all autocommands are cleared
+  autocmd!
+  augroup END
+]],
+  ""
+)
+
 fss.augroup(
   "VimrcIncSearchHighlight",
   {

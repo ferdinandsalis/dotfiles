@@ -1,19 +1,6 @@
 --- Global treesitter object containing treesitter related utilities
 fss.ts = {}
 
----Get all filetypes for which we have a treesitter parser installed
----@return string[]
-function fss.ts.get_filetypes()
-  local parsers = require("nvim-treesitter.parsers")
-  local configs = parsers.get_parser_configs()
-  return vim.tbl_map(
-    function(ft)
-      return configs[ft].filetype or ft
-    end,
-    parsers.available_parsers()
-  )
-end
-
 return function()
   vim.cmd [[highlight link TSKeyword Statement]]
   vim.cmd [[highlight TSParameter gui=italic,bold]]
@@ -60,6 +47,15 @@ return function()
           ["iC"] = "@conditional.inner"
         }
       },
+      swap = {
+        enable = true,
+        swap_next = {
+          ["[w"] = "@parameter.inner"
+        },
+        swap_previous = {
+          ["]w"] = "@parameter.inner"
+        }
+      },
       move = {
         enable = true,
         set_jumps = true, -- whether to set jumps in the jumplist
@@ -87,16 +83,4 @@ return function()
       lint_events = {"BufWrite", "CursorHold"}
     }
   }
-
-  -- Only apply folding to supported files:
-  fss.augroup(
-    "TreesitterFolds",
-    {
-      {
-        events = {"FileType"},
-        targets = fss.ts.get_filetypes(),
-        command = "setlocal foldmethod=expr foldexpr=nvim_treesitter#foldexpr()"
-      }
-    }
-  )
 end

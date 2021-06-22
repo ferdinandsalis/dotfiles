@@ -80,7 +80,7 @@ local function setup_mappings(client, bufnr)
   nnoremap(
     "]c",
     function()
-      vim.lsp.diagnostic.goto_prev {popup_opts = {border = fss.style.border.curved}}
+      vim.lsp.diagnostic.goto_prev {popup_opts = {border = "rounded"}}
     end,
     opts
   )
@@ -88,7 +88,7 @@ local function setup_mappings(client, bufnr)
   nnoremap(
     "[c",
     function()
-      vim.lsp.diagnostic.goto_next {popup_opts = {border = fss.style.border.curved}}
+      vim.lsp.diagnostic.goto_next {popup_opts = {border = "rounded"}}
     end,
     opts
   )
@@ -183,7 +183,7 @@ function fss.lsp.on_attach(client, bufnr)
       bind = true,
       hint_enable = false,
       handler_opts = {
-        border = fss.style.border.curved
+        border = "rounded"
       }
     }
   )
@@ -193,25 +193,6 @@ end
 -----------------------------------------------------------------------------//
 -- Language servers
 -----------------------------------------------------------------------------//
-
---- This function if called immediately on startup might not have all the correct
---- paths added to the runtime if the the package manager e.g. packer loads things too late
-local function get_lua_runtime()
-  local library = {}
-  local items = {
-    "$VIMRUNTIME",
-    "$DOTFILES",
-    "~/.local/share/nvim/site/pack/packer/opt/*",
-    "~/.local/share/nvim/site/pack/packer/start/*"
-  }
-  for _, item in ipairs(items) do
-    for _, p in pairs(vim.fn.expand(item, false, true)) do
-      p = vim.loop.fs_realpath(p)
-      library[p] = true
-    end
-  end
-  return library
-end
 
 fss.lsp.servers = {
   lua = function()
@@ -247,9 +228,6 @@ fss.lsp.servers = {
   end,
   typescript = function()
     return {
-      init_options = {
-        documentFormatting = false
-      },
       filetypes = {
         "javascript",
         "javascriptreact",
@@ -284,7 +262,13 @@ fss.lsp.servers = {
           luafmt = {
             rootPatterns = {".git"},
             command = "luafmt",
-            args = {"--indent-count", vim.o.shiftwidth, "--line-width", "100", "--stdin"}
+            args = {
+              "--indent-count",
+              vim.o.shiftwidth,
+              "--line-width",
+              "100",
+              "--stdin"
+            }
           }
         },
         formatFiletypes = {
@@ -299,36 +283,6 @@ fss.lsp.servers = {
     }
   end
 }
-
-function fss.lsp.setup_servers()
-  local lspinstall = require("lspinstall")
-  local lspconfig = require("lspconfig")
-
-  lspinstall.setup()
-  local installed = lspinstall.installed_servers()
-  local status_capabilities = require("lsp-status").capabilities
-
-  for _, server in pairs(installed) do
-    local mk_config = fss.lsp.servers[server]
-    local config = mk_config and mk_config() or {}
-    config.flags = config.flags or {}
-    config.flags.debounce_text_changes = 150
-    config.on_attach = fss.lsp.on_attach
-    if not config.capabilities then
-      config.capabilities = vim.lsp.protocol.make_client_capabilities()
-    end
-    config.capabilities.textDocument.completion.completionItem.snippetSupport = true
-    config.capabilities.textDocument.completion.completionItem.resolveSupport = {
-      properties = {
-        "documentation",
-        "detail",
-        "additionalTextEdits"
-      }
-    }
-    config.capabilities = fss.deep_merge(status_capabilities, config.capabilities)
-    lspconfig[server].setup(config)
-  end
-end
 
 -----------------------------------------------------------------------------//
 -- Commands
@@ -362,8 +316,16 @@ return function()
   local icons = fss.style.icons
   vim.fn.sign_define(
     {
-      {name = "LspDiagnosticsSignError", text = icons.error, texthl = "LspDiagnosticsSignError"},
-      {name = "LspDiagnosticsSignHint", text = icons.hint, texthl = "LspDiagnosticsSignHint"},
+      {
+        name = "LspDiagnosticsSignError",
+        text = icons.error,
+        texthl = "LspDiagnosticsSignError"
+      },
+      {
+        name = "LspDiagnosticsSignHint",
+        text = icons.hint,
+        texthl = "LspDiagnosticsSignHint"
+      },
       {
         name = "LspDiagnosticsSignWarning",
         text = icons.warning,
@@ -398,8 +360,33 @@ return function()
   vim.lsp.handlers["textDocument/hover"] =
     vim.lsp.with(
     vim.lsp.handlers.hover,
-    {border = fss.style.border.curved, max_width = max_width, max_height = max_height}
+    {border = "rounded", max_width = max_width, max_height = max_height}
   )
 
-  fss.lsp.setup_servers()
+  local lspinstall = require "lspinstall"
+  local lspconfig = require "lspconfig"
+
+  lspinstall.setup()
+  local installed = lspinstall.installed_servers()
+  local status_capabilities = require("lsp-status").capabilities
+  for _, server in pairs(installed) do
+    local mk_config = fss.lsp.servers[server]
+    local config = mk_config and mk_config() or {}
+    config.flags = config.flags or {}
+    config.flags.debounce_text_changes = 150
+    config.on_attach = fss.lsp.on_attach
+    if not config.capabilities then
+      config.capabilities = vim.lsp.protocol.make_client_capabilities()
+    end
+    config.capabilities.textDocument.completion.completionItem.snippetSupport = true
+    config.capabilities.textDocument.completion.completionItem.resolveSupport = {
+      properties = {
+        "documentation",
+        "detail",
+        "additionalTextEdits"
+      }
+    }
+    config.capabilities = fss.deep_merge(status_capabilities, config.capabilities)
+    lspconfig[server].setup(config)
+  end
 end

@@ -20,15 +20,15 @@ local M = {}
 local function colors()
   local error_color = P.dark_red
   local indicator_color = P.bright_blue
-  local bg_color = H.darken_color(H.hl_value("Normal", "bg"), -16)
-  local normal_fg = H.hl_value("Normal", "fg")
-  local pmenu_bg = H.hl_value("Pmenu", "bg")
-  local string_fg = H.hl_value("String", "fg")
-  local comment_fg = H.hl_value("Comment", "fg")
-  local comment_gui = H.hl_value("Comment", "gui")
-  local number_fg = H.hl_value("Number", "fg")
+  local bg_color = H.darken_color(H.get_hl("Normal", "bg"), -16)
+  local normal_fg = H.get_hl("Normal", "fg")
+  local pmenu_bg = H.get_hl("Pmenu", "bg")
+  local string_fg = H.get_hl("String", "fg")
+  local comment_fg = H.get_hl("Comment", "fg")
+  local comment_gui = H.get_hl("Comment", "gui")
+  local number_fg = H.get_hl("Number", "fg")
   local warning_fg = P.light_yellow
-  local inc_search_bg = H.hl_value("Search", "bg")
+  local inc_search_bg = H.get_hl("Search", "bg")
 
   H.all {
     {"StMetadata", {guifg = comment_fg, guibg = bg_color}},
@@ -246,9 +246,9 @@ function _G.statusline()
     {item(notifications, "StTitle", {prefix = ""}), 3},
     -- Git Status
     {item(status.head, "StBlue", {prefix = "", prefix_color = "StOrange"}), 1},
-    {item(status.changed, "StTitle", {prefix = "", prefix_color = "StWarning"}), 3},
-    {item(status.removed, "StTitle", {prefix = "", prefix_color = "StError"}), 3},
-    {item(status.added, "StTitle", {prefix = "", prefix_color = "StGreen"}), 3},
+    {item(status.changed, "StBlue", {prefix = "", prefix_color = "StWarning"}), 3},
+    {item(status.removed, "StBlue", {prefix = "", prefix_color = "StError"}), 3},
+    {item(status.added, "StBlue", {prefix = "", prefix_color = "StGreen"}), 3},
     {
       item(
         ahead,
