@@ -5,11 +5,20 @@ return function()
   vim.cmd [[highlight link TSKeyword Statement]]
   vim.cmd [[highlight TSParameter gui=italic,bold]]
 
+  require("which-key").register(
+    {
+      v = "increment selection",
+      V = "decrement selection"
+    },
+    {
+      prefix = "<leader>"
+    }
+  )
+
   require("nvim-treesitter.configs").setup {
     ensure_installed = "maintained",
     highlight = {
-      enable = true,
-      ignore_install = {"verilog"}
+      enable = true
     },
     context_commentstring = {
       enable = true
@@ -74,6 +83,14 @@ return function()
         goto_previous_end = {
           ["[M"] = "@function.outer",
           ["[]"] = "@class.outer"
+        }
+      },
+      lsp_interop = {
+        enable = true,
+        border = "rounded",
+        peek_definition_code = {
+          ["df"] = "@function.outer",
+          ["dF"] = "@class.outer"
         }
       }
     },

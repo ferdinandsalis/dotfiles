@@ -39,37 +39,40 @@ return function()
   local highlights = require("fss.highlights")
   local bg_color = highlights.darken_color(highlights.get_hl("Normal", "bg"), -10)
 
+  ---@diagnostic disable-next-line: unused-function
+  local function sort_by_mtime(a, b)
+    local astat = vim.loop.fs_stat(a.path)
+    local bstat = vim.loop.fs_stat(b.path)
+    local mod_a = astat and astat.mtime.sec or 0
+    local mod_b = bstat and bstat.mtime.sec or 0
+    return mod_a > mod_b
+  end
+
   require("bufferline").setup(
     {
       options = {
+        view = "multiwindow",
+        sort_by = sort_by_mtime,
         mappings = false,
-        sort_by = function(a, b)
-          local astat = vim.loop.fs_stat(a.path)
-          local bstat = vim.loop.fs_stat(b.path)
-          local mod_a = astat and astat.mtime.sec or 0
-          local mod_b = bstat and bstat.mtime.sec or 0
-          return mod_a > mod_b
-        end,
         diagnostics = "nvim_lsp",
         diagnostics_indicator = diagnostics_indicator,
         custom_filter = custom_filter,
         offsets = {
           {
             filetype = "NvimTree",
-            text = "File Explorer",
+            text = "Explorer",
             highlight = "PanelHeading",
             text_align = "left",
             padding = 1
           },
           {
             filetype = "DiffviewFiles",
-            text = "Diff View",
+            text = "Diff",
             highlight = "PanelHeading",
             text_align = "left",
             padding = 1
           }
         },
-        view = "default",
         buffer_close_icon = "",
         modified_icon = "●",
         close_icon = "",

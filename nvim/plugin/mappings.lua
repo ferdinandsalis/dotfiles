@@ -5,6 +5,7 @@ local command = fss.command
 local nmap = fss.nmap
 local nnoremap = fss.nnoremap
 local xnoremap = fss.xnoremap
+local cnoremap = fss.cnoremap
 local vnoremap = fss.vnoremap
 local inoremap = fss.inoremap
 local tnoremap = fss.tnoremap
@@ -32,10 +33,7 @@ vnoremap(">", ">gv")
 --Remap back tick for jumping to marks more quickly back
 nnoremap("'", "`")
 
-nnoremap(
-  "<localleader>l",
-  [[<cmd>nohlsearch<cr><cmd>diffupdate<cr><cmd>syntax sync fromstart<cr><c-l>]]
-)
+nnoremap("<localleader>l", [[<cmd>nohlsearch<cr><cmd>diffupdate<cr><cmd>syntax sync fromstart<cr><c-l>]])
 
 -- Write and quit all files, ZZ is NOT equivalent to this
 nnoremap("qa", "<cmd>qa<CR>")
@@ -224,11 +222,7 @@ nnoremap("0", "^")
 vnoremap("$", "g_")
 
 -- Toggle top/center/bottom
-nmap(
-  "zz",
-  [[(winline() == (winheight (0) + 1)/ 2) ?  'zt' : (winline() == 1)? 'zb' : 'zz']],
-  {expr = true}
-)
+nmap("zz", [[(winline() == (winheight (0) + 1)/ 2) ?  'zt' : (winline() == 1)? 'zb' : 'zz']], {expr = true})
 
 -- Smooth scroll wheel
 nmap("<ScrollWheelDown>", "<c-d>")
@@ -252,7 +246,7 @@ inoremap("<right>", "<nop>")
 nnoremap("<leader>ev", [[:vsplit $MYVIMRC<cr>]])
 
 -- This line allows the current file to source the vimrc allowing me use bindings as they're added
-nnoremap("<leader>sv", [[:luafile $MYVIMRC<cr> <bar> :call utils#message('Sourced init.vim')<cr>]])
+nnoremap("<leader>sv", [[:luafile $MYVIMRC<cr> <bar> :lua vim.notify('Sourced init.vim')<cr>]])
 
 -----------------------------------------------------------------------------//
 -- Quotes
@@ -264,6 +258,31 @@ nnoremap("<leader>'", [[ciw'<c-r>"'<esc>]])
 nnoremap("<leader>)", [[ciw(<c-r>")<esc>]])
 nnoremap("<leader>}", [[ciw{<c-r>"}<esc>]])
 
+nnoremap("gf", "<Cmd>e <cfile><CR>")
+-----------------------------------------------------------------------------//
+-- Command mode
+-----------------------------------------------------------------------------//
+-- smooth searching, allow tabbing between search results similar to using <c-g>
+-- or <c-t> the main difference being tab is easier to hit and remapping those keys
+-- to these would swallow up a tab mapping
+cnoremap("<Tab>", [[getcmdtype() == "/" || getcmdtype() == "?" ? "<CR>/<C-r>/" : "<C-z>"]], {expr = true})
+cnoremap("<S-Tab>", [[getcmdtype() == "/" || getcmdtype() == "?" ? "<CR>?<C-r>/" : "<S-Tab>"]], {expr = true})
+-- Smart mappings on the command line
+cnoremap("w!!", [[w !sudo tee % >/dev/null]])
+-- insert path of current file into a command
+cnoremap("%%", "<C-r>=fnameescape(expand('%'))<cr>")
+cnoremap("::", "<C-r>=fnameescape(expand('%:p:h'))<cr>/")
+
+-- TODO: converting this to lua does not work for some obscure reason.
+vim.cmd [[
+  function! ExecuteMacroOverVisualRange()
+    echo "@".getcmdline()
+    execute ":'<,'>normal @".nr2char(getchar())
+  endfunction
+]]
+
+xnoremap("@", ":<C-u>call ExecuteMacroOverVisualRange()<CR>", {silent = false})
+
 ------------------------------------------------------------------------------
 -- Google it / Feeling lucky
 ------------------------------------------------------------------------------
@@ -272,13 +291,7 @@ nnoremap("<leader>}", [[ciw{<c-r>"}<esc>]])
 function _G._mappings.google(pat, lucky)
   local query = '"' .. fn.substitute(pat, '["\n]', " ", "g") .. '"'
   query = fn.substitute(query, "[[:punct:] ]", [[\=printf("%%%02X", char2nr(submatch(0)))]], "g")
-  fn.system(
-    fn.printf(
-      vim.g.open_command .. ' "https://www.google.com/search?%sq=%s"',
-      lucky and "btnI&" or "",
-      query
-    )
-  )
+  fn.system(fn.printf(vim.g.open_command .. ' "https://www.google.com/search?%sq=%s"', lucky and "btnI&" or "", query))
 end
 
 nnoremap("<localleader>?", [[:lua _mappings.google(vim.fn.expand("<cWORD>"), false)<cr>]])
@@ -309,7 +322,7 @@ local function toggle_list(prefix)
     end
   end
   if prefix == "l" and vim.tbl_isempty(fn.getloclist(0)) then
-    fn["utils#message"]("Location List is Empty.", "Title")
+    vim.notify("Location List is Empty.", 2)
     return
   end
 

@@ -47,6 +47,8 @@ local exceptions = {
     quickfix = ""
   },
   filetypes = {
+    org = "",
+    orgagenda = "",
     dbui = "",
     vista = "פּ",
     tsplayground = "侮",
@@ -70,6 +72,7 @@ local exceptions = {
     ["dap-repl"] = ""
   },
   names = {
+    orgagenda = "Org",
     minimap = "minimap",
     dbui = "Dadbod UI",
     tsplayground = "Treesitter",

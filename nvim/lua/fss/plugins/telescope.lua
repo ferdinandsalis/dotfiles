@@ -3,25 +3,44 @@ return function()
   local actions = require("telescope.actions")
   local themes = require("telescope.themes")
 
+  local H = require("fss.highlights")
+  local normal_bg = H.get_hl("Normal", "bg")
+  local comment_fg = H.get_hl("Comment", "fg")
+  require("fss.highlights").plugin(
+    "telescope",
+    {"TelescopePathSeparator", {link = "Directory"}},
+    {"TelescopeQueryFilter", {link = "IncSearch"}},
+    {"TelescopeResultsBorder", {guibg = normal_bg, guifg = comment_fg}},
+    {"TelescopePromptBorder", {guibg = normal_bg, guifg = comment_fg}},
+    {"TelescopePreviewBorder", {guibg = normal_bg, guifg = comment_fg}},
+    {"TelescopePreviewNormal", {guibg = normal_bg, guifg = normal_bg}}
+  )
+
   telescope.setup {
     defaults = {
-      prompt_prefix = "❯ ",
+      set_env = {["TERM"] = vim.env.TERM},
+      prompt_prefix = " ",
       mappings = {
         i = {
           ["<c-c>"] = function()
-            vim.cmd("stopinsert!")
+            vim.cmd "stopinsert!"
           end,
           ["<esc>"] = actions.close,
-          ["<c-s>"] = actions.select_horizontal
+          ["<c-s>"] = actions.select_horizontal,
+          ["<c-j>"] = actions.cycle_history_next,
+          ["<c-k>"] = actions.cycle_history_prev
         }
       },
       file_ignore_patterns = {"%.jpg", "%.jpeg", "%.png", "%.otf", "%.ttf"},
-      -- set this value to 'flex' once telescope/#823 is merged
-      layout_strategy = "horizontal",
+      layout_strategy = "flex",
       winblend = 7
     },
     extensions = {
       frecency = {
+        -- the filter is saved so passing a :CWD: tag would not work
+        -- without turning this option off
+        -- @see: https://github.com/nvim-telescope/telescope-frecency.nvim/issues/16
+        persistent_filter = false,
         workspaces = {
           ["conf"] = vim.env.DOTFILES,
           ["project"] = vim.env.PROJECTS_DIR
@@ -41,11 +60,14 @@ return function()
           n = {["<c-x>"] = "delete_buffer"}
         }
       },
+      lsp_code_actions = {
+        theme = "cursor"
+      },
+      colorscheme = {
+        enable_preview = true
+      },
       find_files = {
-        hidden = true,
-        layout_config = {
-          preview_width = 0.65
-        }
+        hidden = true
       },
       git_branches = {
         theme = "dropdown"
@@ -56,61 +78,18 @@ return function()
     }
   }
 
-  telescope.load_extension("fzf")
+  telescope.load_extension "fzf"
+  telescope.load_extension "smart_history"
 
   --- NOTE: this must be required after setting up telescope
   --- otherwise the result will be cached without the updates
   --- from the setup call
   local builtins = require("telescope.builtin")
 
-  local function dotfiles()
-    builtins.find_files {
-      prompt_title = "dotfiles",
-      cwd = vim.g.dotfiles,
-      file_ignore_patterns = {".git/.*", "dotbot/.*"}
-    }
-  end
-
-  local function nvim_config()
-    builtins.find_files {
-      prompt_title = "nvim",
-      cwd = vim.g.vim_dir,
-      file_ignore_patterns = {".git/.*", "dotbot/.*"}
-    }
-  end
-
-  ---find if passed in directory contains the target
-  ---which is the current buffer's path by default
-  ---@param path string
-  ---@param target string
-  ---@return boolean
-  local function is_within(path, target)
-    target = target or vim.fn.expand("%:p")
-    if not target then
-      return false
-    end
-    return target:match(vim.fn.fnamemodify(path, ":p"))
-  end
-
-  ---General finds files function which changes the picker depending
-  ---on the current buffers path.
-  local function files()
-    if is_within(vim.g.vim_dir) then
-      nvim_config()
-    elseif is_within(vim.g.dotfiles) then
-      dotfiles()
-    elseif vim.fn.isdirectory(".git") > 0 then
-      -- if in a git project, use :Telescope git_files
-      builtins.git_files()
-    else
-      -- otherwise, use :Telescope find_files
-      builtins.find_files()
-    end
-  end
-
   local function frecency()
     telescope.extensions.frecency.frecency(
       themes.get_dropdown {
+        default_text = ":CWD:",
         winblend = 10,
         border = true,
         previewer = false,
@@ -121,19 +100,17 @@ return function()
 
   require("which-key").register(
     {
-      ["<C-P>"] = {files, "open project files"},
       ["<leader>f"] = {
-        name = "+telescope",
+        name = "+find",
         a = {builtins.builtin, "builtins"},
-        b = {builtins.git_branches, "branches"},
-        c = {builtins.git_commits, "commits"},
-        d = {dotfiles, "dotfiles"},
-        o = {builtins.buffers, "buffers"},
+        g = {
+          name = "+git",
+          c = {builtins.git_commits, "commits"},
+          b = {builtins.git_branches, "branches"}
+        },
         m = {builtins.man_pages, "man pages"},
         h = {frecency, "history"},
-        n = {nvim_config, "nvim config"},
         r = {builtins.reloader, "module reloader"},
-        w = {builtins.lsp_dynamic_workspace_symbols, "workspace symbols", silent = false},
         ["?"] = {builtins.help_tags, "help"}
       },
       ["<leader>c"] = {

@@ -153,70 +153,41 @@ function M.all(hls)
   end
 end
 
------------------------------------------------------------------------------//
+---------------------------------------------------------------------------------
 -- Color Scheme {{{1
 -----------------------------------------------------------------------------//
 vim.g.tokyonight_style = "storm"
 vim.g.tokyonight_italic_functions = true
 vim.g.tokyonight_sidebars = {"qf", "terminal", "packer"}
 vim.cmd "colorscheme tokyonight"
-
+-- }}}
 ---------------------------------------------------------------------------------
--- Plugin highlights
+-- Plugin highlights {{{
 ---------------------------------------------------------------------------------
-local function plugin_highlights()
-  local normal_bg = M.get_hl("Normal", "bg")
-  local normal_fg = M.get_hl("Normal", "fg")
-  local comment_fg = M.get_hl("Comment", "fg")
-  local bg_color = M.darken_color(normal_bg, -10)
-  local modal_border_color = comment_fg
-
-  M.set_hl("TelescopePathSeparator", {link = "Directory"})
-  M.set_hl("TelescopeQueryFilter", {link = "IncSearch"})
-  M.set_hl("CompeDocumentation", {link = "Pmenu"})
-  M.set_hl("BqfPreviewBorder", {guifg = modal_border_color})
-
-  M.all(
+---Apply highlights for a plugin and refresh on colorscheme change
+---@param name string plugin name
+---@vararg table list of highlights
+function M.plugin(name, ...)
+  name = name:gsub("^%l", string.upper) -- capitalise the name for autocommand convention sake
+  local group_name = fmt("%sHighlightOverrides", name)
+  local hls = {...}
+  M.all(hls)
+  fss.augroup(
+    group_name,
     {
-      -- whichkey.nvim
-      {"WhichKeyFloating", {guibg = bg_color, force = true}},
-      -- telescope.nvim
-      {"TelescopePathSeparator", {link = "Directory"}},
-      {"TelescopeQueryFilter", {link = "IncSearch"}},
-      {"TelescopeResultsBorder", {guibg = normal_bg, guifg = modal_border_color}},
-      {"TelescopePromptBorder", {guibg = normal_bg, guifg = modal_border_color}},
-      {"TelescopePreviewBorder", {guibg = normal_bg, guifg = modal_border_color}},
-      {"TelescopePreviewNormal", {guibg = normal_bg, guifg = normal_fg}},
-      -- -- nvim-ts-rainbow
-      {"rainbowcol1", {guifg = "#a3be8c"}},
-      {"rainbowcol2", {guifg = "#99c2c1"}},
-      {"rainbowcol3", {guifg = "#8fbcbb"}},
-      {"rainbowcol4", {guifg = "#88c0d0"}},
-      {"rainbowcol5", {guifg = "#81a1c1"}},
-      {"rainbowcol6", {guifg = "#5e81ac"}},
-      {"rainbowcol7", {guifg = "#4e6f97"}},
-      -- bqf
-      {"BqfPreviewBorder", {guifg = modal_border_color}}
+      {
+        events = {"ColorScheme"},
+        targets = {"*"},
+        command = function()
+          M.all(hls)
+        end
+      }
     }
   )
-
-  if plugin_loaded("conflict-marker.vim") then
-    M.all {
-      {"ConflictMarkerBegin", {guibg = "#2f7366"}},
-      {"ConflictMarkerOurs", {guibg = "#2e5049"}},
-      {"ConflictMarkerTheirs", {guibg = "#344f69"}},
-      {"ConflictMarkerEnd", {guibg = "#2f628e"}},
-      {"ConflictMarkerCommonAncestorsHunk", {guibg = "#754a81"}}
-    }
-  else
-    -- Highlight VCS conflict markers
-    vim.cmd [[match ErrorMsg '^\(<\|=\|>\)\{7\}\([^=].\+\)\?$']]
-  end
 end
 -- }}}
-
 ---------------------------------------------------------------------------------
--- General highlights
+-- General highlights {{{
 ---------------------------------------------------------------------------------
 local function general_overrides()
   local cursor_line_bg = M.get_hl("CursorLine", "bg")
@@ -269,6 +240,7 @@ local function general_overrides()
     }
   )
 end
+-- }}}
 
 local function set_sidebar_highlight()
   local split_color = M.get_hl("VertSplit", "fg")
@@ -289,7 +261,7 @@ end
 local sidebar_fts = {"NvimTree"}
 
 local function on_sidebar_enter()
-  local highlights =
+  vim.wo.winhighlight =
     table.concat(
     {
       "Normal:PanelBackground",
@@ -301,7 +273,6 @@ local function on_sidebar_enter()
     },
     ","
   )
-  vim.cmd("setlocal winhighlight=" .. highlights)
 end
 
 local function colorscheme_overrides()
@@ -320,7 +291,6 @@ local function colorscheme_overrides()
 end
 
 local function user_highlights()
-  plugin_highlights()
   general_overrides()
   colorscheme_overrides()
   set_sidebar_highlight()
@@ -347,3 +317,5 @@ fss.augroup(
 )
 
 return M
+
+-- vim:foldmethod=marker

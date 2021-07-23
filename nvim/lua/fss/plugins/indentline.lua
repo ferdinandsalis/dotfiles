@@ -4,6 +4,7 @@ return function()
   vim.g.indent_blankline_show_first_indent_level = true
   vim.g.indent_blankline_filetype_exclude = {
     "log",
+    "dirvish",
     "fugitive",
     "gitcommit",
     "packer",

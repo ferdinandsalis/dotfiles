@@ -8,8 +8,17 @@ return function()
     }
   }
 
+  -- local H = require("fss.highlights")
+  -- local normal_bg = H.get_hl("Normal", "bg")
+  -- local bg_color = H.darken_color(normal_bg, -10)
+  -- H.plugin("WhichKey", {"WhichKeyFloating", {guibg = bg_color}})
+
   wk.register(
     {
+      d = {
+        f = "treesitter: peek function definition",
+        F = "treesitter: peek class definition"
+      },
       ["]"] = {
         name = "+next",
         ["<space>"] = "add space below"

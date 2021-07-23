@@ -1,4 +1,5 @@
 local fn = vim.fn
+local api = vim.api
 -----------------------------------------------------------------------------//
 -- Message output on vim actions {{{1
 -----------------------------------------------------------------------------//
@@ -77,7 +78,7 @@ vim.opt.formatoptions = {
 -----------------------------------------------------------------------------//
 -- Folds {{{1
 -----------------------------------------------------------------------------//
-vim.opt.foldtext = "v:lua.folds()"
+vim.opt.foldtext = "v:lua.fss.folds()"
 vim.opt.foldopen = vim.opt.foldopen + "search"
 vim.opt.foldlevelstart = 10
 vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
@@ -85,7 +86,9 @@ vim.opt.foldmethod = "expr"
 -----------------------------------------------------------------------------//
 -- Quickfix {{{1
 -----------------------------------------------------------------------------//
-vim.o.quickfixtextfunc = "v:lua.fss.qftf"
+--- FIXME: Need to use a lambda rather than a lua function directly
+--- @see https://github.com/neovim/neovim/pull/14886
+vim.o.quickfixtextfunc = "{i -> v:lua.fss.qftf(i)}"
 -----------------------------------------------------------------------------//
 -- Grepprg {{{1
 -----------------------------------------------------------------------------//
@@ -100,8 +103,8 @@ end
 -----------------------------------------------------------------------------//
 -- Wild and file globbing stuff in command mode {{{1
 -----------------------------------------------------------------------------//
-vim.opt.wildcharm = fn.char2nr([[\<C-Z>]])
-vim.opt.wildmode = "full" -- Shows a menu bar as opposed to an enormous list
+vim.opt.wildcharm = fn.char2nr(api.nvim_replace_termcodes([[<C-Z>]], true, true, true))
+vim.opt.wildmode = "longest:full,full" -- Shows a menu bar as opposed to an enormous list
 vim.opt.wildignorecase = true -- Ignore case when completing file names and directories
 -- Binary
 vim.opt.wildignore = {
@@ -122,18 +125,6 @@ vim.opt.wildignore = {
   "*.png",
   "*.avi",
   "*.wav",
-  "*.webm",
-  "*.eot",
-  "*.otf",
-  "*.ttf",
-  "*.woff",
-  "*.doc",
-  "*.pdf",
-  "*.zip",
-  "*.tar.gz",
-  "*.tar.bz2",
-  "*.rar",
-  "*.tar.xz",
   -- Cache
   "*/vendor/gems/*",
   "*/vendor/cache/*",
@@ -145,7 +136,6 @@ vim.opt.wildignore = {
   "*.swp",
   ".lock",
   ".DS_Store",
-  "._*",
   "tags.lock"
 }
 vim.opt.wildoptions = "pum"
@@ -159,9 +149,17 @@ vim.opt.linebreak = true -- lines wrap at words rather than random characters
 vim.opt.synmaxcol = 1024 -- don't syntax highlight long lines
 vim.opt.signcolumn = "yes:2"
 vim.opt.ruler = false
-vim.opt.colorcolumn = {"+1"} -- Set the colour column to highlight one column after the 'textwidth'
 vim.opt.cmdheight = 2 -- Set command line height to two lines
 vim.opt.showbreak = [[↪ ]] -- Options include -> '…', '↳ ', '→','↪ '
+--- This is used to handle markdown code blocks where the language might
+--- be set to a value that isn't equivalent to a vim filetype
+vim.g.markdown_fenced_languages = {
+  "js=javascript",
+  "ts=typescript",
+  "shell=sh",
+  "bash=sh",
+  "console=sh"
+}
 -----------------------------------------------------------------------------//
 -- List chars {{{1
 -----------------------------------------------------------------------------//
@@ -228,11 +226,20 @@ vim.opt.sessionoptions = {
   "buffers",
   "curdir",
   "help",
-  "winpos"
-  -- "tabpages",
+  "winpos",
+  "tabpages"
 }
 vim.opt.viewoptions = {"cursor", "folds"} -- save/restore just these (with `:{mk,load}view`)
 vim.opt.virtualedit = "block" -- allow cursor to move where there is no text in visual block mode
+-----------------------------------------------------------------------------//
+-- Shada (Shared Data)
+-----------------------------------------------------------------------------//
+-- NOTE: don't store marks as they are currently broke i.e.
+-- are incorrectly resurrected after deletion
+-- replace '100 with '0 the default which stores 100 marks
+-- add f0 so file marks aren't stored
+-- @credit: wincent
+vim.opt.shada = "!,'0,f0,<50,s10,h"
 -------------------------------------------------------------------------------
 -- BACKUP AND SWAPS {{{
 -------------------------------------------------------------------------------
@@ -242,7 +249,7 @@ if fn.isdirectory(vim.o.undodir) == 0 then
   fn.mkdir(vim.o.undodir, "p")
 end
 vim.opt.undofile = true
-vim.opt.swapfile = true
+vim.opt.swapfile = false
 -- The // at the end tells Vim to use the absolute path to the file to create the swap file.
 -- This will ensure that swap file name is unique, so there are no collisions between files
 -- with the same name from different directories.

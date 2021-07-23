@@ -30,7 +30,7 @@ yabai -m config mouse_action2               resize
 
 yabai -m config window_gap                  "${gap}"
 yabai -m config window_opacity              off
-yabai -m config window_topmost              on
+yabai -m config window_topmost              off
 yabai -m config window_shadow               float
 
 yabai -m config active_window_opacity       1.0
@@ -64,6 +64,7 @@ yabai -m space 5 --label "Other"
 
 # Float these apps
 yabai -m rule --add app="^System Preferences$" manage=off
+yabai -m rule --add app="^1Password" manage=off
 yabai -m rule --add app="^Finder$" manage=off
 yabai -m rule --add app="Digital Color Meter" manage=off
 yabai -m rule --add app="Creative Cloud" manage=off
@@ -71,11 +72,11 @@ yabai -m rule --add app="GPG Keychain" manage=off
 yabai -m rule --add app="Messages" manage=off
 yabai -m rule --add app="Signal" manage=off
 
-# Social
-yabai -m rule --add app="Discord" space=5
-yabai -m rule --add app="Messages" space=5
-yabai -m rule --add app="Signal" space=5
-yabai -m rule --add app="MailMate" space=5
+# # Social
+# yabai -m rule --add app="Discord" space=5
+# yabai -m rule --add app="Messages" space=5
+# yabai -m rule --add app="Signal" space=5
+# yabai -m rule --add app="MailMate" space=5
 
 echo "yabai configuration loaded.."
 

@@ -5,12 +5,8 @@ local t = function(str)
 end
 
 local check_back_space = function()
-  local col = vim.fn.col(".") - 1
-  if col == 0 or vim.fn.getline("."):sub(col, col):match("%s") then
-    return true
-  else
-    return false
-  end
+  local col = vim.fn.col "." - 1
+  return col == 0 or vim.fn.getline('.'):sub(col, col):match '%s' ~= nil
 end
 
 --- Use (s-)tab to:
@@ -44,13 +40,25 @@ return function()
       buffer = {kind = " "},
       vsnip = {kind = " "},
       spell = true,
-      nvim_lsp = true,
-      nvim_lua = true,
-      treesitter = false, -- quite slow
       emoji = {kind = "ﲃ", filetypes = {"markdown"}},
-      tabnine = {priority = 1200}
+      nvim_lsp = {priority = 101},
+      nvim_lua = true,
+      orgmode = true
+    },
+    documentation = {
+      border = "rounded",
+      winhighlight = table.concat(
+        {
+          "NormalFloat:CompeDocumentation",
+          "Normal:CompeDocumentation",
+          "FloatBorder:CompeDocumentationBorder"
+        },
+        ","
+      )
     }
   }
+
+  require("fss.highlights").plugin("Compe", {"CompeDocumentation", {guibg = "Pmenu"}})
 
   local imap = fss.imap
   local smap = fss.smap
@@ -66,18 +74,8 @@ return function()
   inoremap("<C-f>", "compe#scroll({ 'delta': +4 })", opts)
   inoremap("<C-d>", "compe#scroll({ 'delta': -4 })", opts)
 
-  fss.completion_confirm = function()
-    local npairs = require("nvim-autopairs")
-
-    if vim.fn.pumvisible() ~= 0 then
-      if vim.fn.complete_info()["selected"] ~= -1 then
-        return vim.fn["compe#confirm"](npairs.esc("<cr>"))
-      else
-        return npairs.esc("<cr>")
-      end
-    else
-      return npairs.autopairs_cr()
-    end
-  end
-  inoremap("<CR>", "v:lua.fss.completion_confirm()", {expr = true, silent = false})
+  require("nvim-autopairs.completion.compe").setup {
+    map_cr = true, --  map <CR> on insert mode
+    map_complete = true -- it will auto insert `(` after select function or method item
+  }
 end

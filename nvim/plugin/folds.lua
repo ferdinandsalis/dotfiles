@@ -78,7 +78,7 @@ local function handle_fold_end(item)
   return prepare_fold_section(item)
 end
 
-function _G.folds()
+function fss.folds()
   if is_ignored() then
     return fn.foldtext()
   end

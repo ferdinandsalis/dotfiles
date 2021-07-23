@@ -50,7 +50,7 @@ if vim.notify then
   --@param opts Dictionary with optional options (timeout, etc)
   vim.notify = function(message, log_level, _)
     assert(message, "The message key of vim.notify should be a string")
-    fss.notify(message, { timeout = 5000, log_level = log_level })
+    fss.notify(message, {timeout = 5000, log_level = log_level})
   end
 end
 
@@ -73,7 +73,7 @@ end
 -- in commandline: :lua dump(vim.loop)
 ---@vararg any
 function P(...)
-  local objects = vim.tbl_map(vim.inspect, { ... })
+  local objects = vim.tbl_map(vim.inspect, {...})
   print(unpack(objects))
 end
 
@@ -86,9 +86,13 @@ function fss.plugin_installed(plugin_name)
     local dirs = fn.expand(fn.stdpath "data" .. "/site/pack/packer/start/*", true, true)
     local opt = fn.expand(fn.stdpath "data" .. "/site/pack/packer/opt/*", true, true)
     vim.list_extend(dirs, opt)
-    installed = vim.tbl_map(function(path)
-      return fn.fnamemodify(path, ":t")
-    end, dirs)
+    installed =
+      vim.tbl_map(
+      function(path)
+        return fn.fnamemodify(path, ":t")
+      end,
+      dirs
+    )
   end
   return vim.tbl_contains(installed, plugin_name)
 end
@@ -99,7 +103,7 @@ end
 ---@param plugin_name string
 ---@return boolean?
 function _G.plugin_loaded(plugin_name)
-  local plugins = _G.packer_plugins or {}
+  local plugins = packer_plugins or {}
   return plugins[plugin_name] and plugins[plugin_name].loaded
 end
 -----------------------------------------------------------------------------//
@@ -114,7 +118,7 @@ function fss._execute(id, args)
   fss._store[id](args)
 end
 
----@class Autocmd
+---@class Autocommand
 ---@field events string[] list of autocommand events
 ---@field targets string[] list of autocommand patterns
 ---@field modifiers string[] e.g. nested, once
@@ -122,7 +126,7 @@ end
 
 ---Create an autocommand
 ---@param name string
----@param commands Autocmd[]
+---@param commands Autocommand[]
 function fss.augroup(name, commands)
   vim.cmd("augroup " .. name)
   vim.cmd "autocmd!"
@@ -152,14 +156,18 @@ function fss.executable(e)
   return fn.executable(e) > 0
 end
 
+---Echo a msg to the commandline
+---@param msg string | table
+---@param hl string
 function fss.echomsg(msg, hl)
   hl = hl or "Title"
   local msg_type = type(msg)
-  if msg_type ~= "string" or "table" then
-    return
-  end
+  assert(
+    msg_type ~= "string" or msg_type ~= "table",
+    fmt("message should be a string or list of strings not a %s", msg_type)
+  )
   if msg_type == "string" then
-    msg = { { msg, hl } }
+    msg = {{msg, hl}}
   end
   vim.api.nvim_echo(msg, true, {})
 end
@@ -185,16 +193,19 @@ function fss.profile(filename)
   fn.mkdir(base, "p")
   local success, profile = pcall(require, "plenary.profile.lua_profiler")
   if not success then
-    vim.api.nvim_echo({ "Plenary is not installed.", "Title" }, true, {})
+    vim.api.nvim_echo({"Plenary is not installed.", "Title"}, true, {})
   end
   profile.start()
   return function()
     profile.stop()
     local logfile = base .. filename .. ".log"
     profile.report(logfile)
-    vim.defer_fn(function()
-      vim.cmd("tabedit " .. logfile)
-    end, 1000)
+    vim.defer_fn(
+      function()
+        vim.cmd("tabedit " .. logfile)
+      end,
+      1000
+    )
   end
 end
 
@@ -277,16 +288,16 @@ end
 
 local function validate_mappings(lhs, rhs, opts)
   vim.validate {
-    lhs = { lhs, "string" },
+    lhs = {lhs, "string"},
     rhs = {
       rhs,
       function(a)
         local arg_type = type(a)
         return arg_type == "string" or arg_type == "function"
       end,
-      "right hand side",
+      "right hand side"
     },
-    opts = { opts, validate_opts, "mapping options are incorrect" },
+    opts = {opts, validate_opts, "mapping options are incorrect"}
   }
 end
 
@@ -307,7 +318,7 @@ local function make_mapper(mode, o)
 
     validate_mappings(lhs, rhs, _opts)
 
-    if _opts.check_existing and fss.has_map(lhs) then
+    if _opts.check_existing and fss.has_map(lhs, mode) then
       return
     else
       -- don't pass this invalid key to set keymap
@@ -332,8 +343,8 @@ local function make_mapper(mode, o)
   end
 end
 
-local map_opts = { noremap = false, silent = true }
-local noremap_opts = { noremap = true, silent = true }
+local map_opts = {noremap = false, silent = true}
+local noremap_opts = {noremap = true, silent = true}
 
 fss.nmap = make_mapper("n", map_opts)
 fss.xmap = make_mapper("x", map_opts)
@@ -342,7 +353,7 @@ fss.vmap = make_mapper("v", map_opts)
 fss.omap = make_mapper("o", map_opts)
 fss.tmap = make_mapper("t", map_opts)
 fss.smap = make_mapper("s", map_opts)
-fss.cmap = make_mapper("c", { noremap = false, silent = false })
+fss.cmap = make_mapper("c", {noremap = false, silent = false})
 
 fss.nnoremap = make_mapper("n", noremap_opts)
 fss.xnoremap = make_mapper("x", noremap_opts)
@@ -351,7 +362,7 @@ fss.inoremap = make_mapper("i", noremap_opts)
 fss.onoremap = make_mapper("o", noremap_opts)
 fss.tnoremap = make_mapper("t", noremap_opts)
 fss.snoremap = make_mapper("s", noremap_opts)
-fss.cnoremap = make_mapper("c", { noremap = true, silent = false })
+fss.cnoremap = make_mapper("c", {noremap = true, silent = false})
 
 function fss.command(args)
   local nargs = args.nargs or 0
@@ -390,25 +401,40 @@ local function get_last_notification()
   end
 end
 
-local notification_hl = setmetatable({
-  [2] = { "FloatBorder:NvimNotificationError", "NormalFloat:NvimNotificationError" },
-  [1] = { "FloatBorder:NvimNotificationInfo", "NormalFloat:NvimNotificationInfo" },
-}, {
-  __index = function(t, _)
-    return t[1]
-  end,
-})
+local notification_hl =
+  setmetatable(
+  {
+    [2] = {"FloatBorder:NvimNotificationError", "NormalFloat:NvimNotificationError"},
+    [1] = {"FloatBorder:NvimNotificationInfo", "NormalFloat:NvimNotificationInfo"}
+  },
+  {
+    __index = function(t, k)
+      local is_number = type(k) == "number"
+      k = is_number and k or 2 -- handle incorrect level keys as errors
+      if not is_number then
+        fss.echomsg(fmt("%s is not a valid vim.notify error level", k), "ErrorMsg")
+      end
+      return k > 1 and t[2] or t[1]
+    end
+  }
+)
 
 ---Utility function to create a notification message
 ---@param lines string[] | string
 ---@param opts table
 function fss.notify(lines, opts)
-  lines = type(lines) == "string" and { lines } or lines
-  lines = vim.tbl_flatten(vim.tbl_map(function(line)
-    return vim.split(line, "\n")
-  end, lines))
+  lines = type(lines) == "string" and {lines} or lines
+  lines =
+    vim.tbl_flatten(
+    vim.tbl_map(
+      function(line)
+        return vim.split(line, "\n")
+      end,
+      lines
+    )
+  )
   opts = opts or {}
-  local highlights = { "NormalFloat:Normal" }
+  local highlights = {"NormalFloat:Normal"}
   local level = opts.log_level or 1
   local timeout = opts.timeout or 5000
 
@@ -426,17 +452,22 @@ function fss.notify(lines, opts)
   local height = #lines
   local prev = get_last_notification()
   local row = prev and prev.row[false] - prev.height - 2 or vim.o.lines - vim.o.cmdheight - 3
-  local win = api.nvim_open_win(buf, false, {
-    relative = "editor",
-    width = width + 2,
-    height = height,
-    col = vim.o.columns - 2,
-    row = row,
-    anchor = "SE",
-    style = "minimal",
-    focusable = false,
-    border = "rounded",
-  })
+  local win =
+    api.nvim_open_win(
+    buf,
+    false,
+    {
+      relative = "editor",
+      width = width + 2,
+      height = height,
+      col = vim.o.columns - 2,
+      row = row,
+      anchor = "SE",
+      style = "minimal",
+      focusable = false,
+      border = "rounded"
+    }
+  )
 
   local level_hl = notification_hl[level]
 
@@ -446,10 +477,13 @@ function fss.notify(lines, opts)
   vim.bo[buf].filetype = "vim-notify"
   vim.wo[win].wrap = true
   if timeout then
-    vim.defer_fn(function()
-      if api.nvim_win_is_valid(win) then
-        api.nvim_win_close(win, true)
-      end
-    end, timeout)
+    vim.defer_fn(
+      function()
+        if api.nvim_win_is_valid(win) then
+          api.nvim_win_close(win, true)
+        end
+      end,
+      timeout
+    )
   end
 end

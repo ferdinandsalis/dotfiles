@@ -4,8 +4,8 @@
 #=======================================================================
 
 export DOTFILES=$HOME/.dotfiles
-export PROJECTS_DIR=$HOME/Desktop/projects
-export PERSONAL_PROJECTS_DIR=$PROJECTS_DIR/personal
+export PROJECTS_DIR=$HOME/Desktop/Personal/Code
+export WORK_DIR=$HOME/Desktop/Work
 
 if which yarn >/dev/null; then
   path+=("$(yarn global bin)")
