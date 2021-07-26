@@ -9,7 +9,7 @@ local fmt = string.format
 _G.__as_global_callbacks = __as_global_callbacks or {}
 
 _G.fss = {
-  _store = __as_global_callbacks
+  _store = __as_global_callbacks,
 }
 
 -----------------------------------------------------------------------------//
@@ -18,25 +18,25 @@ _G.fss = {
 -- Consistent store of various UI items to reuse throughout my config
 fss.style = {
   icons = {
-    error = "✗",
-    warning = "",
-    info = "",
-    hint = ""
+    error = '✗',
+    warning = '',
+    info = '',
+    hint = '',
   },
   border = {
-    curved = {"╭", "─", "╮", "│", "╯", "─", "╰", "│"}
+    curved = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
   },
   palette = {
-    white = "#c0caf5",
-    dark_red = "#db4b4b",
-    green = "#9ece6a",
-    light_yellow = "#e0af68",
-    dark_blue = "#3d59a1",
-    magenta = "#bb9af7",
-    comment_grey = "#565f89",
-    whitesmoke = "#3b4261",
-    bright_blue = "#7aa2f7"
-  }
+    white = '#c0caf5',
+    dark_red = '#db4b4b',
+    green = '#9ece6a',
+    light_yellow = '#e0af68',
+    dark_blue = '#3d59a1',
+    magenta = '#bb9af7',
+    comment_grey = '#565f89',
+    whitesmoke = '#3b4261',
+    bright_blue = '#7aa2f7',
+  },
 }
 
 -----------------------------------------------------------------------------//
@@ -49,16 +49,16 @@ if vim.notify then
   --@param log_level Optional log level
   --@param opts Dictionary with optional options (timeout, etc)
   vim.notify = function(message, log_level, _)
-    assert(message, "The message key of vim.notify should be a string")
-    fss.notify(message, {timeout = 5000, log_level = log_level})
+    assert(message, 'The message key of vim.notify should be a string')
+    fss.notify(message, { timeout = 5000, log_level = log_level })
   end
 end
 
 -----------------------------------------------------------------------------//
 -- Debugging
 -----------------------------------------------------------------------------//
-if pcall(require, "plenary") then
-  RELOAD = require("plenary.reload").reload_module
+if pcall(require, 'plenary') then
+  RELOAD = require('plenary.reload').reload_module
 
   R = function(name)
     RELOAD(name)
@@ -73,7 +73,7 @@ end
 -- in commandline: :lua dump(vim.loop)
 ---@vararg any
 function P(...)
-  local objects = vim.tbl_map(vim.inspect, {...})
+  local objects = vim.tbl_map(vim.inspect, { ... })
   print(unpack(objects))
 end
 
@@ -83,16 +83,12 @@ local installed
 ---@return boolean
 function fss.plugin_installed(plugin_name)
   if not installed then
-    local dirs = fn.expand(fn.stdpath "data" .. "/site/pack/packer/start/*", true, true)
-    local opt = fn.expand(fn.stdpath "data" .. "/site/pack/packer/opt/*", true, true)
+    local dirs = fn.expand(fn.stdpath 'data' .. '/site/pack/packer/start/*', true, true)
+    local opt = fn.expand(fn.stdpath 'data' .. '/site/pack/packer/opt/*', true, true)
     vim.list_extend(dirs, opt)
-    installed =
-      vim.tbl_map(
-      function(path)
-        return fn.fnamemodify(path, ":t")
-      end,
-      dirs
-    )
+    installed = vim.tbl_map(function(path)
+      return fn.fnamemodify(path, ':t')
+    end, dirs)
   end
   return vim.tbl_contains(installed, plugin_name)
 end
@@ -128,25 +124,25 @@ end
 ---@param name string
 ---@param commands Autocommand[]
 function fss.augroup(name, commands)
-  vim.cmd("augroup " .. name)
-  vim.cmd "autocmd!"
+  vim.cmd('augroup ' .. name)
+  vim.cmd 'autocmd!'
   for _, c in ipairs(commands) do
     local command = c.command
-    if type(command) == "function" then
+    if type(command) == 'function' then
       local fn_id = fss._create(command)
-      command = fmt("lua fss._execute(%s)", fn_id)
+      command = fmt('lua fss._execute(%s)', fn_id)
     end
     vim.cmd(
       string.format(
-        "autocmd %s %s %s %s",
-        table.concat(c.events, ","),
-        table.concat(c.targets or {}, ","),
-        table.concat(c.modifiers or {}, " "),
+        'autocmd %s %s %s %s',
+        table.concat(c.events, ','),
+        table.concat(c.targets or {}, ','),
+        table.concat(c.modifiers or {}, ' '),
         command
       )
     )
   end
-  vim.cmd "augroup END"
+  vim.cmd 'augroup END'
 end
 
 ---Check if a cmd is executable
@@ -160,14 +156,14 @@ end
 ---@param msg string | table
 ---@param hl string
 function fss.echomsg(msg, hl)
-  hl = hl or "Title"
+  hl = hl or 'Title'
   local msg_type = type(msg)
   assert(
-    msg_type ~= "string" or msg_type ~= "table",
-    fmt("message should be a string or list of strings not a %s", msg_type)
+    msg_type ~= 'string' or msg_type ~= 'table',
+    fmt('message should be a string or list of strings not a %s', msg_type)
   )
-  if msg_type == "string" then
-    msg = {{msg, hl}}
+  if msg_type == 'string' then
+    msg = { { msg, hl } }
   end
   vim.api.nvim_echo(msg, true, {})
 end
@@ -175,7 +171,7 @@ end
 -- https://stackoverflow.com/questions/1283388/lua-merge-tables
 function fss.deep_merge(t1, t2)
   for k, v in pairs(t2) do
-    if (type(v) == "table") and (type(t1[k] or false) == "table") then
+    if (type(v) == 'table') and (type(t1[k] or false) == 'table') then
       fss.deep_merge(t1[k], t2[k])
     else
       t1[k] = v
@@ -189,23 +185,20 @@ end
 --- 2. At the bottom of the file call `stop()`
 --- 3. Restart neovim, the newly created log file should open
 function fss.profile(filename)
-  local base = "/tmp/config/profile/"
-  fn.mkdir(base, "p")
-  local success, profile = pcall(require, "plenary.profile.lua_profiler")
+  local base = '/tmp/config/profile/'
+  fn.mkdir(base, 'p')
+  local success, profile = pcall(require, 'plenary.profile.lua_profiler')
   if not success then
-    vim.api.nvim_echo({"Plenary is not installed.", "Title"}, true, {})
+    vim.api.nvim_echo({ 'Plenary is not installed.', 'Title' }, true, {})
   end
   profile.start()
   return function()
     profile.stop()
-    local logfile = base .. filename .. ".log"
+    local logfile = base .. filename .. '.log'
     profile.report(logfile)
-    vim.defer_fn(
-      function()
-        vim.cmd("tabedit " .. logfile)
-      end,
-      1000
-    )
+    vim.defer_fn(function()
+      vim.cmd('tabedit ' .. logfile)
+    end, 1000)
   end
 end
 
@@ -226,7 +219,7 @@ end
 ---Check if a vim variable usually a number is truthy or not
 ---@param value integer
 function fss.truthy(value)
-  assert(type(value) == "number", fmt("Value should be a number but you passed %s", value))
+  assert(type(value) == 'number', fmt('Value should be a number but you passed %s', value))
   return value > 0
 end
 
@@ -254,9 +247,9 @@ function fss.empty(item)
     return true
   end
   local item_type = type(item)
-  if item_type == "string" then
-    return item == ""
-  elseif item_type == "table" then
+  if item_type == 'string' then
+    return item == ''
+  elseif item_type == 'table' then
     return vim.tbl_isempty(item)
   end
 end
@@ -266,8 +259,8 @@ end
 ---@param mode string
 ---@return boolean
 function fss.has_map(lhs, mode)
-  mode = mode or "n"
-  return vim.fn.maparg(lhs, mode) ~= ""
+  mode = mode or 'n'
+  return vim.fn.maparg(lhs, mode) ~= ''
 end
 
 local function validate_opts(opts)
@@ -275,12 +268,12 @@ local function validate_opts(opts)
     return true
   end
 
-  if type(opts) ~= "table" then
-    return false, "opts should be a table"
+  if type(opts) ~= 'table' then
+    return false, 'opts should be a table'
   end
 
-  if opts.buffer and type(opts.buffer) ~= "number" then
-    return false, "The buffer key should be a number"
+  if opts.buffer and type(opts.buffer) ~= 'number' then
+    return false, 'The buffer key should be a number'
   end
 
   return true
@@ -288,16 +281,16 @@ end
 
 local function validate_mappings(lhs, rhs, opts)
   vim.validate {
-    lhs = {lhs, "string"},
+    lhs = { lhs, 'string' },
     rhs = {
       rhs,
       function(a)
         local arg_type = type(a)
-        return arg_type == "string" or arg_type == "function"
+        return arg_type == 'string' or arg_type == 'function'
       end,
-      "right hand side"
+      'right hand side',
     },
-    opts = {opts, validate_opts, "mapping options are incorrect"}
+    opts = { opts, validate_opts, 'mapping options are incorrect' },
   }
 end
 
@@ -313,7 +306,7 @@ local function make_mapper(mode, o)
   ---@param rhs string|function
   ---@param opts table
   return function(lhs, rhs, opts)
-    assert(lhs ~= mode, fmt("The lhs should not be the same as mode for %s", lhs))
+    assert(lhs ~= mode, fmt('The lhs should not be the same as mode for %s', lhs))
     local _opts = opts and vim.deepcopy(opts) or {}
 
     validate_mappings(lhs, rhs, _opts)
@@ -326,62 +319,62 @@ local function make_mapper(mode, o)
     end
 
     -- add functions to a global table keyed by their index
-    if type(rhs) == "function" then
+    if type(rhs) == 'function' then
       local fn_id = fss._create(rhs)
-      rhs = string.format("<cmd>lua fss._execute(%s)<CR>", fn_id)
+      rhs = string.format('<cmd>lua fss._execute(%s)<CR>', fn_id)
     end
 
     if _opts.buffer then
       -- Remove the buffer from the args sent to the key map function
       local bufnr = _opts.buffer
       _opts.buffer = nil
-      _opts = vim.tbl_extend("keep", _opts, parent_opts)
+      _opts = vim.tbl_extend('keep', _opts, parent_opts)
       api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, _opts)
     else
-      api.nvim_set_keymap(mode, lhs, rhs, vim.tbl_extend("keep", _opts, parent_opts))
+      api.nvim_set_keymap(mode, lhs, rhs, vim.tbl_extend('keep', _opts, parent_opts))
     end
   end
 end
 
-local map_opts = {noremap = false, silent = true}
-local noremap_opts = {noremap = true, silent = true}
+local map_opts = { noremap = false, silent = true }
+local noremap_opts = { noremap = true, silent = true }
 
-fss.nmap = make_mapper("n", map_opts)
-fss.xmap = make_mapper("x", map_opts)
-fss.imap = make_mapper("i", map_opts)
-fss.vmap = make_mapper("v", map_opts)
-fss.omap = make_mapper("o", map_opts)
-fss.tmap = make_mapper("t", map_opts)
-fss.smap = make_mapper("s", map_opts)
-fss.cmap = make_mapper("c", {noremap = false, silent = false})
+fss.nmap = make_mapper('n', map_opts)
+fss.xmap = make_mapper('x', map_opts)
+fss.imap = make_mapper('i', map_opts)
+fss.vmap = make_mapper('v', map_opts)
+fss.omap = make_mapper('o', map_opts)
+fss.tmap = make_mapper('t', map_opts)
+fss.smap = make_mapper('s', map_opts)
+fss.cmap = make_mapper('c', { noremap = false, silent = false })
 
-fss.nnoremap = make_mapper("n", noremap_opts)
-fss.xnoremap = make_mapper("x", noremap_opts)
-fss.vnoremap = make_mapper("v", noremap_opts)
-fss.inoremap = make_mapper("i", noremap_opts)
-fss.onoremap = make_mapper("o", noremap_opts)
-fss.tnoremap = make_mapper("t", noremap_opts)
-fss.snoremap = make_mapper("s", noremap_opts)
-fss.cnoremap = make_mapper("c", {noremap = true, silent = false})
+fss.nnoremap = make_mapper('n', noremap_opts)
+fss.xnoremap = make_mapper('x', noremap_opts)
+fss.vnoremap = make_mapper('v', noremap_opts)
+fss.inoremap = make_mapper('i', noremap_opts)
+fss.onoremap = make_mapper('o', noremap_opts)
+fss.tnoremap = make_mapper('t', noremap_opts)
+fss.snoremap = make_mapper('s', noremap_opts)
+fss.cnoremap = make_mapper('c', { noremap = true, silent = false })
 
 function fss.command(args)
   local nargs = args.nargs or 0
   local name = args[1]
   local rhs = args[2]
-  local types = (args.types and type(args.types) == "table") and table.concat(args.types, " ") or ""
+  local types = (args.types and type(args.types) == 'table') and table.concat(args.types, ' ') or ''
 
-  if type(rhs) == "function" then
+  if type(rhs) == 'function' then
     local fn_id = fss._create(rhs)
-    rhs = string.format("lua fss._execute(%d%s)", fn_id, nargs > 0 and ", <f-args>" or "")
+    rhs = string.format('lua fss._execute(%d%s)', fn_id, nargs > 0 and ', <f-args>' or '')
   end
 
-  vim.cmd(string.format("command! -nargs=%s %s %s %s", nargs, types, name, rhs))
+  vim.cmd(string.format('command! -nargs=%s %s %s %s', nargs, types, name, rhs))
 end
 
 function fss.invalidate(path, recursive)
   if recursive then
     for key, value in pairs(package.loaded) do
-      if key ~= "_G" and value and vim.fn.match(key, path) ~= -1 then
+      if key ~= '_G' and value and vim.fn.match(key, path) ~= -1 then
         package.loaded[key] = nil
         require(key)
       end
@@ -395,52 +388,42 @@ end
 local function get_last_notification()
   for _, win in ipairs(api.nvim_list_wins()) do
     local buf = api.nvim_win_get_buf(win)
-    if vim.bo[buf].filetype == "vim-notify" and api.nvim_win_is_valid(win) then
+    if vim.bo[buf].filetype == 'vim-notify' and api.nvim_win_is_valid(win) then
       return api.nvim_win_get_config(win)
     end
   end
 end
 
-local notification_hl =
-  setmetatable(
-  {
-    [2] = {"FloatBorder:NvimNotificationError", "NormalFloat:NvimNotificationError"},
-    [1] = {"FloatBorder:NvimNotificationInfo", "NormalFloat:NvimNotificationInfo"}
-  },
-  {
-    __index = function(t, k)
-      local is_number = type(k) == "number"
-      k = is_number and k or 2 -- handle incorrect level keys as errors
-      if not is_number then
-        fss.echomsg(fmt("%s is not a valid vim.notify error level", k), "ErrorMsg")
-      end
-      return k > 1 and t[2] or t[1]
+local notification_hl = setmetatable({
+  [2] = { 'FloatBorder:NvimNotificationError', 'NormalFloat:NvimNotificationError' },
+  [1] = { 'FloatBorder:NvimNotificationInfo', 'NormalFloat:NvimNotificationInfo' },
+}, {
+  __index = function(t, k)
+    local is_number = type(k) == 'number'
+    k = is_number and k or 2 -- handle incorrect level keys as errors
+    if not is_number then
+      fss.echomsg(fmt('%s is not a valid vim.notify error level', k), 'ErrorMsg')
     end
-  }
-)
+    return k > 1 and t[2] or t[1]
+  end,
+})
 
 ---Utility function to create a notification message
 ---@param lines string[] | string
 ---@param opts table
 function fss.notify(lines, opts)
-  lines = type(lines) == "string" and {lines} or lines
-  lines =
-    vim.tbl_flatten(
-    vim.tbl_map(
-      function(line)
-        return vim.split(line, "\n")
-      end,
-      lines
-    )
-  )
+  lines = type(lines) == 'string' and { lines } or lines
+  lines = vim.tbl_flatten(vim.tbl_map(function(line)
+    return vim.split(line, '\n')
+  end, lines))
   opts = opts or {}
-  local highlights = {"NormalFloat:Normal"}
+  local highlights = { 'NormalFloat:Normal' }
   local level = opts.log_level or 1
   local timeout = opts.timeout or 5000
 
   local width
   for i, line in ipairs(lines) do
-    line = "  " .. line .. "  "
+    line = '  ' .. line .. '  '
     lines[i] = line
     local length = #line
     if not width or width < length then
@@ -452,38 +435,30 @@ function fss.notify(lines, opts)
   local height = #lines
   local prev = get_last_notification()
   local row = prev and prev.row[false] - prev.height - 2 or vim.o.lines - vim.o.cmdheight - 3
-  local win =
-    api.nvim_open_win(
-    buf,
-    false,
-    {
-      relative = "editor",
-      width = width + 2,
-      height = height,
-      col = vim.o.columns - 2,
-      row = row,
-      anchor = "SE",
-      style = "minimal",
-      focusable = false,
-      border = "rounded"
-    }
-  )
+  local win = api.nvim_open_win(buf, false, {
+    relative = 'editor',
+    width = width + 2,
+    height = height,
+    col = vim.o.columns - 2,
+    row = row,
+    anchor = 'SE',
+    style = 'minimal',
+    focusable = false,
+    border = 'rounded',
+  })
 
   local level_hl = notification_hl[level]
 
   vim.list_extend(highlights, level_hl)
-  vim.wo[win].winhighlight = table.concat(highlights, ",")
+  vim.wo[win].winhighlight = table.concat(highlights, ',')
 
-  vim.bo[buf].filetype = "vim-notify"
+  vim.bo[buf].filetype = 'vim-notify'
   vim.wo[win].wrap = true
   if timeout then
-    vim.defer_fn(
-      function()
-        if api.nvim_win_is_valid(win) then
-          api.nvim_win_close(win, true)
-        end
-      end,
-      timeout
-    )
+    vim.defer_fn(function()
+      if api.nvim_win_is_valid(win) then
+        api.nvim_win_close(win, true)
+      end
+    end, timeout)
   end
 end

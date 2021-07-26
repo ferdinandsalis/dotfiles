@@ -4,42 +4,42 @@ local api = vim.api
 local M = {}
 
 vim.g.number_filetype_exclusions = {
-  "undotree",
-  "log",
-  "man",
-  "dap-repl",
-  "markdown",
-  "vimwiki",
-  "vim-plug",
-  "gitcommit",
-  "toggleterm",
-  "fugitive",
-  "coc-explorer",
-  "coc-list",
-  "list",
-  "NvimTree",
-  "startify",
-  "help",
-  "orgagenda",
-  "org",
-  "lsputil_locations_list",
-  "lsputil_symbols_list",
-  "himalaya",
-  "Trouble"
+  'undotree',
+  'log',
+  'man',
+  'dap-repl',
+  'markdown',
+  'vimwiki',
+  'vim-plug',
+  'gitcommit',
+  'toggleterm',
+  'fugitive',
+  'coc-explorer',
+  'coc-list',
+  'list',
+  'NvimTree',
+  'startify',
+  'help',
+  'orgagenda',
+  'org',
+  'lsputil_locations_list',
+  'lsputil_symbols_list',
+  'himalaya',
+  'Trouble',
 }
 
 vim.g.number_buftype_exclusions = {
-  "terminal",
-  "help",
-  "nofile",
-  "acwrite",
-  "quickfix"
+  'terminal',
+  'help',
+  'nofile',
+  'acwrite',
+  'quickfix',
 }
 
-vim.g.number_buftype_ignored = {"quickfix"}
+vim.g.number_buftype_ignored = { 'quickfix' }
 
 local function is_floating_win()
-  return vim.fn.win_gettype() == "popup"
+  return vim.fn.win_gettype() == 'popup'
 end
 
 ---Determines whether or not a window should be ignored by this plugin
@@ -60,7 +60,7 @@ local function is_blocked()
     return true
   end
 
-  if win_type == "command" then
+  if win_type == 'command' then
     return true
   end
 
@@ -110,20 +110,17 @@ local function disable_relative_number()
   end
 end
 
-fss.augroup(
-  "ToggleRelativeLineNumbers",
+fss.augroup('ToggleRelativeLineNumbers', {
   {
-    {
-      events = {"BufEnter", "FileType", "FocusGained", "InsertLeave"},
-      targets = {"*"},
-      command = enable_relative_number
-    },
-    {
-      events = {"FocusLost", "BufLeave", "InsertEnter", "TermOpen"},
-      targets = {"*"},
-      command = disable_relative_number
-    }
-  }
-)
+    events = { 'BufEnter', 'FileType', 'FocusGained', 'InsertLeave' },
+    targets = { '*' },
+    command = enable_relative_number,
+  },
+  {
+    events = { 'FocusLost', 'BufLeave', 'InsertEnter', 'TermOpen' },
+    targets = { '*' },
+    command = disable_relative_number,
+  },
+})
 
 return M
