@@ -1,6 +1,7 @@
 local fn = vim.fn
 local api = vim.api
 local command = fss.command
+local fmt = string.format
 
 local nmap = fss.nmap
 local nnoremap = fss.nnoremap
@@ -9,11 +10,6 @@ local cnoremap = fss.cnoremap
 local vnoremap = fss.vnoremap
 local inoremap = fss.inoremap
 local tnoremap = fss.tnoremap
-
---- work around to place functions in the global scope but
---- namespaced within a table.
---- TODO: refactor this once nvim allows passing lua functions to mappings
-_G._mappings = {}
 
 -- Add Empty space above and below
 nnoremap('[<space>', [[<cmd>put! =repeat(nr2char(10), v:count1)<cr>'[]])
@@ -69,7 +65,7 @@ nnoremap('<c-s>', function()
   -- NOTE: this uses write specifically because we need to trigger a filesystem event
   -- even if the file isn't change so that things like hot reload work
   vim.cmd 'silent! write'
-  fss.notify('Saved ' .. vim.fn.expand '%:t', { timeout = 1000 })
+  vim.notify('Saved ' .. vim.fn.expand '%:t', nil, { timeout = 1000 })
 end)
 
 ------------------------------------------------------------------------------
@@ -144,36 +140,11 @@ nnoremap('<C-Right>', '<C-w>>')
 -- Buffers {{{
 ------------------------------------------------------------------------------
 
--- close all buffers other than the currewnt one
-nnoremap('<leader>on', [[<cmd>w <bar> %bd <bar> e#<CR>]])
-
 -- Use wildmenu to cycle tabs
-nnoremap('<localleader><tab>', [[:b <C-Z>]], { silent = false })
+nnoremap('<localleader><tab>', [[:b <Tab>]], { silent = false })
 
 -- Switch between the last two files
 nnoremap('<leader><leader>', [[<c-^>]])
-
--- Kill buffers
-local function buf_kill()
-  local buflisted = fn.getbufinfo { buflisted = 1 }
-  local cur_winid, cur_bufnr = api.nvim_get_current_win(), api.nvim_get_current_buf()
-  if #buflisted < 2 then
-    vim.cmd 'confirm qall'
-    return
-  end
-  for _, winid in ipairs(fn.getbufinfo(cur_bufnr)[1].windows) do
-    api.nvim_set_current_win(winid)
-    vim.cmd(cur_bufnr == buflisted[#buflisted].bufnr and 'bp' or 'bn')
-  end
-  api.nvim_set_current_win(cur_winid)
-  if not api.nvim_buf_is_valid(cur_bufnr) then
-    return
-  end
-  local is_terminal = vim.bo[cur_bufnr].buftype == 'terminal'
-  api.nvim_buf_delete(cur_bufnr, { force = is_terminal })
-end
-nnoremap('<leader>qq', buf_kill)
-nnoremap('<leader>qw', '<cmd>bd!<CR>')
 
 --- }}}
 
@@ -246,8 +217,10 @@ inoremap('<right>', '<nop>')
 -- This line opens the vimrc in a vertical split
 nnoremap('<leader>ev', [[:vsplit $MYVIMRC<cr>]])
 
+nnoremap('<leader>ep', fmt('<Cmd>vsplit %s/lua/as/plugins/init.lua<CR>', fn.stdpath 'config'))
+
 -- This line allows the current file to source the vimrc allowing me use bindings as they're added
-nnoremap('<leader>sv', [[:luafile $MYVIMRC<cr> <bar> :lua vim.notify('Sourced init.vim')<cr>]])
+nnoremap('<leader>sv', [[<Cmd>source $MYVIMRC<cr> <bar> :lua vim.notify('Sourced init.vim')<cr>]])
 
 -----------------------------------------------------------------------------//
 -- Quotes
@@ -259,6 +232,30 @@ nnoremap("<leader>'", [[ciw'<c-r>"'<esc>]])
 nnoremap('<leader>)', [[ciw(<c-r>")<esc>]])
 nnoremap('<leader>}', [[ciw{<c-r>"}<esc>]])
 
+-- Map Q to replay q register
+nnoremap('Q', '@q')
+
+-- 1. Position the cursor over a word; alternatively, make a selection.
+-- 2. Hit cq to start recording the macro.
+-- 3. Once you are done with the macro, go back to normal mode.
+-- 4. Hit Enter to repeat the macro over search matches.
+function fss.mappings.setup_CR()
+  nmap('<Enter>', [[:nnoremap <lt>Enter> n@z<CR>q:<C-u>let @z=strpart(@z,0,strlen(@z)-1)<CR>n@z]])
+end
+
+-- NOTE: this line is done as a vim command as handling the string in lua breaks
+vim.cmd [[let g:mc = "y/\\V\<C-r>=escape(@\", '/')\<CR>\<CR>""]]
+xnoremap('cn', [[g:mc . "``cgn"]], { expr = true, silent = true })
+xnoremap('cN', [[g:mc . "``cgN"]], { expr = true, silent = true })
+nnoremap('cq', [[:lua fss.mappings.setup_CR()<CR>*``qz]])
+nnoremap('cQ', [[:lua fss.mappings.setup_CR()<CR>#``qz]])
+xnoremap('cq', [[":\<C-u>lua fss.mappings.setup_CR()\<CR>" . "gv" . g:mc . "``qz"]], { expr = true })
+xnoremap(
+  'cQ',
+  [[":\<C-u>lua fss.mappings.setup_CR()\<CR>" . "gv" . substitute(g:mc, '/', '?', 'g') . "``qz"]],
+  { expr = true }
+)
+
 nnoremap('gf', '<Cmd>e <cfile><CR>')
 -----------------------------------------------------------------------------//
 -- Command mode
@@ -268,7 +265,7 @@ nnoremap('gf', '<Cmd>e <cfile><CR>')
 -- to these would swallow up a tab mapping
 cnoremap(
   '<Tab>',
-  [[getcmdtype() == "/" || getcmdtype() == "?" ? "<CR>/<C-r>/" : "<C-z>"]],
+  [[getcmdtype() == "/" || getcmdtype() == "?" ? "<CR>/<C-r>/" : "<Tab>"]],
   { expr = true }
 )
 cnoremap(
@@ -297,7 +294,7 @@ xnoremap('@', ':<C-u>call ExecuteMacroOverVisualRange()<CR>', { silent = false }
 ------------------------------------------------------------------------------
 
 -- Credit: June Gunn <Leader>?/!
-function _G._mappings.google(pat, lucky)
+function fss.mappings.google(pat, lucky)
   local query = '"' .. fn.substitute(pat, '["\n]', ' ', 'g') .. '"'
   query = fn.substitute(query, '[[:punct:] ]', [[\=printf("%%%02X", char2nr(submatch(0)))]], 'g')
   fn.system(
@@ -309,10 +306,10 @@ function _G._mappings.google(pat, lucky)
   )
 end
 
-nnoremap('<localleader>?', [[:lua _mappings.google(vim.fn.expand("<cWORD>"), false)<cr>]])
-nnoremap('<localleader>!', [[:lua _mappings.google(vim.fn.expand("<cWORD>"), true)<cr>]])
-xnoremap('<localleader>?', [["gy:lua _mappings.google(vim.api.nvim_eval("@g"), false)<cr>gv]])
-xnoremap('<localleader>!', [["gy:lua _mappings.google(vim.api.nvim_eval("@g"), false, true)<cr>gv]])
+nnoremap('<localleader>?', [[:lua fss.mappings.google(vim.fn.expand("<cWORD>"), false)<cr>]])
+nnoremap('<localleader>!', [[:lua fss.mappings.google(vim.fn.expand("<cWORD>"), true)<cr>]])
+xnoremap('<localleader>?', [["gy:lua fss.mappings.google(vim.api.nvim_eval("@g"), false)<cr>gv]])
+xnoremap('<localleader>!', [["gy:lua fss.mappings.google(vim.api.nvim_eval("@g"), false, true)<cr>gv]])
 
 -----------------------------------------------------------------------------//
 -- Completion
@@ -321,6 +318,9 @@ xnoremap('<localleader>!', [["gy:lua _mappings.google(vim.api.nvim_eval("@g"), f
 -- cycle the completion menu with <TAB>
 inoremap('<tab>', [[pumvisible() ? "\<C-n>" : "\<Tab>"]], { expr = true })
 inoremap('<s-tab>', [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], { expr = true })
+
+-- nnoremap('<leader>g', [[:silent! set operatorfunc=v:lua.fss.mappings.grep_operator<cr>g@]])
+-- xnoremap('<leader>g', [[:call v:lua.fss.mappings.grep_operator(visualmode())<cr>]])
 
 ---------------------------------------------------------------------------------
 -- Toggle list
@@ -385,3 +385,4 @@ command {
 }
 
 command { 'AutoResize', [[call utils#auto_resize(<args>)]], { '-nargs=?' } }
+

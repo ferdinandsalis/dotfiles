@@ -20,7 +20,7 @@ local M = {}
 local function colors()
   local error_color = P.dark_red
   local indicator_color = P.bright_blue
-  local bg_color = H.darken_color(H.get_hl('Normal', 'bg'), -16)
+  local bg_color = H.alter_color(H.get_hl('Normal', 'bg'), -16)
   local normal_fg = H.get_hl('Normal', 'fg')
   local pmenu_bg = H.get_hl('Pmenu', 'bg')
   local string_fg = H.get_hl('String', 'fg')

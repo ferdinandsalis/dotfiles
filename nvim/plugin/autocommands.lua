@@ -322,19 +322,20 @@ fss.augroup('Utilities', {
       vim.cmd(fmt('bd!|edit %s', vim.uri_from_fname '<afile>'))
     end,
   },
-  {
-    -- When editing a file, always jump to the last known cursor position.
-    -- Don't do it for commit messages, when the position is invalid, or when
-    -- inside an event handler (happens when dropping a file on gvim).
-    events = { 'BufReadPost' },
-    targets = { '*' },
-    command = function()
-      local pos = fn.line '\'"'
-      if vim.bo.ft ~= 'gitcommit' and pos > 0 and pos <= fn.line '$' then
-        vim.cmd 'keepjumps normal g`"'
-      end
-    end,
-  },
+  -- BUG: this causes the cursor to jump to the top on VimEnter
+  -- {
+  --   -- When editing a file, always jump to the last known cursor position.
+  --   -- Don't do it for commit messages, when the position is invalid, or when
+  --   -- inside an event handler (happens when dropping a file on gvim).
+  --   events = { 'BufReadPost' },
+  --   targets = { '*' },
+  --   command = function()
+  --     local pos = fn.line '\'"'
+  --     if vim.bo.ft ~= 'gitcommit' and pos > 0 and pos <= fn.line '$' then
+  --       vim.cmd 'keepjumps normal g`"'
+  --     end
+  --   end,
+  -- },
   {
     events = { 'FileType' },
     targets = { 'gitcommit', 'gitrebase' },
@@ -374,3 +375,18 @@ fss.augroup('Utilities', {
     command = "if 5000 < line('$') | syntax sync minlines=200 | endif",
   },
 })
+
+if fss.has 'nvim-0.6' then
+  fss.augroup('TerminalAutocommands', {
+    {
+      events = { 'TermClose' },
+      targets = { '*' },
+      command = function()
+        --- automatically close a terminal if the job was successful
+        if not vim.v.event.status == 0 then
+          vim.cmd('bdelete! ' .. fn.expand '<abuf>')
+        end
+      end,
+    },
+  })
+end

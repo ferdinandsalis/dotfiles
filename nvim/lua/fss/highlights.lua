@@ -4,7 +4,7 @@ local P = fss.style.palette
 
 local M = {}
 
----Convert a hex color to rgb
+---Convert a hex color to RGB
 ---@param color string
 ---@return number
 ---@return number
@@ -24,7 +24,7 @@ end
 ---@param color string
 ---@param percent number
 ---@return string
-function M.darken_color(color, percent)
+function M.alter_color(color, percent)
   local r, g, b = hex_to_rgb(color)
   if not r or not g or not b then
     return 'NONE'
@@ -125,12 +125,12 @@ function M.get_hl(grp, attr, fallback)
     return flatten_gui(hl)
   end
   local color = hl[attr] or fallback
-  -- convert the decimal rgba value from the hl by name to a 6 character hex + padding if needed
+  -- convert the decimal RGBA value from the hl by name to a 6 character hex + padding if needed
   if not color then
     vim.notify(fmt('%s %s does not exist', grp, attr))
     return 'NONE'
   end
-  -- convert the decimal rgba value from the hl by name to a 6 character hex + padding if needed
+  -- convert the decimal RGBA value from the hl by name to a 6 character hex + padding if needed
   return '#' .. bit.tohex(color, 6)
 end
 
@@ -157,6 +157,7 @@ vim.g.tokyonight_italic_functions = true
 vim.g.tokyonight_sidebars = { 'qf', 'terminal', 'packer' }
 vim.cmd 'colorscheme tokyonight'
 -- }}}
+
 ---------------------------------------------------------------------------------
 -- Plugin highlights {{{
 ---------------------------------------------------------------------------------
@@ -185,7 +186,7 @@ end
 local function general_overrides()
   local cursor_line_bg = M.get_hl('CursorLine', 'bg')
   local normal_fg = M.get_hl('Normal', 'fg')
-  local bg_color = M.darken_color(M.get_hl('Normal', 'bg'), -10)
+  local bg_color = M.alter_color(M.get_hl('Normal', 'bg'), -10)
   local comment_fg = M.get_hl('Comment', 'fg')
 
   M.all {
@@ -203,16 +204,19 @@ local function general_overrides()
     { 'MsgArea', { guifg = normal_fg, guibg = bg_color } },
     { 'MsgSeparator', { guifg = comment_fg, guibg = bg_color } },
     { 'Type', { gui = 'italic,bold' } },
+    -----------------------------------------------------------------------------//
     -- Treesitter
+    -----------------------------------------------------------------------------//
     { 'TSKeyword', { link = 'Statement' } },
     { 'TSParameter', { gui = 'italic,bold' } },
+    -----------------------------------------------------------------------------//
     -- LSP
+    -----------------------------------------------------------------------------//
     { 'LspReferenceText', { gui = 'underline' } },
     { 'LspReferenceRead', { gui = 'underline' } },
-    -- Notifications
-    { 'NvimNotificationError', { link = 'ErrorMsg' } },
-    { 'NvimNotificationInfo', { link = 'Directory' } },
+    -----------------------------------------------------------------------------//
     -- Diff
+    -----------------------------------------------------------------------------//
     { 'DiffAdd', { guibg = '#26332c', guifg = 'NONE' } },
     { 'DiffDelete', { guibg = '#572E33', guifg = '#5c6370', gui = 'NONE' } },
     { 'DiffChange', { guibg = '#273842', guifg = 'NONE' } },
@@ -229,14 +233,20 @@ local function general_overrides()
     { 'diffIsA', { link = 'WarningMsg', force = true } },
     { 'diffNoEOL', { link = 'WarningMsg', force = true } },
     { 'diffOnly', { link = 'WarningMsg', force = true } },
+    -----------------------------------------------------------------------------//
+        -- Vim syntax
+    -----------------------------------------------------------------------------//
+    { 'vimFunc', { link = 'function' } },
+    { 'vimUserFunc', { link = 'function' } },
+    -----------------------------------------------------------------------------//
   }
 end
 -- }}}
 
 local function set_sidebar_highlight()
   local split_color = M.get_hl('VertSplit', 'fg')
-  local bg_color = M.darken_color(M.get_hl('Normal', 'bg'), -10)
-  local st_color = M.darken_color(M.get_hl('Normal', 'bg'), -16)
+  local bg_color = M.alter_color(M.get_hl('Normal', 'bg'), -10)
+  local st_color = M.alter_color(M.get_hl('Normal', 'bg'), -16)
   local hls = {
     { 'PanelBackground', { guibg = bg_color } },
     { 'PanelHeading', { guibg = bg_color, gui = 'bold' } },
@@ -249,7 +259,12 @@ local function set_sidebar_highlight()
   end
 end
 
-local sidebar_fts = { 'NvimTree' }
+local sidebar_fts = {
+  'packer',
+  'NvimTree',
+  'dap-repl',
+  'undotree',
+}
 
 local function on_sidebar_enter()
   vim.wo.winhighlight = table.concat({
@@ -265,7 +280,7 @@ end
 local function colorscheme_overrides()
   if vim.g.colors_name == 'tokyonight' then
     local keyword_fg = M.get_hl('Keyword', 'fg')
-    local dark_bg = M.darken_color(M.get_hl('Normal', 'bg'), -6)
+    local dark_bg = M.alter_color(M.get_hl('Normal', 'bg'), -6)
     M.all {
       { 'TSVariable', { guifg = 'NONE' } },
       { 'WhichKeyFloat', { link = 'PanelBackground' } },

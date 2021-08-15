@@ -1,5 +1,4 @@
 local fn = vim.fn
-local api = vim.api
 -----------------------------------------------------------------------------//
 -- Message output on vim actions {{{1
 -----------------------------------------------------------------------------//
@@ -102,7 +101,8 @@ end
 -----------------------------------------------------------------------------//
 -- Wild and file globbing stuff in command mode {{{1
 -----------------------------------------------------------------------------//
-vim.opt.wildcharm = fn.char2nr(api.nvim_replace_termcodes([[<C-Z>]], true, true, true))
+
+vim.opt.wildcharm = fn.char2nr(fss.replace_termcodes [[<Tab>]])
 vim.opt.wildmode = 'longest:full,full' -- Shows a menu bar as opposed to an enormous list
 vim.opt.wildignorecase = true -- Ignore case when completing file names and directories
 -- Binary
@@ -147,6 +147,7 @@ vim.opt.breakindentopt = 'sbr'
 vim.opt.linebreak = true -- lines wrap at words rather than random characters
 vim.opt.synmaxcol = 1024 -- don't syntax highlight long lines
 vim.opt.signcolumn = 'yes:2'
+vim.opt.signcolumn = 'auto:2-4' --'yes:2'
 vim.opt.ruler = false
 vim.opt.cmdheight = 2 -- Set command line height to two lines
 vim.opt.showbreak = [[↪ ]] -- Options include -> '…', '↳ ', '→','↪ '
@@ -164,7 +165,7 @@ vim.g.markdown_fenced_languages = {
 -----------------------------------------------------------------------------//
 vim.opt.list = true -- invisible chars
 vim.opt.listchars = {
-  eol = ' ',
+  eol = nil,
   tab = '│ ',
   extends = '›', -- Alternatives: … »
   precedes = '‹', -- Alternatives: … «
@@ -202,6 +203,10 @@ vim.opt.termguicolors = true
 vim.opt.emoji = false
 -----------------------------------------------------------------------------//
 vim.opt.inccommand = 'nosplit'
+-----------------------------------------------------------------------------//
+-- Cursor {{{1
+-----------------------------------------------------------------------------//
+vim.opt.cursorlineopt = 'screenline,number'
 -- This is from the help docs, it enables mode shapes, "Cursor" highlight, and blinking
 vim.opt.guicursor = {
   [[n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50]],

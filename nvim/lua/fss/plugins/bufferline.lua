@@ -33,7 +33,7 @@ return function()
   end
 
   local highlights = require 'fss.highlights'
-  local bg_color = highlights.darken_color(highlights.get_hl('Normal', 'bg'), -10)
+  local bg_color = highlights.alter_color(highlights.get_hl('Normal', 'bg'), -10)
 
   ---@diagnostic disable-next-line: unused-function
   local function sort_by_mtime(a, b)
@@ -46,11 +46,16 @@ return function()
 
   require('bufferline').setup {
     options = {
-      view = 'multiwindow',
       sort_by = sort_by_mtime,
-      mappings = false,
+      show_close_icon = false,
+      right_mouse_command = 'vert sbuffer %d',
       diagnostics = 'nvim_lsp',
       diagnostics_indicator = diagnostics_indicator,
+      diagnostics_update_in_insert = false,
+      show_buffer_close_icons = false,
+      persist_buffer_sort = true,
+      separator_style = { '', '' },
+      always_show_bufferline = true,
       custom_filter = custom_filter,
       offsets = {
         {
@@ -61,27 +66,25 @@ return function()
           padding = 1,
         },
         {
+          filetype = 'undotree',
+          text = 'Undotree',
+          highlight = 'PanelHeading',
+          padding = 1,
+        },
+        {
           filetype = 'DiffviewFiles',
           text = 'Diff',
           highlight = 'PanelHeading',
           text_align = 'left',
           padding = 1,
         },
+        {
+          filetype = 'packer',
+          text = 'Packer',
+          highlight = 'PanelHeading',
+          padding = 1,
+        },
       },
-      buffer_close_icon = '',
-      modified_icon = '●',
-      close_icon = '',
-      left_trunc_marker = '',
-      right_trunc_marker = '',
-      max_name_length = 18,
-      max_prefix_length = 15,
-      tab_size = 20,
-      right_mouse_command = 'vert sbuffer %d',
-      show_close_icon = false,
-      show_buffer_close_icons = true,
-      persist_buffer_sort = true,
-      separator_style = { '', '' },
-      always_show_bufferline = true,
     },
     highlights = {
       fill = { guibg = bg_color },
@@ -89,7 +92,14 @@ return function()
   }
 
   require('which-key').register {
+    ['<leader>on'] = {
+      [[:BufferLineCloseLeft<cr> <bar> :BufferLineCloseRight<cr>]],
+      'bufferline: close all but current',
+    },
     ['gb'] = { '<cmd>BufferLinePick<CR>', 'bufferline: pick buffer' },
+    ['<leader>qb'] = { '<cmd>BufferLinePickClose<CR>', 'bufferline: pick close buffer' },
+    ['<leader>ql'] = { '<cmd>BufferLineCloseLeft<CR>', 'bufferline: close left' },
+    ['<leader>qr'] = { '<cmd>BufferLineCloseRight<CR>', 'bufferline: close right' },
     ['<leader><tab>'] = { '<cmd>BufferLineCycleNext<CR>', 'bufferline: next' },
     ['<S-tab>'] = { '<cmd>BufferLineCyclePrev<CR>', 'bufferline: prev' },
     ['[b'] = { '<cmd>BufferLineMoveNext<CR>', 'bufferline: move next' },

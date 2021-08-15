@@ -3,23 +3,22 @@ return function()
 
   require('which-key').register {
     ['<leader>h'] = {
-      name = '+hunk (gitsigns)',
+      name = '+gitsigns hunk',
       s = 'stage',
       u = 'undo stage',
       r = 'reset hunk',
       p = 'preview current hunk',
       b = 'blame current line',
     },
+    ['<leader>lm'] = 'gitsigns: list modified in quickfix',
     ['<localleader>g'] = {
       name = '+git',
-      w = { '<cmd>Gitsigns stage_buffer<CR>', 'gitsigns: stage entire buffer' },
-      r = {
-        name = '+reset',
-        e = { '<cmd>Gitsigns reset_buffer<CR>', 'gitsigns: reset entire buffer' },
-      },
+      w = 'gitsigns: stage entire buffer',
+      r = { name = '+reset', e = 'gitsigns: reset entire buffer' },
       b = {
         name = '+blame',
         l = 'gitsigns: blame current line',
+        d = 'gitsigns: toggle word diff',
       },
     },
     ['[h'] = 'go to next git hunk',

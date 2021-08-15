@@ -13,14 +13,6 @@ return function()
 
   fss.nnoremap('<c-n>', [[<cmd>NvimTreeToggle<CR>]])
 
-  function fss.nvim_tree_os_open()
-    local lib = require 'nvim-tree.lib'
-    local node = lib.get_node_at_cursor()
-    if node then
-      vim.fn.jobstart("open '" .. node.absolute_path .. "' &", { detach = true })
-    end
-  end
-
   vim.g.nvim_tree_special_files = {}
   vim.g.nvim_tree_lsp_diagnostics = 0
   vim.g.nvim_tree_indent_markers = 1
@@ -33,7 +25,7 @@ return function()
   vim.g.nvim_tree_disable_window_picker = 1
   vim.g.nvim_tree_update_cwd = 0
   vim.g.nvim_tree_disable_netrw = 0
-  vim.g.nvim_tree_hijack_netrw = 0
+  vim.g.nvim_tree_hijack_netrw = 1
   vim.g.nvim_tree_root_folder_modifier = ':t'
   vim.g.nvim_tree_ignore = { '.DS_Store', 'fugitive:', '.git', '.cache' }
   vim.g.nvim_tree_highlight_opened_files = 1
@@ -74,7 +66,6 @@ return function()
     { key = '-', cb = action 'dir_up' },
     { key = 'q', cb = action 'close' },
     { key = 'g?', cb = action 'toggle_help' },
-    { key = '<C-o>', cb = ':lua fss.nvim_tree_os_open<CR>' },
   }
 
   local function set_highlights()

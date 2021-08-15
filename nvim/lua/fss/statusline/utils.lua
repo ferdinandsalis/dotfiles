@@ -1,5 +1,4 @@
 local H = require 'fss.highlights'
-local icons_loaded, devicons
 
 local fn = vim.fn
 local expand = fn.expand
@@ -246,9 +245,9 @@ end
 
 --- @param hl string
 --- @param bg_hl string
-local function set_ft_icon_highlight(hl, bg_hl)
-  if not hl then
-    return ''
+local function highlight_ft_icon(hl, bg_hl)
+  if not hl or not bg_hl then
+    return
   end
   local name = hl .. 'Statusline'
   -- TODO: find a mechanism to cache this so it isn't repeated constantly
@@ -265,7 +264,7 @@ end
 
 --- @param ctx table
 --- @param opts table
---- @return string, string
+--- @return string, string?
 local function filetype(ctx, opts)
   local ft_exception = exceptions.filetypes[ctx.filetype]
   if ft_exception then
@@ -277,12 +276,10 @@ local function filetype(ctx, opts)
   end
   local icon, hl
   local extension = fnamemodify(ctx.bufname, ':e')
-  if not icons_loaded then
-    icons_loaded, devicons = pcall(require, 'nvim-web-devicons')
-  end
-  if devicons then
+  local icons_loaded, devicons = pcall(require, 'nvim-web-devicons')
+  if icons_loaded then
     icon, hl = devicons.get_icon(ctx.bufname, extension, { default = true })
-    hl = set_ft_icon_highlight(hl, opts.icon_bg)
+    hl = highlight_ft_icon(hl, opts.icon_bg)
   end
   return icon, hl
 end
@@ -377,16 +374,10 @@ function M.diagnostic_info(context)
   }
 end
 
-local lsp_status
----@type boolean
-local ok
-
 ---The lsp servers current status
 ---@return string
 function M.lsp_status()
-  if not lsp_status then
-    ok, lsp_status = pcall(require, 'lsp-status')
-  end
+  local ok, lsp_status = fss.safe_require('lsp-status', { silent = true })
   if ok and lsp_status then
     return lsp_status.status_progress()
   end

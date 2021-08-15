@@ -10,7 +10,7 @@ return function()
 
   -- local H = require("fss.highlights")
   -- local normal_bg = H.get_hl("Normal", "bg")
-  -- local bg_color = H.darken_color(normal_bg, -10)
+  -- local bg_color = H.alter_color(normal_bg, -10)
   -- H.plugin("WhichKey", {"WhichKeyFloating", {guibg = bg_color}})
 
   wk.register {
@@ -47,11 +47,6 @@ return function()
         name = '+packer',
         c = 'clean',
         s = 'sync',
-      },
-      q = {
-        name = '+quit',
-        w = 'close window (and buffer)',
-        q = 'delete buffer',
       },
       g = 'grep word under the cursor',
       l = {

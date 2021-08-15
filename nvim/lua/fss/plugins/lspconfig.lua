@@ -5,21 +5,13 @@ fss.lsp = {}
 -----------------------------------------------------------------------------//
 
 local function setup_autocommands(client, _)
-  -- FIXME: this opens even when there is no content so this is closed by default
   fss.augroup('LspLocationList', {
     {
       events = { 'User LspDiagnosticsChanged' },
       command = function()
-        local args = {
-          workspace = true,
-          severity_limit = 'Warning',
-          -- TODO: this is now deprecated in neovim nightlies, use open instead
-          open_loclist = false,
-        }
+        -- FIXME: this opens even when there is no content so this is closed by default
         -- argument has changed in nvim nightly
-        if fss.has 'nvim-0.6' then
-          args.open = false
-        end
+        local args = fss.has 'nvim-0.6' and { open = false } or { open_loclist = false }
         vim.lsp.diagnostic.set_loclist(args)
       end,
     },
@@ -61,15 +53,6 @@ local function setup_autocommands(client, _)
       },
     })
   end
-  fss.augroup('LspDiagnosticsCursor', {
-    {
-      events = { 'CursorHold', 'CursorHoldI' },
-      targets = { '*' },
-      command = function()
-        vim.lsp.diagnostic.show_line_diagnostics { border = 'rounded', focusable = false }
-      end,
-    },
-  })
 end
 
 -- Capture real implementation of function that sets signs
@@ -203,33 +186,37 @@ function fss.lsp.tagfunc(pattern, flags)
   return results
 end
 
-require('vim.lsp.protocol').CompletionItemKind = {
-  ' Text', -- Text
-  ' Method', -- Method
-  'ƒ Function', -- Function
-  ' Constructor', -- Constructor
-  '識 Field', -- Field
-  ' Variable', -- Variable
-  ' Class', -- Class
-  'ﰮ Interface', -- Interface
-  ' Module', -- Module
-  ' Property', -- Property
-  ' Unit', -- Unit
-  ' Value', -- Value
-  '了 Enum', -- Enum
-  ' Keyword', -- Keyword
-  ' Snippet', -- Snippet
-  ' Color', -- Color
-  ' File', -- File
-  '渚 Reference', -- Reference
-  ' Folder', -- Folder
-  ' Enum', -- Enum
-  ' Constant', -- Constant
-  ' Struct', -- Struct
-  '鬒 Event', -- Event
-  '\u{03a8} Operator', -- Operator
-  ' Type Parameter', -- TypeParameter
+fss.lsp.icons = {
+  Text = ' Text',
+  Method = ' Method',
+  Function = 'ƒ Function',
+  Constructor = ' Constructor',
+  Field = '識 Field',
+  Variable = ' Variable',
+  Class = ' Class',
+  Interface = 'ﰮ Interface',
+  Module = ' Module',
+  Property = ' Property',
+  Unit = ' Unit',
+  Value = ' Value',
+  Enum = '了 Enum',
+  Keyword = ' Keyword',
+  Snippet = ' Snippet',
+  Color = ' Color',
+  File = ' File',
+  Reference = '渚 Reference',
+  Folder = ' Folder',
+  Constant = ' Constant',
+  Struct = ' Struct',
+  Event = '鬒 Event',
+  Operator = '\u{03a8} Operator',
+  TypeParameter = ' Type Parameter',
 }
+
+local kinds = require('vim.lsp.protocol').CompletionItemKind
+for i, kind in ipairs(kinds) do
+  kinds[i] = fss.lsp.icons[kind] or kind
+end
 
 function fss.lsp.on_attach(client, bufnr)
   setup_autocommands(client, bufnr)
@@ -241,14 +228,6 @@ function fss.lsp.on_attach(client, bufnr)
     vim.bo[bufnr].tagfunc = 'v:lua.fss.lsp.tagfunc'
   end
 
-  require('lsp_signature').on_attach {
-    bind = true,
-    fix_pos = false,
-    hint_enable = false,
-    handler_opts = {
-      border = 'rounded',
-    },
-  }
   require('lsp-status').on_attach(client)
 end
 
@@ -330,29 +309,25 @@ command {
 ---Logic to (re)start installed language servers for use initialising lsps
 ---and restarting them on installing new ones
 function fss.lsp.setup_servers()
-  local lspinstall = require 'lspinstall'
   local lspconfig = require 'lspconfig'
+  local install_ok, lspinstall = fss.safe_require 'lspinstall'
+  local nvim_lsp_ok, cmp_nvim_lsp = fss.safe_require 'cmp_nvim_lsp'
+  -- can't reasonably proceed if lspinstall isn't loaded
+  if not install_ok then
+    return
+  end
 
   lspinstall.setup()
   local installed = lspinstall.installed_servers()
   local status_capabilities = require('lsp-status').capabilities
   for _, server in pairs(installed) do
-    local mk_config = fss.lsp.servers[server]
-    local config = mk_config and mk_config() or {}
-    config.flags = config.flags or {}
-    config.flags.debounce_text_changes = 150
+    local config = fss.lsp.servers[server] and fss.lsp.servers[server]() or {}
+    config.flags = { debounce_text_changes = 500 }
     config.on_attach = fss.lsp.on_attach
-    if not config.capabilities then
-      config.capabilities = vim.lsp.protocol.make_client_capabilities()
+    config.capabilities = config.capabilities or vim.lsp.protocol.make_client_capabilities()
+    if nvim_lsp_ok then
+      cmp_nvim_lsp.update_capabilities(config.capabilities)
     end
-    config.capabilities.textDocument.completion.completionItem.snippetSupport = true
-    config.capabilities.textDocument.completion.completionItem.resolveSupport = {
-      properties = {
-        'documentation',
-        'detail',
-        'additionalTextEdits',
-      },
-    }
     config.capabilities = fss.deep_merge(status_capabilities, config.capabilities)
     lspconfig[server].setup(config)
   end
@@ -372,26 +347,25 @@ return function()
   -----------------------------------------------------------------------------//
   -- Signs
   -----------------------------------------------------------------------------//
-  local icons = fss.style.icons
   vim.fn.sign_define {
     {
       name = 'LspDiagnosticsSignError',
-      text = icons.error,
+      text = fss.style.icons.error,
       texthl = 'LspDiagnosticsSignError',
     },
     {
       name = 'LspDiagnosticsSignHint',
-      text = icons.hint,
+      text = fss.style.icons.hint,
       texthl = 'LspDiagnosticsSignHint',
     },
     {
       name = 'LspDiagnosticsSignWarning',
-      text = icons.warning,
+      text = fss.style.icons.warning,
       texthl = 'LspDiagnosticsSignWarning',
     },
     {
       name = 'LspDiagnosticsSignInformation',
-      text = icons.info,
+      text = fss.style.icons.info,
       texthl = 'LspDiagnosticsSignInformation',
     },
   }

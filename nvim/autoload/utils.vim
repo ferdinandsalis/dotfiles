@@ -128,3 +128,4 @@ function! utils#qf_delete(bufnr) range
   " restore current line
   call setpos('.', [a:bufnr, a:firstline, 1, 0])
 endfunction
+

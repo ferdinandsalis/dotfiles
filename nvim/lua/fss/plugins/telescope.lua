@@ -6,20 +6,19 @@ return function()
   local H = require 'fss.highlights'
   local normal_bg = H.get_hl('Normal', 'bg')
   local comment_fg = H.get_hl('Comment', 'fg')
-  require('fss.highlights').plugin(
+  H.plugin(
     'telescope',
     { 'TelescopePathSeparator', { link = 'Directory' } },
     { 'TelescopeQueryFilter', { link = 'IncSearch' } },
-    { 'TelescopeResultsBorder', { guibg = normal_bg, guifg = comment_fg } },
-    { 'TelescopePromptBorder', { guibg = normal_bg, guifg = comment_fg } },
-    { 'TelescopePreviewBorder', { guibg = normal_bg, guifg = comment_fg } },
-    { 'TelescopePreviewNormal', { guibg = normal_bg, guifg = normal_bg } }
+    { 'TelescopeBorder', { guibg = normal_bg, guifg = comment_fg } },
+    { 'TelescopeSelectionCaret', { guifg = H.get_hl('Identifier', 'fg'), guibg = H.get_hl('TelescopeSelection', 'bg'), }, }
   )
 
   telescope.setup {
     defaults = {
       set_env = { ['TERM'] = vim.env.TERM },
       prompt_prefix = ' ',
+      selection_caret = '» ',
       mappings = {
         i = {
           ['<c-c>'] = function()
@@ -33,17 +32,18 @@ return function()
       },
       file_ignore_patterns = { '%.jpg', '%.jpeg', '%.png', '%.otf', '%.ttf' },
       layout_strategy = 'flex',
-      winblend = 7,
+      winblend = 10,
+      layout_config = {
+        horizontal = {
+          preview_width = 0.45,
+        },
+      },
       history = {
         path = '~/.local/share/nvim/telescope_history.sqlite3',
       },
     },
     extensions = {
       frecency = {
-        -- the filter is saved so passing a :CWD: tag would not work
-        -- without turning this option off
-        -- @see: https://github.com/nvim-telescope/telescope-frecency.nvim/issues/16
-        persistent_filter = false,
         workspaces = {
           conf = vim.env.DOTFILES,
           project = vim.env.PROJECTS_DIR,
@@ -70,6 +70,9 @@ return function()
       },
       oldfiles = {
         theme = 'dropdown',
+      },
+      live_grep = {
+        file_ignore_patterns = { '.git/' },
       },
       lsp_code_actions = {
         theme = 'cursor',

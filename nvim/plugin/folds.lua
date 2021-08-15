@@ -1,3 +1,6 @@
+-----------------------------------------------------------------------------//
+-- Fold Text
+-----------------------------------------------------------------------------//
 local fn = vim.fn
 local api = vim.api
 
@@ -5,8 +8,7 @@ local api = vim.api
 local fold_exclusions = { 'vim' }
 
 local function contains(str, pattern)
-  assert(str)
-  assert(pattern)
+  assert(str and pattern)
   return fn.match(str, pattern) >= 0
 end
 
@@ -22,11 +24,7 @@ local function is_ignored()
   if vim.wo.diff then
     return vim.wo.diff
   end
-  for _, exclusion in ipairs(fold_exclusions) do
-    if exclusion == vim.bo.filetype then
-      return true
-    end
-  end
+  return vim.tbl_contains(fold_exclusions, vim.bo.filetype)
 end
 
 local function is_import(item)
@@ -99,3 +97,5 @@ function fss.folds()
   local text_length = #fn.substitute(fold_start .. fold_end, '.', 'x', 'g') + column_size
   return fold_start .. string.rep(' ', api.nvim_win_get_width(0) - text_length - 7) .. fold_end
 end
+
+-- CREDIT: https://coderwall.com/p/usd_cw/a-pretty-vim-foldtext-function

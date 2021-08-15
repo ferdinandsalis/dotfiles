@@ -1,6 +1,3 @@
---- Global treesitter object containing treesitter related utilities
-fss.ts = {}
-
 return function()
   vim.cmd [[highlight link TSKeyword Statement]]
   vim.cmd [[highlight TSParameter gui=italic,bold]]
