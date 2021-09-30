@@ -1,6 +1,7 @@
 local api = vim.api
 local fmt = string.format
-local P = fss.style.palette
+local L = fss.style.lsp.colors
+local levels = vim.log.levels
 
 local M = {}
 
@@ -31,7 +32,7 @@ function M.alter_color(color, percent)
   end
   r, g, b = alter(r, percent), alter(g, percent), alter(b, percent)
   r, g, b = math.min(r, 255), math.min(g, 255), math.min(b, 255)
-  return string.format('#%02x%02x%02x', r, g, b)
+  return fmt('#%02x%02x%02x', r, g, b)
 end
 
 --- Check if the current window has a winhighlight
@@ -40,14 +41,12 @@ end
 --- @vararg string
 function M.has_win_highlight(win_id, ...)
   local win_hl = vim.wo[win_id].winhighlight
-  local has_match = false
   for _, target in ipairs { ... } do
     if win_hl:match(target) ~= nil then
-      has_match = true
-      break
+      return true, win_hl
     end
   end
-  return (win_hl ~= nil and has_match), win_hl
+  return false, win_hl
 end
 
 ---A mechanism to allow inheritance of the winhighlight of a specific
@@ -76,6 +75,45 @@ function M.adopt_winhighlight(win_id, target, name, default)
   return name
 end
 
+---get a highlight groups details from the nvim API and format the result
+---to match the attributes seen when using `:highlight GroupName`
+--- `nvim_get_hl_by_name` e.g.
+---```json
+---{
+--- foreground: 123456
+--- background: 123456
+--- italic: true
+--- bold: true
+--}
+---```
+--- is converted to
+---```json
+---{
+--- gui: {"italic", "bold"}
+--- guifg: #FFXXXX
+--- guibg: #FFXXXX
+--}
+---```
+---@param group_name string A highlight group name
+local function get_hl(group_name)
+  local attrs = { foreground = 'guifg', background = 'guibg' }
+  local hl = api.nvim_get_hl_by_name(group_name, true)
+  local result = {}
+  if hl then
+    local gui = {}
+    for key, value in pairs(hl) do
+      local t = type(value)
+      if t == 'number' and attrs[key] then
+        result[attrs[key]] = '#' .. bit.tohex(value, 6)
+      elseif t == 'boolean' then -- NOTE: we presume that a boolean value is a GUI attribute
+        table.insert(gui, key)
+      end
+    end
+    result.gui = #gui > 0 and gui or nil
+  end
+  return result
+end
+
 --- NOTE: vim.highlight's link and create are private, so
 --- eventually move to using `nvim_set_hl`
 ---@param name string
@@ -86,6 +124,16 @@ function M.set_hl(name, opts)
     if opts.link then
       vim.highlight.link(name, opts.link, opts.force)
     else
+      if opts.inherit then
+        local attrs = get_hl(opts.inherit)
+        --- FIXME: deep extending does not merge { a = {'one'}} with {b = {'two'}}
+        --- correctly in nvim 0.5.1, but should do in 0.6
+        opts.gui = (opts.gui and attrs.gui) and opts.gui .. ',' .. table.concat(attrs.gui, ',')
+          or opts.gui
+        opts = vim.tbl_deep_extend('force', attrs, opts)
+        opts.inherit = nil
+      end
+      opts.gui = type(opts.gui) == 'table' and table.concat(opts.gui, ', ') or opts.gui
       local ok, msg = pcall(vim.highlight.create, name, opts)
       if not ok then
         vim.notify(fmt('Failed to set %s because: %s', name, msg))
@@ -94,44 +142,25 @@ function M.set_hl(name, opts)
   end
 end
 
----convert a table of gui values into a string
----@param hl table<string, string>
----@return string
-local function flatten_gui(hl)
-  local gui_attr = { 'underline', 'bold', 'undercurl', 'italic' }
-  local gui = {}
-  for name, value in pairs(hl) do
-    if value and vim.tbl_contains(gui_attr, name) then
-      table.insert(gui, name)
-    end
-  end
-  return table.concat(gui, ',')
-end
-
----Get the value a highlight group
----this function is a small wrapper around `nvim_get_hl_by_name`
----which handles errors, fallbacks as well as returning a gui value
+---Get the value a highlight group whilst handling errors, fallbacks as well as returning a gui value
 ---in the right format
 ---@param grp string
 ---@param attr string
 ---@param fallback string
 ---@return string
 function M.get_hl(grp, attr, fallback)
-  assert(grp, 'Cannot get a highlight without specifying a group')
-  local attrs = { fg = 'foreground', bg = 'background' }
-  attr = attrs[attr] or attr
-  local hl = api.nvim_get_hl_by_name(grp, true)
-  if attr == 'gui' then
-    return flatten_gui(hl)
+  if not grp then
+    vim.notify('Cannot get a highlight without specifying a group', levels.ERROR)
+    return 'NONE'
   end
-  local color = hl[attr] or fallback
-  -- convert the decimal RGBA value from the hl by name to a 6 character hex + padding if needed
+  local hl = get_hl(grp)
+  local color = hl[attr:match 'gui' and attr or fmt('gui%s', attr)] or fallback
   if not color then
-    vim.notify(fmt('%s %s does not exist', grp, attr))
+    vim.notify(fmt('%s %s does not exist', grp, attr), levels.INFO)
     return 'NONE'
   end
   -- convert the decimal RGBA value from the hl by name to a 6 character hex + padding if needed
-  return '#' .. bit.tohex(color, 6)
+  return color
 end
 
 function M.clear_hl(name)
@@ -152,11 +181,13 @@ end
 ---------------------------------------------------------------------------------
 -- Color Scheme {{{1
 -----------------------------------------------------------------------------//
-vim.g.tokyonight_style = 'storm'
-vim.g.tokyonight_italic_functions = true
-vim.g.tokyonight_sidebars = { 'qf', 'terminal', 'packer' }
-vim.cmd 'colorscheme tokyonight'
--- }}}
+-- vim.g.tokyonight_style = 'storm'
+-- vim.g.tokyonight_italic_functions = true
+-- vim.g.tokyonight_sidebars = { 'qf', 'terminal', 'packer' }
+-- vim.cmd 'colorscheme tokyonight'
+-- -- }}}
+
+vim.cmd 'colorscheme doom-one'
 
 ---------------------------------------------------------------------------------
 -- Plugin highlights {{{
@@ -186,34 +217,34 @@ end
 local function general_overrides()
   local cursor_line_bg = M.get_hl('CursorLine', 'bg')
   local normal_fg = M.get_hl('Normal', 'fg')
-  local bg_color = M.alter_color(M.get_hl('Normal', 'bg'), -10)
   local comment_fg = M.get_hl('Comment', 'fg')
+  local keyword_fg = M.get_hl('Keyword', 'fg')
+  local bg_color = M.alter_color(M.get_hl('Normal', 'bg'), -10)
+  local hint_line = M.alter_color(L.hint, -80)
+  local error_line = M.alter_color(L.error, -80)
+  local warn_line = M.alter_color(L.warn, -80)
+  local info_line = M.alter_color(L.info, -80)
+  local search_bg = M.get_hl('Search', 'bg')
 
   M.all {
-    { 'CursorLineNr', { gui = 'bold' } },
-    { 'ColorColumn', { guibg = cursor_line_bg } },
-    { 'Comment', { gui = 'italic' } },
-    { 'Credit', { gui = 'bold' } },
+    -- { 'Credit', { gui = 'bold' } },
     { 'NormalFloat', { link = 'Normal' } },
     { 'Error', { link = 'WarningMsg', force = true } },
     { 'ErrorMsg', { guibg = bg_color } },
-    { 'FoldColumn', { guibg = 'background' } },
-    { 'Folded', { link = 'Comment', force = true } },
-    { 'IncSearch', { guibg = 'NONE', guifg = '#ff9e64', gui = 'italic,bold,underline' } },
+    { 'CursorLineNr', { gui = 'bold' } },
+    { 'ColorColumn', { guibg = cursor_line_bg } },
+    { 'IncSearch', { guibg = 'NONE', guifg = L.bright_yellow, gui = 'italic,bold,underline' } },
+
     { 'Include', { gui = 'italic' } },
+    { 'Type', { gui = 'italic,bold' } },
+    { 'Comment', { gui = 'italic' } },
+    { 'Folded', { link = 'Comment', force = true } },
+    { 'QuickFixLine', { guibg = search_bg } },
+    -----------------------------------------------------------------------------//
+    -- Commandline
+    -----------------------------------------------------------------------------//
     { 'MsgArea', { guifg = normal_fg, guibg = bg_color } },
     { 'MsgSeparator', { guifg = comment_fg, guibg = bg_color } },
-    { 'Type', { gui = 'italic,bold' } },
-    -----------------------------------------------------------------------------//
-    -- Treesitter
-    -----------------------------------------------------------------------------//
-    { 'TSKeyword', { link = 'Statement' } },
-    { 'TSParameter', { gui = 'italic,bold' } },
-    -----------------------------------------------------------------------------//
-    -- LSP
-    -----------------------------------------------------------------------------//
-    { 'LspReferenceText', { gui = 'underline' } },
-    { 'LspReferenceRead', { gui = 'underline' } },
     -----------------------------------------------------------------------------//
     -- Diff
     -----------------------------------------------------------------------------//
@@ -234,19 +265,59 @@ local function general_overrides()
     { 'diffNoEOL', { link = 'WarningMsg', force = true } },
     { 'diffOnly', { link = 'WarningMsg', force = true } },
     -----------------------------------------------------------------------------//
-        -- Vim syntax
+    -- Treesitter
     -----------------------------------------------------------------------------//
-    { 'vimFunc', { link = 'function' } },
-    { 'vimUserFunc', { link = 'function' } },
+    { 'TSKeywordReturn', { gui = 'italic', guifg = keyword_fg } },
+    { 'TSParameter', { gui = 'italic,bold' } },
+    { 'TSError', { link = 'LspDiagnosticsUnderlineError', force = true } },
     -----------------------------------------------------------------------------//
+    -- LSP
+    -----------------------------------------------------------------------------//
+    { 'LspReferenceText', { gui = 'underline' } },
+    { 'LspReferenceRead', { gui = 'underline' } },
+    { 'DiagnosticHint', { guifg = L.hint } },
+    { 'DiagnosticError', { guifg = L.error } },
+    { 'DiagnosticWarning', { guifg = L.warn } },
+    { 'DiagnosticInfo', { guifg = L.info } },
+    { 'DiagnosticUnderlineError', { gui = 'undercurl', guisp = L.error, guifg = 'none' } },
+    { 'DiagnosticUnderlineHint', { gui = 'undercurl', guisp = L.hint, guifg = 'none' } },
+    { 'DiagnosticUnderlineWarn', { gui = 'undercurl', guisp = L.warn, guifg = 'none' } },
+    { 'DiagnosticUnderlineInfo', { gui = 'undercurl', guisp = L.info, guifg = 'none' } },
+    { 'DiagnosticSignHintLine', { guibg = hint_line } },
+    { 'DiagnosticSignErrorLine', { guibg = error_line } },
+    { 'DiagnosticSignWarnLine', { guibg = warn_line } },
+    { 'DiagnosticSignInfoLine', { guibg = info_line } },
+    { 'DiagnosticSignWarn', { link = 'DiagnosticWarn', force = true } },
+    { 'DiagnosticSignInfo', { link = 'DiagnosticInfo', force = true } },
+    { 'DiagnosticSignHint', { link = 'DiagnosticHint', force = true } },
+    { 'DiagnosticSignError', { link = 'DiagnosticError', force = true } },
+    { 'DiagnosticFloatingWarn', { link = 'DiagnosticWarn', force = true } },
+    { 'DiagnosticFloatingInfo', { link = 'DiagnosticInfo', force = true } },
+    { 'DiagnosticFloatingHint', { link = 'DiagnosticHint', force = true } },
+    { 'DiagnosticFloatingError', { link = 'DiagnosticError', force = true } },
+    -- TODO: delete the following when v0.6 is stable
+    { 'LspDiagnosticsSignHint', { guifg = L.hint } },
+    { 'LspDiagnosticsDefaultHint', { guifg = L.hint } },
+    { 'LspDiagnosticsDefaultError', { guifg = L.error } },
+    { 'LspDiagnosticsDefaultWarning', { guifg = L.warn } },
+    { 'LspDiagnosticsDefaultInformation', { guifg = L.info } },
+    { 'LspDiagnosticsSignHintLine', { guibg = hint_line } },
+    { 'LspDiagnosticsSignErrorLine', { guibg = error_line } },
+    { 'LspDiagnosticsSignWarningLine', { guibg = warn_line } },
+    { 'LspDiagnosticsSignInformationLine', { guibg = info_line } },
+    { 'LspDiagnosticsUnderlineError', { gui = 'undercurl', guisp = L.error, guifg = 'none' } },
+    { 'LspDiagnosticsUnderlineHint', { gui = 'undercurl', guisp = L.hint, guifg = 'none' } },
+    { 'LspDiagnosticsUnderlineWarning', { gui = 'undercurl', guisp = 'orange', guifg = 'none' } },
+    { 'LspDiagnosticsUnderlineInformation', { gui = 'undercurl', guisp = L.info, guifg = 'none' } },
   }
 end
 -- }}}
 
 local function set_sidebar_highlight()
+  local normal_bg = M.get_hl('Normal', 'bg')
   local split_color = M.get_hl('VertSplit', 'fg')
-  local bg_color = M.alter_color(M.get_hl('Normal', 'bg'), -10)
-  local st_color = M.alter_color(M.get_hl('Normal', 'bg'), -16)
+  local bg_color = M.alter_color(normal_bg, -8)
+  local st_color = M.alter_color(M.get_hl('Visual', 'bg'), -20)
   local hls = {
     { 'PanelBackground', { guibg = bg_color } },
     { 'PanelHeading', { guibg = bg_color, gui = 'bold' } },
@@ -288,6 +359,15 @@ local function colorscheme_overrides()
       { 'CursorLine', { guibg = dark_bg } },
       { 'CursorLineNr', { guibg = dark_bg } },
       { 'Pmenu', { guibg = dark_bg, blend = 6 } },
+    }
+  elseif vim.g.colors_name == 'doom-one' then
+    -- HACK: override the pumblend set by doom-one, use until the behaviour of the setup function
+    -- is fixed, @see: https://github.com/NTBBloodbath/doom-one.nvim/issues/17
+    vim.opt.pumblend = 3
+    local keyword_fg = M.get_hl('Keyword', 'fg')
+    M.all {
+      { 'CursorLineNr', { guifg = keyword_fg } },
+      { 'Constant', { gui = 'NONE' } },
     }
   end
 end

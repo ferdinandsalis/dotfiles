@@ -1,50 +1,51 @@
 return function()
-  local fn = vim.fn
+  local api = vim.api
   local t = fss.replace_termcodes
   local cmp = require 'cmp'
 
-  local check_back_space = function()
-    local col = fn.col '.' - 1
-    return col == 0 or fn.getline('.'):sub(col, col):match '%s' ~= nil
-  end
-
-  local function tab(fallback)
-    local luasnip = require 'luasnip'
-    if fn.pumvisible() == 1 then
-      return fn.feedkeys(t '<C-n>', 'n')
-    elseif luasnip and luasnip.expand_or_jumpable() then
-      return fn.feedkeys(t '<Plug>luasnip-expand-or-jump', '')
-    elseif check_back_space() then
-      vim.fn.feedkeys(t '<Tab>', 'n')
-    else
-      fallback()
-    end
-  end
-
-  local function shift_tab(fallback)
-    local luasnip = require 'luasnip'
-    if fn.pumvisible() == 1 then
-      fn.feedkeys(t '<C-p>', 'n')
-    elseif luasnip and luasnip.jumpable(-1) then
-      fn.feedkeys(t '<Plug>luasnip-jump-prev', '')
-    else
-      fallback()
-    end
-  end
-
-  local H = require 'fss.highlights'
-  local normal_bg = H.get_hl('Normal', 'bg')
-  local comment_fg = H.get_hl('Comment', 'fg')
-  H.plugin(
-    'nvim-cmp',
-    { 'CmpDocumentationBorder', { guibg = normal_bg, guifg = comment_fg } },
-    { 'CmpDocumentation', { link = 'Normal' } }
+  require('fss.highlights').plugin(
+    'Cmp',
+    { 'CmpItemAbbrDeprecated', { gui = 'strikethrough', inherit = 'Comment' } },
+    { 'CmpItemAbbrMatchFuzzy', { gui = 'italic', guifg = 'fg' } }
   )
 
-  require('cmp_nvim_lsp').setup()
+  local function feed(key, mode)
+    api.nvim_feedkeys(t(key), mode or '', true)
+  end
+
+  local function get_luasnip()
+    local ok, luasnip = fss.safe_require('luasnip', { silent = true })
+    if not ok then
+      return nil
+    end
+    return luasnip
+  end
+
+  local function tab(_)
+    local luasnip = get_luasnip()
+    if cmp.visible() then
+      cmp.select_next_item()
+    elseif luasnip and luasnip.expand_or_jumpable() then
+      luasnip.expand_or_jump()
+    else
+      feed '<Plug>(Tabout)'
+    end
+  end
+
+  local function shift_tab(_)
+    local luasnip = get_luasnip()
+    if cmp.visible() then
+      cmp.select_prev_item()
+    elseif luasnip and luasnip.jumpable(-1) then
+      luasnip.jump(-1)
+    else
+      feed '<Plug>(TaboutBack)'
+    end
+  end
+
   cmp.setup {
     experimental = {
-      ghost_text = true,
+      ghost_text = false,
     },
     snippet = {
       expand = function(args)
@@ -54,14 +55,32 @@ return function()
     mapping = {
       ['<Tab>'] = cmp.mapping(tab, { 'i', 's' }),
       ['<S-Tab>'] = cmp.mapping(shift_tab, { 'i', 's' }),
+      ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ['<C-e>'] = cmp.mapping.complete(),
       ['<CR>'] = cmp.mapping.confirm {
         behavior = cmp.ConfirmBehavior.Replace,
         select = true,
       },
     },
     formatting = {
-      format = function(_, vim_item)
-        vim_item.kind = fss.lsp.icons[vim_item.kind]
+      deprecated = true,
+      fields = { 'kind', 'abbr', 'menu' },
+      format = function(entry, vim_item)
+        vim_item.kind = fss.style.lsp.kinds[vim_item.kind]
+        -- FIXME: automate this using a regex to normalise names
+        vim_item.menu = ({
+          nvim_lsp = '[LSP]',
+          nvim_lua = '[Lua]',
+          emoji = '[Emoji]',
+          path = '[Path]',
+          calc = '[Calc]',
+          neorg = '[Neorg]',
+          orgmode = '[Org]',
+          luasnip = '[Luasnip]',
+          buffer = '[Buffer]',
+          spell = '[Spell]',
+        })[entry.source.name]
         return vim_item
       end,
     },
@@ -69,11 +88,13 @@ return function()
       border = 'rounded',
     },
     sources = {
-      { name = 'luasnip' },
       { name = 'nvim_lsp' },
-      { name = 'nvim_lua' },
+      { name = 'luasnip' },
+      { name = 'spell' },
       { name = 'path' },
       { name = 'buffer' },
+      { name = 'neorg' },
+      { name = 'orgmode' },
     },
   }
 end

@@ -8,7 +8,7 @@ local is_home = not is_work
 ---A thin wrapper around vim.notify to add packer details to the message
 ---@param msg string
 function M.packer_notify(msg, level)
-  vim.notify(msg, level, { title = "Packer"})
+  vim.notify(msg, level, { title = 'Packer' })
 end
 
 -- Make sure packer is installed on the current machine and load
@@ -28,6 +28,10 @@ function M.bootstrap_packer()
     local name = vim.env.DEVELOPING and 'local-packer.nvim' or 'packer.nvim'
     vim.cmd(fmt('packadd! %s', name))
   end
+end
+
+function M.not_headless()
+  return #vim.api.nvim_list_uis() > 0
 end
 
 ---@param path string
@@ -103,6 +107,25 @@ end
 ---@return any
 function M.conf(name)
   return require(fmt('fss.plugins.%s', name))
+end
+
+---Install an executable, returning the error if any
+---@param binary string
+---@param installer string
+---@param cmd string
+---@return string?
+function M.install(binary, installer, cmd, opts)
+  opts = opts or { silent = true }
+  cmd = cmd or 'install'
+  if not fss.executable(binary) and fss.executable(installer) then
+    local install_cmd = fmt('%s %s %s', installer, cmd, binary)
+    if opts.silent then
+      vim.cmd('!' .. install_cmd)
+    else
+      -- open a small split, make it full width, run the command
+      vim.cmd(fmt('25split | wincmd J | terminal %s', install_cmd))
+    end
+  end
 end
 
 return M

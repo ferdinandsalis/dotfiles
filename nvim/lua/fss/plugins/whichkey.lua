@@ -8,16 +8,7 @@ return function()
     },
   }
 
-  -- local H = require("fss.highlights")
-  -- local normal_bg = H.get_hl("Normal", "bg")
-  -- local bg_color = H.alter_color(normal_bg, -10)
-  -- H.plugin("WhichKey", {"WhichKeyFloating", {guibg = bg_color}})
-
   wk.register {
-    d = {
-      f = 'treesitter: peek function definition',
-      F = 'treesitter: peek class definition',
-    },
     [']'] = {
       name = '+next',
       ['<space>'] = 'add space below',
@@ -26,17 +17,12 @@ return function()
       name = '+prev',
       ['<space>'] = 'add space above',
     },
+    ['g>'] = 'show message history',
     ['<leader>'] = {
-      ['0'] = 'which_key_ignore',
-      ['1'] = 'which_key_ignore',
-      ['2'] = 'which_key_ignore',
-      ['3'] = 'which_key_ignore',
-      ['4'] = 'which_key_ignore',
-      ['5'] = 'which_key_ignore',
-      ['6'] = 'which_key_ignore',
-      ['7'] = 'which_key_ignore',
-      ['8'] = 'which_key_ignore',
-      ['9'] = 'which_key_ignore',
+      d = {
+        f = 'treesitter: peek function definition',
+        F = 'treesitter: peek class definition',
+      },
       n = {
         name = '+new',
         f = 'create a new file',
@@ -48,6 +34,11 @@ return function()
         c = 'clean',
         s = 'sync',
       },
+      q = {
+        name = '+quit',
+        w = 'close window (and buffer)',
+        q = 'delete buffer',
+      },
       g = 'grep word under the cursor',
       l = {
         name = '+list',
@@ -56,8 +47,10 @@ return function()
       },
       e = {
         name = '+edit',
-        v = 'open vimrc in a new buffer',
-        z = 'open zshrc in a new buffer',
+        v = 'open vimrc in a vertical split',
+        p = 'open plugins file in a vertical split',
+        z = 'open zshrc in a vertical split',
+        t = 'open tmux config in a vertical split',
       },
       o = {
         name = '+only',
@@ -68,7 +61,6 @@ return function()
         c = 'tab close',
         n = 'tab edit current buffer',
       },
-      u = 'toggle undo tree',
       sw = 'swap buffers horizontally',
       so = 'source current buffer',
       sv = 'source init.vim',
@@ -95,6 +87,7 @@ return function()
         k = 'resize: upwards',
       },
       l = 'redraw window',
+      z = 'center view port',
       [','] = 'add comma to end of line',
       [';'] = 'add semicolon to end of line',
       ['?'] = 'search for word under cursor in google',

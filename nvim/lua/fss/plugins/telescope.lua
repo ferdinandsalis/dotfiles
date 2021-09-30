@@ -1,22 +1,41 @@
 return function()
   local telescope = require 'telescope'
   local actions = require 'telescope.actions'
-  local themes = require 'telescope.themes'
 
   local H = require 'fss.highlights'
-  local normal_bg = H.get_hl('Normal', 'bg')
-  local comment_fg = H.get_hl('Comment', 'fg')
   H.plugin(
     'telescope',
-    { 'TelescopePathSeparator', { link = 'Directory' } },
-    { 'TelescopeQueryFilter', { link = 'IncSearch' } },
-    { 'TelescopeBorder', { guibg = normal_bg, guifg = comment_fg } },
-    { 'TelescopeSelectionCaret', { guifg = H.get_hl('Identifier', 'fg'), guibg = H.get_hl('TelescopeSelection', 'bg'), }, }
+    { 'TelescopeMatching', { link = 'Title', force = true } },
+    { 'TelescopeBorder', { link = 'GreyFloatBorder', force = true } },
+    { 'TelescopePromptPrefix', { link = 'Statement', force = true } },
+    {
+      'TelescopeSelectionCaret',
+      {
+        guifg = H.get_hl('Identifier', 'fg'),
+        guibg = H.get_hl('TelescopeSelection', 'bg'),
+      },
+    }
   )
+
+  ---@param opts table
+  ---@return table
+  local function dropdown(opts)
+    return require('telescope.themes').get_dropdown(vim.tbl_deep_extend('force', opts or {}, {
+      borderchars = {
+        { '─', '│', '─', '│', '┌', '┐', '┘', '└' },
+        prompt = { '─', '│', ' ', '│', '┌', '┐', '│', '│' },
+        results = { '─', '│', '─', '│', '├', '┤', '┘', '└' },
+        preview = { '─', '│', '─', '│', '┌', '┐', '┘', '└' },
+      },
+    }))
+  end
+
+  telescope.load_extension('projects')
 
   telescope.setup {
     defaults = {
       set_env = { ['TERM'] = vim.env.TERM },
+      borderchars = { '─', '│', '─', '│', '┌', '┐', '┘', '└' },
       prompt_prefix = ' ',
       selection_caret = '» ',
       mappings = {
@@ -31,15 +50,16 @@ return function()
         },
       },
       file_ignore_patterns = { '%.jpg', '%.jpeg', '%.png', '%.otf', '%.ttf' },
+      path_display = { 'smart', 'absolute', 'truncate' },
       layout_strategy = 'flex',
-      winblend = 10,
       layout_config = {
         horizontal = {
           preview_width = 0.45,
         },
       },
+      winblend = 10,
       history = {
-        path = '~/.local/share/nvim/telescope_history.sqlite3',
+        path = vim.fn.stdpath 'data' .. '/telescope_history.sqlite3',
       },
     },
     extensions = {
@@ -56,7 +76,7 @@ return function()
       },
     },
     pickers = {
-      buffers = {
+      buffers = dropdown {
         sort_mru = true,
         sort_lastused = true,
         show_all_buffers = true,
@@ -68,11 +88,13 @@ return function()
           n = { ['<c-x>'] = 'delete_buffer' },
         },
       },
-      oldfiles = {
-        theme = 'dropdown',
-      },
+      oldfiles = dropdown(),
       live_grep = {
         file_ignore_patterns = { '.git/' },
+      },
+      current_buffer_fuzzy_find = dropdown {
+        previewer = false,
+        shorten_path = false,
       },
       lsp_code_actions = {
         theme = 'cursor',
@@ -83,34 +105,60 @@ return function()
       find_files = {
         hidden = true,
       },
-      git_branches = {
-        theme = 'dropdown',
+      git_branches = dropdown(),
+      git_bcommits = {
+        layout_config = {
+          horizontal = {
+            preview_width = 0.55,
+          },
+        },
       },
-      reloader = {
-        theme = 'dropdown',
+      git_commits = {
+        layout_config = {
+          horizontal = {
+            preview_width = 0.55,
+          },
+        },
       },
+      reloader = dropdown(),
     },
   }
-
-  telescope.load_extension 'fzf'
-  telescope.load_extension 'smart_history'
 
   --- NOTE: this must be required after setting up telescope
   --- otherwise the result will be cached without the updates
   --- from the setup call
   local builtins = require 'telescope.builtin'
 
+  local function project_files(opts)
+    if not pcall(builtins.git_files, opts) then
+      builtins.find_files(opts)
+    end
+  end
+
   local function nvim_config()
     builtins.find_files {
       prompt_title = '~ nvim config ~',
-      cwd = vim.g.vim_dir,
+      cwd = vim.fn.stdpath 'config',
       file_ignore_patterns = { '.git/.*', 'dotbot/.*' },
     }
   end
 
+  local function dotfiles()
+    builtins.find_files {
+      prompt_title = '~ dotfiles ~',
+      cwd = vim.g.dotfiles,
+    }
+  end
+
+  local function orgfiles()
+    builtins.find_files {
+      prompt_title = 'Org',
+      cwd = vim.fn.expand '~/Desktop/org',
+    }
+  end
+
   local function frecency()
-    telescope.extensions.frecency.frecency(themes.get_dropdown {
-      default_text = ':CWD:',
+    telescope.extensions.frecency.frecency(dropdown {
       winblend = 10,
       border = true,
       previewer = false,
@@ -118,10 +166,35 @@ return function()
     })
   end
 
-  require('which-key').register({
-    f = {
+  local function gh_notifications()
+    telescope.extensions.ghn.ghn(dropdown())
+  end
+
+  local function installed_plugins()
+    require('telescope.builtin').find_files {
+      cwd = vim.fn.stdpath 'data' .. '/site/pack/packer',
+    }
+  end
+
+  local function tmux_sessions()
+    telescope.extensions.tmux.sessions {}
+  end
+
+  local function tmux_windows()
+    telescope.extensions.tmux.windows {
+      entry_format = '#S: #T',
+    }
+  end
+
+  require('which-key').register {
+    ['<c-p>'] = { project_files, 'telescope: find files' },
+    ['<leader>f'] = {
       name = '+telescope',
       a = { builtins.builtin, 'builtins' },
+      b = { builtins.current_buffer_fuzzy_find, 'current buffer fuzzy find' },
+      d = { dotfiles, 'dotfiles' },
+      f = { builtins.find_files, 'find files' },
+      n = { gh_notifications, 'notifications' },
       g = {
         name = '+git',
         c = { builtins.git_commits, 'commits' },
@@ -129,16 +202,24 @@ return function()
       },
       m = { builtins.man_pages, 'man pages' },
       h = { frecency, 'history' },
-      n = { nvim_config, 'nvim config' },
-      r = { builtins.reloader, 'module reloader' },
+      c = { nvim_config, 'nvim config' },
       o = { builtins.buffers, 'buffers' },
-      w = { builtins.lsp_dynamic_workspace_symbols, 'workspace symbols', silent = false },
+      p = { installed_plugins, 'plugins' },
+      O = { orgfiles, 'org files' },
+      R = { builtins.reloader, 'module reloader' },
+      r = { builtins.resume, 'resume last picker' },
+      s = { builtins.live_grep, 'grep string' },
+      t = {
+        name = '+tmux',
+        s = { tmux_sessions, 'sessions' },
+        w = { tmux_windows, 'windows' },
+      },
       ['?'] = { builtins.help_tags, 'help' },
     },
-    c = {
+    ['<leader>c'] = {
       d = { builtins.lsp_workspace_diagnostics, 'telescope: workspace diagnostics' },
+      s = { builtins.lsp_document_symbols, 'telescope: document symbols' },
+      w = { builtins.lsp_dynamic_workspace_symbols, 'telescope: workspace symbols' },
     },
-  }, {
-    prefix = '<leader>',
-  })
+  }
 end

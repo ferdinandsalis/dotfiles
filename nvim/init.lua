@@ -1,9 +1,11 @@
--- This is all taken from https://github.com/akinsho/dotfiles
+---------------------------------------------------------------------------------
+-- NVIM CONFIG
+-- This is all shamefully taken from https://github.com/akinsho/dotfiles
 -- with some minor modifications
+---------------------------------------------------------------------------------
 
--- NOTE: this is set by nvim by default but maybe too late
-vim.cmd 'syntax enable'
-
+vim.g.os = vim.loop.os_uname().sysname
+vim.g.open_command = vim.g.os == 'Darwin' and 'open' or 'xdg-open'
 vim.g.dotfiles = '~/.doffiles'
 vim.g.vim_dir = '~/.dotfiles/nvim'
 
@@ -14,6 +16,18 @@ vim.g.vim_dir = '~/.dotfiles/nvim'
 vim.g.mapleader = ',' -- Remap leader key
 vim.g.maplocalleader = ' ' -- Local leader is <Space>
 
+local ok, reload = pcall(require, 'plenary.reload')
+RELOAD = ok and reload.reload_module or function(...)
+  return ...
+end
+function R(name)
+  RELOAD(name)
+  return require(name)
+end
+
+------------------------------------------------------------------------
+-- Plugin Configurations
+------------------------------------------------------------------------
 require 'fss.globals'
 require 'fss.settings'
 require 'fss.highlights'

@@ -1,4 +1,4 @@
-local utils = require 'fss.plugins.utils'
+local utils = require 'fss.utils.plugins'
 
 local conf = utils.conf
 local packer_notify = utils.packer_notify
@@ -16,15 +16,11 @@ utils.bootstrap_packer()
 -- cfilter plugin allows filter down an existing quickfix list
 vim.cmd 'packadd! cfilter'
 
--- FIXME: currently because mpack is required BEFORE packer
--- loads it can't be loaded by packer which doesn't set the
--- packpath till later in the setup process e.g. when packer compiled is loaded
--- so the following command needs to be manually executed
--- luarocks install --lua-version=5.1 mpack
-local ok, impatient = fss.safe_require 'impatient'
-if ok then
-  impatient.enable_profile()
-end
+fss.safe_require 'impatient'
+-- FIXME: profiling causes load issues with fzy-lua-native
+-- if impatient_ok then
+--   impatient.enable_profile()
+-- end
 
 -- NOTE: luarocks install on every single PackerInstall https://github.com/wbthomason/packer.nvim/issues/180
 
@@ -38,102 +34,50 @@ require('packer').startup {
 
     use_rocks 'penlight'
 
-    -- NOTE: this plugin will be redundant once https://github.com/neovim/neovim/pull/15436 is merged
-    use 'lewis6991/impatient.nvim'
-
     use {
       'ahmedkhalf/project.nvim',
       config = function()
-        require('project_nvim').setup()
-      end,
-    }
-
-    use {
-      'camspiers/snap',
-      rocks = { 'fzy' },
-      event = 'CursorHold',
-      keys = { '<C-p>' },
-      setup = function()
-        require('which-key').register({
-          ['f'] = {
-            o = 'snap: buffers',
-            p = 'snap: project files',
-            s = 'snap: grep',
-            c = 'snap: cursor word',
-            d = 'snap: dotfiles',
-            O = 'snap: org files',
-          },
-        }, {
-          prefix = '<leader>',
-        })
-      end,
-      config = function()
-        local H = require 'fss.highlights'
-        local comment_fg = H.get_hl('Comment', 'fg')
-        require('fss.highlights').plugin(
-          'snap',
-          { 'SnapSelect', { link = 'TelescopeSelection', force = true } },
-          { 'SnapPosition', { link = 'Keyword', force = true } },
-          { 'SnapBorder', { guifg = comment_fg } }
-        )
-
-        local snap = require 'snap'
-        local config = require 'snap.config'
-        local file = config.file:with {
-          reverse = true,
-          suffix = ' »',
-          consumer = 'fzy',
-        }
-        local vimgrep = config.vimgrep:with {
-          suffix = ' »',
-          reverse = true,
-          limit = 50000,
-        }
-        local args = { '--hidden', '--iglob', '!{.git/*,zsh/plugins/*,dotbot/*}' }
-        snap.maps {
-          {
-            '<c-p>',
-            file { prompt = 'Project', args = args, try = { 'git.file', 'ripgrep.file' } },
-            { command = 'project-files' },
-          },
-          {
-            '<leader>fp',
-            file { prompt = 'Project', args = args, try = { 'git.file', 'ripgrep.file' } },
-            { command = 'project-files' },
-          },
-          {
-            '<leader>fd',
-            file {
-              prompt = 'Dotfiles',
-              producer = 'ripgrep.file',
-              args = { vim.env.DOTFILES, unpack(args) },
-            },
-            { command = 'dots' },
-          },
-          {
-            '<leader>fO',
-            file {
-              prompt = 'Org',
-              producer = 'ripgrep.file',
-              args = { vim.fn.expand '~/Desktop/Orgmode/' },
-            },
-            { command = 'org' },
-          },
-          { '<leader>fs', vimgrep { limit = 50000, args = args }, { command = 'grep' } },
-          { '<leader>fc', vimgrep { prompt = 'Find word', args = args, filter_with = 'cword' } },
-          { '<leader>fo', file { producer = 'vim.buffer' }, { command = 'buffers' } },
+        require('project_nvim').setup {
+          ignore_lsp = { "null-ls", "jsonls", "graphql" },
+          silent_chdir = false
         }
       end,
     }
 
     use {
       'nvim-telescope/telescope.nvim',
-      event = 'CursorHold',
+      cmd = 'Telescope',
+      keys = { '<c-p>', '<leader>fo', '<leader>ff', '<leader>fs' },
+      module_pattern = 'telescope.*',
       config = conf 'telescope',
       requires = {
-        { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' },
-        { 'nvim-telescope/telescope-frecency.nvim', requires = 'tami5/sqlite.lua' },
-        { 'nvim-telescope/telescope-smart-history.nvim' },
+        {
+          'nvim-telescope/telescope-fzf-native.nvim',
+          run = 'make',
+          after = 'telescope.nvim',
+          config = function()
+            require('telescope').load_extension 'fzf'
+          end,
+        },
+        {
+          'nvim-telescope/telescope-frecency.nvim',
+          after = 'telescope.nvim',
+          requires = 'tami5/sqlite.lua',
+        },
+        {
+          'camgraff/telescope-tmux.nvim',
+          after = 'telescope.nvim',
+          config = function()
+            require('telescope').load_extension 'tmux'
+          end,
+        },
+        {
+          'nvim-telescope/telescope-smart-history.nvim',
+          after = 'telescope.nvim',
+          config = function()
+            require('telescope').load_extension 'smart_history'
+          end,
+        },
       },
     }
 
@@ -176,10 +120,29 @@ require('packer').startup {
 
     use {
       'rcarriga/vim-ultest',
-      opt = true,
-      cmd = { 'Ultest', 'UltestNearest' },
+      cmd = 'Ultest',
+      wants = 'vim-test',
+      event = { 'BufEnter *_test.*,*_spec.*' },
       requires = { 'vim-test/vim-test' },
       run = ':UpdateRemotePlugins',
+      config = function()
+        local test_patterns = { '*_test.*', '*_spec.*' }
+        fss.augroup('UltestTests', {
+          {
+            events = { 'BufWritePost' },
+            targets = test_patterns,
+            command = 'UltestNearest',
+          },
+        })
+        fss.nmap(']T', '<Plug>(ultest-next-fail)', {
+          label = 'ultest: next failure',
+          buffer = 0,
+        })
+        fss.nmap('[T', '<Plug>(ultest-prev-fail)', {
+          label = 'ultest: previous failure',
+          buffer = 0,
+        })
+      end,
     }
 
     use {
@@ -188,6 +151,21 @@ require('packer').startup {
         require('auto-session').setup {
           auto_session_root_dir = ('%s/session/auto/'):format(vim.fn.stdpath 'data'),
         }
+      end,
+    }
+
+    use {
+      'christoomey/vim-tmux-navigator',
+      config = function()
+        vim.g.tmux_navigator_no_mappings = 1
+        fss.nnoremap('<C-H>', '<cmd>TmuxNavigateLeft<cr>')
+        fss.nnoremap('<C-J>', '<cmd>TmuxNavigateDown<cr>')
+        fss.nnoremap('<C-K>', '<cmd>TmuxNavigateUp<cr>')
+        fss.nnoremap('<C-L>', '<cmd>TmuxNavigateRight<cr>')
+        -- Disable tmux navigator when zooming the Vim pane
+        vim.g.tmux_navigator_disable_when_zoomed = 1
+        vim.g.tmux_navigator_preserve_zoom = 1
+        vim.g.tmux_navigator_save_on_switch = 2
       end,
     }
 
@@ -289,25 +267,11 @@ require('packer').startup {
       },
     }
 
-    use 'folke/lua-dev.nvim'
+    use { 'folke/lua-dev.nvim', commit = 'e958850' }
 
-    use {
-      'kabouzeid/nvim-lspinstall',
-      module = 'lspinstall',
-      requires = 'nvim-lspconfig',
-      config = function()
-        require('lspinstall').post_install_hook = function()
-          fss.lsp.setup_servers()
-          vim.cmd 'bufdo e'
-        end
-      end,
-    }
+    use { 'neovim/nvim-lspconfig', config = conf 'lspconfig' }
 
-    use {
-      'neovim/nvim-lspconfig',
-      event = 'BufReadPre',
-      config = conf 'lspconfig',
-    }
+    use { 'williamboman/nvim-lsp-installer', requires = 'nvim-lspconfig' }
 
     use {
       'nvim-lua/lsp-status.nvim',
@@ -324,62 +288,83 @@ require('packer').startup {
       end,
     }
 
-    use {
-      'kosayoda/nvim-lightbulb',
-      config = function()
-        fss.augroup('NvimLightbulb', {
-          {
-            events = { 'CursorHold', 'CursorHoldI' },
-            targets = { '*' },
-            command = function()
-              require('nvim-lightbulb').update_lightbulb {
-                sign = { enabled = false },
-                virtual_text = { enabled = true },
-              }
-            end,
-          },
-        })
-      end,
-    }
+    use 'jose-elias-alvarez/nvim-lsp-ts-utils'
 
     use {
       'jose-elias-alvarez/null-ls.nvim',
+      run = function()
+        utils.install('write-good', 'npm', 'install -g')
+      end,
       requires = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
-      -- trigger loading after lspconfig has started the other servers
-      -- since there is otherwise a race condition and null-ls' setup would
-      -- have to be moved into lspconfig.lua otherwise
-      event = 'User LspServersStarted',
       config = function()
         local null_ls = require 'null-ls'
+        local builtins = null_ls.builtins
         null_ls.config {
           debounce = 150,
           sources = {
-            null_ls.builtins.code_actions.gitsigns,
-            null_ls.builtins.formatting.stylua,
-            null_ls.builtins.formatting.prettierd,
+            -- builtins.hover.dictionary,
+            builtins.diagnostics.write_good,
+            builtins.code_actions.gitsigns,
+            builtins.formatting.mix,
+            builtins.formatting.prettierd,
+            builtins.formatting.stylua.with {
+              condition = function(_utils)
+                return _utils.root_has_file 'stylua.toml'
+              end,
+            },
           },
         }
-        require('lspconfig')['null-ls'].setup {
-          on_attach = fss.lsp.on_attach,
+        require('lspconfig')['null-ls'].setup { on_attach = fss.lsp.on_attach }
+      end,
+    }
+
+    use {
+      'windwp/lsp-fastaction.nvim',
+      config = function()
+        local fastaction = require 'lsp-fastaction'
+        fastaction.setup {
+          action_data = {
+            dart = {
+              { pattern = 'import library', key = 'i', order = 1 },
+              { pattern = 'wrap with widget', key = 'w', order = 2 },
+              { pattern = 'column', key = 'c', order = 3 },
+              { pattern = 'row', key = 'r', order = 3 },
+              { pattern = 'container', key = 'C', order = 4 },
+              { pattern = 'center', key = 'E', order = 4 },
+              { pattern = 'padding', key = 'p', order = 4 },
+              { pattern = 'remove', key = 'r', order = 5 },
+              -- range code action
+              { pattern = "surround with %'if'", key = 'i', order = 2 },
+              { pattern = 'try%-catch', key = 't', order = 2 },
+              { pattern = 'for%-in', key = 'f', order = 2 },
+              { pattern = 'setstate', key = 's', order = 2 },
+            },
+          },
+        }
+        fss.xnoremap(
+          '<leader>ca',
+          "<esc><Cmd>lua require('lsp-fastaction').range_code_action()<CR>",
+          'lsp: code action'
+        )
+        require('which-key').register {
+          ['<leader>ca'] = { fastaction.code_action, 'lsp: code action' },
         }
       end,
     }
 
-    -- use {
-    --   'ray-x/lsp_signature.nvim',
-    --   config = function()
-    --     require('lsp_signature').setup {
-    --       bind = true,
-    --       fix_pos = function(signatures, _) -- second argument is the client
-    --         return signatures[1].activeParameter >= 0 and signatures[1].parameters > 1
-    --       end,
-    --       hint_enable = false,
-    --       handler_opts = {
-    --         border = 'rounded',
-    --       },
-    --     }
-    --   end,
-    -- }
+    use {
+      'ray-x/lsp_signature.nvim',
+      config = function()
+        require('lsp_signature').setup {
+          bind = true,
+          fix_pos = function(signatures, _) -- second argument is the client
+            return signatures[1].activeParameter >= 0 and signatures[1].parameters > 1
+          end,
+          hint_enable = false,
+          handler_opts = { border = 'rounded' },
+        }
+      end,
+    }
 
     use {
       'hrsh7th/nvim-cmp',
@@ -399,17 +384,10 @@ require('packer').startup {
       'AckslD/nvim-neoclip.lua',
       config = function()
         require('neoclip').setup {
+          enable_persistant_history = true,
           keys = {
-            i = {
-              select = '<c-p>',
-              paste = '<CR>',
-              paste_behind = '<c-k>',
-            },
-            n = {
-              select = 'p',
-              paste = '<CR>',
-              paste_behind = 'P',
-            },
+            i = { select = '<c-p>', paste = '<CR>', paste_behind = '<c-k>' },
+            n = { select = 'p', paste = '<CR>', paste_behind = 'P' },
           },
         }
         local function clip()
@@ -527,6 +505,7 @@ require('packer').startup {
       after = { 'nvim-cmp' },
       config = function()
         require('tabout').setup {
+          completion = false,
           ignore_beginning = false,
         }
       end,
@@ -570,6 +549,8 @@ require('packer').startup {
 
     use 'mtdl9/vim-log-highlighting'
 
+    use 'slime-lang/vim-slime-syntax'
+
     use 'plasticboy/vim-markdown'
 
     use 'folke/tokyonight.nvim'
@@ -589,42 +570,30 @@ require('packer').startup {
     -- Git {{{
     --------------------------------------------------------------------------------
 
-    use { 'TimUntersberger/neogit', config = conf 'neogit' }
+    use {
+      'TimUntersberger/neogit',
+      cmd = 'Neogit',
+      keys = { '<localleader>gs', '<localleader>gl', '<localleader>gp' },
+      requires = 'plenary.nvim',
+      setup = conf('neogit').setup,
+      config = conf('neogit').config,
+    }
 
     use {
       'sindrets/diffview.nvim',
-      cmd = { 'DiffviewOpen', 'DiffViewFileHistory' },
+      cmd = { 'DiffviewOpen', 'DiffviewFileHistory' },
       module = 'diffview',
       keys = '<localleader>gd',
+      setup = function()
+        require('which-key').register { ['<localleader>gd'] = 'diffview: diff HEAD' }
+      end,
       config = function()
-        local cb = require('diffview.config').diffview_callback
-        require('which-key').register(
-          { gd = { '<Cmd>DiffviewOpen<CR>', 'diff ref' } },
-          { prefix = '<localleader>' }
-        )
+        fss.nnoremap('<localleader>gd', '<Cmd>DiffviewOpen<CR>')
         require('diffview').setup {
+          enhanced_diff_hl = true,
           key_bindings = {
-            file_panel = {
-              ['q'] = '<Cmd>DiffviewClose<CR>',
-              ['j'] = cb 'next_entry', -- Bring the cursor to the next file entry
-              ['<down>'] = cb 'next_entry',
-              ['k'] = cb 'prev_entry', -- Bring the cursor to the previous file entry.
-              ['<up>'] = cb 'prev_entry',
-              ['<cr>'] = cb 'select_entry', -- Open the diff for the selected entry.
-              ['o'] = cb 'select_entry',
-              ['R'] = cb 'refresh_files', -- Update stats and entries in the file list.
-              ['<tab>'] = cb 'select_next_entry',
-              ['<s-tab>'] = cb 'select_prev_entry',
-              ['<leader>e'] = cb 'focus_files',
-              ['<leader>b'] = cb 'toggle_files',
-            },
-            view = {
-              ['q'] = '<Cmd>DiffviewClose<CR>',
-              ['<tab>'] = cb 'select_next_entry', -- Open the diff for the next file
-              ['<s-tab>'] = cb 'select_prev_entry', -- Open the diff for the previous file
-              ['<leader>e'] = cb 'focus_files', -- Bring focus to the files panel
-              ['<leader>b'] = cb 'toggle_files', -- Toggle the files panel.
-            },
+            file_panel = { q = '<Cmd>DiffviewClose<CR>' },
+            view = { q = '<Cmd>DiffviewClose<CR>' },
           },
         }
       end,
@@ -640,7 +609,7 @@ require('packer').startup {
       'rhysd/conflict-marker.vim',
       config = function()
         require('fss.highlights').plugin(
-          'ConflictMarker',
+          'conflictMarker',
           { 'ConflictMarkerBegin', { guibg = '#2f7366' } },
           { 'ConflictMarkerOurs', { guibg = '#2e5049' } },
           { 'ConflictMarkerTheirs', { guibg = '#344f69' } },
@@ -657,24 +626,24 @@ require('packer').startup {
 
     use {
       'pwntester/octo.nvim',
-      cmd = 'Octo',
-      keys = { '<localleader>opl' },
+      cmd = 'Octo*',
+      setup = function()
+        require('which-key').register {
+          ['<localleader>o'] = {
+            name = '+octo',
+            p = { name = '+pull-request', l = { '<cmd>Octo pr list<CR>', 'list' } },
+            i = { name = '+issues', l = { '<cmd>Octo issue list<CR>', 'list' } },
+          },
+        }
+      end,
       config = function()
         require('octo').setup()
-        require('which-key').register({
-          o = {
-            name = '+octo',
-            p = {
-              l = {
-                '<cmd>Octo pr list<CR>',
-                'PR List',
-              },
-            },
-          },
-        }, {
-          prefix = '<localleader>',
-        })
       end,
+    }
+
+    use {
+      'rlch/github-notifications.nvim',
+      requires = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope.nvim' },
     }
 
     ---}}}
@@ -693,7 +662,51 @@ require('packer').startup {
 
     use {
       'lukas-reineke/indent-blankline.nvim',
-      config = conf 'indentline',
+      config = function()
+        require('indent_blankline').setup {
+          char = '│', -- ┆ ┊ 
+          show_foldtext = false,
+          show_first_indent_level = true,
+          filetype_exclude = {
+            'startify',
+            'dashboard',
+            'log',
+            'fugitive',
+            'gitcommit',
+            'packer',
+            'vimwiki',
+            'markdown',
+            'json',
+            'txt',
+            'vista',
+            'help',
+            'NvimTree',
+            'git',
+            'TelescopePrompt',
+            'undotree',
+            'flutterToolsOutline',
+            'norg',
+            'org',
+            'orgagenda',
+            '', -- for all buffers without a file type
+          },
+          buftype_exclude = { 'terminal', 'nofile' },
+          show_current_context = true,
+          context_patterns = {
+            'class',
+            'function',
+            'method',
+            'block',
+            'list_literal',
+            'selector',
+            '^if',
+            '^table',
+            'if_statement',
+            'while',
+            'for',
+          },
+        }
+      end,
     }
 
     use {
@@ -706,16 +719,23 @@ require('packer').startup {
       'karb94/neoscroll.nvim',
       config = function()
         require('neoscroll').setup {
-          mappings = {
-            '<C-u>',
-            '<C-d>',
-            '<C-b>',
-            '<C-f>',
-            '<C-y>',
-            'zt',
-            'zz',
-            'zb',
-          },
+          mappings = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', 'zt', 'zz', 'zb' },
+          stop_eof = false,
+          hide_cursor = false,
+        }
+      end,
+    }
+
+    use {
+      'mg979/vim-visual-multi',
+      config = function()
+        vim.g.VM_highlight_matches = 'underline'
+        vim.g.VM_theme = 'codedark'
+        vim.g.VM_maps = {
+          ['Find Under'] = '<C-e>',
+          ['Find Subword Under'] = '<C-e>',
+          ['Select Cursor Down'] = [[\j]],
+          ['Select Cursor Up'] = [[\k]],
         }
       end,
     }
@@ -724,7 +744,7 @@ require('packer').startup {
 
     use {
       'kyazdani42/nvim-tree.lua',
-      config = conf 'tree',
+      config = conf 'nvimtree',
       requires = 'nvim-web-devicons',
     }
 
@@ -771,20 +791,35 @@ require('packer').startup {
       end,
     }
 
+    -- prevent select and visual mode from overwriting the clipboard
+    use {
+      'kevinhwang91/nvim-hclipboard',
+      config = function()
+        require('hclipboard').start()
+      end,
+    }
+
+    -----------------------------------------------------------------------------//
+    -- Quickfix
+    -----------------------------------------------------------------------------//
+    use {
+      'https://gitlab.com/yorickpeterse/nvim-pqf',
+      event = 'VimEnter',
+      config = function()
+        require('fss.highlights').plugin(
+          'NvimPQF',
+          { 'qfPosition', { link = 'Tag', force = true } }
+        )
+        require('pqf').setup()
+      end,
+    }
+
     use {
       'kevinhwang91/nvim-bqf',
       config = function()
         local H = require 'fss.highlights'
         local comment_fg = H.get_hl('Comment', 'fg')
         H.plugin('bqf', { 'BqfPreviewBorder', { guifg = comment_fg } })
-      end,
-    }
-
-    -- prevent select and visual mode from overwriting the clipboard
-    use {
-      'kevinhwang91/nvim-hclipboard',
-      config = function()
-        require('hclipboard').start()
       end,
     }
 
@@ -798,11 +833,11 @@ require('packer').startup {
     --@see: https://github.com/wbthomason/packer.nvim/issues/464
     use {
       'gelguy/wilder.nvim',
-      -- event = { 'CursorHold', 'CmdlineEnter' },
+      event = { 'CursorHold', 'CmdlineEnter' },
       rocks = { 'luarocks-fetch-gitrec', 'pcre2' },
       requires = { 'romgrk/fzy-lua-native' },
       config = function()
-        fss.source 'vimscript/wilder.vim'
+        fss.source('vimscript/wilder.vim', true)
       end,
     }
 
@@ -813,8 +848,8 @@ require('packer').startup {
     -- Editing {{{
     --------------------------------------------------------------------------------
 
-    use { 'tversteeg/registers.nvim', opt = true }
     use { 'junegunn/vim-easy-align', cmd = 'EasyAlign' }
+
     use {
       'mbbill/undotree',
       cmd = 'UndotreeToggle',
@@ -873,12 +908,20 @@ require('packer').startup {
 
     use {
       'windwp/nvim-autopairs',
+      after = 'nvim-cmp',
       config = function()
         require('nvim-autopairs').setup {
           close_triple_quotes = true,
+          check_ts = false,
+        }
+        require('nvim-autopairs.completion.cmp').setup {
+          map_cr = true, --  map <CR> on insert mode
+          map_complete = true, -- it will auto insert `(` after select function or method item
+          auto_select = true, -- automatically select the first item
         }
       end,
     }
+
     use {
       'tpope/vim-surround',
       config = function()
@@ -886,7 +929,9 @@ require('packer').startup {
         fss.xmap('s', '<Plug>VSurround')
       end,
     }
+
     use 'AndrewRadev/splitjoin.vim'
+
     use {
       'AndrewRadev/dsf.vim',
       setup = function()
@@ -923,9 +968,32 @@ require('packer').startup {
         vim.g.dsf_no_mappings = 1
       end,
     }
-    use { 'b3nj5m1n/kommentary', config = conf 'kommentary' }
+
+    use {
+      'numToStr/Comment.nvim',
+      config = function()
+        require('Comment').setup()
+      end,
+    }
+
     use 'chaoren/vim-wordmotion'
+
     use 'arecarn/vim-fold-cycle'
+
+    use {
+      'chentau/marks.nvim',
+      config = function()
+        require('fss.highlights').plugin('marks', { 'MarkSignHL', { guifg = 'Red' } })
+        require('marks').setup {
+          -- builtin_marks = { '.', '^' },
+          bookmark_0 = {
+            sign = '⚑',
+            virt_text = 'bookmarks',
+          },
+        }
+      end,
+    }
+
     use {
       'winston0410/range-highlight.nvim',
       opt = true,
@@ -945,30 +1013,43 @@ require('packer').startup {
     }
 
     use {
-      'soywod/himalaya', --- Email in nvim
-      rtp = 'vim',
-      run = 'curl -sSL https://raw.githubusercontent.com/soywod/himalaya/master/install.sh | PREFIX=~/.local sh',
+      'lukas-reineke/headlines.nvim',
       config = function()
-        require('which-key').register({
-          e = {
-            name = '+email',
-            l = { '<Cmd>Himalaya<CR>', 'list' },
-          },
-        }, {
-          prefix = '<localleader>',
-        })
+        require('headlines').setup()
+      end,
+    }
+
+    use {
+      'akinsho/org-bullets.nvim',
+      config = function()
+        require('org-bullets').setup()
       end,
     }
 
     ---}}}
     --------------------------------------------------------------------------------
-    -- Profiling {{{
+    -- Profiling & Startup {{{
     --------------------------------------------------------------------------------
+    use {
+      'nathom/filetype.nvim',
+      config = function()
+        require('filetype').setup {
+          overrides = {
+            literal = {
+              ['kitty.conf'] = 'kitty',
+            },
+          },
+        }
+      end,
+    }
+
+    -- NOTE: this plugin will be redundant once https://github.com/neovim/neovim/pull/15436 is merged
+    use 'lewis6991/impatient.nvim'
     use {
       'dstein64/vim-startuptime',
       cmd = 'StartupTime',
       config = function()
-        vim.g.startuptime_tries = 10
+        vim.g.startuptime_tries = 15
         vim.g.startuptime_exe_args = { '+let g:auto_session_enabled = 0' }
       end,
     }
@@ -1004,6 +1085,11 @@ fss.command {
   end,
 }
 
+if not vim.g.packer_compiled_loaded then
+  fss.source(PACKER_COMPILED_PATH)
+  vim.g.packer_compiled_loaded = true
+end
+
 fss.augroup('PackerSetupInit', {
   {
     events = { 'BufWritePost' },
@@ -1011,17 +1097,11 @@ fss.augroup('PackerSetupInit', {
     command = function()
       fss.invalidate('fss.plugins', true)
       require('packer').compile()
-      packer_notify 'packer compiled...'
     end,
   },
 })
 
 fss.nnoremap('<leader>ps', [[<Cmd>PackerSync<CR>]])
 fss.nnoremap('<leader>pc', [[<Cmd>PackerClean<CR>]])
-
-if not vim.g.packer_compiled_loaded then
-  vim.cmd(fmt('source %s', PACKER_COMPILED_PATH))
-  vim.g.packer_compiled_loaded = true
-end
 
 -- vim:foldmethod=marker

@@ -1,21 +1,13 @@
 fss.lsp = {}
 
+--- TODO: remove once 0.6 is stable (use vim.diagnostic)
+local diagnostics = fss.nightly and vim.diagnostic or vim.lsp.diagnostic
+
 -----------------------------------------------------------------------------//
 -- Autocommands
 -----------------------------------------------------------------------------//
 
 local function setup_autocommands(client, _)
-  fss.augroup('LspLocationList', {
-    {
-      events = { 'User LspDiagnosticsChanged' },
-      command = function()
-        -- FIXME: this opens even when there is no content so this is closed by default
-        -- argument has changed in nvim nightly
-        local args = fss.has 'nvim-0.6' and { open = false } or { open_loclist = false }
-        vim.lsp.diagnostic.set_loclist(args)
-      end,
-    },
-  })
   if client and client.resolved_capabilities.code_lens then
     fss.augroup('LspCodeLens', {
       {
@@ -55,53 +47,6 @@ local function setup_autocommands(client, _)
   end
 end
 
--- Capture real implementation of function that sets signs
-local orig_set_signs = vim.lsp.diagnostic.set_signs
-local diagnostic_cache = {}
-
----Override diagnostics signs helper to only show the single most relevant sign
----@see: http://reddit.com/r/neovim/comments/mvhfw7/can_built_in_lsp_diagnostics_be_limited_to_show_a
----@param diagnostics table
----@param bufnr number
----@param client_id number
----@param sign_ns number
----@param opts table
-local function set_highest_signs(diagnostics, bufnr, client_id, sign_ns, opts)
-  -- original func runs some checks, which I think is worth doing but maybe overkill
-  if not diagnostics then
-    diagnostics = diagnostic_cache[bufnr][client_id]
-  end
-
-  -- early escape
-  if not diagnostics then
-    return
-  end
-
-  -- Work out max severity diagnostic per line
-  local max_severity_per_line = {}
-  for _, d in pairs(diagnostics) do
-    if max_severity_per_line[d.range.start.line] then
-      local current_d = max_severity_per_line[d.range.start.line]
-      if d.severity < current_d.severity then
-        max_severity_per_line[d.range.start.line] = d
-      end
-    else
-      max_severity_per_line[d.range.start.line] = d
-    end
-  end
-
-  -- map to list
-  local filtered_diagnostics = {}
-  for _, v in pairs(max_severity_per_line) do
-    table.insert(filtered_diagnostics, v)
-  end
-
-  -- call original function
-  orig_set_signs(filtered_diagnostics, bufnr, client_id, sign_ns, opts)
-end
-
-vim.lsp.diagnostic.set_signs = set_highest_signs
-
 -----------------------------------------------------------------------------//
 -- Mappings
 -----------------------------------------------------------------------------//
@@ -112,27 +57,24 @@ vim.lsp.diagnostic.set_signs = set_highest_signs
 local function setup_mappings(client, bufnr)
   local maps = {
     ['<leader>rf'] = { vim.lsp.buf.formatting, 'lsp: format buffer' },
-    ['<leader>cw'] = { vim.lsp.buf.workspace_symbol, 'lsp: workspace symbol' },
-    ['<leader>cs'] = { vim.lsp.buf.document_symbol, 'lsp: document symbol' },
     ['gi'] = 'lsp: implementation',
     ['gd'] = { vim.lsp.buf.definition, 'lsp: definition' },
     ['gr'] = { vim.lsp.buf.references, 'lsp: references' },
     ['gI'] = { vim.lsp.buf.incoming_calls, 'lsp: incoming calls' },
     ['K'] = { vim.lsp.buf.hover, 'lsp: hover' },
   }
-
   maps[']c'] = {
     function()
-      vim.lsp.diagnostic.goto_prev {
-        popup_opts = { border = 'rounded', focusable = false },
+      diagnostics.goto_prev {
+        popup_opts = { border = 'rounded', focusable = false, source = 'always' },
       }
     end,
     'lsp: go to prev diagnostic',
   }
   maps['[c'] = {
     function()
-      vim.lsp.diagnostic.goto_next {
-        popup_opts = { border = 'rounded', focusable = false },
+      diagnostics.goto_next {
+        popup_opts = { border = 'rounded', focusable = false, source = 'always' },
       }
     end,
     'lsp: go to next diagnostic',
@@ -186,43 +128,67 @@ function fss.lsp.tagfunc(pattern, flags)
   return results
 end
 
-fss.lsp.icons = {
-  Text = ' Text',
-  Method = ' Method',
-  Function = 'ƒ Function',
-  Constructor = ' Constructor',
-  Field = '識 Field',
-  Variable = ' Variable',
-  Class = ' Class',
-  Interface = 'ﰮ Interface',
-  Module = ' Module',
-  Property = ' Property',
-  Unit = ' Unit',
-  Value = ' Value',
-  Enum = '了 Enum',
-  Keyword = ' Keyword',
-  Snippet = ' Snippet',
-  Color = ' Color',
-  File = ' File',
-  Reference = '渚 Reference',
-  Folder = ' Folder',
-  Constant = ' Constant',
-  Struct = ' Struct',
-  Event = '鬒 Event',
-  Operator = '\u{03a8} Operator',
-  TypeParameter = ' Type Parameter',
-}
+local function tsserver_on_attach(client, bufnr)
+  setup_autocommands(client, bufnr)
+  setup_mappings(client, bufnr)
 
-local kinds = require('vim.lsp.protocol').CompletionItemKind
-for i, kind in ipairs(kinds) do
-  kinds[i] = fss.lsp.icons[kind] or kind
+  if client.resolved_capabilities.goto_definition then
+    vim.bo[bufnr].tagfunc = 'v:lua.fss.lsp.tagfunc'
+  end
+
+  require('lsp-status').on_attach(client)
+
+  client.resolved_capabilities.document_formatting = false
+  client.resolved_capabilities.document_range_formatting = false
+
+  local ts_utils = require("nvim-lsp-ts-utils")
+
+  -- defaults
+  ts_utils.setup {
+    debug = true,
+    disable_commands = false,
+    enable_import_on_completion = true,
+
+    -- import all
+    import_all_timeout = 5000, -- ms
+    import_all_priorities = {
+      buffers = 4, -- loaded buffer names
+      buffer_content = 3, -- loaded buffer content
+      local_files = 2, -- git files or files with relative path markers
+      same_file = 1, -- add to existing import statement
+    },
+    import_all_scan_buffers = 100,
+    import_all_select_source = false,
+
+    -- eslint
+    eslint_enable_code_actions = true,
+    eslint_enable_disable_comments = true,
+    eslint_bin = "eslint_d",
+    eslint_enable_diagnostics = false,
+    eslint_opts = {},
+
+    -- formatting
+    enable_formatting = false,
+    formatter = "prettierd",
+    formatter_opts = {},
+
+    -- update imports on file move
+    update_imports_on_move = true,
+    require_confirmation_on_move = true,
+    watch_dir = nil,
+
+    -- filter diagnostics
+    filter_out_diagnostics_by_severity = {},
+    filter_out_diagnostics_by_code = { 80001 },
+  }
+
+  -- required to fix code action ranges and filter diagnostics
+  ts_utils.setup_client(client)
 end
 
 function fss.lsp.on_attach(client, bufnr)
   setup_autocommands(client, bufnr)
   setup_mappings(client, bufnr)
-
-  client.resolved_capabilities.document_formatting = false
 
   if client.resolved_capabilities.goto_definition then
     vim.bo[bufnr].tagfunc = 'v:lua.fss.lsp.tagfunc'
@@ -236,102 +202,54 @@ end
 -----------------------------------------------------------------------------//
 
 fss.lsp.servers = {
-  lua = function()
-    --- NOTE: This is the secret sauce that allows reading requires and variables
-    --- between different modules in the nvim lua context
-    --- @see https://gist.github.com/folke/fe5d28423ea5380929c3f7ce674c41d8
-    --- if I ever decide to move away from lua dev then use the above
-    return require('lua-dev').setup {
-      library = {
-        vimruntime = false,
-        plugins = false,
-      },
-      lspconfig = {
-        settings = {
-          Lua = {
-            diagnostics = {
-              globals = {
-                'vim',
-                'describe',
-                'it',
-                'before_each',
-                'after_each',
-                'pending',
-                'teardown',
-                'packer_plugins',
-              },
+--- NOTE: This is the secret sauce that allows reading requires and variables
+  --- between different modules in the nvim lua context
+  --- @see https://gist.github.com/folke/fe5d28423ea5380929c3f7ce674c41d8
+  --- if I ever decide to move away from lua dev then use the above
+  sumneko_lua = require('lua-dev').setup {
+    lspconfig = {
+      settings = {
+        Lua = {
+          diagnostics = {
+            globals = {
+              'vim',
+              'describe',
+              'it',
+              'before_each',
+              'after_each',
+              'pending',
+              'teardown',
+              'packer_plugins',
             },
-            -- Await resolution of https://github.com/sumneko/lua-language-server/issues/543
-            -- completion = {keywordSnippet = "Both", callSnippet = "Both"}
           },
+          completion = { keywordSnippet = 'Replace', callSnippet = 'Replace' },
         },
       },
-    }
-  end,
-  typescript = function()
-    return {
-      filetypes = {
-        'javascript',
-        'javascriptreact',
-        'javascript.jsx',
-        'typescript',
-        'typescriptreact',
-        'typescript.tsx',
-      },
-      root_dir = function(fname)
-        return require('lspconfig/util').root_pattern 'tsconfig.json'(fname)
-          or require('lspconfig/util').root_pattern('package.json', 'jsconfig.json', '.git')(fname)
-      end,
-    }
-  end,
+    },
+  },
 }
 
------------------------------------------------------------------------------//
--- Commands
------------------------------------------------------------------------------//
-local command = fss.command
-
-command {
-  'LspLog',
-  function()
-    local path = vim.lsp.get_log_path()
-    vim.cmd('edit ' .. path)
-  end,
-}
-
-command {
-  'Format',
-  function()
-    vim.lsp.buf.formatting_sync(nil, 1000)
-  end,
-}
-
----Logic to (re)start installed language servers for use initialising lsps
+--Logic to (re)start installed language servers for use initialising lsps
 ---and restarting them on installing new ones
-function fss.lsp.setup_servers()
-  local lspconfig = require 'lspconfig'
-  local install_ok, lspinstall = fss.safe_require 'lspinstall'
+function fss.lsp.get_server_config(server)
   local nvim_lsp_ok, cmp_nvim_lsp = fss.safe_require 'cmp_nvim_lsp'
-  -- can't reasonably proceed if lspinstall isn't loaded
-  if not install_ok then
-    return
+  local status_capabilities = require('lsp-status').capabilities
+  local conf = fss.lsp.servers[server.name]
+  local config = type(conf) == 'table' and conf or {}
+  config.flags = { debounce_text_changes = 500 }
+  config.on_attach = fss.lsp.on_attach
+  if server.name == 'tsserver' then
+    config.on_attach = tsserver_on_attach
+  else
+    config.on_attach = fss.lsp.on_attach
   end
 
-  lspinstall.setup()
-  local installed = lspinstall.installed_servers()
-  local status_capabilities = require('lsp-status').capabilities
-  for _, server in pairs(installed) do
-    local config = fss.lsp.servers[server] and fss.lsp.servers[server]() or {}
-    config.flags = { debounce_text_changes = 500 }
-    config.on_attach = fss.lsp.on_attach
-    config.capabilities = config.capabilities or vim.lsp.protocol.make_client_capabilities()
-    if nvim_lsp_ok then
-      cmp_nvim_lsp.update_capabilities(config.capabilities)
-    end
-    config.capabilities = fss.deep_merge(status_capabilities, config.capabilities)
-    lspconfig[server].setup(config)
+  config.capabilities = config.capabilities or vim.lsp.protocol.make_client_capabilities()
+  if nvim_lsp_ok then
+    cmp_nvim_lsp.update_capabilities(config.capabilities)
   end
-  vim.cmd 'doautocmd User LspServersStarted'
+  config.capabilities = fss.deep_merge(status_capabilities, config.capabilities)
+  return config
 end
 
 return function()
@@ -340,57 +258,10 @@ return function()
   end
   vim.g.lspconfig_has_setup = true
 
-  if vim.env.DEVELOPING then
-    vim.lsp.set_log_level(vim.lsp.log_levels.DEBUG)
-  end
-
-  -----------------------------------------------------------------------------//
-  -- Signs
-  -----------------------------------------------------------------------------//
-  vim.fn.sign_define {
-    {
-      name = 'LspDiagnosticsSignError',
-      text = fss.style.icons.error,
-      texthl = 'LspDiagnosticsSignError',
-    },
-    {
-      name = 'LspDiagnosticsSignHint',
-      text = fss.style.icons.hint,
-      texthl = 'LspDiagnosticsSignHint',
-    },
-    {
-      name = 'LspDiagnosticsSignWarning',
-      text = fss.style.icons.warning,
-      texthl = 'LspDiagnosticsSignWarning',
-    },
-    {
-      name = 'LspDiagnosticsSignInformation',
-      text = fss.style.icons.info,
-      texthl = 'LspDiagnosticsSignInformation',
-    },
-  }
-
-  -----------------------------------------------------------------------------//
-  -- Handler overrides
-  -----------------------------------------------------------------------------//
-  vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(
-    vim.lsp.diagnostic.on_publish_diagnostics,
-    {
-      underline = true,
-      virtual_text = false,
-      signs = true,
-      update_in_insert = false,
-    }
-  )
-
-  local max_width = math.max(math.floor(vim.o.columns * 0.4), 100)
-  local max_height = math.max(math.floor(vim.o.lines * 0.3), 30)
-
-  -- NOTE: the hover handler returns the bufnr,winnr so can be used for mappings
-  vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(
-    vim.lsp.handlers.hover,
-    { border = 'rounded', max_width = max_width, max_height = max_height }
-  )
-
-  fss.lsp.setup_servers()
+  local lsp_installer = require 'nvim-lsp-installer'
+  lsp_installer.on_server_ready(function(server)
+    server:setup(fss.lsp.get_server_config(server))
+    vim.cmd [[ do User LspAttachBuffers ]]
+  end)
 end
+

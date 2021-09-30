@@ -1,5 +1,5 @@
 return function()
-  local org_dir = '~/Desktop/Orgmode'
+  local org_dir = '~/Desktop/org'
   require('fss.highlights').plugin(
     'org',
     { 'OrgDone', { guifg = 'Green', gui = 'bold' } },
@@ -17,7 +17,7 @@ return function()
   require('orgmode').setup {
     org_agenda_files = { org_dir .. '/**/*', '~/org/**/*' },
     org_default_notes_file = org_dir .. '/refile.org',
-    org_todo_keywords = { 'TODO', 'WAITING', 'NEXT', '|', 'DONE', 'CANCELLED' },
+    org_todo_keywords = { 'TODO(t)', 'WAITING', 'NEXT', '|', 'DONE', 'CANCELLED' },
     org_todo_keyword_faces = {
       NEXT = ':foreground royalblue :weight bold :slant italic',
       CANCELLED = ':foreground darkred',

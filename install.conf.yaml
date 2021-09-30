@@ -7,6 +7,7 @@
 
 - link:
     # ~/.dotfiles: ""
+    ~/.tmux.conf: tmux/.tmux.conf
     ~/.zshrc: zsh/zshrc
     ~/.zshenv: zsh/zshenv
     ~/.gitconfig: git/gitconfig

@@ -6,54 +6,63 @@
 --- 3. https://got-ravings.blogspot.com/2008/08/vim-pr0n-making-statuslines-that-own.html
 --- 4. Right sided truncation - https://stackoverflow.com/a/20899652
 
-local utils = require 'fss.statusline.utils'
+local utils = require 'fss.utils.statusline'
 local H = require 'fss.highlights'
 
 local P = fss.style.palette
 local M = {}
 
---- NOTE: Unicode characters including vim devicons should NOT be highlighted
---- as italic or bold, this is because the underlying bold font is not necessarily
---- patched with the nerd font characters
---- terminal emulators like kitty handle this by fetching nerd fonts elsewhere
---- but this is not universal across terminals so should be avoided
 local function colors()
-  local error_color = P.dark_red
+  --- NOTE: Unicode characters including vim devicons should NOT be highlighted
+  --- as italic or bold, this is because the underlying bold font is not necessarily
+  --- patched with the nerd font characters
+  --- terminal emulators like kitty handle this by fetching nerd fonts elsewhere
+  --- but this is not universal across terminals so should be avoided
+
   local indicator_color = P.bright_blue
-  local bg_color = H.alter_color(H.get_hl('Normal', 'bg'), -16)
+  local warning_fg = fss.style.lsp.colors.warn
+
+  local error_color = fss.style.lsp.colors.error
+  local info_color = fss.style.lsp.colors.info
   local normal_fg = H.get_hl('Normal', 'fg')
   local pmenu_bg = H.get_hl('Pmenu', 'bg')
   local string_fg = H.get_hl('String', 'fg')
-  local comment_fg = H.get_hl('Comment', 'fg')
-  local comment_gui = H.get_hl('Comment', 'gui')
   local number_fg = H.get_hl('Number', 'fg')
-  local warning_fg = P.light_yellow
+  local identifier_fg = H.get_hl('Identifier', 'fg')
   local inc_search_bg = H.get_hl('Search', 'bg')
 
+  local bg_color = H.alter_color(H.get_hl('Normal', 'bg'), -16)
+
   H.all {
-    { 'StMetadata', { guifg = comment_fg, guibg = bg_color } },
-    { 'StMetadataPrefix', { guibg = bg_color, guifg = comment_fg } },
+    { 'StMetadata', { guibg = bg_color, inherit = 'Comment' } },
+    { 'StMetadataPrefix', { guibg = bg_color, inherit = 'Comment', gui = 'NONE' } },
     { 'StIndicator', { guibg = bg_color, guifg = indicator_color } },
     { 'StModified', { guifg = string_fg, guibg = bg_color } },
+    { 'StGit', { guifg = P.light_red, guibg = bg_color } },
     { 'StGreen', { guifg = string_fg, guibg = bg_color } },
+    { 'StBlue', { guifg = P.dark_blue, guibg = bg_color, gui = 'bold' } },
     { 'StNumber', { guifg = number_fg, guibg = bg_color } },
-    { 'StCount', { guifg = normal_fg, guibg = P.whitesmoke, gui = 'bold' } },
+    { 'StCount', { guifg = 'bg', guibg = indicator_color, gui = 'bold' } },
     { 'StPrefix', { guibg = pmenu_bg, guifg = normal_fg } },
-    { 'StPrefixSep', { guibg = bg_color, guifg = pmenu_bg } },
-    { 'StDirectory', { guibg = bg_color, guifg = comment_fg, gui = 'italic' } },
+    { 'StDirectory', { guibg = bg_color, guifg = 'Gray', gui = 'italic' } },
     { 'StParentDirectory', { guibg = bg_color, guifg = string_fg, gui = 'bold' } },
-    { 'StDim', { guibg = bg_color, guifg = comment_fg } },
-    { 'StTitle', { guibg = bg_color, guifg = normal_fg, gui = 'bold' } },
-    { 'StComment', { guibg = bg_color, guifg = comment_fg, gui = comment_gui } },
-    { 'StInfo', { guifg = P.dark_blue, guibg = bg_color, gui = 'bold' } },
+    { 'StIdentifier', { guifg = identifier_fg, guibg = bg_color } },
+    { 'StTitle', { guibg = bg_color, guifg = 'LightGray', gui = 'bold' } },
+    { 'StComment', { guibg = bg_color, inherit = 'Comment' } },
     { 'StInactive', { guifg = bg_color, guibg = P.comment_grey } },
-    { 'StInactiveSep', { guibg = bg_color, guifg = P.comment_grey } },
     { 'StatusLine', { guibg = bg_color } },
     { 'StatusLineNC', { guibg = bg_color, gui = 'NONE' } },
+    { 'StInfo', { guifg = info_color, guibg = bg_color, gui = 'bold' } },
     { 'StWarning', { guifg = warning_fg, guibg = bg_color } },
     { 'StError', { guifg = error_color, guibg = bg_color } },
-    { 'StFilename', { guibg = bg_color, guifg = P.white, gui = 'bold' } },
-    { 'StFilenameInactive', { guifg = P.comment_grey, guibg = bg_color, gui = 'bold' } },
+    {
+      'StFilename',
+      { guibg = bg_color, guifg = 'LightGray', gui = 'bold' },
+    },
+    {
+      'StFilenameInactive',
+      { guifg = P.comment_grey, guibg = bg_color, gui = 'italic,bold' },
+    },
     { 'StModeNormal', { guibg = bg_color, guifg = P.whitesmoke, gui = 'bold' } },
     { 'StModeInsert', { guibg = bg_color, guifg = P.dark_blue, gui = 'bold' } },
     { 'StModeVisual', { guibg = bg_color, guifg = P.magenta, gui = 'bold' } },
@@ -106,13 +115,13 @@ local item_if = utils.item_if
 
 ---A very over-engineered statusline, heavily inspired by doom-modeline
 ---@return string
-function _G.statusline()
+function _G.__statusline()
   -- use the statusline global variable which is set inside of statusline
   -- functions to the window for *that* statusline
   local curwin = vim.g.statusline_winid or 0
   local curbuf = vim.api.nvim_win_get_buf(curwin)
 
-  -- TODO reduce the available space whenever we add
+  -- TODO: reduce the available space whenever we add
   -- a component so we can use it to determine what to add
   local available_space = vim.api.nvim_win_get_width(curwin)
 
@@ -174,10 +183,12 @@ function _G.statusline()
   local behind = updates.behind and tonumber(updates.behind) or 0
 
   -- Github notifications
-  local notifications = vim.g.github_notifications
+  local ghn_ok, ghn = pcall(require, 'github-notifications')
+  local notifications = ghn_ok and ghn.statusline_notification_count() or ''
 
   -- LSP Diagnostics
   local diagnostics = utils.diagnostic_info(ctx)
+  local flutter = vim.g.flutter_tools_decorations or {}
   -----------------------------------------------------------------------------//
   -- Left section
   -----------------------------------------------------------------------------//
@@ -191,21 +202,22 @@ function _G.statusline()
     { file_item, 0 },
     -- LSP Status
     {
-      item(
-        utils.current_function(),
-        'StMetadata',
-        { before = '  ', prefix = '', prefix_color = 'StIdentifier' }
-      ),
+      item(utils.current_function(), 'StMetadata', {
+        before = '  ',
+        prefix = '',
+        prefix_color = 'StIdentifier',
+      }),
       4,
     },
     -- Local plugin dev indicator
     {
-      item_if(
-        available_space > 100 and 'local dev' or '',
-        vim.env.DEVELOPING ~= nil,
-        'StComment',
-        { prefix = '', padding = 'none', before = '  ', prefix_color = 'StWarning', small = 1 }
-      ),
+      item_if(available_space > 100 and 'local dev' or '', vim.env.DEVELOPING ~= nil, 'StComment', {
+        prefix = '',
+        padding = 'none',
+        before = '  ',
+        prefix_color = 'StWarning',
+        small = 1,
+      }),
       2,
     },
     { separator },
@@ -220,40 +232,33 @@ function _G.statusline()
     -----------------------------------------------------------------------------//
     -- Right section
     -----------------------------------------------------------------------------//
+    { item(flutter.app_version, 'StMetadata'), 4 },
+    { item(flutter.device and flutter.device.name or '', 'StMetadata'), 4 },
     { item(utils.lsp_status(), 'StMetadata'), 4 },
     {
-      item_if(
-        diagnostics.error.count,
-        diagnostics.error,
-        'StError',
-        { prefix = diagnostics.error.sign }
-      ),
+      item_if(diagnostics.error.count, diagnostics.error, 'StError', {
+        prefix = diagnostics.error.sign,
+      }),
       1,
     },
     {
-      item_if(
-        diagnostics.warning.count,
-        diagnostics.warning,
-        'StWarning',
-        { prefix = diagnostics.warning.sign }
-      ),
+      item_if(diagnostics.warning.count, diagnostics.warning, 'StWarning', {
+        prefix = diagnostics.warning.sign,
+      }),
       3,
     },
     {
-      item_if(
-        diagnostics.info.count,
-        diagnostics.info,
-        'StInfo',
-        { prefix = diagnostics.info.sign }
-      ),
+      item_if(diagnostics.info.count, diagnostics.info, 'StInfo', {
+        prefix = diagnostics.info.sign,
+      }),
       4,
     },
-    { item(notifications, 'StTitle', { prefix = '' }), 3 },
+    { item(notifications, 'StTitle'), 3 },
     -- Git Status
-    { item(status.head, 'StBlue', { prefix = '', prefix_color = 'StOrange' }), 1 },
-    { item(status.changed, 'StBlue', { prefix = '', prefix_color = 'StWarning' }), 3 },
-    { item(status.removed, 'StBlue', { prefix = '', prefix_color = 'StError' }), 3 },
-    { item(status.added, 'StBlue', { prefix = '', prefix_color = 'StGreen' }), 3 },
+    { item(status.head, 'StBlue', { prefix = '', prefix_color = 'StGit' }), 1 },
+    { item(status.changed, 'StTitle', { prefix = '', prefix_color = 'StWarning' }), 3 },
+    { item(status.removed, 'StTitle', { prefix = '', prefix_color = 'StError' }), 3 },
+    { item(status.added, 'StTitle', { prefix = '', prefix_color = 'StGreen' }), 3 },
     {
       item(
         ahead,
@@ -276,12 +281,10 @@ function _G.statusline()
     },
     -- (Unexpected) Indentation
     {
-      item_if(
-        ctx.shiftwidth,
-        ctx.shiftwidth > 2 or not ctx.expandtab,
-        'StTitle',
-        { prefix = ctx.expandtab and 'Ξ' or '⇥', prefix_color = 'PmenuSbar' }
-      ),
+      item_if(ctx.shiftwidth, ctx.shiftwidth > 2 or not ctx.expandtab, 'StTitle', {
+        prefix = ctx.expandtab and 'Ξ' or '⇥',
+        prefix_color = 'PmenuSbar',
+      }),
       6,
     },
     { end_marker }
@@ -299,11 +302,11 @@ local function setup_autocommands()
       targets = { '*' },
       command = colors,
     },
-    { events = { 'VimEnter' }, targets = { '*' }, command = utils.git_updates },
     {
-      events = { 'VimEnter' },
+      events = { 'BufReadPre' },
+      modifiers = { '++once' },
       targets = { '*' },
-      command = utils.github_notifications,
+      command = utils.git_updates,
     },
     {
       events = { 'DirChanged' },
@@ -318,20 +321,12 @@ local function setup_autocommands()
     -- },
     -- NOTE: user autocommands can't be joined into one autocommand
     {
-      events = { 'User AsyncGitJobComplete' },
-      command = utils.git_updates_refresh,
-    },
-    {
       events = { 'User NeogitStatusRefresh' },
       command = utils.git_updates_refresh,
     },
     {
       events = { 'User FugitiveChanged' },
       command = utils.git_updates_refresh,
-    },
-    {
-      events = { 'User FugitiveChanged' },
-      command = 'redrawstatus!',
     },
   })
 end
@@ -343,6 +338,6 @@ setup_autocommands()
 vim.g.qf_disable_statusline = 1
 
 -- set the statusline
-vim.o.statusline = '%!v:lua.statusline()'
+vim.o.statusline = '%!v:lua.__statusline()'
 
 return M

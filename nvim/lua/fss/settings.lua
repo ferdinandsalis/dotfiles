@@ -8,11 +8,11 @@ vim.opt.shortmess = {
   o = true, -- file-read message overwrites previous
   O = true, -- file-read message overwrites previous
   T = true, -- truncate non-file messages in middle
-  f = true, -- (file x of x) instead of just (x of x)
+  f = true, -- (file x of x) instead of just (x of x
   F = true, -- Don't give file info when editing a file, NOTE: this breaks autocommand messages
   s = true,
   c = true,
-  W = true, -- Dont show [w] or written when writing
+  W = true, -- Don't show [w] or written when writing
 }
 -----------------------------------------------------------------------------//
 -- Timings {{{1
@@ -24,6 +24,7 @@ vim.opt.ttimeoutlen = 10
 -----------------------------------------------------------------------------//
 -- Window splitting and buffers {{{1
 -----------------------------------------------------------------------------//
+--- NOTE: remove this once 0.6 lands as it is now default
 vim.opt.hidden = true
 vim.opt.splitbelow = true
 vim.opt.splitright = true
@@ -78,7 +79,7 @@ vim.opt.formatoptions = {
 -----------------------------------------------------------------------------//
 vim.opt.foldtext = 'v:lua.fss.folds()'
 vim.opt.foldopen = vim.opt.foldopen + 'search'
-vim.opt.foldlevelstart = 10
+vim.opt.foldlevelstart = 5
 vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
 vim.opt.foldmethod = 'expr'
 -----------------------------------------------------------------------------//
@@ -86,13 +87,13 @@ vim.opt.foldmethod = 'expr'
 -----------------------------------------------------------------------------//
 --- FIXME: Need to use a lambda rather than a lua function directly
 --- @see https://github.com/neovim/neovim/pull/14886
-vim.o.quickfixtextfunc = '{i -> v:lua.fss.qftf(i)}'
+-- vim.o.quickfixtextfunc = '{i -> v:lua.fss.qftf(i)}'
 -----------------------------------------------------------------------------//
 -- Grepprg {{{1
 -----------------------------------------------------------------------------//
 -- Use faster grep alternatives if possible
 if fss.executable 'rg' then
-  vim.o.grepprg = [[rg --hidden --glob "!.git" --no-heading --smart-case --vimgrep --follow $*]]
+  vim.o.grepprg = [[rg --glob "!.git" --no-heading --vimgrep --follow $*]]
   vim.opt.grepformat = vim.opt.grepformat ^ { '%f:%l:%c:%m' }
 elseif fss.executable 'ag' then
   vim.o.grepprg = [[ag --nogroup --nocolor --vimgrep]]
@@ -101,7 +102,6 @@ end
 -----------------------------------------------------------------------------//
 -- Wild and file globbing stuff in command mode {{{1
 -----------------------------------------------------------------------------//
-
 vim.opt.wildcharm = fn.char2nr(fss.replace_termcodes [[<Tab>]])
 vim.opt.wildmode = 'longest:full,full' -- Shows a menu bar as opposed to an enormous list
 vim.opt.wildignorecase = true -- Ignore case when completing file names and directories
@@ -124,11 +124,6 @@ vim.opt.wildignore = {
   '*.png',
   '*.avi',
   '*.wav',
-  -- Cache
-  '*/vendor/gems/*',
-  '*/vendor/cache/*',
-  '*/.bundle/*',
-  '*.gem',
   -- Temp/System
   '*.*~',
   '*~ ',
@@ -146,8 +141,9 @@ vim.opt.conceallevel = 2
 vim.opt.breakindentopt = 'sbr'
 vim.opt.linebreak = true -- lines wrap at words rather than random characters
 vim.opt.synmaxcol = 1024 -- don't syntax highlight long lines
+-- FIXME: use 'auto:2-4' when the ability to set only a single lsp sign is restored
+--@see: https://github.com/neovim/neovim/issues?q=set_signs
 vim.opt.signcolumn = 'yes:2'
-vim.opt.signcolumn = 'auto:2-4' --'yes:2'
 vim.opt.ruler = false
 vim.opt.cmdheight = 2 -- Set command line height to two lines
 vim.opt.showbreak = [[↪ ]] -- Options include -> '…', '↳ ', '→','↪ '
@@ -176,14 +172,14 @@ vim.opt.listchars = {
 -----------------------------------------------------------------------------//
 vim.opt.wrap = true
 vim.opt.wrapmargin = 2
-vim.opt.softtabstop = 2
 vim.opt.textwidth = 80
-vim.opt.shiftwidth = 2
-vim.opt.expandtab = true
 vim.opt.autoindent = true
 vim.opt.shiftround = true
+vim.opt.expandtab = true
+vim.opt.shiftwidth = 2
 -----------------------------------------------------------------------------//
 -- vim.o.debug = "msg"
+--- NOTE: remove this once 0.6 lands, it is now default
 vim.opt.joinspaces = false
 vim.opt.gdefault = true
 vim.opt.pumheight = 15
@@ -194,6 +190,7 @@ vim.opt.autowriteall = true -- automatically :write before running commands and 
 vim.opt.clipboard = { 'unnamedplus' }
 vim.opt.laststatus = 2
 vim.opt.termguicolors = true
+vim.opt.guifont = 'Fira Code Regular Nerd Font Complete Mono:h14'
 -----------------------------------------------------------------------------//
 -- Emoji {{{1
 -----------------------------------------------------------------------------//
@@ -202,22 +199,25 @@ vim.opt.termguicolors = true
 -- CREDIT: https://www.youtube.com/watch?v=F91VWOelFNE
 vim.opt.emoji = false
 -----------------------------------------------------------------------------//
+--- NOTE: remove this once 0.6 lands, it is now default
 vim.opt.inccommand = 'nosplit'
 -----------------------------------------------------------------------------//
 -- Cursor {{{1
 -----------------------------------------------------------------------------//
-vim.opt.cursorlineopt = 'screenline,number'
 -- This is from the help docs, it enables mode shapes, "Cursor" highlight, and blinking
 vim.opt.guicursor = {
   [[n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50]],
   [[a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor]],
   [[sm:block-blinkwait175-blinkoff150-blinkon175]],
 }
+
+if fss.nightly then
+  vim.opt.cursorlineopt = 'screenline,number'
+end
 -----------------------------------------------------------------------------//
 -- Title {{{1
 -----------------------------------------------------------------------------//
--- " ❐ %t %r %m"
-vim.opt.titlestring = require('fss.external').title_string()
+vim.opt.titlestring = require('fss.external').title_string() or ' ❐ %t %r %m'
 vim.opt.titleold = fn.fnamemodify(vim.loop.os_getenv 'SHELL', ':t')
 vim.opt.title = true
 vim.opt.titlelen = 70
@@ -231,7 +231,7 @@ vim.opt.sessionoptions = {
   'curdir',
   'help',
   'winpos',
-  'tabpages',
+  -- "tabpages",
 }
 vim.opt.viewoptions = { 'cursor', 'folds' } -- save/restore just these (with `:{mk,load}view`)
 vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode
@@ -278,7 +278,6 @@ vim.opt.spellsuggest:prepend { 12 }
 vim.opt.spelloptions = 'camel'
 vim.opt.spellcapcheck = '' -- don't check for capital letters at start of sentence
 vim.opt.fileformats = { 'unix', 'mac', 'dos' }
-vim.opt.complete:prepend { 'kspell' }
 -----------------------------------------------------------------------------//
 -- Mouse {{{1
 -----------------------------------------------------------------------------//

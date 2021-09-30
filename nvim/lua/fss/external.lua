@@ -45,7 +45,7 @@ end
 local function fileicon()
   local name = fn.bufname()
   local icon, hl
-  local loaded, devicons = pcall(require, 'nvim-web-devicons')
+  local loaded, devicons = fss.safe_require 'nvim-web-devicons'
   if loaded then
     icon, hl = devicons.get_icon(name, fn.fnamemodify(name, ':e'), { default = true })
   end
@@ -54,7 +54,7 @@ end
 
 function M.title_string()
   if not hl_ok then
-    return  ''
+    return
   end
   local dir = fn.fnamemodify(fn.getcwd(), ':t')
   local icon, hl = fileicon()

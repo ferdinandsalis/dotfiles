@@ -5,10 +5,10 @@ local contains = vim.tbl_contains
 
 vim.api.nvim_exec(
   [[
-  augroup vimrc -- Ensure all autocommands are cleared
-  autocmd!
-  augroup END
-]],
+   augroup vimrc -- Ensure all autocommands are cleared
+   autocmd!
+   augroup END
+  ]],
   ''
 )
 
@@ -93,17 +93,6 @@ fss.augroup('SmartClose', {
   },
 })
 
-fss.augroup('DotooOverrides', {
-  {
-    events = { 'Filetype' },
-    targets = { 'dotoocapture', 'dotoo' },
-    command = function()
-      vim.bo.bufhidden = 'wipe'
-      fss.nnoremap('q', '<Cmd>wq<CR>', { buffer = 0, nowait = true })
-    end,
-  },
-})
-
 fss.augroup('ExternalCommands', {
   {
     -- Open images in an image viewer (probably Preview)
@@ -139,18 +128,30 @@ fss.augroup('Templates', {
 })
 
 --- automatically clear commandline messages after a few seconds delay
---- source: http//unix.stackexchange.com/a/613645
+--- source: http://unix.stackexchange.com/a/613645
+---@return function
+local function clear_commandline()
+  --- Track the timer object and stop any previous timers before setting
+  --- a new one so that each change waits for 10secs and that 10secs is
+  --- deferred each time
+  local timer
+  return function()
+    if timer then
+      timer:stop()
+    end
+    timer = vim.defer_fn(function()
+      if fn.mode() == 'n' then
+        vim.cmd [[echon '']]
+      end
+    end, 10000)
+  end
+end
+
 fss.augroup('ClearCommandMessages', {
   {
     events = { 'CmdlineLeave', 'CmdlineChanged' },
     targets = { ':' },
-    command = function()
-      vim.defer_fn(function()
-        if fn.mode() == 'n' then
-          vim.cmd [[echon '']]
-        end
-      end, 2000)
-    end,
+    command = clear_commandline(),
   },
 })
 
@@ -164,7 +165,7 @@ if vim.env.TMUX ~= nil then
       end,
     },
     {
-      events = { 'VimLeavePre', 'FocusLost' },
+      events = { 'VimLeavePre' },
       targets = { '*' },
       command = function()
         require('fss.external').tmux.set_statusline(true)
@@ -174,7 +175,12 @@ if vim.env.TMUX ~= nil then
       events = { 'ColorScheme', 'FocusGained' },
       targets = { '*' },
       command = function()
-        require('fss.external').tmux.set_statusline()
+        -- NOTE: there is a race condition here as the colors
+        -- for kitty to re-use need to be set AFTER the rest of the colorscheme
+        -- overrides
+        vim.defer_fn(function()
+          require('fss.external').tmux.set_statusline()
+        end, 1)
       end,
     },
   })
@@ -186,7 +192,7 @@ fss.augroup('TextYankHighlight', {
     events = { 'TextYankPost' },
     targets = { '*' },
     command = function()
-      require('vim.highlight').on_yank {
+      vim.highlight.on_yank {
         timeout = 500,
         on_visual = false,
         higroup = 'Visual',
@@ -196,36 +202,51 @@ fss.augroup('TextYankHighlight', {
 })
 
 local column_exclude = { 'gitcommit' }
-local column_clear = { 'startify', 'vimwiki', 'vim-plug', 'help', 'fugitive', 'mail' }
+local column_clear = {
+  'startify',
+  'vimwiki',
+  'vim-plug',
+  'help',
+  'fugitive',
+  'mail',
+  'org',
+  'orgagenda',
+  'NeogitStatus',
+}
 
 --- Set or unset the color column depending on the filetype of the buffer and its eligibility
----@param leaving boolean?
+---@param leaving boolean indicates if the function was called on window leave
 local function check_color_column(leaving)
   if contains(column_exclude, vim.bo.filetype) then
     return
   end
 
   local not_eligible = not vim.bo.modifiable
-    or vim.wo.pvw
+    or vim.wo.previewwindow
+    or vim.bo.buftype ~= ''
     or not vim.bo.buflisted
-    or vim.bo.bt ~= ''
 
-  if contains(column_clear, vim.bo.filetype) or not_eligible then
+  local small_window = api.nvim_win_get_width(0) <= vim.bo.textwidth + 1
+  local is_last_win = #api.nvim_list_wins() == 1
+
+  if
+    contains(column_clear, vim.bo.filetype)
+    or not_eligible
+    or (leaving and not is_last_win)
+    or small_window
+  then
     vim.wo.colorcolumn = ''
     return
   end
-  if api.nvim_win_get_width(0) <= 120 or leaving then
-    -- only reset this value when it doesn't already exist
-    vim.wo.colorcolumn = ''
-  elseif vim.wo.colorcolumn == '' then
-    vim.cmd 'setlocal colorcolumn=+1'
+  if vim.wo.colorcolumn == '' then
+    vim.wo.colorcolumn = '+1'
   end
 end
 
 fss.augroup('CustomColorColumn', {
   {
     -- Update the cursor column to match current window size
-    events = { 'BufEnter', 'VimResized', 'FocusGained', 'WinEnter' },
+    events = { 'WinEnter', 'BufEnter', 'VimResized', 'FileType' },
     targets = { '*' },
     command = function()
       check_color_column()
@@ -240,10 +261,19 @@ fss.augroup('CustomColorColumn', {
   },
 })
 fss.augroup('UpdateVim', {
-  -- NOTE: This takes ${VIM_STARTUP_TIME} duration to run
-  -- autocmd BufWritePost $DOTFILES/**/nvim/configs/*.vim,$MYVIMRC ++nested
-  --       \  luafile $MYVIMRC | redraw | silent doautocmd ColorScheme |
-  --       \  call utils#message("sourced ".fnamemodify($MYVIMRC, ":t"), "Title")
+  {
+    -- TODO: not clear what effect this has in the post vimscript world
+    -- it correctly sources $MYVIMRC but all the other files that it
+    -- requires will need to be resourced or reloaded themselves
+    events = 'BufWritePost',
+    targets = { '$DOTFILES/**/nvim/plugin/*.{lua,vim}', '$MYVIMRC' },
+    modifiers = { '++nested' },
+    command = function()
+      local ok, msg = pcall(vim.cmd, 'source $MYVIMRC | redraw | silent doautocmd ColorScheme')
+      msg = ok and 'sourced ' .. vim.fn.fnamemodify(vim.env.MYVIMRC, ':t') or msg
+      vim.notify(msg)
+    end,
+  },
   {
     events = { 'FocusLost' },
     targets = { '*' },
@@ -305,7 +335,7 @@ fss.augroup('Cursorline', {
   },
 })
 
-local save_excluded = { 'lua.luapad' }
+local save_excluded = { 'lua.luapad', 'gitcommit', 'NeogitCommitMessage' }
 local function can_save()
   return fss.empty(vim.bo.buftype)
     and not fss.empty(vim.bo.filetype)
@@ -323,19 +353,24 @@ fss.augroup('Utilities', {
     end,
   },
   -- BUG: this causes the cursor to jump to the top on VimEnter
-  -- {
-  --   -- When editing a file, always jump to the last known cursor position.
-  --   -- Don't do it for commit messages, when the position is invalid, or when
-  --   -- inside an event handler (happens when dropping a file on gvim).
-  --   events = { 'BufReadPost' },
-  --   targets = { '*' },
-  --   command = function()
-  --     local pos = fn.line '\'"'
-  --     if vim.bo.ft ~= 'gitcommit' and pos > 0 and pos <= fn.line '$' then
-  --       vim.cmd 'keepjumps normal g`"'
-  --     end
-  --   end,
-  -- },
+  {
+    -- When editing a file, always jump to the last known cursor position.
+    -- Don't do it for commit messages, when the position is invalid, or when
+    -- inside an event handler (happens when dropping a file on gvim).
+    events = { 'BufWinEnter' },
+    targets = { '*' },
+    command = function()
+      local pos = fn.line [['"]]
+      if
+        vim.bo.ft ~= 'gitcommit'
+        and vim.fn.win_gettype() ~= 'popup'
+        and pos > 0
+        and pos <= fn.line '$'
+      then
+        vim.cmd 'keepjumps normal g`"'
+      end
+    end,
+  },
   {
     events = { 'FileType' },
     targets = { 'gitcommit', 'gitrebase' },

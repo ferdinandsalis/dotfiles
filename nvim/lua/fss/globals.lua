@@ -6,63 +6,119 @@ local fmt = string.format
 -----------------------------------------------------------------------------//
 --- Inspired by @tjdevries' astraunauta.nvim/ @TimUntersberger's config
 --- store all callbacks in one global table so they are able to survive re-requiring this file
-_G.__as_global_callbacks = __as_global_callbacks or {}
+_G.__fss_global_callbacks = __fss_global_callbacks or {}
 
 _G.fss = {
-  _store = __as_global_callbacks,
+  _store = __fss_global_callbacks,
   --- work around to place functions in the global scope but namespaced within a table.
   --- TODO: refactor this once nvim allows passing lua functions to mappings
   mappings = {},
 }
 
+R 'fss.utils.mappings'
+
 -----------------------------------------------------------------------------//
 -- UI
 -----------------------------------------------------------------------------//
 -- Consistent store of various UI items to reuse throughout my config
-fss.style = {
-  icons = {
-    error = '', -- 
-    warning = '',
-    info = '',
-    hint = '',
-  },
-  border = {
-    curved = { '╭', '─', '╮', '│', '╯', '─', '╰', '│' },
-  },
-  palette = {
-    white = '#c0caf5',
-    dark_red = '#db4b4b',
-    green = '#9ece6a',
-    light_yellow = '#e0af68',
-    dark_blue = '#3d59a1',
-    magenta = '#bb9af7',
-    comment_grey = '#565f89',
-    whitesmoke = '#3b4261',
-    bright_blue = '#7aa2f7',
-  },
-}
+do
+  local palette = {
+    pale_red = '#E06C75',
+    dark_red = '#be5046',
+    light_red = '#c43e1f',
+    dark_orange = '#FF922B',
+    green = '#98c379',
+    bright_yellow = '#FAB005',
+    light_yellow = '#e5c07b',
+    dark_blue = '#4e88ff',
+    magenta = '#c678dd',
+    comment_grey = '#6a7685',
+    grey = '#3E4556',
+    light_grey = '#ced5de',
+    whitesmoke = '#90a1ab',
+    bright_blue = '#51afef',
+    teal = '#15AABF',
+  }
+
+  fss.style = {
+    icons = {
+      error = '', -- 
+      warning = '',
+      info = '',
+      hint = '',
+    },
+    lsp = {
+      colors = {
+        error = palette.pale_red,
+        warn = palette.dark_orange,
+        hint = palette.bright_yellow,
+        info = palette.teal,
+      },
+      kinds = {
+        Text = '',
+        Method = '',
+        Function = '',
+        Constructor = '',
+        Field = 'ﰠ',
+        Variable = '',
+        Class = 'ﴯ',
+        Interface = '',
+        Module = '',
+        Property = 'ﰠ',
+        Unit = '塞',
+        Value = '',
+        Enum = '',
+        Keyword = '',
+        Snippet = '',
+        Color = '',
+        File = '',
+        Reference = '',
+        Folder = '',
+        EnumMember = '',
+        Constant = '',
+        Struct = 'פּ',
+        Event = '',
+        Operator = '',
+        TypeParameter = '',
+      },
+    },
+    palette = palette,
+  }
+end
 
 -----------------------------------------------------------------------------//
 -- Debugging
 -----------------------------------------------------------------------------//
-if pcall(require, 'plenary') then
-  RELOAD = require('plenary.reload').reload_module
-
-  R = function(name)
-    RELOAD(name)
-    return require(name)
-  end
-end
 
 -- inspect the contents of an object very quickly
 -- in your code or from the command-line:
+-- @see: https://www.reddit.com/r/neovim/comments/p84iu2/useful_functions_to_explore_lua_objects/
 -- USAGE:
--- in lua: dump({1, 2, 3})
--- in commandline: :lua dump(vim.loop)
+-- in lua: P({1, 2, 3})
+-- in commandline: :lua P(vim.loop)
 ---@vararg any
 function P(...)
-  local objects = vim.tbl_map(vim.inspect, { ... })
-  print(unpack(objects))
+  local objects, v = {}, nil
+  for i = 1, select('#', ...) do
+    v = select(i, ...)
+    table.insert(objects, vim.inspect(v))
+  end
+
+  print(table.concat(objects, '\n'))
+  return ...
+end
+
+function _G.dump_text(...)
+  local objects, v = {}, nil
+  for i = 1, select('#', ...) do
+    v = select(i, ...)
+    table.insert(objects, vim.inspect(v))
+  end
+
+  local lines = vim.split(table.concat(objects, '\n'), '\n')
+  local lnum = vim.api.nvim_win_get_cursor(0)[1]
+  vim.fn.append(lnum, lines)
+  return ...
 end
 
 local installed
@@ -86,13 +142,14 @@ end
 ---loaded e.g. lazy loading will return false
 ---@param plugin_name string
 ---@return boolean?
-function _G.plugin_loaded(plugin_name)
+function fss.plugin_loaded(plugin_name)
   local plugins = packer_plugins or {}
   return plugins[plugin_name] and plugins[plugin_name].loaded
 end
 -----------------------------------------------------------------------------//
 -- Utils
 -----------------------------------------------------------------------------//
+
 function fss._create(f)
   table.insert(fss._store, f)
   return #fss._store
@@ -128,6 +185,7 @@ function fss.augroup(name, commands)
         local fn_id = fss._create(command)
         command = fmt('lua fss._execute(%s)', fn_id)
       end
+      c.events = type(c.events) == 'string' and { c.events } or c.events
       vim.cmd(
         string.format(
           'autocmd %s %s %s %s',
@@ -149,8 +207,13 @@ end
 
 ---Source a lua or vimscript file
 ---@param path string path relative to the nvim directory
-function fss.source(path)
-  vim.cmd(fmt('source %s/%s', vim.g.vim_dir, path))
+---@param prefix boolean?
+function fss.source(path, prefix)
+  if not prefix then
+    vim.cmd(fmt('source %s', path))
+  else
+    vim.cmd(fmt('source %s/%s', vim.g.vim_dir, path))
+  end
 end
 
 ---Require a module using [pcall] and report any errors
@@ -159,11 +222,11 @@ end
 ---@return boolean, any
 function fss.safe_require(module, opts)
   opts = opts or { silent = false }
-  local ok, err = pcall(require, module)
+  local ok, result = pcall(require, module)
   if not ok and not opts.silent then
-    vim.notify(err, L.ERROR, { title = fmt('Error requiring: %s', module) })
+    vim.notify(result, L.ERROR, { title = fmt('Error requiring: %s', module) })
   end
-  return ok, err
+  return ok, result
 end
 
 ---Check if a cmd is executable
@@ -171,22 +234,6 @@ end
 ---@return boolean
 function fss.executable(e)
   return fn.executable(e) > 0
-end
-
----Echo a msg to the commandline
----@param msg string | table
----@param hl string
-function fss.echomsg(msg, hl)
-  hl = hl or 'Title'
-  local msg_type = type(msg)
-  assert(
-    msg_type ~= 'string' or msg_type ~= 'table',
-    fmt('message should be a string or list of strings not a %s', msg_type)
-  )
-  if msg_type == 'string' then
-    msg = { { msg, hl } }
-  end
-  vim.api.nvim_echo(msg, true, {})
 end
 
 -- https://stackoverflow.com/questions/1283388/lua-merge-tables
@@ -237,19 +284,7 @@ function fss.has(feature)
   return vim.fn.has(feature) > 0
 end
 
----Check if directory exists using vim's isdirectory function
----@param path string
----@return boolean
-function fss.is_dir(path)
-  return fn.isdirectory(path) > 0
-end
-
----Check if a vim variable usually a number is truthy or not
----@param value integer
-function fss.truthy(value)
-  assert(type(value) == 'number', fmt('Value should be a number but you passed %s', value))
-  return value > 0
-end
+fss.nightly = fss.has 'nvim-0.6'
 
 ---Find an item in a list
 ---@generic T
@@ -282,69 +317,8 @@ function fss.empty(item)
   end
 end
 
----check if a mapping already exists
----@param lhs string
----@param mode string
----@return boolean
-function fss.has_map(lhs, mode)
-  mode = mode or 'n'
-  return vim.fn.maparg(lhs, mode) ~= ''
-end
-
----create a mapping function factory
----@param mode string
----@param o table
----@return fun(lhs: string, rhs: string, opts: table|nil) 'create a mapping'
-local function make_mapper(mode, o)
-  -- copy the opts table as extends will mutate the opts table passed in otherwise
-  local parent_opts = vim.deepcopy(o)
-  ---Create a mapping
-  ---@param lhs string
-  ---@param rhs string|function
-  ---@param opts table
-  return function(lhs, rhs, opts)
-    assert(lhs ~= mode, fmt('The lhs should not be the same as mode for %s', lhs))
-    assert(type(rhs) == 'string' or type(rhs) == 'function', '"rhs" should be a function or string')
-    opts = opts and vim.deepcopy(opts) or {}
-
-    local buffer = opts.buffer
-    opts.buffer = nil
-    if type(rhs) == 'function' then
-      local fn_id = fss._create(rhs)
-      rhs = string.format('<cmd>lua fss._execute(%s)<CR>', fn_id)
-    end
-
-    if buffer and type(buffer) == 'number' then
-      opts = vim.tbl_extend('keep', opts, parent_opts)
-      api.nvim_buf_set_keymap(buffer, mode, lhs, rhs, opts)
-      return
-    end
-
-    api.nvim_set_keymap(mode, lhs, rhs, vim.tbl_extend('keep', opts, parent_opts))
-  end
-end
-
-local map_opts = { noremap = false, silent = true }
-local noremap_opts = { noremap = true, silent = true }
-
-fss.nmap = make_mapper('n', map_opts)
-fss.xmap = make_mapper('x', map_opts)
-fss.imap = make_mapper('i', map_opts)
-fss.vmap = make_mapper('v', map_opts)
-fss.omap = make_mapper('o', map_opts)
-fss.tmap = make_mapper('t', map_opts)
-fss.smap = make_mapper('s', map_opts)
-fss.cmap = make_mapper('c', { noremap = false, silent = false })
-
-fss.nnoremap = make_mapper('n', noremap_opts)
-fss.xnoremap = make_mapper('x', noremap_opts)
-fss.vnoremap = make_mapper('v', noremap_opts)
-fss.inoremap = make_mapper('i', noremap_opts)
-fss.onoremap = make_mapper('o', noremap_opts)
-fss.tnoremap = make_mapper('t', noremap_opts)
-fss.snoremap = make_mapper('s', noremap_opts)
-fss.cnoremap = make_mapper('c', { noremap = true, silent = false })
-
+---Create an nvim command
+---@param args table
 function fss.command(args)
   local nargs = args.nargs or 0
   local name = args[1]

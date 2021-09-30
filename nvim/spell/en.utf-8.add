@@ -165,3 +165,5 @@ XD
 trunc
 autocmds
 builtins
+luarocks
+fzy

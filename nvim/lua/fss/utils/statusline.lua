@@ -1,17 +1,18 @@
 local H = require 'fss.highlights'
 
 local fn = vim.fn
+local api = vim.api
 local expand = fn.expand
 local strwidth = fn.strwidth
 local fnamemodify = fn.fnamemodify
 local contains = vim.tbl_contains
+local fmt = string.format
 
 local M = {}
 
-local function get_toggleterm_name(_, bufnum)
+local function get_toggleterm_name(_, buf)
   local shell = fnamemodify(vim.env.SHELL, ':t')
-  local terminal_prefix = 'Terminal(' .. shell .. ')['
-  return terminal_prefix .. fn.getbufvar(bufnum, 'toggle_number') .. ']'
+  return fmt('Terminal(%s)[%s]', shell, api.nvim_buf_get_var(buf, 'toggle_number'))
 end
 
 local plain_filetypes = {
@@ -48,6 +49,8 @@ local exceptions = {
   filetypes = {
     org = '',
     orgagenda = '',
+    ['himalaya-msg-list'] = '',
+    mail = '',
     dbui = '',
     vista = 'פּ',
     tsplayground = '侮',
@@ -67,12 +70,15 @@ local exceptions = {
     NvimTree = 'פּ',
     toggleterm = ' ',
     calendar = '',
+    minimap = '',
     octo = '',
     ['dap-repl'] = '',
   },
   names = {
     orgagenda = 'Org',
-    minimap = 'minimap',
+    ['himalaya-msg-list'] = 'Inbox',
+    mail = 'Mail',
+    minimap = '',
     dbui = 'Dadbod UI',
     tsplayground = 'Treesitter',
     vista = 'Vista',
@@ -90,7 +96,7 @@ local exceptions = {
     undotree = 'UndoTree',
     octo = 'Octo',
     ['coc-explorer'] = 'Coc Explorer',
-    NvimTree = '',
+    NvimTree = 'Nvim Tree',
     toggleterm = get_toggleterm_name,
     ['dap-repl'] = 'Debugger REPL',
   },
@@ -236,7 +242,7 @@ local function filename(ctx, modifier)
 
   local path = (ctx.buftype == '' and not ctx.preview) and buf_expand(ctx.bufnum, ':~:.:h') or nil
   local is_root = path and #path == 1 -- "~" or "."
-  local dir = path and not is_root and fn.pathshorten(fnamemodify(path, ':h:h')) .. '/' or ''
+  local dir = path and not is_root and fn.pathshorten(fnamemodify(path, ':h')) .. '/' or ''
   local parent = path and (is_root and path or fnamemodify(path, ':t')) or ''
   parent = parent ~= '' and parent .. '/' or ''
 
@@ -276,7 +282,7 @@ local function filetype(ctx, opts)
   end
   local icon, hl
   local extension = fnamemodify(ctx.bufname, ':e')
-  local icons_loaded, devicons = pcall(require, 'nvim-web-devicons')
+  local icons_loaded, devicons = fss.safe_require 'nvim-web-devicons'
   if icons_loaded then
     icon, hl = devicons.get_icon(ctx.bufname, extension, { default = true })
     hl = highlight_ft_icon(hl, opts.icon_bg)
@@ -359,17 +365,29 @@ function M.file(ctx, minimal)
   }
 end
 
+---Shim to handle getting diagnostics in nvim 0.5 and nightly
+---@param buf number
+---@param severity string
+---@return number
+local function get_count(buf, severity)
+  if fss.nightly then
+    local s = vim.diagnostic.severity[severity:upper()]
+    return #vim.diagnostic.get(buf, { severity = s })
+  end
+  --- FIXME: remove  this once 0.6 or 5.1 is stable
+  ---@diagnostic disable-next-line: deprecated
+  return vim.lsp.diagnostic.get_count(buf, severity)
+end
+
 function M.diagnostic_info(context)
   local buf = context.bufnum
   if vim.tbl_isempty(vim.lsp.buf_get_clients(buf)) then
     return { error = {}, warning = {}, info = {} }
   end
-  local get_count = vim.lsp.diagnostic.get_count
-
   local icons = fss.style.icons
   return {
     error = { count = get_count(buf, 'Error'), sign = icons.error },
-    warning = { count = get_count(buf, 'Warning'), sign = icons.warning },
+    warning = { count = get_count(buf, 'Warning'), sign = icons.warn },
     info = { count = get_count(buf, 'Information'), sign = icons.info },
   }
 end
@@ -530,14 +548,7 @@ function M.item(component, hl, opts)
     component = component:sub(1, opts.max_size - 1) .. '…'
   end
 
-  local parts = {
-    before,
-    prefix,
-    M.wrap(hl),
-    component,
-    '%*',
-    after,
-  }
+  local parts = { before, prefix, M.wrap(hl), component, '%*', after }
   return { table.concat(parts), #component + #before + #after + prefix_size }
 end
 
@@ -577,6 +588,16 @@ local function job(interval, task, on_complete)
   end
 end
 
+---Validate the response from the github CLI is JSON
+---@param data table
+---@return boolean
+local function validate_github_response(data)
+  return vim.tbl_islist(data)
+    and not fss.empty(data[1])
+    and type(data[1]) == 'string'
+    and not data[1]:match '<!DOCTYPE html>'
+end
+
 local function fetch_github_notifications()
   fn.jobstart('gh api notifications', {
     stdout_buffered = true,
@@ -584,8 +605,8 @@ local function fetch_github_notifications()
       if data then
         vim.defer_fn(function()
           -- data is a table, so check that the first value isn't an empty string
-          if data and data[1] ~= '' then
-            local notifications = vim.fn.json_decode(data)
+          if validate_github_response(data) then
+            local notifications = vim.json and vim.json.decode(data[1]) or vim.fn.json_decode(data)
             vim.g.github_notifications = #notifications
           end
         end, 1)
