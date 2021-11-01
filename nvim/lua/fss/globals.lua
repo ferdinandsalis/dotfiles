@@ -23,21 +23,21 @@ R 'fss.utils.mappings'
 -- Consistent store of various UI items to reuse throughout my config
 do
   local palette = {
-    pale_red = '#E06C75',
-    dark_red = '#be5046',
-    light_red = '#c43e1f',
-    dark_orange = '#FF922B',
-    green = '#98c379',
-    bright_yellow = '#FAB005',
-    light_yellow = '#e5c07b',
-    dark_blue = '#4e88ff',
-    magenta = '#c678dd',
-    comment_grey = '#6a7685',
-    grey = '#3E4556',
-    light_grey = '#ced5de',
-    whitesmoke = '#90a1ab',
-    bright_blue = '#51afef',
-    teal = '#15AABF',
+    pale_red = '#544247',
+    dark_red = '#e66868',
+    light_red = '#e67e80',
+    dark_orange = '#e69875',
+    green = '#a7c080',
+    bright_yellow = '#dfa000',
+    light_yellow = '#dbbc7f',
+    dark_blue = '#3a94c5',
+    magenta = '#d699b6',
+    comment_grey = '#7a8478',
+    grey = '#505a60',
+    light_grey = '#a6b0a0',
+    whitesmoke = '#939f91',
+    bright_blue = '#7fbbb3',
+    teal = '#83c092',
   }
 
   fss.style = {
@@ -149,6 +149,20 @@ end
 -----------------------------------------------------------------------------//
 -- Utils
 -----------------------------------------------------------------------------//
+
+---Check whether or not the location or quickfix list is open
+---@return boolean
+function fss.is_vim_list_open()
+  for _, win in ipairs(api.nvim_list_wins()) do
+    local buf = api.nvim_win_get_buf(win)
+    local location_list = fn.getloclist(0, { filewinid = 0 })
+    local is_loc_list = location_list.filewinid > 0
+    if vim.bo[buf].filetype == 'qf' or is_loc_list then
+      return true
+    end
+  end
+  return false
+end
 
 function fss._create(f)
   table.insert(fss._store, f)

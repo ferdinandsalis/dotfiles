@@ -30,7 +30,7 @@ return function()
     }))
   end
 
-  telescope.load_extension('projects')
+  telescope.load_extension 'projects'
 
   telescope.setup {
     defaults = {
@@ -40,6 +40,7 @@ return function()
       selection_caret = '» ',
       mappings = {
         i = {
+          ['<c-w>'] = actions.send_selected_to_qflist,
           ['<c-c>'] = function()
             vim.cmd 'stopinsert!'
           end,
@@ -47,6 +48,9 @@ return function()
           ['<c-s>'] = actions.select_horizontal,
           ['<c-j>'] = actions.cycle_history_next,
           ['<c-k>'] = actions.cycle_history_prev,
+        },
+        n = {
+          ['<C-w>'] = actions.send_selected_to_qflist,
         },
       },
       file_ignore_patterns = { '%.jpg', '%.jpeg', '%.png', '%.otf', '%.ttf' },
@@ -57,7 +61,7 @@ return function()
           preview_width = 0.45,
         },
       },
-      winblend = 10,
+      winblend = 3,
       history = {
         path = vim.fn.stdpath 'data' .. '/telescope_history.sqlite3',
       },

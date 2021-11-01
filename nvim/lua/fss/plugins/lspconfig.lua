@@ -1,8 +1,5 @@
 fss.lsp = {}
 
---- TODO: remove once 0.6 is stable (use vim.diagnostic)
-local diagnostics = fss.nightly and vim.diagnostic or vim.lsp.diagnostic
-
 -----------------------------------------------------------------------------//
 -- Autocommands
 -----------------------------------------------------------------------------//
@@ -37,11 +34,19 @@ local function setup_autocommands(client, _)
     })
   end
   if client and client.resolved_capabilities.document_formatting then
+    -- format on save
     fss.augroup('LspFormat', {
       {
         events = { 'BufWritePre' },
         targets = { '<buffer>' },
-        command = vim.lsp.buf.formatting_sync,
+        command = function()
+          -- BUG: folds are are removed when formatting is done, so we save the current state of the
+          -- view and re-apply it manually after formatting the buffer
+          -- @see: https://github.com/nvim-treesitter/nvim-treesitter/issues/1424#issuecomment-909181939
+          vim.cmd 'mkview!'
+          vim.lsp.buf.formatting_sync()
+          vim.cmd 'loadview'
+        end,
       },
     })
   end
@@ -63,10 +68,19 @@ local function setup_mappings(client, bufnr)
     ['gI'] = { vim.lsp.buf.incoming_calls, 'lsp: incoming calls' },
     ['K'] = { vim.lsp.buf.hover, 'lsp: hover' },
   }
+
+  -- FIXME: remove when 0.6 is released
+  local goto_key = fss.nightly and 'float' or 'popup_opts'
+  local diagnostics = fss.nightly and vim.diagnostic or vim.lsp.diagnostic
+
   maps[']c'] = {
     function()
       diagnostics.goto_prev {
-        popup_opts = { border = 'rounded', focusable = false, source = 'always' },
+        [goto_key] = {
+          border = 'rounded',
+          focusable = false,
+          source = 'always',
+        },
       }
     end,
     'lsp: go to prev diagnostic',
@@ -74,7 +88,11 @@ local function setup_mappings(client, bufnr)
   maps['[c'] = {
     function()
       diagnostics.goto_next {
-        popup_opts = { border = 'rounded', focusable = false, source = 'always' },
+        [goto_key] = {
+          border = 'rounded',
+          focusable = false,
+          source = 'always',
+        },
       }
     end,
     'lsp: go to next diagnostic',
@@ -141,7 +159,7 @@ local function tsserver_on_attach(client, bufnr)
   client.resolved_capabilities.document_formatting = false
   client.resolved_capabilities.document_range_formatting = false
 
-  local ts_utils = require("nvim-lsp-ts-utils")
+  local ts_utils = require 'nvim-lsp-ts-utils'
 
   -- defaults
   ts_utils.setup {
@@ -163,18 +181,18 @@ local function tsserver_on_attach(client, bufnr)
     -- eslint
     eslint_enable_code_actions = true,
     eslint_enable_disable_comments = true,
-    eslint_bin = "eslint_d",
+    eslint_bin = 'eslint_d',
     eslint_enable_diagnostics = false,
     eslint_opts = {},
 
     -- formatting
     enable_formatting = false,
-    formatter = "prettierd",
+    formatter = 'prettierd',
     formatter_opts = {},
 
     -- update imports on file move
-    update_imports_on_move = true,
-    require_confirmation_on_move = true,
+    update_imports_on_move = false,
+    require_confirmation_on_move = false,
     watch_dir = nil,
 
     -- filter diagnostics
@@ -202,7 +220,10 @@ end
 -----------------------------------------------------------------------------//
 
 fss.lsp.servers = {
---- NOTE: This is the secret sauce that allows reading requires and variables
+  bashls = true,
+  tsserver = true,
+  elixirls = true,
+  --- NOTE: This is the secret sauce that allows reading requires and variables
   --- between different modules in the nvim lua context
   --- @see https://gist.github.com/folke/fe5d28423ea5380929c3f7ce674c41d8
   --- if I ever decide to move away from lua dev then use the above
@@ -264,4 +285,3 @@ return function()
     vim.cmd [[ do User LspAttachBuffers ]]
   end)
 end
-

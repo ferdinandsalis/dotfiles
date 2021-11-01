@@ -31,30 +31,35 @@ command {
   end,
 }
 
+local list_type = fss.nightly and 'quickfix' or 'location'
+local function set_diagnostics()
+  if fss.nightly then
+    return vim.diagnostic.setqflist { open = false }
+  end
+  ---@diagnostic disable-next-line: deprecated
+  vim.lsp.diagnostic.set_loclist { open_loclist = false, workspace = true }
+end
+
 command {
   'LspDiagnostics',
   function()
-    if not fss.nightly then
-      ---@diagnostic disable-next-line: deprecated
-      vim.lsp.diagnostic.set_loclist { open = false }
-      fss.toggle_list 'l'
-    else
-      vim.diagnostic.setqflist { open = false }
-      -- Open the quickfix list with diagnostics if any are present
-      -- and then keep the list updated
-      local is_open = fss.toggle_list 'c'
-      if is_open then
-        fss.augroup('LspDiagnosticUpdate', {
-          {
-            events = { 'User DiagnosticsChanged' },
-            command = function()
-              vim.diagnostic.setqflist { open = false }
-            end,
-          },
-        })
-      elseif fn.exists '#LspDiagnosticUpdate' > 0 then
-        vim.cmd 'autocmd! LspDiagnosticUpdate'
-      end
+    set_diagnostics()
+    fss.toggle_list(list_type)
+    if fss.is_vim_list_open() then
+      local event = fss.nightly and 'DiagnosticsChanged' or 'LspDiagnosticsChanged'
+      fss.augroup('LspDiagnosticUpdate', {
+        {
+          events = { fmt('User %s', event) },
+          command = function()
+            set_diagnostics()
+            if fss.is_vim_list_open() then
+              fss.toggle_list(list_type)
+            end
+          end,
+        },
+      })
+    elseif fn.exists '#LspDiagnosticUpdate' > 0 then
+      vim.cmd 'autocmd! LspDiagnosticUpdate'
     end
   end,
 }

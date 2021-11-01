@@ -38,8 +38,8 @@ require('packer').startup {
       'ahmedkhalf/project.nvim',
       config = function()
         require('project_nvim').setup {
-          ignore_lsp = { "null-ls", "jsonls", "graphql" },
-          silent_chdir = false
+          ignore_lsp = { 'null-ls', 'jsonls', 'graphql' },
+          silent_chdir = false,
         }
       end,
     }
@@ -88,33 +88,40 @@ require('packer').startup {
     use 'kyazdani42/nvim-web-devicons'
 
     use {
+      'vuki656/package-info.nvim',
+      requires = 'MunifTanjim/nui.nvim',
+      config = function()
+        require('package-info').setup()
+      end,
+    }
+
+    use {
       'vim-test/vim-test',
       cmd = { 'Test*' },
       keys = { '<localleader>tf', '<localleader>tn', '<localleader>ts' },
+      setup = function()
+        require('which-key').register({
+          t = {
+            name = '+vim-test',
+            f = 'test: file',
+            n = 'test: nearest',
+            s = 'test: suite',
+          },
+        }, {
+          prefix = '<localleader>',
+        })
+      end,
       config = function()
         vim.cmd [[
-            let test#strategy = "neovim"
-            let test#neovim#term_position = "vert botright"
-            let g:test#javascript#jest#executable = 'yarn test'
-            let g:test#javascript#runner = 'jest'
-          ]]
-        require('which-key').register {
-          ['<localleader>t'] = {
-            name = '+vim-test',
-            f = {
-              '<cmd>TestFile<CR>',
-              'test: file',
-            },
-            n = {
-              '<cmd>TestNearest<CR>',
-              'test: nearest',
-            },
-            s = {
-              '<cmd>TestSuite<CR>',
-              'test: suite',
-            },
-          },
-        }
+          function! ToggleTermStrategy(cmd) abort
+            call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
+          endfunction
+          let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
+        ]]
+        vim.g['test#strategy'] = 'toggleterm'
+        fss.nnoremap('<localleader>tf', '<cmd>TestFile<CR>')
+        fss.nnoremap('<localleader>tn', '<cmd>TestNearest<CR>')
+        fss.nnoremap('<localleader>ts', '<cmd>TestSuite<CR>')
       end,
     }
 
@@ -185,14 +192,14 @@ require('packer').startup {
 
     use {
       'akinsho/toggleterm.nvim',
+      local_path = 'personal',
       config = function()
         require('toggleterm').setup {
           open_mapping = [[<c-\>]],
           shade_filetypes = { 'none' },
           direction = 'vertical',
           start_in_insert = true,
-          shading_factor = 0.5,
-          float_opts = { border = 'curved' },
+          float_opts = { border = 'curved', winblend = 3 },
           size = function(term)
             if term.direction == 'horizontal' then
               return 15
@@ -211,6 +218,14 @@ require('packer').startup {
 
         local Terminal = require('toggleterm.terminal').Terminal
 
+        local lazygit = Terminal:new {
+          cmd = 'lazygit',
+          dir = 'git_dir',
+          hidden = true,
+          direction = 'float',
+          on_open = float_handler,
+        }
+
         local htop = Terminal:new {
           cmd = 'htop',
           hidden = 'true',
@@ -223,6 +238,15 @@ require('packer').startup {
           function()
             htop:toggle()
           end,
+        }
+
+        require('which-key').register {
+          ['<leader>lg'] = {
+            function()
+              lazygit:toggle()
+            end,
+            'toggleterm: toggle lazygit',
+          },
         }
       end,
     }
@@ -270,8 +294,22 @@ require('packer').startup {
     use { 'folke/lua-dev.nvim', commit = 'e958850' }
 
     use { 'neovim/nvim-lspconfig', config = conf 'lspconfig' }
-
-    use { 'williamboman/nvim-lsp-installer', requires = 'nvim-lspconfig' }
+    use {
+      'williamboman/nvim-lsp-installer',
+      requires = 'nvim-lspconfig',
+      config = function()
+        local lsp_installer_servers = require 'nvim-lsp-installer.servers'
+        for name, _ in pairs(fss.lsp.servers) do
+          ---@type boolean, table|string
+          local ok, server = lsp_installer_servers.get_server(name)
+          if ok then
+            if not server:is_installed() then
+              server:install()
+            end
+          end
+        end
+      end,
+    }
 
     use {
       'nvim-lua/lsp-status.nvim',
@@ -374,8 +412,11 @@ require('packer').startup {
         { 'hrsh7th/cmp-nvim-lsp' },
         { 'f3fora/cmp-spell', after = 'nvim-cmp' },
         { 'hrsh7th/cmp-path', after = 'nvim-cmp' },
+        { 'hrsh7th/cmp-calc', after = 'nvim-cmp' },
         { 'hrsh7th/cmp-buffer', after = 'nvim-cmp' },
+        { 'hrsh7th/cmp-cmdline', after = 'nvim-cmp' },
         { 'saadparwaiz1/cmp_luasnip', after = 'nvim-cmp' },
+        { 'tzachar/cmp-tabnine', run = './install.sh', after = 'nvim-cmp' },
       },
       config = conf 'cmp',
     }
@@ -546,24 +587,19 @@ require('packer').startup {
     }
 
     use 'windwp/nvim-ts-autotag'
-
     use 'mtdl9/vim-log-highlighting'
-
     use 'slime-lang/vim-slime-syntax'
-
     use 'plasticboy/vim-markdown'
 
+    -- Color schemes {{{
     use 'folke/tokyonight.nvim'
-
     use 'NTBBloodbath/doom-one.nvim'
-
-    use {
-      'projekt0n/github-nvim-theme',
-      event = 'ColorScheme github',
-      config = function()
-        require('github-theme').setup()
-      end,
-    }
+    use 'sainnhe/everforest'
+    -- use 'sainnhe/gruvbox-material'
+    -- use 'maaslalani/nordbuddy'
+    -- use 'shaunsingh/nord.nvim'
+    -- use { 'mcchrish/zenbones.nvim', requires = 'rktjmp/lush.nvim' }
+    -- }}}
 
     -- }}}
     --------------------------------------------------------------------------------
@@ -804,13 +840,19 @@ require('packer').startup {
     -----------------------------------------------------------------------------//
     use {
       'https://gitlab.com/yorickpeterse/nvim-pqf',
-      event = 'VimEnter',
       config = function()
         require('fss.highlights').plugin(
           'NvimPQF',
           { 'qfPosition', { link = 'Tag', force = true } }
         )
-        require('pqf').setup()
+        require('pqf').setup {
+          signs = {
+            error = fss.style.icons.error,
+            warning = fss.style.icons.warn,
+            info = fss.style.icons.info,
+            hint = fss.style.icons.hint,
+          },
+        }
       end,
     }
 
@@ -833,7 +875,8 @@ require('packer').startup {
     --@see: https://github.com/wbthomason/packer.nvim/issues/464
     use {
       'gelguy/wilder.nvim',
-      event = { 'CursorHold', 'CmdlineEnter' },
+      opt = true,
+      -- event = { 'CursorHold', 'CmdlineEnter' },
       rocks = { 'luarocks-fetch-gitrec', 'pcre2' },
       requires = { 'romgrk/fzy-lua-native' },
       config = function()
@@ -913,11 +956,6 @@ require('packer').startup {
         require('nvim-autopairs').setup {
           close_triple_quotes = true,
           check_ts = false,
-        }
-        require('nvim-autopairs.completion.cmp').setup {
-          map_cr = true, --  map <CR> on insert mode
-          map_complete = true, -- it will auto insert `(` after select function or method item
-          auto_select = true, -- automatically select the first item
         }
       end,
     }
@@ -1035,7 +1073,11 @@ require('packer').startup {
       config = function()
         require('filetype').setup {
           overrides = {
+            extensions = {
+              exs = 'elixir',
+            },
             literal = {
+              ['.envrc'] = 'sh',
               ['kitty.conf'] = 'kitty',
             },
           },

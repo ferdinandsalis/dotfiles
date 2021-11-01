@@ -5,6 +5,9 @@ return function()
 
   require('fss.highlights').plugin(
     'Cmp',
+    { 'CmpItemAbbr', { inherit = 'Comment', gui = 'NONE' } },
+    { 'CmpItemMenu', { inherit = 'NonText', gui = 'NONE' } },
+    { 'CmpItemAbbrMatch', { inherit = 'Pmenu', gui = 'bold' } },
     { 'CmpItemAbbrDeprecated', { gui = 'strikethrough', inherit = 'Comment' } },
     { 'CmpItemAbbrMatchFuzzy', { gui = 'italic', guifg = 'fg' } }
   )
@@ -21,23 +24,27 @@ return function()
     return luasnip
   end
 
-  local function tab(_)
+  local function tab(fallback)
     local luasnip = get_luasnip()
     if cmp.visible() then
       cmp.select_next_item()
     elseif luasnip and luasnip.expand_or_jumpable() then
-      luasnip.expand_or_jump()
+      feed '<Plug>luasnip-expand-or-jump'
+    elseif api.nvim_get_mode().mode == 'c' then
+      fallback()
     else
       feed '<Plug>(Tabout)'
     end
   end
 
-  local function shift_tab(_)
+  local function shift_tab(fallback)
     local luasnip = get_luasnip()
     if cmp.visible() then
       cmp.select_prev_item()
     elseif luasnip and luasnip.jumpable(-1) then
-      luasnip.jump(-1)
+      feed '<Plug>luasnip-jump-prev'
+    elseif api.nvim_get_mode().mode == 'c' then
+      fallback()
     else
       feed '<Plug>(TaboutBack)'
     end
@@ -45,7 +52,7 @@ return function()
 
   cmp.setup {
     experimental = {
-      ghost_text = false,
+      ghost_text = true,
     },
     snippet = {
       expand = function(args)
@@ -53,10 +60,10 @@ return function()
       end,
     },
     mapping = {
-      ['<Tab>'] = cmp.mapping(tab, { 'i', 's' }),
-      ['<S-Tab>'] = cmp.mapping(shift_tab, { 'i', 's' }),
-      ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ['<Tab>'] = cmp.mapping(tab, { 'i', 'c' }),
+      ['<S-Tab>'] = cmp.mapping(shift_tab, { 'i', 'c' }),
+      ['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
+      ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
       ['<C-e>'] = cmp.mapping.complete(),
       ['<CR>'] = cmp.mapping.confirm {
         behavior = cmp.ConfirmBehavior.Replace,
@@ -68,8 +75,10 @@ return function()
       fields = { 'kind', 'abbr', 'menu' },
       format = function(entry, vim_item)
         vim_item.kind = fss.style.lsp.kinds[vim_item.kind]
+        local name = entry.source.name
+        local completion = entry.completion_item.data
         -- FIXME: automate this using a regex to normalise names
-        vim_item.menu = ({
+        local menu = ({
           nvim_lsp = '[LSP]',
           nvim_lua = '[Lua]',
           emoji = '[Emoji]',
@@ -77,24 +86,59 @@ return function()
           calc = '[Calc]',
           neorg = '[Neorg]',
           orgmode = '[Org]',
+          cmp_tabnine = '[TN]',
           luasnip = '[Luasnip]',
           buffer = '[Buffer]',
           spell = '[Spell]',
-        })[entry.source.name]
+          cmdline = '[Command]',
+        })[name]
+
+        if name == 'cmp_tabnine' then
+          if completion and completion.detail then
+            menu = completion.detail .. ' ' .. menu
+          end
+          vim_item.kind = ''
+        end
+        vim_item.menu = menu
         return vim_item
       end,
     },
     documentation = {
       border = 'rounded',
     },
-    sources = {
+    sources = cmp.config.sources({
       { name = 'nvim_lsp' },
       { name = 'luasnip' },
+      { name = 'cmp_tabnine' },
       { name = 'spell' },
+      { name = 'calc' },
       { name = 'path' },
-      { name = 'buffer' },
       { name = 'neorg' },
       { name = 'orgmode' },
-    },
+    }, {
+      { name = 'buffer' },
+    }),
   }
+
+   -- Use buffer source for `/`.
+  cmp.setup.cmdline('/', {
+    sources = {
+      { name = 'buffer' },
+    },
+  })
+
+  cmp.setup.cmdline('?', {
+    sources = {
+      { name = 'buffer' },
+    },
+  })
+
+  -- Use cmdline & path source for ':'.
+  cmp.setup.cmdline(':', {
+    sources = cmp.config.sources({
+      { name = 'path' },
+    }, {
+      { name = 'cmdline' },
+    }),
+  })
 end

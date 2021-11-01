@@ -44,10 +44,10 @@ local function colors()
     { 'StNumber', { guifg = number_fg, guibg = bg_color } },
     { 'StCount', { guifg = 'bg', guibg = indicator_color, gui = 'bold' } },
     { 'StPrefix', { guibg = pmenu_bg, guifg = normal_fg } },
-    { 'StDirectory', { guibg = bg_color, guifg = 'Gray', gui = 'italic' } },
+    { 'StDirectory', { guibg = bg_color, guifg = P.grey, gui = 'italic' } },
     { 'StParentDirectory', { guibg = bg_color, guifg = string_fg, gui = 'bold' } },
     { 'StIdentifier', { guifg = identifier_fg, guibg = bg_color } },
-    { 'StTitle', { guibg = bg_color, guifg = 'LightGray', gui = 'bold' } },
+    { 'StTitle', { guibg = bg_color, guifg = P.light_grey, gui = 'bold' } },
     { 'StComment', { guibg = bg_color, inherit = 'Comment' } },
     { 'StInactive', { guifg = bg_color, guibg = P.comment_grey } },
     { 'StatusLine', { guibg = bg_color } },
@@ -55,14 +55,8 @@ local function colors()
     { 'StInfo', { guifg = info_color, guibg = bg_color, gui = 'bold' } },
     { 'StWarning', { guifg = warning_fg, guibg = bg_color } },
     { 'StError', { guifg = error_color, guibg = bg_color } },
-    {
-      'StFilename',
-      { guibg = bg_color, guifg = 'LightGray', gui = 'bold' },
-    },
-    {
-      'StFilenameInactive',
-      { guifg = P.comment_grey, guibg = bg_color, gui = 'italic,bold' },
-    },
+    { 'StFilename', { guibg = bg_color, guifg = P.light_grey, gui = 'bold' } },
+    { 'StFilenameInactive', { guifg = P.comment_grey, guibg = bg_color, gui = 'italic,bold' } },
     { 'StModeNormal', { guibg = bg_color, guifg = P.whitesmoke, gui = 'bold' } },
     { 'StModeInsert', { guibg = bg_color, guifg = P.dark_blue, gui = 'bold' } },
     { 'StModeVisual', { guibg = bg_color, guifg = P.magenta, gui = 'bold' } },
@@ -183,12 +177,11 @@ function _G.__statusline()
   local behind = updates.behind and tonumber(updates.behind) or 0
 
   -- Github notifications
-  local ghn_ok, ghn = pcall(require, 'github-notifications')
-  local notifications = ghn_ok and ghn.statusline_notification_count() or ''
+  -- local ghn_ok, ghn = pcall(require, 'github-notifications')
+  -- -- local notifications = ghn_ok and ghn.statusline_notification_count() or ''
 
   -- LSP Diagnostics
   local diagnostics = utils.diagnostic_info(ctx)
-  local flutter = vim.g.flutter_tools_decorations or {}
   -----------------------------------------------------------------------------//
   -- Left section
   -----------------------------------------------------------------------------//
@@ -232,8 +225,6 @@ function _G.__statusline()
     -----------------------------------------------------------------------------//
     -- Right section
     -----------------------------------------------------------------------------//
-    { item(flutter.app_version, 'StMetadata'), 4 },
-    { item(flutter.device and flutter.device.name or '', 'StMetadata'), 4 },
     { item(utils.lsp_status(), 'StMetadata'), 4 },
     {
       item_if(diagnostics.error.count, diagnostics.error, 'StError', {
@@ -241,24 +232,24 @@ function _G.__statusline()
       }),
       1,
     },
-    {
-      item_if(diagnostics.warning.count, diagnostics.warning, 'StWarning', {
-        prefix = diagnostics.warning.sign,
-      }),
-      3,
-    },
-    {
-      item_if(diagnostics.info.count, diagnostics.info, 'StInfo', {
-        prefix = diagnostics.info.sign,
-      }),
-      4,
-    },
-    { item(notifications, 'StTitle'), 3 },
+    -- {
+    --   item_if(diagnostics.warning.count, diagnostics.warning, 'StWarning', {
+    --     prefix = diagnostics.warning.sign,
+    --   }),
+    --   3,
+    -- },
+    -- {
+    --   item_if(diagnostics.info.count, diagnostics.info, 'StInfo', {
+    --     prefix = diagnostics.info.sign,
+    --   }),
+    --   4,
+    -- },
+    -- { item(notifications, 'StTitle'), 3 },
     -- Git Status
-    { item(status.head, 'StBlue', { prefix = '', prefix_color = 'StGit' }), 1 },
-    { item(status.changed, 'StTitle', { prefix = '', prefix_color = 'StWarning' }), 3 },
-    { item(status.removed, 'StTitle', { prefix = '', prefix_color = 'StError' }), 3 },
-    { item(status.added, 'StTitle', { prefix = '', prefix_color = 'StGreen' }), 3 },
+    { item(status.head, 'StBlue', { prefix = '', prefix_color = 'StGit' }), 1 },
+    -- { item(status.changed, 'StTitle', { prefix = '', prefix_color = 'StWarning' }), 3 },
+    -- { item(status.removed, 'StTitle', { prefix = '', prefix_color = 'StError' }), 3 },
+    -- { item(status.added, 'StTitle', { prefix = '', prefix_color = 'StGreen' }), 3 },
     {
       item(
         ahead,

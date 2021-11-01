@@ -128,8 +128,9 @@ function M.set_hl(name, opts)
         local attrs = get_hl(opts.inherit)
         --- FIXME: deep extending does not merge { a = {'one'}} with {b = {'two'}}
         --- correctly in nvim 0.5.1, but should do in 0.6
-        opts.gui = (opts.gui and attrs.gui) and opts.gui .. ',' .. table.concat(attrs.gui, ',')
-          or opts.gui
+        if opts.gui and not opts.gui:match 'NONE' and attrs.gui then
+          opts.gui = opts.gui .. ',' .. table.concat(attrs.gui, ',')
+        end
         opts = vim.tbl_deep_extend('force', attrs, opts)
         opts.inherit = nil
       end
@@ -187,7 +188,7 @@ end
 -- vim.cmd 'colorscheme tokyonight'
 -- -- }}}
 
-vim.cmd 'colorscheme doom-one'
+vim.cmd 'colorscheme everforest'
 
 ---------------------------------------------------------------------------------
 -- Plugin highlights {{{
@@ -228,18 +229,17 @@ local function general_overrides()
 
   M.all {
     -- { 'Credit', { gui = 'bold' } },
-    { 'NormalFloat', { link = 'Normal' } },
-    { 'Error', { link = 'WarningMsg', force = true } },
-    { 'ErrorMsg', { guibg = bg_color } },
-    { 'CursorLineNr', { gui = 'bold' } },
-    { 'ColorColumn', { guibg = cursor_line_bg } },
-    { 'IncSearch', { guibg = 'NONE', guifg = L.bright_yellow, gui = 'italic,bold,underline' } },
-
-    { 'Include', { gui = 'italic' } },
-    { 'Type', { gui = 'italic,bold' } },
-    { 'Comment', { gui = 'italic' } },
-    { 'Folded', { link = 'Comment', force = true } },
-    { 'QuickFixLine', { guibg = search_bg } },
+    -- { 'NormalFloat', { link = 'Normal' } },
+    -- { 'Error', { link = 'WarningMsg', force = true } },
+    -- { 'ErrorMsg', { guibg = bg_color } },
+    -- { 'CursorLineNr', { gui = 'bold' } },
+    -- { 'ColorColumn', { guibg = cursor_line_bg } },
+    -- { 'IncSearch', { guibg = 'NONE', guifg = L.bright_yellow, gui = 'italic,underline' } },
+    -- { 'Include', { gui = 'italic' } },
+    -- { 'Type', { gui = 'italic,bold' } },
+    -- { 'Comment', { gui = 'italic' } },
+    -- { 'Folded', { link = 'Comment', force = true } },
+    -- { 'QuickFixLine', { guibg = search_bg } },
     -----------------------------------------------------------------------------//
     -- Commandline
     -----------------------------------------------------------------------------//
@@ -248,10 +248,10 @@ local function general_overrides()
     -----------------------------------------------------------------------------//
     -- Diff
     -----------------------------------------------------------------------------//
-    { 'DiffAdd', { guibg = '#26332c', guifg = 'NONE' } },
-    { 'DiffDelete', { guibg = '#572E33', guifg = '#5c6370', gui = 'NONE' } },
-    { 'DiffChange', { guibg = '#273842', guifg = 'NONE' } },
-    { 'DiffText', { guibg = '#314753', guifg = 'NONE' } },
+    -- { 'DiffAdd', { guibg = '#26332c', guifg = 'NONE' } },
+    -- { 'DiffDelete', { guibg = '#572E33', guifg = '#5c6370', gui = 'NONE' } },
+    -- { 'DiffChange', { guibg = '#273842', guifg = 'NONE' } },
+    -- { 'DiffText', { guibg = '#314753', guifg = 'NONE' } },
     { 'diffAdded', { link = 'DiffAdd', force = true } },
     { 'diffChanged', { link = 'DiffChange', force = true } },
     { 'diffRemoved', { link = 'DiffDelete', force = true } },
@@ -267,48 +267,37 @@ local function general_overrides()
     -----------------------------------------------------------------------------//
     -- Treesitter
     -----------------------------------------------------------------------------//
-    { 'TSKeywordReturn', { gui = 'italic', guifg = keyword_fg } },
-    { 'TSParameter', { gui = 'italic,bold' } },
-    { 'TSError', { link = 'LspDiagnosticsUnderlineError', force = true } },
-    -----------------------------------------------------------------------------//
-    -- LSP
-    -----------------------------------------------------------------------------//
-    { 'LspReferenceText', { gui = 'underline' } },
-    { 'LspReferenceRead', { gui = 'underline' } },
-    { 'DiagnosticHint', { guifg = L.hint } },
-    { 'DiagnosticError', { guifg = L.error } },
-    { 'DiagnosticWarning', { guifg = L.warn } },
-    { 'DiagnosticInfo', { guifg = L.info } },
-    { 'DiagnosticUnderlineError', { gui = 'undercurl', guisp = L.error, guifg = 'none' } },
-    { 'DiagnosticUnderlineHint', { gui = 'undercurl', guisp = L.hint, guifg = 'none' } },
-    { 'DiagnosticUnderlineWarn', { gui = 'undercurl', guisp = L.warn, guifg = 'none' } },
-    { 'DiagnosticUnderlineInfo', { gui = 'undercurl', guisp = L.info, guifg = 'none' } },
-    { 'DiagnosticSignHintLine', { guibg = hint_line } },
-    { 'DiagnosticSignErrorLine', { guibg = error_line } },
-    { 'DiagnosticSignWarnLine', { guibg = warn_line } },
-    { 'DiagnosticSignInfoLine', { guibg = info_line } },
-    { 'DiagnosticSignWarn', { link = 'DiagnosticWarn', force = true } },
-    { 'DiagnosticSignInfo', { link = 'DiagnosticInfo', force = true } },
-    { 'DiagnosticSignHint', { link = 'DiagnosticHint', force = true } },
-    { 'DiagnosticSignError', { link = 'DiagnosticError', force = true } },
-    { 'DiagnosticFloatingWarn', { link = 'DiagnosticWarn', force = true } },
-    { 'DiagnosticFloatingInfo', { link = 'DiagnosticInfo', force = true } },
-    { 'DiagnosticFloatingHint', { link = 'DiagnosticHint', force = true } },
-    { 'DiagnosticFloatingError', { link = 'DiagnosticError', force = true } },
-    -- TODO: delete the following when v0.6 is stable
-    { 'LspDiagnosticsSignHint', { guifg = L.hint } },
-    { 'LspDiagnosticsDefaultHint', { guifg = L.hint } },
-    { 'LspDiagnosticsDefaultError', { guifg = L.error } },
-    { 'LspDiagnosticsDefaultWarning', { guifg = L.warn } },
-    { 'LspDiagnosticsDefaultInformation', { guifg = L.info } },
-    { 'LspDiagnosticsSignHintLine', { guibg = hint_line } },
-    { 'LspDiagnosticsSignErrorLine', { guibg = error_line } },
-    { 'LspDiagnosticsSignWarningLine', { guibg = warn_line } },
-    { 'LspDiagnosticsSignInformationLine', { guibg = info_line } },
-    { 'LspDiagnosticsUnderlineError', { gui = 'undercurl', guisp = L.error, guifg = 'none' } },
-    { 'LspDiagnosticsUnderlineHint', { gui = 'undercurl', guisp = L.hint, guifg = 'none' } },
-    { 'LspDiagnosticsUnderlineWarning', { gui = 'undercurl', guisp = 'orange', guifg = 'none' } },
-    { 'LspDiagnosticsUnderlineInformation', { gui = 'undercurl', guisp = L.info, guifg = 'none' } },
+    {
+      'TSKeywordReturn',
+      { gui = 'italic' },
+      { 'TSParameter', { gui = 'italic,bold' } },
+      { 'TSError', { link = 'LspDiagnosticsUnderlineError', force = true } },
+      -----------------------------------------------------------------------------//
+      -- LSP
+      -----------------------------------------------------------------------------//
+      -- { 'LspReferenceText', { gui = 'underline' } },
+      -- { 'LspReferenceRead', { gui = 'underline' } },
+      -- { 'DiagnosticHint', { guifg = L.hint } },
+      -- { 'DiagnosticError', { guifg = L.error } },
+      -- { 'DiagnosticWarning', { guifg = L.warn } },
+      -- { 'DiagnosticInfo', { guifg = L.info } },
+      -- { 'DiagnosticUnderlineError', { gui = 'undercurl', guisp = L.error, guifg = 'none' } },
+      -- { 'DiagnosticUnderlineHint', { gui = 'undercurl', guisp = L.hint, guifg = 'none' } },
+      -- { 'DiagnosticUnderlineWarn', { gui = 'undercurl', guisp = L.warn, guifg = 'none' } },
+      -- { 'DiagnosticUnderlineInfo', { gui = 'undercurl', guisp = L.info, guifg = 'none' } },
+      { 'DiagnosticSignHintLine', { guibg = hint_line } },
+      { 'DiagnosticSignErrorLine', { guibg = error_line } },
+      { 'DiagnosticSignWarnLine', { guibg = warn_line } },
+      { 'DiagnosticSignInfoLine', { guibg = info_line } },
+      -- { 'DiagnosticSignWarn', { link = 'DiagnosticWarn', force = true } },
+      -- { 'DiagnosticSignInfo', { link = 'DiagnosticInfo', force = true } },
+      -- { 'DiagnosticSignHint', { link = 'DiagnosticHint', force = true } },
+      -- { 'DiagnosticSignError', { link = 'DiagnosticError', force = true } },
+      -- { 'DiagnosticFloatingWarn', { link = 'DiagnosticWarn', force = true } },
+      -- { 'DiagnosticFloatingInfo', { link = 'DiagnosticInfo', force = true } },
+      -- { 'DiagnosticFloatingHint', { link = 'DiagnosticHint', force = true } },
+      -- { 'DiagnosticFloatingError', { link = 'DiagnosticError', force = true } },
+    },
   }
 end
 -- }}}
@@ -330,12 +319,7 @@ local function set_sidebar_highlight()
   end
 end
 
-local sidebar_fts = {
-  'packer',
-  'NvimTree',
-  'dap-repl',
-  'undotree',
-}
+local sidebar_fts = { 'packer', 'NvimTree', 'dap-repl', 'undotree' }
 
 local function on_sidebar_enter()
   vim.wo.winhighlight = table.concat({
@@ -356,17 +340,15 @@ local function colorscheme_overrides()
       { 'TSVariable', { guifg = 'NONE' } },
       { 'WhichKeyFloat', { link = 'PanelBackground' } },
       { 'Cursor', { guibg = keyword_fg, gui = 'NONE' } },
-      { 'CursorLine', { guibg = dark_bg } },
-      { 'CursorLineNr', { guibg = dark_bg } },
       { 'Pmenu', { guibg = dark_bg, blend = 6 } },
     }
   elseif vim.g.colors_name == 'doom-one' then
-    -- HACK: override the pumblend set by doom-one, use until the behaviour of the setup function
-    -- is fixed, @see: https://github.com/NTBBloodbath/doom-one.nvim/issues/17
-    vim.opt.pumblend = 3
-    local keyword_fg = M.get_hl('Keyword', 'fg')
+    local normal_bg = M.get_hl('Normal', 'bg')
+    local bg_color = M.alter_color(normal_bg, 12)
     M.all {
-      { 'CursorLineNr', { guifg = keyword_fg } },
+      { 'SignColumn', { guibg = bg_color } },
+      { 'CursorColumn', { guibg = bg_color } },
+      { 'CursorLine', { guibg = bg_color } },
       { 'Constant', { gui = 'NONE' } },
     }
   end
