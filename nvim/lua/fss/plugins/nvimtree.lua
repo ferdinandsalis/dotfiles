@@ -18,7 +18,6 @@ return function()
   vim.g.nvim_tree_git_hl = 1
   vim.g.nvim_tree_width_allow_resize = 1
   vim.g.nvim_tree_root_folder_modifier = ':t'
-  vim.g.nvim_tree_ignore = { '.DS_Store', 'fugitive:', '.git' }
   vim.g.nvim_tree_highlight_opened_files = 1
 
   local P = fss.style.palette
@@ -56,6 +55,9 @@ return function()
     update_focused_file = {
       enable = true,
       update_cwd = true,
+    },
+    filters = {
+      custom = { '.DS_Store', 'fugitive:', '.git' },
     },
   }
 end

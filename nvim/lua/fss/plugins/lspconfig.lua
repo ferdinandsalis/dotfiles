@@ -113,7 +113,8 @@ local function setup_mappings(client, bufnr)
   end
 
   if client.supports_method 'textDocument/rename' then
-    maps['<leader>rn'] = { vim.lsp.buf.rename, 'lsp: rename' }
+    local renamer = require('renamer').rename or vim.lsp.buf.rename
+    maps['<leader>rn'] = { renamer, 'lsp: rename' }
   end
 
   require('which-key').register(maps, { buffer = 0 })
@@ -223,6 +224,15 @@ fss.lsp.servers = {
   bashls = true,
   tsserver = true,
   elixirls = true,
+    jsonls = function()
+    return {
+      settings = {
+        json = {
+          schemas = require('schemastore').json.schemas(),
+        },
+      },
+    }
+  end,
   --- NOTE: This is the secret sauce that allows reading requires and variables
   --- between different modules in the nvim lua context
   --- @see https://gist.github.com/folke/fe5d28423ea5380929c3f7ce674c41d8

@@ -3,18 +3,27 @@
       create: true
       relink: true
 
+- create:
+    - ~/.ssh
+    - ~/.config
+    - ~/projects
+    - ~/work
+
 - clean: ["~"]
 
 - link:
-    # ~/.dotfiles: ""
+    ~/.dotfiles: ""
     ~/.tmux.conf: tmux/.tmux.conf
     ~/.zshrc: zsh/zshrc
     ~/.zshenv: zsh/zshenv
+    ~/.vimrc: vim/vimrc
     ~/.gitconfig: git/gitconfig
     ~/.gitmessage: git/gitmessage
     ~/.config/nvim: nvim
+    ~/Library/Application Support/lazygit/config.yml:
+      if: "[ `uname` = Darwin ]"
+      path: lazygit/config.yml
     ~/.config/direnv: direnv
-    ~/.config/skhd: skhd
     ~/.config/kitty:
       force: true
       path: kitty

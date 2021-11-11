@@ -182,13 +182,15 @@ end
 ---------------------------------------------------------------------------------
 -- Color Scheme {{{1
 -----------------------------------------------------------------------------//
--- vim.g.tokyonight_style = 'storm'
--- vim.g.tokyonight_italic_functions = true
--- vim.g.tokyonight_sidebars = { 'qf', 'terminal', 'packer' }
--- vim.cmd 'colorscheme tokyonight'
--- -- }}}
 
-vim.cmd 'colorscheme everforest'
+if fss.plugin_installed 'everforest' then
+  -- vim.g.tokyonight_style = 'storm'
+  -- vim.g.tokyonight_italic_functions = true
+  -- vim.g.tokyonight_sidebars = { 'qf', 'terminal', 'packer' }
+  -- vim.cmd 'colorscheme tokyonight'
+  -- vim.cmd 'colorscheme everforest'
+  vim.cmd 'colorscheme everforest'
+end
 
 ---------------------------------------------------------------------------------
 -- Plugin highlights {{{
@@ -216,54 +218,20 @@ end
 -- General highlights {{{
 ---------------------------------------------------------------------------------
 local function general_overrides()
-  local cursor_line_bg = M.get_hl('CursorLine', 'bg')
   local normal_fg = M.get_hl('Normal', 'fg')
   local comment_fg = M.get_hl('Comment', 'fg')
-  local keyword_fg = M.get_hl('Keyword', 'fg')
   local bg_color = M.alter_color(M.get_hl('Normal', 'bg'), -10)
   local hint_line = M.alter_color(L.hint, -80)
   local error_line = M.alter_color(L.error, -80)
   local warn_line = M.alter_color(L.warn, -80)
   local info_line = M.alter_color(L.info, -80)
-  local search_bg = M.get_hl('Search', 'bg')
 
   M.all {
-    -- { 'Credit', { gui = 'bold' } },
-    -- { 'NormalFloat', { link = 'Normal' } },
-    -- { 'Error', { link = 'WarningMsg', force = true } },
-    -- { 'ErrorMsg', { guibg = bg_color } },
-    -- { 'CursorLineNr', { gui = 'bold' } },
-    -- { 'ColorColumn', { guibg = cursor_line_bg } },
-    -- { 'IncSearch', { guibg = 'NONE', guifg = L.bright_yellow, gui = 'italic,underline' } },
-    -- { 'Include', { gui = 'italic' } },
-    -- { 'Type', { gui = 'italic,bold' } },
-    -- { 'Comment', { gui = 'italic' } },
-    -- { 'Folded', { link = 'Comment', force = true } },
-    -- { 'QuickFixLine', { guibg = search_bg } },
     -----------------------------------------------------------------------------//
     -- Commandline
     -----------------------------------------------------------------------------//
     { 'MsgArea', { guifg = normal_fg, guibg = bg_color } },
     { 'MsgSeparator', { guifg = comment_fg, guibg = bg_color } },
-    -----------------------------------------------------------------------------//
-    -- Diff
-    -----------------------------------------------------------------------------//
-    -- { 'DiffAdd', { guibg = '#26332c', guifg = 'NONE' } },
-    -- { 'DiffDelete', { guibg = '#572E33', guifg = '#5c6370', gui = 'NONE' } },
-    -- { 'DiffChange', { guibg = '#273842', guifg = 'NONE' } },
-    -- { 'DiffText', { guibg = '#314753', guifg = 'NONE' } },
-    { 'diffAdded', { link = 'DiffAdd', force = true } },
-    { 'diffChanged', { link = 'DiffChange', force = true } },
-    { 'diffRemoved', { link = 'DiffDelete', force = true } },
-    { 'diffBDiffer', { link = 'WarningMsg', force = true } },
-    { 'diffCommon', { link = 'WarningMsg', force = true } },
-    { 'diffDiffer', { link = 'WarningMsg', force = true } },
-    { 'diffFile', { link = 'Directory', force = true } },
-    { 'diffIdentical', { link = 'WarningMsg', force = true } },
-    { 'diffIndexLine', { link = 'Number', force = true } },
-    { 'diffIsA', { link = 'WarningMsg', force = true } },
-    { 'diffNoEOL', { link = 'WarningMsg', force = true } },
-    { 'diffOnly', { link = 'WarningMsg', force = true } },
     -----------------------------------------------------------------------------//
     -- Treesitter
     -----------------------------------------------------------------------------//
@@ -275,28 +243,10 @@ local function general_overrides()
       -----------------------------------------------------------------------------//
       -- LSP
       -----------------------------------------------------------------------------//
-      -- { 'LspReferenceText', { gui = 'underline' } },
-      -- { 'LspReferenceRead', { gui = 'underline' } },
-      -- { 'DiagnosticHint', { guifg = L.hint } },
-      -- { 'DiagnosticError', { guifg = L.error } },
-      -- { 'DiagnosticWarning', { guifg = L.warn } },
-      -- { 'DiagnosticInfo', { guifg = L.info } },
-      -- { 'DiagnosticUnderlineError', { gui = 'undercurl', guisp = L.error, guifg = 'none' } },
-      -- { 'DiagnosticUnderlineHint', { gui = 'undercurl', guisp = L.hint, guifg = 'none' } },
-      -- { 'DiagnosticUnderlineWarn', { gui = 'undercurl', guisp = L.warn, guifg = 'none' } },
-      -- { 'DiagnosticUnderlineInfo', { gui = 'undercurl', guisp = L.info, guifg = 'none' } },
       { 'DiagnosticSignHintLine', { guibg = hint_line } },
       { 'DiagnosticSignErrorLine', { guibg = error_line } },
       { 'DiagnosticSignWarnLine', { guibg = warn_line } },
       { 'DiagnosticSignInfoLine', { guibg = info_line } },
-      -- { 'DiagnosticSignWarn', { link = 'DiagnosticWarn', force = true } },
-      -- { 'DiagnosticSignInfo', { link = 'DiagnosticInfo', force = true } },
-      -- { 'DiagnosticSignHint', { link = 'DiagnosticHint', force = true } },
-      -- { 'DiagnosticSignError', { link = 'DiagnosticError', force = true } },
-      -- { 'DiagnosticFloatingWarn', { link = 'DiagnosticWarn', force = true } },
-      -- { 'DiagnosticFloatingInfo', { link = 'DiagnosticInfo', force = true } },
-      -- { 'DiagnosticFloatingHint', { link = 'DiagnosticHint', force = true } },
-      -- { 'DiagnosticFloatingError', { link = 'DiagnosticError', force = true } },
     },
   }
 end
@@ -376,6 +326,8 @@ fss.augroup('UserHighlights', {
     command = on_sidebar_enter,
   },
 })
+
+-- -- }}}
 
 return M
 

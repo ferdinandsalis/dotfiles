@@ -26,10 +26,14 @@ return function()
 
   local function tab(fallback)
     local luasnip = get_luasnip()
+    local copilot_keys = vim.fn['copilot#Accept']()
     if cmp.visible() then
       cmp.select_next_item()
-    elseif luasnip and luasnip.expand_or_jumpable() then
-      feed '<Plug>luasnip-expand-or-jump'
+    elseif copilot_keys ~= '' then -- prioritise copilot over snippets
+      -- Copilot keys do not need to be wrapped in termcodes
+      api.nvim_feedkeys(copilot_keys, 'i', true)
+    elseif luasnip and luasnip.expand_or_locally_jumpable() then
+      luasnip.expand_or_jump()
     elseif api.nvim_get_mode().mode == 'c' then
       fallback()
     else
@@ -42,17 +46,22 @@ return function()
     if cmp.visible() then
       cmp.select_prev_item()
     elseif luasnip and luasnip.jumpable(-1) then
-      feed '<Plug>luasnip-jump-prev'
+      luasnip.jump(-1)
     elseif api.nvim_get_mode().mode == 'c' then
       fallback()
     else
-      feed '<Plug>(TaboutBack)'
+      local copilot_keys = vim.fn['copilot#Accept']()
+      if copilot_keys ~= '' then
+        feed(copilot_keys, 'i')
+      else
+        feed '<Plug>(Tabout)'
+      end
     end
   end
 
   cmp.setup {
     experimental = {
-      ghost_text = true,
+      ghost_text = false,
     },
     snippet = {
       expand = function(args)
@@ -64,7 +73,7 @@ return function()
       ['<S-Tab>'] = cmp.mapping(shift_tab, { 'i', 'c' }),
       ['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
       ['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
-      ['<C-e>'] = cmp.mapping.complete(),
+      ['<C-q>'] = cmp.mapping.complete(),
       ['<CR>'] = cmp.mapping.confirm {
         behavior = cmp.ConfirmBehavior.Replace,
         select = true,
@@ -86,19 +95,15 @@ return function()
           calc = '[Calc]',
           neorg = '[Neorg]',
           orgmode = '[Org]',
-          cmp_tabnine = '[TN]',
           luasnip = '[Luasnip]',
           buffer = '[Buffer]',
+          fuzzy_buffer = '[Fuzzy Buffer]',
+          fuzzy_path = '[Fuzzy Path]',
           spell = '[Spell]',
           cmdline = '[Command]',
+          cmp_git = '[Git]',
         })[name]
 
-        if name == 'cmp_tabnine' then
-          if completion and completion.detail then
-            menu = completion.detail .. ' ' .. menu
-          end
-          vim_item.kind = ''
-        end
         vim_item.menu = menu
         return vim_item
       end,
@@ -109,34 +114,30 @@ return function()
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
       { name = 'luasnip' },
-      { name = 'cmp_tabnine' },
       { name = 'spell' },
       { name = 'calc' },
       { name = 'path' },
+      -- { name = 'fuzzy_path' },
       { name = 'neorg' },
       { name = 'orgmode' },
+      -- { name = 'cmp_git' },
     }, {
-      { name = 'buffer' },
+      { name = 'fuzzy_buffer' },
     }),
   }
 
-   -- Use buffer source for `/`.
-  cmp.setup.cmdline('/', {
-    sources = {
-      { name = 'buffer' },
-    },
-  })
-
-  cmp.setup.cmdline('?', {
-    sources = {
-      { name = 'buffer' },
-    },
-  })
-
-  -- Use cmdline & path source for ':'.
+  local search_sources = {
+    sources = cmp.config.sources({
+      { name = 'nvim_lsp_document_symbol' },
+    }, {
+      { name = 'fuzzy_buffer' },
+    }),
+  }
+  cmp.setup.cmdline('/', search_sources)
+  cmp.setup.cmdline('?', search_sources)
   cmp.setup.cmdline(':', {
     sources = cmp.config.sources({
-      { name = 'path' },
+      { name = 'fuzzy_path' },
     }, {
       { name = 'cmdline' },
     }),

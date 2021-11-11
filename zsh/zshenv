@@ -18,6 +18,10 @@ path+=(
   "$HOME/.cargo/bin"
 )
 
+export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+export PATH="/usr/local/opt/terraform@0.12/bin:$PATH"
+
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 
@@ -30,7 +34,7 @@ if [ -f "$HOME/.environment.secret.sh" ]; then
   source $HOME/.environment.secret.sh
 fi
 
- # Add LUA_PATH to the environment ensuring the lua version is set since
+# Add LUA_PATH to the environment ensuring the lua version is set since
 # luarocks from homebrew uses lua 5.4 by default so would otherwise add the
 # wrong path
 if which luarocks >/dev/null; then
@@ -56,7 +60,7 @@ export SSH_KEY_PATH="~/.ssh/rsa_id"
 export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=241'
 
 if ! type "$bat" > /dev/null; then
-  export BAT_THEME="TwoDark"
+  export BAT_THEME="ansi"
 fi
 
 # Fuzzy Finder
@@ -64,4 +68,5 @@ export FZF_DEFAULT_COMMAND='rg --files --no-ignore-vcs --hidden'
 export FZF_DEFAULT_OPTS="--history=$HOME/.fzf_history"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_TMUX=0
+
 source "/Users/ferdinand/.rover/env"

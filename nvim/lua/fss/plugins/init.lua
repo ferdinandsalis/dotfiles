@@ -17,10 +17,6 @@ utils.bootstrap_packer()
 vim.cmd 'packadd! cfilter'
 
 fss.safe_require 'impatient'
--- FIXME: profiling causes load issues with fzy-lua-native
--- if impatient_ok then
---   impatient.enable_profile()
--- end
 
 -- NOTE: luarocks install on every single PackerInstall https://github.com/wbthomason/packer.nvim/issues/180
 
@@ -291,7 +287,7 @@ require('packer').startup {
       },
     }
 
-    use { 'folke/lua-dev.nvim', commit = 'e958850' }
+    use 'folke/lua-dev.nvim'
 
     use { 'neovim/nvim-lspconfig', config = conf 'lspconfig' }
     use {
@@ -328,6 +324,8 @@ require('packer').startup {
 
     use 'jose-elias-alvarez/nvim-lsp-ts-utils'
 
+    use 'b0o/schemastore.nvim'
+
     use {
       'jose-elias-alvarez/null-ls.nvim',
       run = function()
@@ -353,6 +351,15 @@ require('packer').startup {
           },
         }
         require('lspconfig')['null-ls'].setup { on_attach = fss.lsp.on_attach }
+      end,
+    }
+
+    use {
+      'filipdutescu/renamer.nvim',
+      config = function()
+        require('renamer').setup {
+          title = 'Rename',
+        }
       end,
     }
 
@@ -395,9 +402,16 @@ require('packer').startup {
       config = function()
         require('lsp_signature').setup {
           bind = true,
-          fix_pos = function(signatures, _) -- second argument is the client
-            return signatures[1].activeParameter >= 0 and signatures[1].parameters > 1
+          fix_pos = function(signatures, client)
+            if signatures[1].activeParameter >= 0 and #signatures[1].parameters == 1 then
+              return false
+            end
+            if client.name == 'sumneko_lua' then
+              return true
+            end
+            return false
           end,
+          auto_close_after = 15, -- close after 15 seconds
           hint_enable = false,
           handler_opts = { border = 'rounded' },
         }
@@ -410,13 +424,24 @@ require('packer').startup {
       event = 'InsertEnter',
       requires = {
         { 'hrsh7th/cmp-nvim-lsp' },
+        { 'hrsh7th/cmp-nvim-lsp-document-symbol', after = 'nvim-cmp' },
+        { 'hrsh7th/cmp-cmdline', after = 'nvim-cmp' },
         { 'f3fora/cmp-spell', after = 'nvim-cmp' },
         { 'hrsh7th/cmp-path', after = 'nvim-cmp' },
         { 'hrsh7th/cmp-calc', after = 'nvim-cmp' },
         { 'hrsh7th/cmp-buffer', after = 'nvim-cmp' },
-        { 'hrsh7th/cmp-cmdline', after = 'nvim-cmp' },
+        { 'petertriho/cmp-git', after = 'nvim-cmp' },
         { 'saadparwaiz1/cmp_luasnip', after = 'nvim-cmp' },
-        { 'tzachar/cmp-tabnine', run = './install.sh', after = 'nvim-cmp' },
+        {
+          'tzachar/cmp-fuzzy-path',
+          after = 'cmp-path',
+          requires = { 'hrsh7th/cmp-path', 'tzachar/fuzzy.nvim' },
+        },
+        {
+          'tzachar/cmp-fuzzy-buffer',
+          after = 'nvim-cmp',
+          requires = { 'tzachar/fuzzy.nvim' },
+        },
       },
       config = conf 'cmp',
     }
@@ -522,22 +547,7 @@ require('packer').startup {
       requires = 'nvim-treesitter',
     }
     use 'RRethy/nvim-treesitter-textsubjects'
-    use {
-      'p00f/nvim-ts-rainbow',
-      requires = 'nvim-treesitter',
-      config = function()
-        require('fss.highlights').plugin(
-          'rainbow',
-          { 'rainbowcol1', { guifg = '#a3be8c' } },
-          { 'rainbowcol2', { guifg = '#99c2c1' } },
-          { 'rainbowcol3', { guifg = '#8fbcbb' } },
-          { 'rainbowcol4', { guifg = '#88c0d0' } },
-          { 'rainbowcol5', { guifg = '#81a1c1' } },
-          { 'rainbowcol6', { guifg = '#5e81ac' } },
-          { 'rainbowcol7', { guifg = '#4e6f97' } }
-        )
-      end,
-    }
+    use { 'p00f/nvim-ts-rainbow', requires = 'nvim-treesitter' }
 
     -- Use <Tab> to escape from pairs such as ""|''|() etc.
     use {
@@ -590,16 +600,9 @@ require('packer').startup {
     use 'mtdl9/vim-log-highlighting'
     use 'slime-lang/vim-slime-syntax'
     use 'plasticboy/vim-markdown'
-
-    -- Color schemes {{{
+    use { 'sainnhe/everforest', commit = "becc25f" }
     use 'folke/tokyonight.nvim'
     use 'NTBBloodbath/doom-one.nvim'
-    use 'sainnhe/everforest'
-    -- use 'sainnhe/gruvbox-material'
-    -- use 'maaslalani/nordbuddy'
-    -- use 'shaunsingh/nord.nvim'
-    -- use { 'mcchrish/zenbones.nvim', requires = 'rktjmp/lush.nvim' }
-    -- }}}
 
     -- }}}
     --------------------------------------------------------------------------------
@@ -679,6 +682,10 @@ require('packer').startup {
 
     use {
       'rlch/github-notifications.nvim',
+      -- don't load this plugin if the gh cli is not installed
+      cond = function()
+        return fss.executable 'gh'
+      end,
       requires = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope.nvim' },
     }
 
@@ -703,6 +710,8 @@ require('packer').startup {
           char = '│', -- ┆ ┊ 
           show_foldtext = false,
           show_first_indent_level = true,
+          show_current_context = true,
+          show_current_context_start = true,
           filetype_exclude = {
             'startify',
             'dashboard',
@@ -727,7 +736,6 @@ require('packer').startup {
             '', -- for all buffers without a file type
           },
           buftype_exclude = { 'terminal', 'nofile' },
-          show_current_context = true,
           context_patterns = {
             'class',
             'function',
@@ -776,37 +784,35 @@ require('packer').startup {
       end,
     }
 
-    -- use 'justinmk/vim-dirvish'
-
     use {
       'kyazdani42/nvim-tree.lua',
       config = conf 'nvimtree',
       requires = 'nvim-web-devicons',
     }
 
-    use {
-      'folke/zen-mode.nvim',
-      cmd = { 'ZenMode' },
-      config = function()
-        require('zen-mode').setup {
-          window = {
-            backdrop = 1,
-            options = {
-              number = false,
-              relativenumber = false,
-            },
-          },
-          {
-            gitsigns = true,
-          },
-        }
-        require('which-key').register {
-          ['<leader>ze'] = { '<cmd>ZenMode<CR>', 'Zen' },
-        }
-      end,
-    }
-
-    use 'folke/twilight.nvim'
+    -- use {
+    --   'folke/zen-mode.nvim',
+    --   cmd = { 'ZenMode' },
+    --   config = function()
+    --     require('zen-mode').setup {
+    --       window = {
+    --         backdrop = 1,
+    --         options = {
+    --           number = false,
+    --           relativenumber = false,
+    --         },
+    --       },
+    --       {
+    --         gitsigns = true,
+    --       },
+    --     }
+    --     require('which-key').register {
+    --       ['<leader>ze'] = { '<cmd>ZenMode<CR>', 'Zen' },
+    --     }
+    --   end,
+    -- }
+    --
+    -- use 'folke/twilight.nvim'
 
     use {
       'iamcco/markdown-preview.nvim',
@@ -835,24 +841,39 @@ require('packer').startup {
       end,
     }
 
+    use {
+      'github/copilot.vim',
+      config = function()
+        vim.g.copilot_filetypes = {
+          ['*'] = false,
+          lua = true,
+          javascript = true,
+          javascriptreact = true,
+          typescript = true,
+          typescriptreact = true,
+        }
+        vim.g.copilot_no_tab_map = true
+        vim.g.copilot_assume_mapped = true
+        vim.g.copilot_tab_fallback = ''
+        require('fss.highlights').plugin('copilot', {
+          'CopilotSuggestion',
+          { link = 'Comment', force = true },
+        })
+      end,
+    }
+
     -----------------------------------------------------------------------------//
     -- Quickfix
     -----------------------------------------------------------------------------//
     use {
       'https://gitlab.com/yorickpeterse/nvim-pqf',
+      event = 'BufReadPre',
       config = function()
         require('fss.highlights').plugin(
           'NvimPQF',
           { 'qfPosition', { link = 'Tag', force = true } }
         )
-        require('pqf').setup {
-          signs = {
-            error = fss.style.icons.error,
-            warning = fss.style.icons.warn,
-            info = fss.style.icons.info,
-            hint = fss.style.icons.hint,
-          },
-        }
+        require('pqf').setup {}
       end,
     }
 
@@ -869,20 +890,6 @@ require('packer').startup {
     --------------------------------------------------------------------------------
     -- Search Tools {{{
     --------------------------------------------------------------------------------
-
-    -- lazy load as it is very expensive to load during startup i.e. 20ms+
-    -- FIXME: UpdateRemotePlugins doesn't seem to be called for lazy loaded plugins
-    --@see: https://github.com/wbthomason/packer.nvim/issues/464
-    use {
-      'gelguy/wilder.nvim',
-      opt = true,
-      -- event = { 'CursorHold', 'CmdlineEnter' },
-      rocks = { 'luarocks-fetch-gitrec', 'pcre2' },
-      requires = { 'romgrk/fzy-lua-native' },
-      config = function()
-        fss.source('vimscript/wilder.vim', true)
-      end,
-    }
 
     use 'ggandor/lightspeed.nvim'
 

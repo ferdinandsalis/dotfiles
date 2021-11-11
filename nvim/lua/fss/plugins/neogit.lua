@@ -17,7 +17,7 @@ function M.config()
     disable_signs = false,
     disable_commit_confirmation = true,
     disable_builtin_notifications = true,
-    disable_insert_on_commit = false,
+    disable_insert_on_commit = true,
     signs = {
       section = { '', '' }, -- "", ""
       item = { '▸', '▾' },

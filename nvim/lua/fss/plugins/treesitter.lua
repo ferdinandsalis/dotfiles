@@ -1,29 +1,30 @@
 return function()
-  vim.cmd [[highlight link TSKeyword Statement]]
-  vim.cmd [[highlight TSParameter gui=italic,bold]]
-
-  require('which-key').register({
-    v = 'increment selection',
-    V = 'decrement selection',
-  }, {
-    prefix = '<leader>',
-  })
+  local parser_configs = require('nvim-treesitter.parsers').get_parser_configs()
+  parser_configs.norg = {
+    install_info = {
+      url = 'https://github.com/vhyrro/tree-sitter-norg',
+      files = { 'src/parser.c', 'src/scanner.cc' },
+      branch = 'main',
+    },
+  }
+  parser_configs.org = {
+    install_info = {
+      url = 'https://github.com/milisims/tree-sitter-org',
+      revision = 'main',
+      files = { 'src/parser.c', 'src/scanner.cc' },
+    },
+    filetype = 'org',
+  }
 
   require('nvim-treesitter.configs').setup {
     ensure_installed = 'maintained',
     highlight = {
       enable = true,
-    },
-    context_commentstring = {
-      enable = true,
+      disable = { 'org' },
+      additional_vim_regex_highlighting = { 'org' },
     },
     autotag = {
       enable = true,
-    },
-    rainbow = {
-      enable = true,
-      disable = { 'lua', 'json' },
-      extended_mode = true,
     },
     incremental_selection = {
       enable = true,
@@ -39,6 +40,7 @@ return function()
       enable = true,
     },
     textobjects = {
+      lookahead = true,
       select = {
         enable = true,
         keymaps = {
@@ -66,28 +68,32 @@ return function()
           [']m'] = '@function.outer',
           [']]'] = '@class.outer',
         },
-        goto_next_end = {
-          [']M'] = '@function.outer',
-          [']['] = '@class.outer',
-        },
         goto_previous_start = {
           ['[m'] = '@function.outer',
           ['[['] = '@class.outer',
-        },
-        goto_previous_end = {
-          ['[M'] = '@function.outer',
-          ['[]'] = '@class.outer',
         },
       },
       lsp_interop = {
         enable = true,
         border = 'rounded',
         peek_definition_code = {
-          ['df'] = '@function.outer',
-          ['dF'] = '@class.outer',
+          ['<leader>df'] = '@function.outer',
+          ['<leader>dF'] = '@class.outer',
         },
       },
     },
+    rainbow = {
+      enable = true,
+      disable = { 'lua', 'json' },
+      colors = {
+        'royalblue3',
+        'darkorange3',
+        'seagreen3',
+        'firebrick',
+        'darkorchid3',
+      },
+    },
+    autopairs = { enable = true },
     query_linter = {
       enable = true,
       use_virtual_text = true,
