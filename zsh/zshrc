@@ -29,10 +29,10 @@ compinit
 
 source $PLUGIN_DIR/asdf.zsh
 source $PLUGIN_DIR/direnv.zsh
-# source $PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-# source $PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh
-# source $PLUGIN_DIR/zsh-completions/zsh-completions.plugin.zsh
-# source $PLUGIN_DIR/alias-tips/alias-tips.plugin.zsh
+source $PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source $PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $PLUGIN_DIR/zsh-completions/zsh-completions.plugin.zsh
+source $PLUGIN_DIR/zsh-history-substring-search/zsh-history-substring-search.plugin.zsh
 autoload zmv # builtin zsh rename command
 
 #-------------------------------------------------------------------------------
