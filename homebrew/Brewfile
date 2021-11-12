@@ -53,12 +53,12 @@ cask "arq"
 cask "alfred"
 cask "adobe-creative-cloud"
 cask "kitty"
-cask "github-desktop"
 
 cask "font-blex-mono-nerd-font"
 cask "font-hasklug-nerd-font"
 cask "font-victor-mono"
 
+cask "alt-tab"
 cask "docker"
 cask "firefox"
 cask "google-chrome"
@@ -77,5 +77,5 @@ mas "Table Tool", id: 1122008420
 mas "Vimari", id: 1480933944
 mas "Xcode", id: 497799835
 
-brew "whalebrew"
-whalebrew "flomotlik/formica"
+# brew "whalebrew"
+# whalebrew "flomotlik/formica"
