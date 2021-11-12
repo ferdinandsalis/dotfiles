@@ -600,7 +600,7 @@ require('packer').startup {
     use 'mtdl9/vim-log-highlighting'
     use 'slime-lang/vim-slime-syntax'
     use 'plasticboy/vim-markdown'
-    use { 'sainnhe/everforest', commit = "becc25f" }
+    use 'sainnhe/everforest'
     use 'folke/tokyonight.nvim'
     use 'NTBBloodbath/doom-one.nvim'
 
