@@ -32,6 +32,7 @@ require('packer').startup {
 
     use {
       'ahmedkhalf/project.nvim',
+      opt = true,
       config = function()
         require('project_nvim').setup {
           ignore_lsp = { 'null-ls', 'jsonls', 'graphql' },

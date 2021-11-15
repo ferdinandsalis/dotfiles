@@ -30,7 +30,7 @@ return function()
     }))
   end
 
-  telescope.load_extension 'projects'
+  -- telescope.load_extension 'projects'
 
   telescope.setup {
     defaults = {
