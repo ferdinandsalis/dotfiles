@@ -58,3 +58,5 @@ backups
 
 # Environment variables
 .envrc
+
+.vscode
