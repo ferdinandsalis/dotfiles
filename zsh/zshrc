@@ -214,7 +214,7 @@ fpath+=$DOTFILES/zsh/functions
 autoload -Uz _fill_line && _fill_line
 
 #-------------------------------------------------------------------------------
-#               Prompt
+# Prompt
 #-------------------------------------------------------------------------------
 # Sets PROMPT and RPROMPT.
 #
@@ -246,7 +246,7 @@ function set-prompt() {
   local top_right="${vim_mode}${execution_time}%F{240}%*%f"
   local bottom_left="%(1j.%F{cyan}%j✦%f .)%(?.${dots_prompt_icon}.${dots_prompt_failure_icon})"
 
-  PROMPT="$(_fill_line "$top_left" "$top_right")"$'\n'$bottom_left
+  PROMPT=$'\n'"$(_fill_line "$top_left")"$'\n'$bottom_left
 }
 
 # Correction prompt
@@ -336,7 +336,7 @@ function -auto-ls-after-cd() {
   # Only in response to a user-initiated `cd`, not indirectly (eg. via another
   # function).
   if [ "$ZSH_EVAL_CONTEXT" = "toplevel:shfunc" ]; then
-    exa
+    exa -lba --git --group-directories-first --icons
   fi
 }
 add-zsh-hook chpwd -auto-ls-after-cd
@@ -489,7 +489,8 @@ bindkey '^U' autosuggest-accept
 path=(
   "$(brew --prefix)/opt/ruby/bin"
   "$(brew --prefix)/lib/ruby/gems/3.0.0/bin"
+  "$(brew --prefix)/go/bin"
   $path
 )
 
-[ -s ~/.luaver/luaver ] && . ~/.luaver/luaver
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
