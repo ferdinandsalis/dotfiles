@@ -19,7 +19,7 @@ local function colors()
   --- terminal emulators like kitty handle this by fetching nerd fonts elsewhere
   --- but this is not universal across terminals so should be avoided
 
-  local indicator_color = P.bright_blue
+  local indicator_color = P.blue
   local warning_fg = fss.style.lsp.colors.warn
 
   local error_color = fss.style.lsp.colors.error
@@ -31,36 +31,36 @@ local function colors()
   local identifier_fg = H.get_hl('Identifier', 'fg')
   local inc_search_bg = H.get_hl('Search', 'bg')
 
-  local bg_color = H.alter_color(H.get_hl('Normal', 'bg'), -16)
+  local bg_color = P.bg_sidebar
 
   H.all {
     { 'StMetadata', { guibg = bg_color, inherit = 'Comment' } },
     { 'StMetadataPrefix', { guibg = bg_color, inherit = 'Comment', gui = 'NONE' } },
     { 'StIndicator', { guibg = bg_color, guifg = indicator_color } },
     { 'StModified', { guifg = string_fg, guibg = bg_color } },
-    { 'StGit', { guifg = P.light_red, guibg = bg_color } },
+    { 'StGit', { guifg = P.gitSigns.delete, guibg = bg_color } },
     { 'StGreen', { guifg = string_fg, guibg = bg_color } },
-    { 'StBlue', { guifg = P.dark_blue, guibg = bg_color, gui = 'bold' } },
+    { 'StBlue', { guifg = P.blue, guibg = bg_color, gui = 'bold' } },
     { 'StNumber', { guifg = number_fg, guibg = bg_color } },
     { 'StCount', { guifg = 'bg', guibg = indicator_color, gui = 'bold' } },
     { 'StPrefix', { guibg = pmenu_bg, guifg = normal_fg } },
-    { 'StDirectory', { guibg = bg_color, guifg = P.grey, gui = 'italic' } },
+    { 'StDirectory', { guibg = bg_color, guifg = P.comment, gui = 'italic' } },
     { 'StParentDirectory', { guibg = bg_color, guifg = string_fg, gui = 'bold' } },
     { 'StIdentifier', { guifg = identifier_fg, guibg = bg_color } },
-    { 'StTitle', { guibg = bg_color, guifg = P.light_grey, gui = 'bold' } },
+    { 'StTitle', { guibg = bg_color, guifg = P.dark5, gui = 'bold' } },
     { 'StComment', { guibg = bg_color, inherit = 'Comment' } },
-    { 'StInactive', { guifg = bg_color, guibg = P.comment_grey } },
+    { 'StInactive', { guifg = bg_color, guibg = P.terminal_black } },
     { 'StatusLine', { guibg = bg_color } },
     { 'StatusLineNC', { guibg = bg_color, gui = 'NONE' } },
     { 'StInfo', { guifg = info_color, guibg = bg_color, gui = 'bold' } },
     { 'StWarning', { guifg = warning_fg, guibg = bg_color } },
     { 'StError', { guifg = error_color, guibg = bg_color } },
-    { 'StFilename', { guibg = bg_color, guifg = P.light_grey, gui = 'bold' } },
-    { 'StFilenameInactive', { guifg = P.comment_grey, guibg = bg_color, gui = 'italic,bold' } },
-    { 'StModeNormal', { guibg = bg_color, guifg = P.whitesmoke, gui = 'bold' } },
-    { 'StModeInsert', { guibg = bg_color, guifg = P.dark_blue, gui = 'bold' } },
+    { 'StFilename', { guibg = bg_color, guifg = P.dark5, gui = 'bold' } },
+    { 'StFilenameInactive', { guifg = P.terminal_black, guibg = bg_color, gui = 'italic,bold' } },
+    { 'StModeNormal', { guibg = bg_color, guifg = P.dark3, gui = 'bold' } },
+    { 'StModeInsert', { guibg = bg_color, guifg = P.blue, gui = 'bold' } },
     { 'StModeVisual', { guibg = bg_color, guifg = P.magenta, gui = 'bold' } },
-    { 'StModeReplace', { guibg = bg_color, guifg = P.dark_red, gui = 'bold' } },
+    { 'StModeReplace', { guibg = bg_color, guifg = P.red, gui = 'bold' } },
     { 'StModeCommand', { guibg = bg_color, guifg = inc_search_bg, gui = 'bold' } },
   }
 end

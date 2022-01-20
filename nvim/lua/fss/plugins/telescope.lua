@@ -17,17 +17,21 @@ return function()
     }
   )
 
-  ---@param opts table
-  ---@return table
-  local function dropdown(opts)
-    return require('telescope.themes').get_dropdown(vim.tbl_deep_extend('force', opts or {}, {
+  local function get_border(opts)
+    return vim.tbl_deep_extend('force', opts or {}, {
       borderchars = {
         { '─', '│', '─', '│', '┌', '┐', '┘', '└' },
         prompt = { '─', '│', ' ', '│', '┌', '┐', '│', '│' },
         results = { '─', '│', '─', '│', '├', '┤', '┘', '└' },
         preview = { '─', '│', '─', '│', '┌', '┐', '┘', '└' },
       },
-    }))
+    })
+  end
+
+  ---@param opts table
+  ---@return table
+  local function dropdown(opts)
+    return require('telescope.themes').get_dropdown(get_border(opts))
   end
 
   -- telescope.load_extension 'projects'
@@ -38,6 +42,10 @@ return function()
       borderchars = { '─', '│', '─', '│', '┌', '┐', '┘', '└' },
       prompt_prefix = ' ',
       selection_caret = '» ',
+      prompt_title = false,
+      results_title = false,
+      preview_title = false,
+      color_devicons = false,
       mappings = {
         i = {
           ['<c-w>'] = actions.send_selected_to_qflist,
@@ -59,6 +67,11 @@ return function()
       layout_config = {
         horizontal = {
           preview_width = 0.45,
+        },
+        cursor = get_border {
+          layout_config = {
+            cursor = { width = 0.3 },
+          },
         },
       },
       winblend = 3,
@@ -108,6 +121,7 @@ return function()
       },
       find_files = {
         hidden = true,
+        git_ignore = true,
       },
       git_branches = dropdown(),
       git_bcommits = {

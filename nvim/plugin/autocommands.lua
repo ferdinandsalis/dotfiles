@@ -157,13 +157,13 @@ fss.augroup('ClearCommandMessages', {
 
 if vim.env.TMUX ~= nil then
   fss.augroup('External', {
-    {
-      events = { 'BufEnter' },
-      targets = { '*' },
-      command = function()
-        vim.o.titlestring = require('fss.external').title_string()
-      end,
-    },
+    -- {
+    --   events = { 'BufEnter' },
+    --   targets = { '*' },
+    --   command = function()
+    --     vim.o.titlestring = require('fss.external').title_string()
+    --   end,
+    -- },
     {
       events = { 'VimLeavePre' },
       targets = { '*' },

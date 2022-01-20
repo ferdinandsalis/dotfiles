@@ -167,7 +167,6 @@ nnoremap('<C-Left>', '<C-w><')
 -- nnoremap("<C-k>", "<C-w>k")
 nnoremap('<C-Right>', '<C-w>>')
 
-
 ----------------------------------------------------------------------------------
 -- Operators
 ----------------------------------------------------------------------------------
@@ -250,7 +249,7 @@ nnoremap('<c-s>', function()
   -- NOTE: this uses write specifically because we need to trigger a filesystem event
   -- even if the file isn't change so that things like hot reload work
   vim.cmd 'silent! write'
-  vim.notify('Saved ' .. vim.fn.expand '%:t', nil, { timeout = 1000 })
+  vim.notify('Saved ' .. vim.fn.expand '%:t', nil, { timeout = 500 })
 end)
 -- Write and quit all files, ZZ is NOT equivalent to this
 nnoremap('qa', '<cmd>qa<CR>')
@@ -336,7 +335,11 @@ xnoremap('cn', [[g:mc . "``cgn"]], { expr = true, silent = true })
 xnoremap('cN', [[g:mc . "``cgN"]], { expr = true, silent = true })
 nnoremap('cq', [[:lua fss.mappings.setup_CR()<CR>*``qz]])
 nnoremap('cQ', [[:lua fss.mappings.setup_CR()<CR>#``qz]])
-xnoremap('cq', [[":\<C-u>lua fss.mappings.setup_CR()\<CR>" . "gv" . g:mc . "``qz"]], { expr = true })
+xnoremap(
+  'cq',
+  [[":\<C-u>lua fss.mappings.setup_CR()\<CR>" . "gv" . g:mc . "``qz"]],
+  { expr = true }
+)
 xnoremap(
   'cQ',
   [[":\<C-u>lua fss.mappings.setup_CR()\<CR>" . "gv" . substitute(g:mc, '/', '?', 'g') . "``qz"]],
@@ -414,40 +417,38 @@ xnoremap('<leader>g', [[:call v:lua.fss.mappings.grep_operator(visualmode())<cr>
 ---------------------------------------------------------------------------------
 -- Toggle list
 ---------------------------------------------------------------------------------
-
 --- Utility function to toggle the location or the quickfix list
----@return boolean whether or not the list is open
-function fss.toggle_list(prefix)
+---@param list_type '"quickfix"' | '"location"'
+---@return nil
+function fss.toggle_list(list_type)
+  local is_location_target = list_type == 'location'
+  local prefix = is_location_target and 'l' or 'c'
   local L = vim.log.levels
-  for _, win in ipairs(api.nvim_list_wins()) do
-    local buf = api.nvim_win_get_buf(win)
-    local location_list = fn.getloclist(0, { filewinid = 0 })
-    local is_loc_list = location_list.filewinid > 0
-    if vim.bo[buf].filetype == 'qf' or is_loc_list then
-      fn.execute(prefix .. 'close')
-      return false
-    end
+  local is_open = fss.is_vim_list_open()
+  if is_open then
+    return fn.execute(prefix .. 'close')
   end
-  local list = prefix == 'l' and fn.getloclist(0) or fn.getqflist()
+  local list = is_location_target and fn.getloclist(0) or fn.getqflist()
   if vim.tbl_isempty(list) then
-    vim.notify(prefix == 'l' and 'Location' or 'QuickFix' .. ' List is Empty.', L.WARN)
-    return false
+    local msg_prefix = (is_location_target and 'Location' or 'QuickFix')
+    return vim.notify(msg_prefix .. ' List is Empty.', L.WARN)
   end
 
   local winnr = fn.winnr()
   fn.execute(prefix .. 'open')
   if fn.winnr() ~= winnr then
-    vim.cmd [[wincmd p]]
+    vim.cmd 'wincmd p'
   end
-  return true
 end
 
 nnoremap('<leader>ls', function()
-  fss.toggle_list 'c'
+  fss.toggle_list 'quickfix'
 end)
 nnoremap('<leader>li', function()
-  fss.toggle_list 'l'
+  fss.toggle_list 'location'
 end)
+
+----------
 
 -----------------------------------------------------------------------------//
 -- Completion
@@ -508,4 +509,3 @@ command {
 -----------------------------------------------------------------------------//
 -- 1.) https://www.reddit.com/r/vim/comments/i2x8xc/i_want_gf_to_create_files_if_they_dont_exist/
 -- 2.) https://github.com/kristijanhusak/neovim-config/blob/5474d932386c3724d2ce02a5963528fe5d5e1015/nvim/lua/partials/mappings.lua#L154
-

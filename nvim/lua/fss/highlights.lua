@@ -1,5 +1,6 @@
-local api = vim.api
 local fmt = string.format
+local api = vim.api
+local P = fss.style.palette
 local L = fss.style.lsp.colors
 local levels = vim.log.levels
 
@@ -114,8 +115,7 @@ local function get_hl(group_name)
   return result
 end
 
---- NOTE: vim.highlight's link and create are private, so
---- eventually move to using `nvim_set_hl`
+--- NOTE: vim.highlight's link and create are private, so eventually move to using `nvim_set_hl`
 ---@param name string
 ---@param opts table
 function M.set_hl(name, opts)
@@ -180,17 +180,16 @@ function M.all(hls)
 end
 
 ---------------------------------------------------------------------------------
--- Color Scheme {{{1
+-- Color Scheme {{{
 -----------------------------------------------------------------------------//
 
-if fss.plugin_installed 'everforest' then
-  -- vim.g.tokyonight_style = 'storm'
-  -- vim.g.tokyonight_italic_functions = true
-  -- vim.g.tokyonight_sidebars = { 'qf', 'terminal', 'packer' }
-  -- vim.cmd 'colorscheme tokyonight'
-  -- vim.cmd 'colorscheme everforest'
-  vim.cmd 'colorscheme everforest'
+if fss.plugin_installed 'tokyonight.nvim' then
+  vim.g.tokyonight_italic_functions = true
+  vim.g.tokyonight_sidebars = { 'qf', 'terminal', 'packer', 'NvimTree' }
+  vim.cmd 'colorscheme tokyonight'
 end
+
+-- }}}
 
 ---------------------------------------------------------------------------------
 -- Plugin highlights {{{
@@ -200,10 +199,9 @@ end
 ---@vararg table list of highlights
 function M.plugin(name, ...)
   name = name:gsub('^%l', string.upper) -- capitalise the name for autocommand convention sake
-  local group_name = fmt('%sHighlightOverrides', name)
   local hls = { ... }
   M.all(hls)
-  fss.augroup(group_name, {
+  fss.augroup(fmt('%sHighlightOverrides', name), {
     {
       events = { 'ColorScheme' },
       targets = { '*' },
@@ -218,20 +216,19 @@ end
 -- General highlights {{{
 ---------------------------------------------------------------------------------
 local function general_overrides()
-  local normal_fg = M.get_hl('Normal', 'fg')
-  local comment_fg = M.get_hl('Comment', 'fg')
-  local bg_color = M.alter_color(M.get_hl('Normal', 'bg'), -10)
   local hint_line = M.alter_color(L.hint, -80)
   local error_line = M.alter_color(L.error, -80)
   local warn_line = M.alter_color(L.warn, -80)
   local info_line = M.alter_color(L.info, -80)
+  local colors = require('tokyonight.colors').setup()
 
   M.all {
+    { 'ColorColumn', { guibg = colors.bg_highlight } },
     -----------------------------------------------------------------------------//
     -- Commandline
     -----------------------------------------------------------------------------//
-    { 'MsgArea', { guifg = normal_fg, guibg = bg_color } },
-    { 'MsgSeparator', { guifg = comment_fg, guibg = bg_color } },
+    { 'MsgArea', { guifg = colors.fg_sidebar, guibg = colors.bg_sidebar } },
+    { 'MsgSeparator', { guifg = colors.fg_sidebar, guibg = colors.bg_sidebar } },
     -----------------------------------------------------------------------------//
     -- Treesitter
     -----------------------------------------------------------------------------//
@@ -286,20 +283,16 @@ local function colorscheme_overrides()
   if vim.g.colors_name == 'tokyonight' then
     local keyword_fg = M.get_hl('Keyword', 'fg')
     local dark_bg = M.alter_color(M.get_hl('Normal', 'bg'), -6)
+    local bg = M.get_hl('Normal', 'bg')
+    local fg = M.get_hl('Normal', 'fg')
     M.all {
+      { 'Folded', { guifg = fg, guibg = bg } },
+      -- { 'FoldColumn', { guifg = keyword_fg, guibg = bg } },
+      -- { 'FoldColumnLine', { guifg = keyword_fg, guibg = bg } },
       { 'TSVariable', { guifg = 'NONE' } },
       { 'WhichKeyFloat', { link = 'PanelBackground' } },
       { 'Cursor', { guibg = keyword_fg, gui = 'NONE' } },
       { 'Pmenu', { guibg = dark_bg, blend = 6 } },
-    }
-  elseif vim.g.colors_name == 'doom-one' then
-    local normal_bg = M.get_hl('Normal', 'bg')
-    local bg_color = M.alter_color(normal_bg, 12)
-    M.all {
-      { 'SignColumn', { guibg = bg_color } },
-      { 'CursorColumn', { guibg = bg_color } },
-      { 'CursorLine', { guibg = bg_color } },
-      { 'Constant', { gui = 'NONE' } },
     }
   end
 end

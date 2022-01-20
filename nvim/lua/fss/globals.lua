@@ -22,37 +22,44 @@ R 'fss.utils.mappings'
 -----------------------------------------------------------------------------//
 -- Consistent store of various UI items to reuse throughout my config
 do
-  local palette = {
-    pale_red = '#544247',
-    dark_red = '#e66868',
-    light_red = '#e67e80',
-    dark_orange = '#e69875',
-    green = '#a7c080',
-    bright_yellow = '#dfa000',
-    light_yellow = '#dbbc7f',
-    dark_blue = '#3a94c5',
-    magenta = '#d699b6',
-    comment_grey = '#7a8478',
-    grey = '#505a60',
-    light_grey = '#a6b0a0',
-    whitesmoke = '#939f91',
-    bright_blue = '#7fbbb3',
-    teal = '#83c092',
-  }
+  local palette = require('tokyonight.colors').setup()
 
   fss.style = {
     icons = {
-      error = '', -- 
-      warning = '',
+      error = '✗',
+      warn = '',
       info = '',
       hint = '',
     },
     lsp = {
       colors = {
-        error = palette.pale_red,
-        warn = palette.dark_orange,
-        hint = palette.bright_yellow,
+        error = palette.red,
+        warn = palette.orange,
+        hint = palette.yellow,
         info = palette.teal,
+      },
+      kind_highlights = {
+        Text = 'String',
+        Method = 'Method',
+        Function = 'Function',
+        Constructor = 'TSConstructor',
+        Field = 'Field',
+        Variable = 'Variable',
+        Class = 'Class',
+        Interface = 'Constant',
+        Module = 'Include',
+        Property = 'Property',
+        Unit = 'Constant',
+        Value = 'Variable',
+        Enum = 'Type',
+        Keyword = 'Keyword',
+        File = 'Directory',
+        Reference = 'Preproc',
+        Constant = 'Constant',
+        Struct = 'Type',
+        Event = 'Variable',
+        Operator = 'Operator',
+        TypeParameter = 'Type',
       },
       kinds = {
         Text = '',
@@ -298,7 +305,7 @@ function fss.has(feature)
   return vim.fn.has(feature) > 0
 end
 
-fss.nightly = fss.has 'nvim-0.6'
+fss.nightly = fss.has 'nvim-0.7'
 
 ---Find an item in a list
 ---@generic T

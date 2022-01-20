@@ -32,7 +32,7 @@ require('packer').startup {
 
     use {
       'ahmedkhalf/project.nvim',
-      opt = true,
+      disable = true,
       config = function()
         require('project_nvim').setup {
           ignore_lsp = { 'null-ls', 'jsonls', 'graphql' },
@@ -86,6 +86,7 @@ require('packer').startup {
 
     use {
       'vuki656/package-info.nvim',
+      disable = true,
       requires = 'MunifTanjim/nui.nvim',
       config = function()
         require('package-info').setup()
@@ -151,6 +152,7 @@ require('packer').startup {
 
     use {
       'rmagatti/auto-session',
+      disable = false,
       config = function()
         require('auto-session').setup {
           auto_session_root_dir = ('%s/session/auto/'):format(vim.fn.stdpath 'data'),
@@ -175,6 +177,7 @@ require('packer').startup {
 
     use {
       'rmagatti/session-lens',
+      disable = true,
       after = 'telescope.nvim',
       config = function()
         local session_lens = require 'session-lens'
@@ -332,18 +335,20 @@ require('packer').startup {
       run = function()
         utils.install('write-good', 'npm', 'install -g')
       end,
-      requires = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
+      requires = { 'nvim-lua/plenary.nvim' },
       config = function()
         local null_ls = require 'null-ls'
         local builtins = null_ls.builtins
-        null_ls.config {
+        null_ls.setup {
+          debug = true,
           debounce = 150,
+          on_attach = fss.lsp.on_attach,
           sources = {
             -- builtins.hover.dictionary,
             builtins.diagnostics.write_good,
             builtins.code_actions.gitsigns,
             builtins.formatting.mix,
-            builtins.formatting.prettierd,
+            builtins.formatting.prettier_d_slim,
             builtins.formatting.stylua.with {
               condition = function(_utils)
                 return _utils.root_has_file 'stylua.toml'
@@ -351,55 +356,12 @@ require('packer').startup {
             },
           },
         }
-        require('lspconfig')['null-ls'].setup { on_attach = fss.lsp.on_attach }
-      end,
-    }
-
-    use {
-      'filipdutescu/renamer.nvim',
-      config = function()
-        require('renamer').setup {
-          title = 'Rename',
-        }
-      end,
-    }
-
-    use {
-      'windwp/lsp-fastaction.nvim',
-      config = function()
-        local fastaction = require 'lsp-fastaction'
-        fastaction.setup {
-          action_data = {
-            dart = {
-              { pattern = 'import library', key = 'i', order = 1 },
-              { pattern = 'wrap with widget', key = 'w', order = 2 },
-              { pattern = 'column', key = 'c', order = 3 },
-              { pattern = 'row', key = 'r', order = 3 },
-              { pattern = 'container', key = 'C', order = 4 },
-              { pattern = 'center', key = 'E', order = 4 },
-              { pattern = 'padding', key = 'p', order = 4 },
-              { pattern = 'remove', key = 'r', order = 5 },
-              -- range code action
-              { pattern = "surround with %'if'", key = 'i', order = 2 },
-              { pattern = 'try%-catch', key = 't', order = 2 },
-              { pattern = 'for%-in', key = 'f', order = 2 },
-              { pattern = 'setstate', key = 's', order = 2 },
-            },
-          },
-        }
-        fss.xnoremap(
-          '<leader>ca',
-          "<esc><Cmd>lua require('lsp-fastaction').range_code_action()<CR>",
-          'lsp: code action'
-        )
-        require('which-key').register {
-          ['<leader>ca'] = { fastaction.code_action, 'lsp: code action' },
-        }
       end,
     }
 
     use {
       'ray-x/lsp_signature.nvim',
+      disable = true,
       config = function()
         require('lsp_signature').setup {
           bind = true,
@@ -449,6 +411,7 @@ require('packer').startup {
 
     use {
       'AckslD/nvim-neoclip.lua',
+      disable = true,
       config = function()
         require('neoclip').setup {
           enable_persistant_history = true,
@@ -502,7 +465,7 @@ require('packer').startup {
           { 'TroubleLocation', { guifg = H.get_hl('Comment', 'fg') } }
         )
         local trouble = require 'trouble'
-        fss.nnoremap('<leader>ld', '<cmd>TroubleToggle lsp_workspace_diagnostics<CR>')
+        fss.nnoremap('<leader>ld', '<cmd>TroubleToggle workspace_diagnostics<CR>')
         fss.nnoremap('<leader>lr', '<cmd>TroubleToggle lsp_references<CR>')
         fss.nnoremap(']d', function()
           trouble.previous { skip_groups = true, jump = true }
@@ -696,6 +659,19 @@ require('packer').startup {
     --------------------------------------------------------------------------------
 
     use {
+      'stevearc/dressing.nvim',
+      config = function()
+        require('dressing').setup {
+          select = {
+            telescope = {
+              theme = 'cursor',
+            },
+          },
+        }
+      end,
+    }
+
+    use {
       'moll/vim-bbye',
       setup = function()
         require('which-key').register {
@@ -727,6 +703,7 @@ require('packer').startup {
             'vista',
             'help',
             'NvimTree',
+            'NeoTree',
             'git',
             'TelescopePrompt',
             'undotree',
@@ -761,17 +738,6 @@ require('packer').startup {
     }
 
     use {
-      'karb94/neoscroll.nvim',
-      config = function()
-        require('neoscroll').setup {
-          mappings = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', 'zt', 'zz', 'zb' },
-          stop_eof = false,
-          hide_cursor = false,
-        }
-      end,
-    }
-
-    use {
       'mg979/vim-visual-multi',
       config = function()
         vim.g.VM_highlight_matches = 'underline'
@@ -787,33 +753,114 @@ require('packer').startup {
 
     use {
       'kyazdani42/nvim-tree.lua',
+      disable = false,
       config = conf 'nvimtree',
       requires = 'nvim-web-devicons',
     }
 
-    -- use {
-    --   'folke/zen-mode.nvim',
-    --   cmd = { 'ZenMode' },
-    --   config = function()
-    --     require('zen-mode').setup {
-    --       window = {
-    --         backdrop = 1,
-    --         options = {
-    --           number = false,
-    --           relativenumber = false,
-    --         },
-    --       },
-    --       {
-    --         gitsigns = true,
-    --       },
-    --     }
-    --     require('which-key').register {
-    --       ['<leader>ze'] = { '<cmd>ZenMode<CR>', 'Zen' },
-    --     }
-    --   end,
-    -- }
-    --
-    -- use 'folke/twilight.nvim'
+    use 'MunifTanjim/nui.nvim'
+
+    use {
+      'petertriho/nvim-scrollbar',
+      config = function()
+        local colors = require('tokyonight.colors').setup()
+
+        require('scrollbar').setup {
+          handle = {
+            color = colors.bg_highlight,
+          },
+          exclude_filetypes = {
+            'packer',
+          },
+          marks = {
+            Search = { color = colors.orange },
+            Error = { color = colors.error },
+            Warn = { color = colors.warning },
+            Info = { color = colors.info },
+            Hint = { color = colors.hint },
+            Misc = { color = colors.purple },
+          },
+        }
+      end,
+    }
+
+    use {
+      'anuvyklack/pretty-fold.nvim',
+      config = function()
+        require('pretty-fold').setup {
+          fill_char = ' ',
+        }
+        require('pretty-fold.preview').setup_keybinding()
+      end,
+    }
+
+    use {
+      'nvim-neo-tree/neo-tree.nvim',
+      disable = true,
+      requires = {
+        'nvim-lua/plenary.nvim',
+        'kyazdani42/nvim-web-devicons', -- not strictly required, but recommended
+        'MunifTanjim/nui.nvim',
+      },
+      config = function()
+        require('neo-tree').setup {
+          popup_border_style = 'rounded',
+          filesystem = {
+            window = {
+              mappings = {
+                ['<2-LeftMouse>'] = 'open',
+                ['<cr>'] = 'open',
+                ['S'] = 'open_split',
+                ['s'] = 'open_vsplit',
+                ['C'] = 'close_node',
+                ['<bs>'] = 'navigate_up',
+                ['.'] = 'set_root',
+                ['H'] = 'toggle_hidden',
+                ['I'] = 'toggle_gitignore',
+                ['R'] = 'refresh',
+                ['/'] = 'filter_as_you_type',
+                ['f'] = 'filter_on_submit',
+                ['<c-x>'] = 'clear_filter',
+                ['a'] = 'add',
+                ['d'] = 'delete',
+                ['r'] = 'rename',
+                ['c'] = 'copy_to_clipboard',
+                ['x'] = 'cut_to_clipboard',
+                ['p'] = 'paste_from_clipboard',
+              },
+            },
+          },
+        }
+        fss.nnoremap('<c-n>', [[<cmd>NeoTreeReveal<CR>]])
+      end,
+    }
+
+    use 'tpope/vim-vinegar'
+
+    use {
+      'folke/zen-mode.nvim',
+      disable = false,
+      cmd = { 'ZenMode' },
+      config = function()
+        require('zen-mode').setup {
+          window = {
+            backdrop = 1,
+            options = {
+              number = false,
+              relativenumber = false,
+            },
+          },
+          {
+            gitsigns = true,
+          },
+        }
+        require('which-key').register {
+          ['<leader>ze'] = { '<cmd>ZenMode<CR>', 'Zen' },
+        }
+      end,
+    }
+
+    use 'folke/twilight.nvim'
 
     use {
       'iamcco/markdown-preview.nvim',
@@ -846,9 +893,14 @@ require('packer').startup {
       'github/copilot.vim',
       config = function()
         vim.g.copilot_filetypes = {
-          ['*'] = true,
+          ['*'] = false,
           gitcommit = false,
-          NeogitCommitMessage = false
+          NeogitCommitMessage = false,
+          lua = true,
+          javascript = true,
+          typescript = true,
+          typescriptreact = true,
+          javascriptreact = true,
         }
         fss.imap('<c-h>', [[copilot#Accept("\<CR>")]], { expr = true, script = true })
         vim.g.copilot_no_tab_map = true
@@ -1019,6 +1071,8 @@ require('packer').startup {
         require('Comment').setup()
       end,
     }
+
+    use 'sQVe/sort.nvim'
 
     use 'chaoren/vim-wordmotion'
 

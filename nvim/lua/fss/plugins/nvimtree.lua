@@ -12,31 +12,22 @@ return function()
       deleted = '',
     },
   }
+
   vim.g.nvim_tree_special_files = {}
   vim.g.nvim_tree_indent_markers = 1
   vim.g.nvim_tree_group_empty = 1
-  vim.g.nvim_tree_git_hl = 1
+  vim.g.nvim_tree_git_hl = 0
   vim.g.nvim_tree_width_allow_resize = 1
   vim.g.nvim_tree_root_folder_modifier = ':t'
   vim.g.nvim_tree_highlight_opened_files = 1
 
-  local P = fss.style.palette
-  require('fss.highlights').plugin(
-    'NvimTree',
-    { 'NvimTreeIndentMarker', { link = 'Comment' } },
-    { 'NvimTreeNormal', { link = 'PanelBackground' } },
-    { 'NvimTreeNormalNC', { link = 'PanelBackground' } },
-    { 'NvimTreeSignColumn', { link = 'PanelBackground' } },
-    { 'NvimTreeEndOfBuffer', { link = 'PanelBackground' } },
-    { 'NvimTreeVertSplit', { link = 'PanelVertSplit' } },
-    { 'NvimTreeStatusLine', { link = 'PanelSt' } },
-    { 'NvimTreeStatusLineNC', { link = 'PanelStNC' } },
-    { 'NvimTreeRootFolder', { gui = 'bold,italic', guifg = P.magenta } }
-  )
-
   fss.nnoremap('<c-n>', [[<cmd>NvimTreeToggle<CR>]])
 
   require('nvim-tree').setup {
+    git = {
+      enable = false,
+      timeout = 200,
+    },
     view = {
       width = 38,
       auto_resize = true,
@@ -45,16 +36,16 @@ return function()
       },
     },
     diagnostics = {
-      enable = true,
+      enable = false,
     },
-    disable_netrw = true,
+    disable_netrw = false,
     hijack_netrw = true,
     open_on_setup = false,
     hijack_cursor = true,
-    update_cwd = true,
+    update_cwd = false,
     update_focused_file = {
       enable = true,
-      update_cwd = true,
+      update_cwd = false,
     },
     filters = {
       custom = { '.DS_Store', 'fugitive:', '.git' },

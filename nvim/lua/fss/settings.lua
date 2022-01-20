@@ -211,13 +211,12 @@ vim.opt.guicursor = {
   [[sm:block-blinkwait175-blinkoff150-blinkon175]],
 }
 
-if fss.nightly then
-  vim.opt.cursorlineopt = 'screenline,number'
-end
+vim.opt.cursorlineopt = 'screenline,number'
 -----------------------------------------------------------------------------//
 -- Title {{{1
 -----------------------------------------------------------------------------//
-vim.opt.titlestring = require('fss.external').title_string() or ' ❐ %t %r %m'
+vim.opt.titlestring = ' ❐ %t %r %m'
+-- vim.opt.titlestring = require('fss.external').title_string() or ' ❐ %t %r %m'
 vim.opt.titleold = fn.fnamemodify(vim.loop.os_getenv 'SHELL', ':t')
 vim.opt.title = true
 vim.opt.titlelen = 70
@@ -230,8 +229,7 @@ vim.opt.sessionoptions = {
   'buffers',
   'curdir',
   'help',
-  'winpos',
-  -- "tabpages",
+  'winpos'
 }
 vim.opt.viewoptions = { 'cursor', 'folds' } -- save/restore just these (with `:{mk,load}view`)
 vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode

@@ -2,6 +2,7 @@ return function()
   local api = vim.api
   local t = fss.replace_termcodes
   local cmp = require 'cmp'
+  local fmt = string.format
 
   require('fss.highlights').plugin(
     'Cmp',
@@ -11,6 +12,16 @@ return function()
     { 'CmpItemAbbrDeprecated', { gui = 'strikethrough', inherit = 'Comment' } },
     { 'CmpItemAbbrMatchFuzzy', { gui = 'italic', guifg = 'fg' } }
   )
+
+  local lsp_hls = fss.style.lsp.kind_highlights
+
+  -- local kind_hls = vim.tbl_map(function(key)
+  --   return { fmt('CmpItemKind%s', key), { inherit = lsp_hls[key], gui = 'NONE' } }
+  -- end, vim.tbl_keys(
+  --   lsp_hls
+  -- ))
+
+  -- require('fss.highlights').plugin('CmpKinds', unpack(kind_hls))
 
   local function feed(key, mode)
     api.nvim_feedkeys(t(key), mode or '', true)
@@ -61,7 +72,7 @@ return function()
 
   cmp.setup {
     experimental = {
-      ghost_text = false,
+      ghost_text = false, -- disable whilst using copilot
     },
     snippet = {
       expand = function(args)
@@ -95,6 +106,7 @@ return function()
           calc = '[Calc]',
           neorg = '[Neorg]',
           orgmode = '[Org]',
+          cmp_tabnine = '[TN]',
           luasnip = '[Luasnip]',
           buffer = '[Buffer]',
           fuzzy_buffer = '[Fuzzy Buffer]',
@@ -104,6 +116,12 @@ return function()
           cmp_git = '[Git]',
         })[name]
 
+        if name == 'cmp_tabnine' then
+          if completion and completion.detail then
+            menu = completion.detail .. ' ' .. menu
+          end
+          vim_item.kind = ''
+        end
         vim_item.menu = menu
         return vim_item
       end,
@@ -114,13 +132,12 @@ return function()
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
       { name = 'luasnip' },
+      { name = 'cmp_tabnine' },
       { name = 'spell' },
-      { name = 'calc' },
       { name = 'path' },
-      -- { name = 'fuzzy_path' },
       { name = 'neorg' },
       { name = 'orgmode' },
-      -- { name = 'cmp_git' },
+      { name = 'cmp_git' },
     }, {
       { name = 'fuzzy_buffer' },
     }),
