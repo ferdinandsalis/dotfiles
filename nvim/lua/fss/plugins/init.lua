@@ -663,6 +663,9 @@ require('packer').startup {
       config = function()
         require('dressing').setup {
           select = {
+            input = {
+              insert_only = false,
+            },
             telescope = {
               theme = 'cursor',
             },

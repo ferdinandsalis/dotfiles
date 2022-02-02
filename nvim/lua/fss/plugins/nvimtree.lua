@@ -39,7 +39,7 @@ return function()
       enable = false,
     },
     disable_netrw = false,
-    hijack_netrw = true,
+    hijack_netrw = false,
     open_on_setup = false,
     hijack_cursor = true,
     update_cwd = false,
