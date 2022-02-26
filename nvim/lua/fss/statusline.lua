@@ -21,7 +21,6 @@ local function colors()
 
   local indicator_color = P.blue
   local warning_fg = fss.style.lsp.colors.warn
-
   local error_color = fss.style.lsp.colors.error
   local info_color = fss.style.lsp.colors.info
   local normal_fg = H.get_hl('Normal', 'fg')
@@ -30,8 +29,7 @@ local function colors()
   local number_fg = H.get_hl('Number', 'fg')
   local identifier_fg = H.get_hl('Identifier', 'fg')
   local inc_search_bg = H.get_hl('Search', 'bg')
-
-  local bg_color = P.bg_sidebar
+  local bg_color = P.bg_highlight
 
   H.all {
     { 'StMetadata', { guibg = bg_color, inherit = 'Comment' } },
@@ -39,13 +37,13 @@ local function colors()
     { 'StIndicator', { guibg = bg_color, guifg = indicator_color } },
     { 'StModified', { guifg = string_fg, guibg = bg_color } },
     { 'StGit', { guifg = P.gitSigns.delete, guibg = bg_color } },
-    { 'StGreen', { guifg = string_fg, guibg = bg_color } },
+    { 'StGreen', { guifg = P.green, guibg = bg_color } },
     { 'StBlue', { guifg = P.blue, guibg = bg_color, gui = 'bold' } },
     { 'StNumber', { guifg = number_fg, guibg = bg_color } },
     { 'StCount', { guifg = 'bg', guibg = indicator_color, gui = 'bold' } },
     { 'StPrefix', { guibg = pmenu_bg, guifg = normal_fg } },
     { 'StDirectory', { guibg = bg_color, guifg = P.comment, gui = 'italic' } },
-    { 'StParentDirectory', { guibg = bg_color, guifg = string_fg, gui = 'bold' } },
+    { 'StParentDirectory', { guibg = bg_color, guifg = P.dark5, gui = 'bold' } },
     { 'StIdentifier', { guifg = identifier_fg, guibg = bg_color } },
     { 'StTitle', { guibg = bg_color, guifg = P.dark5, gui = 'bold' } },
     { 'StComment', { guibg = bg_color, inherit = 'Comment' } },
@@ -55,7 +53,7 @@ local function colors()
     { 'StInfo', { guifg = info_color, guibg = bg_color, gui = 'bold' } },
     { 'StWarning', { guifg = warning_fg, guibg = bg_color } },
     { 'StError', { guifg = error_color, guibg = bg_color } },
-    { 'StFilename', { guibg = bg_color, guifg = P.dark5, gui = 'bold' } },
+    { 'StFilename', { guibg = bg_color, guifg = P.fg, gui = 'bold' } },
     { 'StFilenameInactive', { guifg = P.terminal_black, guibg = bg_color, gui = 'italic,bold' } },
     { 'StModeNormal', { guibg = bg_color, guifg = P.dark3, gui = 'bold' } },
     { 'StModeInsert', { guibg = bg_color, guifg = P.blue, gui = 'bold' } },
@@ -189,10 +187,11 @@ function _G.__statusline()
     { item_if(file_modified, ctx.modified, 'StModified'), 1 },
     { readonly_item, 2 },
     { item(utils.mode()), 0 },
-    { item(utils.search_count(), 'StCount'), 1 },
+    -- { item(utils.search_count(), 'StCount'), 1 },
     { dir_item, 3 },
     { parent_item, 2 },
     { file_item, 0 },
+    { item_if('Saving…', vim.g.is_saving, 'StComment', { before = ' ' }), 1 },
     -- LSP Status
     {
       item(utils.current_function(), 'StMetadata', {
@@ -225,25 +224,13 @@ function _G.__statusline()
     -----------------------------------------------------------------------------//
     -- Right section
     -----------------------------------------------------------------------------//
-    { item(utils.lsp_status(), 'StMetadata'), 4 },
+    { item(utils.lsp_client(), 'StMetadata'), 4 },
     {
       item_if(diagnostics.error.count, diagnostics.error, 'StError', {
         prefix = diagnostics.error.sign,
       }),
       1,
     },
-    -- {
-    --   item_if(diagnostics.warning.count, diagnostics.warning, 'StWarning', {
-    --     prefix = diagnostics.warning.sign,
-    --   }),
-    --   3,
-    -- },
-    -- {
-    --   item_if(diagnostics.info.count, diagnostics.info, 'StInfo', {
-    --     prefix = diagnostics.info.sign,
-    --   }),
-    --   4,
-    -- },
     -- { item(notifications, 'StTitle'), 3 },
     -- Git Status
     { item(status.head, 'StBlue', { prefix = '', prefix_color = 'StGit' }), 1 },
@@ -304,12 +291,18 @@ local function setup_autocommands()
       targets = { '*' },
       command = utils.git_update_toggle,
     },
-    --- NOTE: enable to update search count on cursor move
-    -- {
-    --   events = {"CursorMoved", "CursorMovedI"},
-    --   targets = {"*"},
-    --   command = utils.update_search_count
-    -- },
+    {
+      events = { 'BufWritePre' },
+      targets = { '*' },
+      command = function()
+        if not vim.g.is_saving and vim.bo.modified then
+          vim.g.is_saving = true
+          vim.defer_fn(function()
+            vim.g.is_saving = false
+          end, 1000)
+        end
+      end,
+    },
     -- NOTE: user autocommands can't be joined into one autocommand
     {
       events = { 'User NeogitStatusRefresh' },

@@ -131,7 +131,7 @@ require('packer').startup {
       requires = { 'vim-test/vim-test' },
       run = ':UpdateRemotePlugins',
       config = function()
-        local test_patterns = { '*_test.*', '*_spec.*' }
+        local test_patterns = { '*.test.*', '*_test.*', '*_spec.*' }
         fss.augroup('UltestTests', {
           {
             events = { 'BufWritePost' },
@@ -312,17 +312,9 @@ require('packer').startup {
     }
 
     use {
-      'nvim-lua/lsp-status.nvim',
+      'j-hui/fidget.nvim',
       config = function()
-        local status = require 'lsp-status'
-        status.config {
-          indicator_hint = '',
-          indicator_info = '',
-          indicator_errors = '✗',
-          indicator_warnings = '',
-          status_symbol = ' ',
-        }
-        status.register_progress()
+        require('fidget').setup {}
       end,
     }
 
@@ -348,7 +340,11 @@ require('packer').startup {
             builtins.diagnostics.write_good,
             builtins.code_actions.gitsigns,
             builtins.formatting.mix,
-            builtins.formatting.prettier_d_slim,
+            builtins.formatting.prettier,
+            -- builtins.formatting.prettier_d_slim.with {
+            --   local_path = 'node_modules/.bin/prettier_d_slim',
+            --   arg = '--'
+            -- },
             builtins.formatting.stylua.with {
               condition = function(_utils)
                 return _utils.root_has_file 'stylua.toml'
@@ -361,19 +357,11 @@ require('packer').startup {
 
     use {
       'ray-x/lsp_signature.nvim',
-      disable = true,
+      disable = false,
       config = function()
         require('lsp_signature').setup {
           bind = true,
-          fix_pos = function(signatures, client)
-            if signatures[1].activeParameter >= 0 and #signatures[1].parameters == 1 then
-              return false
-            end
-            if client.name == 'sumneko_lua' then
-              return true
-            end
-            return false
-          end,
+          fix_pos = false,
           auto_close_after = 15, -- close after 15 seconds
           hint_enable = false,
           handler_opts = { border = 'rounded' },
@@ -395,6 +383,15 @@ require('packer').startup {
         { 'hrsh7th/cmp-buffer', after = 'nvim-cmp' },
         { 'petertriho/cmp-git', after = 'nvim-cmp' },
         { 'saadparwaiz1/cmp_luasnip', after = 'nvim-cmp' },
+        {
+          'petertriho/cmp-git',
+          after = 'nvim-cmp',
+          config = function()
+            require('cmp_git').setup {
+              filetypes = { 'gitcommit', 'NeogitCommitMessage' },
+            }
+          end,
+        },
         {
           'tzachar/cmp-fuzzy-path',
           after = 'cmp-path',
@@ -564,6 +561,8 @@ require('packer').startup {
     use 'mtdl9/vim-log-highlighting'
     use 'slime-lang/vim-slime-syntax'
     use 'plasticboy/vim-markdown'
+    use 'jparise/vim-graphql'
+
     use 'sainnhe/everforest'
     use 'folke/tokyonight.nvim'
     use 'NTBBloodbath/doom-one.nvim'
@@ -772,9 +771,9 @@ require('packer').startup {
           handle = {
             color = colors.bg_highlight,
           },
-          exclude_filetypes = {
-            'packer',
-          },
+        -- NOTE: If telescope is not explicitly excluded this garbles input into its prompt buffer
+          excluded_filetypes = { 'packer', 'TelescopePrompt' },
+          excluded_buftypes = { 'terminal', 'prompt' },
           marks = {
             Search = { color = colors.orange },
             Error = { color = colors.error },
@@ -797,48 +796,8 @@ require('packer').startup {
       end,
     }
 
-    use {
-      'nvim-neo-tree/neo-tree.nvim',
-      disable = true,
-      requires = {
-        'nvim-lua/plenary.nvim',
-        'kyazdani42/nvim-web-devicons', -- not strictly required, but recommended
-        'MunifTanjim/nui.nvim',
-      },
-      config = function()
-        require('neo-tree').setup {
-          popup_border_style = 'rounded',
-          filesystem = {
-            window = {
-              mappings = {
-                ['<2-LeftMouse>'] = 'open',
-                ['<cr>'] = 'open',
-                ['S'] = 'open_split',
-                ['s'] = 'open_vsplit',
-                ['C'] = 'close_node',
-                ['<bs>'] = 'navigate_up',
-                ['.'] = 'set_root',
-                ['H'] = 'toggle_hidden',
-                ['I'] = 'toggle_gitignore',
-                ['R'] = 'refresh',
-                ['/'] = 'filter_as_you_type',
-                ['f'] = 'filter_on_submit',
-                ['<c-x>'] = 'clear_filter',
-                ['a'] = 'add',
-                ['d'] = 'delete',
-                ['r'] = 'rename',
-                ['c'] = 'copy_to_clipboard',
-                ['x'] = 'cut_to_clipboard',
-                ['p'] = 'paste_from_clipboard',
-              },
-            },
-          },
-        }
-        fss.nnoremap('<c-n>', [[<cmd>NeoTreeReveal<CR>]])
-      end,
-    }
-
-    use 'tpope/vim-vinegar'
+    -- use 'tpope/vim-vinegar'
+    use 'justinmk/vim-dirvish'
 
     use {
       'folke/zen-mode.nvim',
@@ -1109,9 +1068,43 @@ require('packer').startup {
     --------------------------------------------------------------------------------
 
     use {
-      'kristijanhusak/orgmode.nvim',
-      config = conf 'orgmode',
+      'vhyrro/neorg',
+      requires = { 'vhyrro/neorg-telescope' },
+      config = function()
+        require('neorg').setup {
+          load = {
+            ['core.defaults'] = {},
+            ['core.integrations.telescope'] = {},
+            ['core.keybinds'] = {
+              config = {
+                default_keybinds = true,
+                neorg_leader = '<localleader>n',
+              },
+            },
+            ['core.norg.completion'] = {
+              config = {
+                engine = 'nvim-cmp',
+              },
+            },
+            ['core.norg.concealer'] = {},
+            ['core.norg.dirman'] = {
+              config = {
+                workspaces = {
+                  notes = '~/Desktop/Personal/main/',
+                  tasks = '~/Desktop/Personal/tasks/',
+                },
+              },
+            },
+            ['core.gtd.base'] = {
+              config = {
+                workspace = 'tasks',
+              },
+            },
+          },
+        }
+      end,
     }
+
 
     use {
       'lukas-reineke/headlines.nvim',
@@ -1131,23 +1124,6 @@ require('packer').startup {
     --------------------------------------------------------------------------------
     -- Profiling & Startup {{{
     --------------------------------------------------------------------------------
-    use {
-      'nathom/filetype.nvim',
-      config = function()
-        require('filetype').setup {
-          overrides = {
-            extensions = {
-              exs = 'elixir',
-            },
-            literal = {
-              ['.envrc'] = 'sh',
-              ['kitty.conf'] = 'kitty',
-            },
-          },
-        }
-      end,
-    }
-
     -- NOTE: this plugin will be redundant once https://github.com/neovim/neovim/pull/15436 is merged
     use 'lewis6991/impatient.nvim'
     use {

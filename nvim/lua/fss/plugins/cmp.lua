@@ -13,14 +13,14 @@ return function()
     { 'CmpItemAbbrMatchFuzzy', { gui = 'italic', guifg = 'fg' } }
   )
 
-  local lsp_hls = fss.style.lsp.kind_highlights
-
+  -- local lsp_hls = fss.style.lsp.kind_highlights
+  --
   -- local kind_hls = vim.tbl_map(function(key)
   --   return { fmt('CmpItemKind%s', key), { inherit = lsp_hls[key], gui = 'NONE' } }
   -- end, vim.tbl_keys(
   --   lsp_hls
   -- ))
-
+  --
   -- require('fss.highlights').plugin('CmpKinds', unpack(kind_hls))
 
   local function feed(key, mode)
@@ -105,7 +105,6 @@ return function()
           path = '[Path]',
           calc = '[Calc]',
           neorg = '[Neorg]',
-          orgmode = '[Org]',
           cmp_tabnine = '[TN]',
           luasnip = '[Luasnip]',
           buffer = '[Buffer]',
@@ -132,11 +131,10 @@ return function()
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
       { name = 'luasnip' },
+      { name = 'path' },
       { name = 'cmp_tabnine' },
       { name = 'spell' },
-      { name = 'path' },
       { name = 'neorg' },
-      { name = 'orgmode' },
       { name = 'cmp_git' },
     }, {
       { name = 'fuzzy_buffer' },

@@ -7,7 +7,7 @@ setlocal listchars=tab:\ \ ,
 setlocal colorcolumn=50,72
 
 lua << EOF
-if as.plugin_loaded('nvim-cmp') then
+if fss.plugin_loaded('nvim-cmp') then
   require('cmp').setup.buffer {
     experimental = {
       ghost_text = false,

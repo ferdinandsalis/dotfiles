@@ -1,20 +1,26 @@
+
 return function()
   local telescope = require 'telescope'
   local actions = require 'telescope.actions'
+  local layout_actions = require 'telescope.actions.layout'
 
+  local P = fss.style.palette
   local H = require 'fss.highlights'
+  local normal_bg = H.alter_color(H.get_hl('TelescopeNormal', 'bg'), 30)
+  local normal_fg = H.get_hl('TelescopeNormal', 'fg')
   H.plugin(
     'telescope',
-    { 'TelescopeMatching', { link = 'Title', force = true } },
-    { 'TelescopeBorder', { link = 'GreyFloatBorder', force = true } },
-    { 'TelescopePromptPrefix', { link = 'Statement', force = true } },
-    {
-      'TelescopeSelectionCaret',
-      {
-        guifg = H.get_hl('Identifier', 'fg'),
-        guibg = H.get_hl('TelescopeSelection', 'bg'),
-      },
-    }
+    { 'TelescopeNormal', { guifg = normal_fg, guibg = P.bg_dark } },
+    { 'TelescopeBorder', { guifg = P.bg_dark, guibg = P.bg_dark } },
+    { 'TelescopePreviewTitle', { guifg = P.bg_dark, guibg = H.alter_color(P.green, -20) } },
+    { 'TelescopeSelection', { guibg = normal_bg } },
+    { 'TelescopeMatching', { guifg = P.red } },
+
+    { 'TelescopePrompt', { guifg = normal_fg, guibg = normal_bg } },
+    { 'TelescopePromptPrefix', { guifg = H.alter_color(P.red, -20), guibg = normal_bg }},
+    { 'TelescopePromptNormal', { guifg = normal_fg, guibg = normal_bg } },
+    { 'TelescopePromptBorder', { guifg = normal_bg, guibg = normal_bg } },
+    { 'TelescopePromptTitle', { guifg = P.bg_dark, guibg = H.alter_color(P.red, -20) } }
   )
 
   local function get_border(opts)
@@ -40,12 +46,25 @@ return function()
     defaults = {
       set_env = { ['TERM'] = vim.env.TERM },
       borderchars = { '─', '│', '─', '│', '┌', '┐', '┘', '└' },
-      prompt_prefix = ' ',
-      selection_caret = '» ',
-      prompt_title = false,
+      border = {},
       results_title = false,
-      preview_title = false,
       color_devicons = false,
+      vimgrep_arguments = {
+         "rg",
+         "--color=never",
+         "--no-heading",
+         "--with-filename",
+         "--line-number",
+         "--column",
+         "--smart-case",
+      },
+      prompt_prefix = "   ",
+      selection_caret = "  ",
+      entry_prefix = "  ",
+      initial_mode = "insert",
+      selection_strategy = "reset",
+      sorting_strategy = "ascending",
+      layout_strategy = "horizontal",
       mappings = {
         i = {
           ['<c-w>'] = actions.send_selected_to_qflist,
@@ -56,29 +75,35 @@ return function()
           ['<c-s>'] = actions.select_horizontal,
           ['<c-j>'] = actions.cycle_history_next,
           ['<c-k>'] = actions.cycle_history_prev,
+          ['<c-e>'] = layout_actions.toggle_preview,
+          ['<c-l>'] = layout_actions.cycle_layout_next,
         },
         n = {
           ['<C-w>'] = actions.send_selected_to_qflist,
         },
       },
-      file_ignore_patterns = { '%.jpg', '%.jpeg', '%.png', '%.otf', '%.ttf' },
-      path_display = { 'smart', 'absolute', 'truncate' },
-      layout_strategy = 'flex',
+      file_ignore_patterns = { '%.jpg', '%.jpeg', '%.png', '%.otf', '%.ttf', 'node_modules' },
+      path_display = { 'truncate' },
+      use_less = true,
       layout_config = {
-        horizontal = {
-          preview_width = 0.45,
-        },
-        cursor = get_border {
-          layout_config = {
-            cursor = { width = 0.3 },
-          },
-        },
+         horizontal = {
+          prompt_position = "top",
+          preview_width = 0.55,
+          results_width = 0.8,
+         },
+         vertical = {
+          mirror = false,
+         },
+         width = 0.80,
+         height = 0.80,
+         preview_cutoff = 120,
       },
-      winblend = 3,
+      winblend = 0,
       history = {
         path = vim.fn.stdpath 'data' .. '/telescope_history.sqlite3',
       },
     },
+
     extensions = {
       frecency = {
         workspaces = {
@@ -121,7 +146,7 @@ return function()
       },
       find_files = {
         hidden = true,
-        git_ignore = true,
+        file_ignore_patterns = { 'node_modules', '.git' }
       },
       git_branches = dropdown(),
       git_bcommits = {

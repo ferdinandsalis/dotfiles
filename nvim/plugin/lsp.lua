@@ -8,6 +8,8 @@ if vim.env.DEVELOPING then
   vim.lsp.set_log_level(L.DEBUG)
 end
 
+local icons = fss.style.icons
+
 -----------------------------------------------------------------------------//
 -- Commands
 -----------------------------------------------------------------------------//
@@ -60,10 +62,10 @@ fss.nnoremap('<leader>ll', '<Cmd>LspDiagnostics<CR>', 'toggle quickfix diagnosti
 local prefix = fss.nightly and 'DiagnosticSign' or 'LspDiagnosticsSign'
 
 local diagnostic_types = {
-  { 'Hint', icon = fss.style.icons.hint },
-  { 'Error', icon = fss.style.icons.error },
-  { 'Warn', icon = fss.style.icons.warn },
-  { 'Info', icon = fss.style.icons.info },
+  { 'Error', icon = icons.error },
+  { 'Warn', icon = icons.warn },
+  { 'Hint', icon = icons.hint },
+  { 'Info', icon = icons.info },
 }
 
 fn.sign_define(vim.tbl_map(function(t)

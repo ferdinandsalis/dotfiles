@@ -1,6 +1,5 @@
 local has = fss.has
 local fn = vim.fn
-local api = vim.api
 local command = fss.command
 local fmt = string.format
 
@@ -244,13 +243,12 @@ cnoremap('<Esc>f', [[<S-Right>]])
 -- Insert escaped '/' while inputting a search pattern
 cnoremap('/', [[getcmdtype() == "/" ? "\/" : "/"]], { expr = true })
 -----------------------------------------------------------------------------//
--- Save
-nnoremap('<c-s>', function()
-  -- NOTE: this uses write specifically because we need to trigger a filesystem event
-  -- even if the file isn't change so that things like hot reload work
-  vim.cmd 'silent! write'
-  vim.notify('Saved ' .. vim.fn.expand '%:t', nil, { timeout = 500 })
-end)
+ -- Save
+ -----------------------------------------------------------------------------//
+ -- NOTE: this uses write specifically because we need to trigger a filesystem event
+ -- even if the file isn't change so that things like hot reload work
+ nnoremap('<c-s>', ':silent! write<CR>')
+
 -- Write and quit all files, ZZ is NOT equivalent to this
 nnoremap('qa', '<cmd>qa<CR>')
 ------------------------------------------------------------------------------
@@ -500,7 +498,7 @@ command { 'AutoResize', [[call utils#auto_resize(<args>)]], { '-nargs=?' } }
 command {
   'LuaInvalidate',
   function(pattern)
-    require('as.utils').invalidate(pattern, true)
+    require('fss.utils').invalidate(pattern, true)
   end,
   nargs = 1,
 }

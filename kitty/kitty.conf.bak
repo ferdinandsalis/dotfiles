@@ -1,21 +1,26 @@
 #: Fonts {{{
 
 #: Font Family
-# font_family      Iosevka Term SS08
-# bold_font        Iosevka Term SS08 Bold
-# italic_font      Iosevka Term SS08 Italic
-# bold_italic_font Iosevka Term SS08 Bold Italic
+font_family      Iosevka Term Regular
+bold_font        Iosevka Term Bold
+italic_font      Iosevka Term Italic
+bold_italic_font Iosevka Term Bold Italic
 
-font_family       PragmataProMonoLiga Nerd Font Regular
-bold_font         PragmataProMonoLiga Nerd Font Bold
-italic_font       PragmataProMonoLiga Nerd Font Italic
-bold_italic_font  PragmataProMonoLiga Nerd Font Bold Italic
+# font_family       PragmataProMonoLiga Nerd Font Regular
+# bold_font         PragmataProMonoLiga Nerd Font Bold
+# italic_font       PragmataProMonoLiga Nerd Font Italic
+# bold_italic_font  PragmataProMonoLiga Nerd Font Bold Italic
+
+# font_family       MonoLisa Regular
+# bold_font         MonoLisa Bold
+# italic_font       MonoLisa Regular Italic
+# bold_italic_font  MonoLisa Bold Italic
 
 #: Font size (in pts)
 font_size 14.0
 
-adjust_line_height  145%
-adjust_column_width 104%
+adjust_line_height  140%
+adjust_column_width 102%
 
 disable_ligatures cursor
 
@@ -316,7 +321,7 @@ window_margin_width 0.0
 #: values set top, horizontal and bottom. Four values set top, right,
 #: bottom and left.
 
-window_padding_width 0 0 0 0
+window_padding_width 0 16 0 16
 
 #: The window padding (in pts) (blank area between the text and the
 #: window border). A single value sets all four sides. Two values set
@@ -532,7 +537,7 @@ macos_quit_when_last_window_closed yes
 #: Disable this if you want kitty top-level (OS) windows to not be
 #: resizable on macOS.
 
-macos_thicken_font 0.2
+# macos_thicken_font 0.0
 
 #: Draw an extra border around the font with the given width, to
 #: increase legibility at small font sizes. For example, a value of

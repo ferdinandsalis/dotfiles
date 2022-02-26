@@ -387,13 +387,10 @@ function M.diagnostic_info(context)
   }
 end
 
----The lsp servers current status
----@return string
-function M.lsp_status()
-  local ok, lsp_status = fss.safe_require('lsp-status', { silent = true })
-  if ok and lsp_status then
-    return lsp_status.status_progress()
-  end
+
+function M.lsp_client()
+  local clients = vim.lsp.buf_get_clients(0)
+  return #clients > 0 and clients[#clients].name or ''
 end
 
 ---The currently focused function

@@ -98,7 +98,7 @@ local function setup_mappings(client, bufnr)
   }
 
   if client.resolved_capabilities.implementation then
-    maps.n['gi'] = { vim.lsp.buf.implementation, 'lsp: impementation' }
+    maps.n['gi'] = { vim.lsp.buf.implementation, 'lsp: implementation' }
   end
 
   if client.resolved_capabilities.type_definition then
@@ -152,8 +152,6 @@ local function tsserver_on_attach(client, bufnr)
     vim.bo[bufnr].tagfunc = 'v:lua.fss.lsp.tagfunc'
   end
 
-  require('lsp-status').on_attach(client)
-
   client.resolved_capabilities.document_formatting = false
   client.resolved_capabilities.document_range_formatting = false
 
@@ -185,12 +183,12 @@ local function tsserver_on_attach(client, bufnr)
 
     -- formatting
     enable_formatting = false,
-    formatter = 'prettierd',
+    formatter = 'prettier_d_slim',
     formatter_opts = {},
 
     -- update imports on file move
     update_imports_on_move = false,
-    require_confirmation_on_move = false,
+    require_confirmation_on_move = true,
     watch_dir = nil,
 
     -- filter diagnostics
@@ -209,8 +207,6 @@ function fss.lsp.on_attach(client, bufnr)
   if client.resolved_capabilities.goto_definition then
     vim.bo[bufnr].tagfunc = 'v:lua.fss.lsp.tagfunc'
   end
-
-  require('lsp-status').on_attach(client)
 end
 
 -----------------------------------------------------------------------------//
@@ -261,7 +257,6 @@ fss.lsp.servers = {
 ---and restarting them on installing new ones
 function fss.lsp.get_server_config(server)
   local nvim_lsp_ok, cmp_nvim_lsp = fss.safe_require 'cmp_nvim_lsp'
-  local status_capabilities = require('lsp-status').capabilities
   local conf = fss.lsp.servers[server.name]
   local config = type(conf) == 'table' and conf or {}
   config.flags = { debounce_text_changes = 500 }
@@ -276,7 +271,6 @@ function fss.lsp.get_server_config(server)
   if nvim_lsp_ok then
     cmp_nvim_lsp.update_capabilities(config.capabilities)
   end
-  config.capabilities = fss.deep_merge(status_capabilities, config.capabilities)
   return config
 end
 

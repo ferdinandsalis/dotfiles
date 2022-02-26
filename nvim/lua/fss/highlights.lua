@@ -223,7 +223,7 @@ local function general_overrides()
   local colors = require('tokyonight.colors').setup()
 
   M.all {
-    { 'ColorColumn', { guibg = colors.bg_highlight } },
+    { 'ColorColumn', { guibg = colors.bg_sidebar } },
     -----------------------------------------------------------------------------//
     -- Commandline
     -----------------------------------------------------------------------------//

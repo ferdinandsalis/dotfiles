@@ -25,7 +25,7 @@ return function()
 
   require('nvim-tree').setup {
     git = {
-      enable = false,
+      enable = true,
       timeout = 200,
     },
     view = {
@@ -36,7 +36,7 @@ return function()
       },
     },
     diagnostics = {
-      enable = false,
+      enable = true,
     },
     disable_netrw = false,
     hijack_netrw = false,
