@@ -1,4 +1,4 @@
-alias ls='exa'
+alias ls="ls --color=auto --hyperlink=auto $@"
 alias l='exa -lb --git --group-directories-first --icons'
 alias ll='exa -lbG --git --group-directories-first'
 alias la='exa -lba --git --group-directories-first --icons'

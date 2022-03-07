@@ -16,6 +16,7 @@
     ~/.tmux.conf: tmux/.tmux.conf
     ~/.zshrc: zsh/zshrc
     ~/.zshenv: zsh/zshenv
+    ~/.zprofile: zsh/zprofile
     ~/.vimrc: vim/vimrc
     ~/.gitconfig: git/gitconfig
     ~/.gitmessage: git/gitmessage
@@ -30,9 +31,6 @@
     ~/.config/karabiner:
       force: true
       path: karabiner
-    ~/.config/himalaya:
-      force: true
-      path: himalaya
 
 - shell:
     - [git submodule update --init --recursive, Installing submodules]

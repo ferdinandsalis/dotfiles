@@ -40,6 +40,7 @@ brew "the_silver_searcher"
 brew "ripgrep"
 brew "rust"
 brew "go"
+brew "svn"
 brew "tree"
 brew "zoxide"
 brew "aws/tap/aws-sam-cli"
@@ -76,6 +77,7 @@ cask "figma"
 cask "google-chrome"
 cask "karabiner-elements"
 cask "slack"
+cask "kap"
 cask "sketch"
 cask "skype"
 cask "steam"
@@ -83,8 +85,8 @@ cask "spotify"
 cask "visual-studio-code"
 
 brew "mas"
-mas "1Password 7", id: 1333542190
-mas "Magnet", id: 441258766
+#mas "1Password 7", id: 1333542190
+#mas "Magnet", id: 441258766
 mas "Table Tool", id: 1122008420
 mas "Vimari", id: 1480933944
 mas "Xcode", id: 497799835

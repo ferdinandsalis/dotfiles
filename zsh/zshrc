@@ -19,6 +19,10 @@ __DOTS[ITALIC_OFF]=$'\e[23m'
 
 PLUGIN_DIR=$DOTFILES/zsh/plugins
 
+if type brew &>/dev/null; then
+   FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+ fi
+
 # Init completions
 autoload -Uz compinit
 compinit
@@ -35,7 +39,7 @@ source $PLUGIN_DIR/asdf.zsh
 source $PLUGIN_DIR/direnv.zsh
 source $PLUGIN_DIR/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source $PLUGIN_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh
-# source $PLUGIN_DIR/zsh-completions/zsh-completions.plugin.zsh
+source $PLUGIN_DIR/zsh-completions/zsh-completions.plugin.zsh
 source $PLUGIN_DIR/zsh-history-substring-search/zsh-history-substring-search.plugin.zsh
 autoload zmv # builtin zsh rename command
 
@@ -90,7 +94,7 @@ setopt AUTO_PUSHD              # [default] cd automatically pushes old dir onto 
 setopt AUTO_RESUME             # allow simple commands to resume backgrounded jobs
 setopt CLOBBER                 # allow clobbering with >, no need to use >!
 setopt CORRECT                 # [default] command auto-correction
-setopt CORRECT_ALL             # [default] argument auto-correction
+# setopt CORRECT_ALL             # [default] argument auto-correction
 setopt NO_FLOW_CONTROL         # disable start (C-s) and stop (C-q) characters
 setopt NO_HIST_IGNORE_ALL_DUPS # don't filter non-contiguous duplicates from history
 setopt HIST_FIND_NO_DUPS       # don't show dupes when searching
@@ -476,21 +480,6 @@ bindkey '^P' up-history
 bindkey '^N' down-history
 bindkey '^U' autosuggest-accept
 
-#-------------------------------------------------------------------------------
-# Path Updates
-#-------------------------------------------------------------------------------
-# NOTE: this is here because it must be loaded after homebrew is added to the
-# path which is done in the .zprofile which loads after the .zshenv
-
-# MacOS ships with an older version of Ruby which is built against an X86
-# system rather than ARM i.e. for M1+. So replace the system ruby with an
-# updated one from Homebrew and ensure it is before /usr/bin/ruby
-# Prepend to PATH
-path=(
-  "$(brew --prefix)/opt/ruby/bin"
-  "$(brew --prefix)/lib/ruby/gems/3.0.0/bin"
-  "$(brew --prefix)/go/bin"
-  $path
-)
+export MANPATH="$(brew --prefix)/opt/coreutils/libexec/gnuman:${MANPATH}"
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"

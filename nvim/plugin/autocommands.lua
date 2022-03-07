@@ -4,12 +4,12 @@ local fmt = string.format
 local contains = vim.tbl_contains
 
 vim.api.nvim_exec(
-  [[
+[[
    augroup vimrc -- Ensure all autocommands are cleared
    autocmd!
    augroup END
   ]],
-  ''
+    ''
 )
 
 fss.augroup('VimrcIncSearchHighlight', {
@@ -41,9 +41,9 @@ local smart_close_filetypes = {
 }
 
 local function smart_close()
-  if fn.winnr '$' ~= 1 then
-    api.nvim_win_close(0, true)
-  end
+    if fn.winnr '$' ~= 1 then
+        api.nvim_win_close(0, true)
+    end
 end
 
 fss.augroup('SmartClose', {
@@ -58,16 +58,16 @@ fss.augroup('SmartClose', {
     events = { 'FileType' },
     targets = { '*' },
     command = function()
-      local is_readonly = (vim.bo.readonly or not vim.bo.modifiable) and fn.hasmapto('q', 'n') == 0
+        local is_readonly = (vim.bo.readonly or not vim.bo.modifiable) and fn.hasmapto('q', 'n') == 0
 
-      local is_eligible = vim.bo.buftype ~= ''
-        or is_readonly
-        or vim.wo.previewwindow
-        or contains(smart_close_filetypes, vim.bo.filetype)
+        local is_eligible = vim.bo.buftype ~= ''
+            or is_readonly
+            or vim.wo.previewwindow
+            or contains(smart_close_filetypes, vim.bo.filetype)
 
-      if is_eligible then
-        fss.nnoremap('q', smart_close, { buffer = 0, nowait = true })
-      end
+        if is_eligible then
+            fss.nnoremap('q', smart_close, { buffer = 0, nowait = true })
+        end
     end,
   },
   {
@@ -75,9 +75,9 @@ fss.augroup('SmartClose', {
     events = { 'BufEnter' },
     targets = { '*' },
     command = function()
-      if fn.winnr '$' == 1 and vim.bo.buftype == 'quickfix' then
-        api.nvim_buf_delete(0, { force = true })
-      end
+        if fn.winnr '$' == 1 and vim.bo.buftype == 'quickfix' then
+            api.nvim_buf_delete(0, { force = true })
+        end
     end,
   },
   {
@@ -86,9 +86,9 @@ fss.augroup('SmartClose', {
     targets = { '*' },
     modifiers = { 'nested' },
     command = function()
-      if vim.bo.filetype ~= 'qf' then
-        vim.cmd 'silent! lclose'
-      end
+        if vim.bo.filetype ~= 'qf' then
+            vim.cmd 'silent! lclose'
+        end
     end,
   },
 })
@@ -99,7 +99,7 @@ fss.augroup('ExternalCommands', {
     events = { 'BufEnter' },
     targets = { '*.png,*.jpg,*.gif' },
     command = function()
-      vim.cmd(fmt('silent! "%s | :bw"', vim.g.open_command .. ' ' .. fn.expand '%'))
+        vim.cmd(fmt('silent! "%s | :bw"', vim.g.open_command .. ' ' .. fn.expand '%'))
     end,
   },
 })
@@ -131,20 +131,20 @@ fss.augroup('Templates', {
 --- source: http://unix.stackexchange.com/a/613645
 ---@return function
 local function clear_commandline()
-  --- Track the timer object and stop any previous timers before setting
-  --- a new one so that each change waits for 10secs and that 10secs is
-  --- deferred each time
-  local timer
-  return function()
-    if timer then
-      timer:stop()
+    --- Track the timer object and stop any previous timers before setting
+    --- a new one so that each change waits for 10secs and that 10secs is
+    --- deferred each time
+    local timer
+    return function()
+        if timer then
+            timer:stop()
+        end
+        timer = vim.defer_fn(function()
+            if fn.mode() == 'n' then
+                vim.cmd [[echon '']]
+            end
+        end, 10000)
     end
-    timer = vim.defer_fn(function()
-      if fn.mode() == 'n' then
-        vim.cmd [[echon '']]
-      end
-    end, 10000)
-  end
 end
 
 fss.augroup('ClearCommandMessages', {
@@ -156,7 +156,7 @@ fss.augroup('ClearCommandMessages', {
 })
 
 if vim.env.TMUX ~= nil then
-  fss.augroup('External', {
+    fss.augroup('External', {
     -- {
     --   events = { 'BufEnter' },
     --   targets = { '*' },
@@ -168,22 +168,22 @@ if vim.env.TMUX ~= nil then
       events = { 'VimLeavePre' },
       targets = { '*' },
       command = function()
-        require('fss.external').tmux.set_statusline(true)
+          require('fss.external').tmux.set_statusline(true)
       end,
     },
     {
       events = { 'ColorScheme', 'FocusGained' },
       targets = { '*' },
       command = function()
-        -- NOTE: there is a race condition here as the colors
-        -- for kitty to re-use need to be set AFTER the rest of the colorscheme
-        -- overrides
-        vim.defer_fn(function()
-          require('fss.external').tmux.set_statusline()
-        end, 1)
+          -- NOTE: there is a race condition here as the colors
+          -- for kitty to re-use need to be set AFTER the rest of the colorscheme
+          -- overrides
+          vim.defer_fn(function()
+              require('fss.external').tmux.set_statusline()
+          end, 1)
       end,
     },
-  })
+    })
 end
 
 fss.augroup('TextYankHighlight', {
@@ -192,11 +192,11 @@ fss.augroup('TextYankHighlight', {
     events = { 'TextYankPost' },
     targets = { '*' },
     command = function()
-      vim.highlight.on_yank {
+        vim.highlight.on_yank {
         timeout = 500,
         on_visual = false,
         higroup = 'Visual',
-      }
+        }
     end,
   },
 })
@@ -217,30 +217,28 @@ local column_clear = {
 --- Set or unset the color column depending on the filetype of the buffer and its eligibility
 ---@param leaving boolean indicates if the function was called on window leave
 local function check_color_column(leaving)
-  if contains(column_exclude, vim.bo.filetype) then
-    return
-  end
+    if contains(column_exclude, vim.bo.filetype) then
+        return
+    end
 
-  local not_eligible = not vim.bo.modifiable
-    or vim.wo.previewwindow
-    or vim.bo.buftype ~= ''
-    or not vim.bo.buflisted
+    local not_eligible = not vim.bo.modifiable
+        or vim.wo.previewwindow
+        or vim.bo.buftype ~= ''
+        or not vim.bo.buflisted
 
-  local small_window = api.nvim_win_get_width(0) <= vim.bo.textwidth + 1
-  local is_last_win = #api.nvim_list_wins() == 1
+    local small_window = api.nvim_win_get_width(0) <= vim.bo.textwidth + 1
+    local is_last_win = #api.nvim_list_wins() == 1
 
-  if
-    contains(column_clear, vim.bo.filetype)
-    or not_eligible
-    or (leaving and not is_last_win)
-    or small_window
-  then
-    vim.wo.colorcolumn = ''
-    return
-  end
-  if vim.wo.colorcolumn == '' then
-    vim.wo.colorcolumn = '+1'
-  end
+    if contains(column_clear, vim.bo.filetype)
+        or not_eligible
+        or (leaving and not is_last_win)
+        or small_window then
+        vim.wo.colorcolumn = ''
+        return
+    end
+    if vim.wo.colorcolumn == '' then
+        vim.wo.colorcolumn = '+1'
+    end
 end
 
 fss.augroup('CustomColorColumn', {
@@ -249,14 +247,14 @@ fss.augroup('CustomColorColumn', {
     events = { 'WinEnter', 'BufEnter', 'VimResized', 'FileType' },
     targets = { '*' },
     command = function()
-      check_color_column()
+        check_color_column()
     end,
   },
   {
     events = { 'WinLeave' },
     targets = { '*' },
     command = function()
-      check_color_column(true)
+        check_color_column(true)
     end,
   },
 })
@@ -269,9 +267,9 @@ fss.augroup('UpdateVim', {
     targets = { '$DOTFILES/**/nvim/plugin/*.{lua,vim}', '$MYVIMRC' },
     modifiers = { '++nested' },
     command = function()
-      local ok, msg = pcall(vim.cmd, 'source $MYVIMRC | redraw | silent doautocmd ColorScheme')
-      msg = ok and 'sourced ' .. vim.fn.fnamemodify(vim.env.MYVIMRC, ':t') or msg
-      vim.notify(msg)
+        local ok, msg = pcall(vim.cmd, 'source $MYVIMRC | redraw | silent doautocmd ColorScheme')
+        msg = ok and 'sourced ' .. vim.fn.fnamemodify(vim.env.MYVIMRC, ':t') or msg
+        vim.notify(msg)
     end,
   },
   {
@@ -310,10 +308,10 @@ fss.augroup('WindowBehaviours', {
 })
 
 local function should_show_cursorline()
-  return vim.bo.buftype ~= 'terminal'
-    and not vim.wo.previewwindow
-    and vim.wo.winhighlight == ''
-    and vim.bo.filetype ~= ''
+    return vim.bo.buftype ~= 'terminal'
+        and not vim.wo.previewwindow
+        and vim.wo.winhighlight == ''
+        and vim.bo.filetype ~= ''
 end
 
 fss.augroup('Cursorline', {
@@ -321,26 +319,26 @@ fss.augroup('Cursorline', {
     events = { 'BufEnter' },
     targets = { '*' },
     command = function()
-      if should_show_cursorline() then
-        vim.wo.cursorline = true
-      end
+        if should_show_cursorline() then
+            vim.wo.cursorline = true
+        end
     end,
   },
   {
     events = { 'BufLeave' },
     targets = { '*' },
     command = function()
-      vim.wo.cursorline = false
+        vim.wo.cursorline = false
     end,
   },
 })
 
 local save_excluded = { 'lua.luapad', 'gitcommit', 'NeogitCommitMessage' }
 local function can_save()
-  return fss.empty(vim.bo.buftype)
-    and not fss.empty(vim.bo.filetype)
-    and vim.bo.modifiable
-    and not vim.tbl_contains(save_excluded, vim.bo.filetype)
+    return fss.empty(vim.bo.buftype)
+        and not fss.empty(vim.bo.filetype)
+        and vim.bo.modifiable
+        and not vim.tbl_contains(save_excluded, vim.bo.filetype)
 end
 
 fss.augroup('Utilities', {
@@ -349,7 +347,7 @@ fss.augroup('Utilities', {
     events = { 'BufReadCmd' },
     targets = { 'file:///*' },
     command = function()
-      vim.cmd(fmt('bd!|edit %s', vim.uri_from_fname '<afile>'))
+        vim.cmd(fmt('bd!|edit %s', vim.uri_from_fname '<afile>'))
     end,
   },
   -- BUG: this causes the cursor to jump to the top on VimEnter
@@ -360,15 +358,13 @@ fss.augroup('Utilities', {
     events = { 'BufWinEnter' },
     targets = { '*' },
     command = function()
-      local pos = fn.line [['"]]
-      if
-        vim.bo.ft ~= 'gitcommit'
-        and vim.fn.win_gettype() ~= 'popup'
-        and pos > 0
-        and pos <= fn.line '$'
-      then
-        vim.cmd 'keepjumps normal g`"'
-      end
+        local pos = fn.line [['"]]
+        if vim.bo.ft ~= 'gitcommit'
+            and vim.fn.win_gettype() ~= 'popup'
+            and pos > 0
+            and pos <= fn.line '$' then
+            vim.cmd 'keepjumps normal g`"'
+        end
     end,
   },
   {
@@ -385,9 +381,9 @@ fss.augroup('Utilities', {
     events = { 'BufLeave' },
     targets = { '*' },
     command = function()
-      if can_save() then
-        vim.cmd 'silent! update'
-      end
+        if can_save() then
+            vim.cmd 'silent! update'
+        end
     end,
   },
   {
@@ -395,13 +391,13 @@ fss.augroup('Utilities', {
     targets = { '*' },
     modifiers = { 'nested' },
     command = function()
-      if fss.empty(vim.bo.filetype) or fn.exists 'b:ftdetect' == 1 then
-        vim.cmd [[
+        if fss.empty(vim.bo.filetype) or fn.exists 'b:ftdetect' == 1 then
+            vim.cmd [[
             unlet! b:ftdetect
             filetype detect
             echom 'Filetype set to ' . &ft
           ]]
-      end
+        end
     end,
   },
   {
@@ -411,17 +407,15 @@ fss.augroup('Utilities', {
   },
 })
 
-if fss.has 'nvim-0.6' then
-  fss.augroup('TerminalAutocommands', {
+fss.augroup('TerminalAutocommands', {
     {
       events = { 'TermClose' },
       targets = { '*' },
       command = function()
-        --- automatically close a terminal if the job was successful
-        if not vim.v.event.status == 0 then
-          vim.cmd('bdelete! ' .. fn.expand '<abuf>')
-        end
+          --- automatically close a terminal if the job was successful
+          if not vim.v.event.status == 0 then
+              vim.cmd('bdelete! ' .. fn.expand '<abuf>')
+          end
       end,
     },
-  })
-end
+})

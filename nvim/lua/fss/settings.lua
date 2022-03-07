@@ -24,8 +24,6 @@ vim.opt.ttimeoutlen = 10
 -----------------------------------------------------------------------------//
 -- Window splitting and buffers {{{1
 -----------------------------------------------------------------------------//
---- NOTE: remove this once 0.6 lands as it is now default
-vim.opt.hidden = true
 vim.opt.splitbelow = true
 vim.opt.splitright = true
 vim.opt.eadirection = 'hor'
@@ -47,7 +45,7 @@ vim.opt.fillchars = {
 -----------------------------------------------------------------------------//
 -- Use in vertical diff mode, blank lines to keep sides aligned, Ignore whitespace changes
 vim.opt.diffopt = vim.opt.diffopt
-  + {
+    + {
     'vertical',
     'iwhite',
     'hiddenoff',
@@ -55,7 +53,7 @@ vim.opt.diffopt = vim.opt.diffopt
     'context:4',
     'algorithm:histogram',
     'indent-heuristic',
-  }
+    }
 -----------------------------------------------------------------------------//
 -- Format Options {{{1
 -----------------------------------------------------------------------------//
@@ -93,11 +91,11 @@ vim.opt.foldmethod = 'expr'
 -----------------------------------------------------------------------------//
 -- Use faster grep alternatives if possible
 if fss.executable 'rg' then
-  vim.o.grepprg = [[rg --glob "!.git" --no-heading --vimgrep --follow $*]]
-  vim.opt.grepformat = vim.opt.grepformat ^ { '%f:%l:%c:%m' }
+    vim.o.grepprg = [[rg --glob "!.git" --no-heading --vimgrep --follow $*]]
+    vim.opt.grepformat = vim.opt.grepformat ^ { '%f:%l:%c:%m' }
 elseif fss.executable 'ag' then
-  vim.o.grepprg = [[ag --nogroup --nocolor --vimgrep]]
-  vim.opt.grepformat = vim.opt.grepformat ^ { '%f:%l:%c:%m' }
+    vim.o.grepprg = [[ag --nogroup --nocolor --vimgrep]]
+    vim.opt.grepformat = vim.opt.grepformat ^ { '%f:%l:%c:%m' }
 end
 -----------------------------------------------------------------------------//
 -- Wild and file globbing stuff in command mode {{{1
@@ -177,8 +175,6 @@ vim.opt.expandtab = true
 vim.opt.shiftwidth = 2
 -----------------------------------------------------------------------------//
 -- vim.o.debug = "msg"
---- NOTE: remove this once 0.6 lands, it is now default
-vim.opt.joinspaces = false
 vim.opt.gdefault = true
 vim.opt.pumheight = 15
 vim.opt.confirm = true -- make vim prompt me to save before doing destructive things
@@ -197,9 +193,6 @@ vim.opt.guifont = 'Fira Code Regular Nerd Font Complete Mono:h14'
 -- CREDIT: https://www.youtube.com/watch?v=F91VWOelFNE
 vim.opt.emoji = false
 -----------------------------------------------------------------------------//
---- NOTE: remove this once 0.6 lands, it is now default
-vim.opt.inccommand = 'nosplit'
------------------------------------------------------------------------------//
 -- Cursor {{{1
 -----------------------------------------------------------------------------//
 -- This is from the help docs, it enables mode shapes, "Cursor" highlight, and blinking
@@ -214,7 +207,6 @@ vim.opt.cursorlineopt = 'screenline,number'
 -- Title {{{1
 -----------------------------------------------------------------------------//
 vim.opt.titlestring = ' ❐ %t %r %m'
--- vim.opt.titlestring = require('fss.external').title_string() or ' ❐ %t %r %m'
 vim.opt.titleold = fn.fnamemodify(vim.loop.os_getenv 'SHELL', ':t')
 vim.opt.title = true
 vim.opt.titlelen = 70
@@ -246,7 +238,7 @@ vim.opt.shada = "!,'0,f0,<50,s10,h"
 vim.opt.backup = false
 vim.opt.writebackup = false
 if fn.isdirectory(vim.o.undodir) == 0 then
-  fn.mkdir(vim.o.undodir, 'p')
+    fn.mkdir(vim.o.undodir, 'p')
 end
 vim.opt.undofile = true
 vim.opt.swapfile = false
@@ -255,7 +247,7 @@ vim.opt.swapfile = false
 -- with the same name from different directories.
 vim.opt.directory = fn.stdpath 'data' .. '/swap//'
 if fn.isdirectory(vim.o.directory) == 0 then
-  fn.mkdir(vim.o.directory, 'p')
+    fn.mkdir(vim.o.directory, 'p')
 end
 --}}}
 -----------------------------------------------------------------------------//
@@ -287,7 +279,7 @@ vim.opt.exrc = true -- Allow project local vimrc files example .nvimrc see :h ex
 -- Git editor
 -----------------------------------------------------------------------------//
 if fss.executable 'nvr' then
-  vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
-  vim.env.EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
+    vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
+    vim.env.EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
 end
 -- vim:foldmethod=marker

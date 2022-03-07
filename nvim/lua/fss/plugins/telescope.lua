@@ -97,8 +97,15 @@ return function()
          width = 0.80,
          height = 0.80,
          preview_cutoff = 120,
+         cursor = { -- FIXME: this does not change the size of the cursor layout
+          width = 0.4,
+          height = function(self, _, max_lines)
+            local results = #self.finder.results
+            return (results <= max_lines and results or max_lines - 10) + 4
+          end,
+        },
       },
-      winblend = 0,
+      winblend = 3,
       history = {
         path = vim.fn.stdpath 'data' .. '/telescope_history.sqlite3',
       },

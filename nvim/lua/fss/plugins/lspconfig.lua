@@ -5,17 +5,17 @@ fss.lsp = {}
 -----------------------------------------------------------------------------//
 
 local function setup_autocommands(client, _)
-  if client and client.resolved_capabilities.code_lens then
-    fss.augroup('LspCodeLens', {
+    if client and client.resolved_capabilities.code_lens then
+        fss.augroup('LspCodeLens', {
       {
         events = { 'BufEnter', 'CursorHold', 'InsertLeave' },
         targets = { '<buffer>' },
         command = vim.lsp.codelens.refresh,
       },
-    })
-  end
-  if client and client.resolved_capabilities.document_highlight then
-    fss.augroup('LspCursorCommands', {
+        })
+    end
+    if client and client.resolved_capabilities.document_highlight then
+        fss.augroup('LspCursorCommands', {
       {
         events = { 'CursorHold' },
         targets = { '<buffer>' },
@@ -31,25 +31,28 @@ local function setup_autocommands(client, _)
         targets = { '<buffer>' },
         command = vim.lsp.buf.clear_references,
       },
-    })
-  end
-  if client and client.resolved_capabilities.document_formatting then
-    -- format on save
-    fss.augroup('LspFormat', {
+        })
+    end
+    if client and client.resolved_capabilities.document_formatting then
+        -- format on save
+        fss.augroup('LspFormat', {
       {
         events = { 'BufWritePre' },
         targets = { '<buffer>' },
         command = function()
-          -- BUG: folds are are removed when formatting is done, so we save the current state of the
-          -- view and re-apply it manually after formatting the buffer
-          -- @see: https://github.com/nvim-treesitter/nvim-treesitter/issues/1424#issuecomment-909181939
-          vim.cmd 'mkview!'
-          vim.lsp.buf.formatting_sync()
-          vim.cmd 'loadview'
+            -- BUG: folds are are removed when formatting is done, so we save the current state of the
+            -- view and re-apply it manually after formatting the buffer
+            -- @see: https://github.com/nvim-treesitter/nvim-treesitter/issues/1424#issuecomment-909181939
+            vim.cmd 'mkview!'
+            local ok, msg = pcall(vim.lsp.buf.formatting_sync, nil, 2000)
+            if not ok then
+                vim.notify(fmt('Error formatting file: %s', msg))
+            end
+            vim.cmd 'loadview'
         end,
       },
-    })
-  end
+        })
+    end
 end
 
 -----------------------------------------------------------------------------//
@@ -60,7 +63,7 @@ end
 ---@param client table lsp client
 ---@param bufnr integer?
 local function setup_mappings(client, bufnr)
-  local maps = {
+    local maps = {
     n = {
       ['<leader>rf'] = { vim.lsp.buf.formatting, 'lsp: format buffer' },
       ['gi'] = 'lsp: implementation',
@@ -70,95 +73,95 @@ local function setup_mappings(client, bufnr)
       ['K'] = { vim.lsp.buf.hover, 'lsp: hover' },
     },
     x = {},
-  }
+    }
 
-  maps.n[']c'] = {
+    maps.n[']c'] = {
     function()
-      vim.diagnostic.goto_prev {
+        vim.diagnostic.goto_prev {
         float = {
           border = 'rounded',
           focusable = false,
           source = 'always',
         },
-      }
+        }
     end,
     'lsp: go to prev diagnostic',
-  }
-  maps.n['[c'] = {
+    }
+    maps.n['[c'] = {
     function()
-      vim.diagnostic.goto_next {
+        vim.diagnostic.goto_next {
         float = {
           border = 'rounded',
           focusable = false,
           source = 'always',
         },
-      }
+        }
     end,
     'lsp: go to next diagnostic',
-  }
+    }
 
-  if client.resolved_capabilities.implementation then
-    maps.n['gi'] = { vim.lsp.buf.implementation, 'lsp: implementation' }
-  end
+    if client.resolved_capabilities.implementation then
+        maps.n['gi'] = { vim.lsp.buf.implementation, 'lsp: implementation' }
+    end
 
-  if client.resolved_capabilities.type_definition then
-    maps.n['<leader>gd'] = { vim.lsp.buf.type_definition, 'lsp: go to type definition' }
-  end
+    if client.resolved_capabilities.type_definition then
+        maps.n['<leader>gd'] = { vim.lsp.buf.type_definition, 'lsp: go to type definition' }
+    end
 
-  maps.n['<leader>ca'] = { vim.lsp.buf.code_action, 'lsp: code action' }
-  maps.x['<leader>ca'] = { '<esc><Cmd>lua vim.lsp.buf.range_code_action()<CR>', 'lsp: code action' }
+    maps.n['<leader>ca'] = { vim.lsp.buf.code_action, 'lsp: code action' }
+    maps.x['<leader>ca'] = { '<esc><Cmd>lua vim.lsp.buf.range_code_action()<CR>', 'lsp: code action' }
 
-  if client.supports_method 'textDocument/rename' then
-    maps.n['<leader>rn'] = { vim.lsp.buf.rename, 'lsp: rename' }
-  end
+    if client.supports_method 'textDocument/rename' then
+        maps.n['<leader>rn'] = { vim.lsp.buf.rename, 'lsp: rename' }
+    end
 
-  for mode, value in pairs(maps) do
-    require('which-key').register(value, { buffer = 0, mode = mode })
-  end
+    for mode, value in pairs(maps) do
+        require('which-key').register(value, { buffer = 0, mode = mode })
+    end
 end
 
 function fss.lsp.tagfunc(pattern, flags)
-  if flags ~= 'c' then
-    return vim.NIL
-  end
-  local params = vim.lsp.util.make_position_params()
-  local client_id_to_results, err = vim.lsp.buf_request_sync(
+    if flags ~= 'c' then
+        return vim.NIL
+    end
+    local params = vim.lsp.util.make_position_params()
+    local client_id_to_results, err = vim.lsp.buf_request_sync(
     0,
-    'textDocument/definition',
-    params,
-    500
-  )
-  assert(not err, vim.inspect(err))
+        'textDocument/definition',
+        params,
+        500
+    )
+    assert(not err, vim.inspect(err))
 
-  local results = {}
-  for _, lsp_results in ipairs(client_id_to_results) do
-    for _, location in ipairs(lsp_results.result or {}) do
-      local start = location.range.start
-      table.insert(results, {
+    local results = {}
+    for _, lsp_results in ipairs(client_id_to_results) do
+        for _, location in ipairs(lsp_results.result or {}) do
+            local start = location.range.start
+            table.insert(results, {
         name = pattern,
         filename = vim.uri_to_fname(location.uri),
         cmd = string.format('call cursor(%d, %d)', start.line + 1, start.character + 1),
-      })
+            })
+        end
     end
-  end
-  return results
+    return results
 end
 
 local function tsserver_on_attach(client, bufnr)
-  setup_autocommands(client, bufnr)
-  setup_mappings(client, bufnr)
+    setup_autocommands(client, bufnr)
+    setup_mappings(client, bufnr)
 
-  if client.resolved_capabilities.goto_definition then
-    vim.bo[bufnr].tagfunc = 'v:lua.fss.lsp.tagfunc'
-  end
+    if client.resolved_capabilities.goto_definition then
+        vim.bo[bufnr].tagfunc = 'v:lua.fss.lsp.tagfunc'
+    end
 
-  client.resolved_capabilities.document_formatting = false
-  client.resolved_capabilities.document_range_formatting = false
+    client.resolved_capabilities.document_formatting = false
+    client.resolved_capabilities.document_range_formatting = false
 
-  local ts_utils = require 'nvim-lsp-ts-utils'
+    local ts_utils = require 'nvim-lsp-ts-utils'
 
-  -- defaults
-  ts_utils.setup {
+    -- defaults
+    ts_utils.setup {
     debug = true,
     disable_commands = false,
     enable_import_on_completion = true,
@@ -194,19 +197,19 @@ local function tsserver_on_attach(client, bufnr)
     -- filter diagnostics
     filter_out_diagnostics_by_severity = {},
     filter_out_diagnostics_by_code = { 80001 },
-  }
+    }
 
-  -- required to fix code action ranges and filter diagnostics
-  ts_utils.setup_client(client)
+    -- required to fix code action ranges and filter diagnostics
+    ts_utils.setup_client(client)
 end
 
 function fss.lsp.on_attach(client, bufnr)
-  setup_autocommands(client, bufnr)
-  setup_mappings(client, bufnr)
+    setup_autocommands(client, bufnr)
+    setup_mappings(client, bufnr)
 
-  if client.resolved_capabilities.goto_definition then
-    vim.bo[bufnr].tagfunc = 'v:lua.fss.lsp.tagfunc'
-  end
+    if client.resolved_capabilities.goto_definition then
+        vim.bo[bufnr].tagfunc = 'v:lua.fss.lsp.tagfunc'
+    end
 end
 
 -----------------------------------------------------------------------------//
@@ -218,13 +221,13 @@ fss.lsp.servers = {
   tsserver = true,
   elixirls = true,
   jsonls = function()
-    return {
+      return {
       settings = {
         json = {
           schemas = require('schemastore').json.schemas(),
         },
       },
-    }
+      }
   end,
   --- NOTE: This is the secret sauce that allows reading requires and variables
   --- between different modules in the nvim lua context
@@ -256,33 +259,33 @@ fss.lsp.servers = {
 --Logic to (re)start installed language servers for use initialising lsps
 ---and restarting them on installing new ones
 function fss.lsp.get_server_config(server)
-  local nvim_lsp_ok, cmp_nvim_lsp = fss.safe_require 'cmp_nvim_lsp'
-  local conf = fss.lsp.servers[server.name]
-  local config = type(conf) == 'table' and conf or {}
-  config.flags = { debounce_text_changes = 500 }
-  config.on_attach = fss.lsp.on_attach
-  if server.name == 'tsserver' then
-    config.on_attach = tsserver_on_attach
-  else
+    local nvim_lsp_ok, cmp_nvim_lsp = fss.safe_require 'cmp_nvim_lsp'
+    local conf = fss.lsp.servers[server.name]
+    local config = type(conf) == 'table' and conf or {}
+    config.flags = { debounce_text_changes = 500 }
     config.on_attach = fss.lsp.on_attach
-  end
+    if server.name == 'tsserver' then
+        config.on_attach = tsserver_on_attach
+    else
+        config.on_attach = fss.lsp.on_attach
+    end
 
-  config.capabilities = config.capabilities or vim.lsp.protocol.make_client_capabilities()
-  if nvim_lsp_ok then
-    cmp_nvim_lsp.update_capabilities(config.capabilities)
-  end
-  return config
+    config.capabilities = config.capabilities or vim.lsp.protocol.make_client_capabilities()
+    if nvim_lsp_ok then
+        cmp_nvim_lsp.update_capabilities(config.capabilities)
+    end
+    return config
 end
 
 return function()
-  if vim.g.lspconfig_has_setup then
-    return
-  end
-  vim.g.lspconfig_has_setup = true
+    if vim.g.lspconfig_has_setup then
+        return
+    end
+    vim.g.lspconfig_has_setup = true
 
-  local lsp_installer = require 'nvim-lsp-installer'
-  lsp_installer.on_server_ready(function(server)
-    server:setup(fss.lsp.get_server_config(server))
-    vim.cmd [[ do User LspAttachBuffers ]]
-  end)
+    local lsp_installer = require 'nvim-lsp-installer'
+    lsp_installer.on_server_ready(function(server)
+        server:setup(fss.lsp.get_server_config(server))
+        vim.cmd [[ do User LspAttachBuffers ]]
+    end)
 end
