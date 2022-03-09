@@ -59,4 +59,6 @@ backups
 # Environment variables
 .envrc
 
+# Editor and terminal configurations
 .vscode
+.workspace.conf

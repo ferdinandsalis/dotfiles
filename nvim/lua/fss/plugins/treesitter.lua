@@ -84,7 +84,14 @@ return function()
     },
     rainbow = {
       enable = false,
-      disable = { 'lua', 'json', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact' },
+      disable = {
+        'lua',
+        'json',
+        'javascript',
+        'javascriptreact',
+        'typescript',
+        'typescriptreact',
+      },
       colors = {
         'royalblue3',
         'darkorange3',

@@ -1,4 +1,3 @@
-
 return function()
   local telescope = require 'telescope'
   local actions = require 'telescope.actions'
@@ -17,7 +16,7 @@ return function()
     { 'TelescopeMatching', { guifg = P.red } },
 
     { 'TelescopePrompt', { guifg = normal_fg, guibg = normal_bg } },
-    { 'TelescopePromptPrefix', { guifg = H.alter_color(P.red, -20), guibg = normal_bg }},
+    { 'TelescopePromptPrefix', { guifg = H.alter_color(P.red, -20), guibg = normal_bg } },
     { 'TelescopePromptNormal', { guifg = normal_fg, guibg = normal_bg } },
     { 'TelescopePromptBorder', { guifg = normal_bg, guibg = normal_bg } },
     { 'TelescopePromptTitle', { guifg = P.bg_dark, guibg = H.alter_color(P.red, -20) } }
@@ -50,21 +49,21 @@ return function()
       results_title = false,
       color_devicons = false,
       vimgrep_arguments = {
-         "rg",
-         "--color=never",
-         "--no-heading",
-         "--with-filename",
-         "--line-number",
-         "--column",
-         "--smart-case",
+        'rg',
+        '--color=never',
+        '--no-heading',
+        '--with-filename',
+        '--line-number',
+        '--column',
+        '--smart-case',
       },
-      prompt_prefix = "   ",
-      selection_caret = "  ",
-      entry_prefix = "  ",
-      initial_mode = "insert",
-      selection_strategy = "reset",
-      sorting_strategy = "ascending",
-      layout_strategy = "horizontal",
+      prompt_prefix = '   ',
+      selection_caret = '  ',
+      entry_prefix = '  ',
+      initial_mode = 'insert',
+      selection_strategy = 'reset',
+      sorting_strategy = 'ascending',
+      layout_strategy = 'horizontal',
       mappings = {
         i = {
           ['<c-w>'] = actions.send_selected_to_qflist,
@@ -86,18 +85,18 @@ return function()
       path_display = { 'truncate' },
       use_less = true,
       layout_config = {
-         horizontal = {
-          prompt_position = "top",
+        horizontal = {
+          prompt_position = 'top',
           preview_width = 0.55,
           results_width = 0.8,
-         },
-         vertical = {
+        },
+        vertical = {
           mirror = false,
-         },
-         width = 0.80,
-         height = 0.80,
-         preview_cutoff = 120,
-         cursor = { -- FIXME: this does not change the size of the cursor layout
+        },
+        width = 0.80,
+        height = 0.80,
+        preview_cutoff = 120,
+        cursor = { -- FIXME: this does not change the size of the cursor layout
           width = 0.4,
           height = function(self, _, max_lines)
             local results = #self.finder.results
@@ -153,7 +152,7 @@ return function()
       },
       find_files = {
         hidden = true,
-        file_ignore_patterns = { 'node_modules', '.git' }
+        file_ignore_patterns = { 'node_modules', '.git' },
       },
       git_branches = dropdown(),
       git_bcommits = {

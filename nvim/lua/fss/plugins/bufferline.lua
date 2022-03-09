@@ -39,11 +39,66 @@ return function()
   end
 
   -- local groups = require 'bufferline.groups'
+  local colors = require('tokyonight.colors').setup()
 
   require('bufferline').setup {
+    highlights = {
+      tab = {
+        guifg = { attribute = 'fg', highlight = 'Comment' },
+        guibg = '#1f2334',
+      },
+      close_button = {
+        guifg = { attribute = 'fg', highlight = 'Comment' },
+        guibg = '#1f2334',
+      },
+      hint_diagnostic = {
+        guifg = { attribute = 'fg', highlight = 'Comment' },
+        guibg = '#1f2334',
+      },
+      hint = {
+        guifg = { attribute = 'fg', highlight = 'Comment' },
+        guibg = '#1f2334',
+      },
+      error_diagnostic = {
+        guifg = { attribute = 'fg', highlight = 'Comment' },
+        guibg = '#1f2334',
+      },
+      error = {
+        guifg = { attribute = 'fg', highlight = 'Comment' },
+        guibg = '#1f2334',
+      },
+      warning_diagnostic = {
+        guifg = { attribute = 'fg', highlight = 'Comment' },
+        guibg = '#1f2334',
+      },
+      warning = {
+        guifg = { attribute = 'fg', highlight = 'Comment' },
+        guibg = '#1f2334',
+      },
+      buffer_visible = {
+        gui = 'bold,italic',
+      },
+      background = {
+        guifg = { attribute = 'fg', highlight = 'Comment' },
+        guibg = '#1f2334',
+      },
+      fill = {
+        guifg = colors.fg_dark,
+        guibg = '#1f2334',
+      },
+      separator = {
+        guifg = '#1f2334',
+        guibg = '#1f2334',
+      },
+      indicator_selected = {
+        guifg = '#32384F',
+      },
+    },
     options = {
+      mode = 'buffers', -- tabs
       sort_by = sort_by_mtime,
       right_mouse_command = 'vert sbuffer %d',
+      show_buffer_icons = false,
       show_close_icon = false,
       ---based on https://github.com/kovidgoyal/kitty/issues/957
       diagnostics = 'nvim_lsp',
@@ -53,30 +108,26 @@ return function()
       offsets = {
         {
           filetype = 'undotree',
-          text = 'Undotree',
+          text = '',
           highlight = 'PanelHeading',
           padding = 1,
         },
         {
           filetype = 'NvimTree',
-          text = 'Explorer',
+          text = '',
+          text_align = 'left',
           highlight = 'PanelHeading',
           padding = 1,
         },
         {
           filetype = 'DiffviewFiles',
-          text = 'Diff View',
+          text = '',
           highlight = 'PanelHeading',
           padding = 1,
         },
         {
-          filetype = 'flutterToolsOutline',
-          text = 'Flutter Outline',
-          highlight = 'PanelHeading',
-        },
-        {
           filetype = 'packer',
-          text = 'Packer',
+          text = '',
           highlight = 'PanelHeading',
           padding = 1,
         },

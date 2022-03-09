@@ -151,20 +151,10 @@ nnoremap('<localleader>wh', '<C-W>t <C-W>K')
 -- Change two vertically split windows to horizontal splits
 nnoremap('<localleader>wv', '<C-W>t <C-W>H')
 
-inoremap('<C-h>', '<C-w>h')
-inoremap('<C-j>', '<C-w>j')
-inoremap('<C-k>', '<C-w>k')
-inoremap('<C-l>', '<C-w>l')
-
-nnoremap('<C-h>', '<C-w>h')
-nnoremap('<C-j>', '<C-w>j')
-nnoremap('<C-k>', '<C-w>k')
-nnoremap('<C-l>', '<C-w>l')
-
-nnoremap('<C-Left>', '<C-w><')
+-- nnoremap('<C-Left>', '<C-w><')
 -- nnoremap("<C-j>", "<C-w>j")
 -- nnoremap("<C-k>", "<C-w>k")
-nnoremap('<C-Right>', '<C-w>>')
+-- nnoremap('<C-Right>', '<C-w>>')
 
 ----------------------------------------------------------------------------------
 -- Operators
@@ -243,11 +233,11 @@ cnoremap('<Esc>f', [[<S-Right>]])
 -- Insert escaped '/' while inputting a search pattern
 cnoremap('/', [[getcmdtype() == "/" ? "\/" : "/"]], { expr = true })
 -----------------------------------------------------------------------------//
- -- Save
- -----------------------------------------------------------------------------//
- -- NOTE: this uses write specifically because we need to trigger a filesystem event
- -- even if the file isn't change so that things like hot reload work
- nnoremap('<c-s>', ':silent! write<CR>')
+-- Save
+-----------------------------------------------------------------------------//
+-- NOTE: this uses write specifically because we need to trigger a filesystem event
+-- even if the file isn't change so that things like hot reload work
+nnoremap('<c-s>', ':silent! write<CR>')
 
 -- Write and quit all files, ZZ is NOT equivalent to this
 nnoremap('qa', '<cmd>qa<CR>')

@@ -387,7 +387,6 @@ function M.diagnostic_info(context)
   }
 end
 
-
 function M.lsp_client()
   local clients = vim.lsp.buf_get_clients(0)
   return #clients > 0 and clients[#clients].name or ''

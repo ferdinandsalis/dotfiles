@@ -211,6 +211,7 @@ function M.plugin(name, ...)
     },
   })
 end
+
 -- }}}
 ---------------------------------------------------------------------------------
 -- General highlights {{{
@@ -223,7 +224,8 @@ local function general_overrides()
   local colors = require('tokyonight.colors').setup()
 
   M.all {
-    { 'ColorColumn', { guibg = colors.bg_sidebar } },
+    { 'ColorColumn', { guibg = '#272b40' } },
+    { 'CursorLine', { guibg = '#272b40' } },
     -----------------------------------------------------------------------------//
     -- Commandline
     -----------------------------------------------------------------------------//
@@ -247,6 +249,7 @@ local function general_overrides()
     },
   }
 end
+
 -- }}}
 
 local function set_sidebar_highlight()
@@ -266,18 +269,18 @@ local function set_sidebar_highlight()
   end
 end
 
-local sidebar_fts = { 'packer', 'NvimTree', 'dap-repl', 'undotree' }
-
-local function on_sidebar_enter()
-  vim.wo.winhighlight = table.concat({
-    'Normal:PanelBackground',
-    'EndOfBuffer:PanelBackground',
-    'StatusLine:PanelSt',
-    'StatusLineNC:PanelStNC',
-    'SignColumn:PanelBackground',
-    'VertSplit:PanelVertSplit',
-  }, ',')
-end
+-- local sidebar_fts = { 'packer', 'NvimTree', 'dap-repl', 'undotree' }
+--
+-- local function on_sidebar_enter()
+--   vim.wo.winhighlight = table.concat({
+--     'Normal:PanelBackground',
+--     'EndOfBuffer:PanelBackground',
+--     'StatusLine:PanelSt',
+--     'StatusLineNC:PanelStNC',
+--     'SignColumn:PanelBackground',
+--     'VertSplit:PanelVertSplit',
+--   }, ',')
+-- end
 
 local function colorscheme_overrides()
   if vim.g.colors_name == 'tokyonight' then
@@ -313,11 +316,11 @@ fss.augroup('UserHighlights', {
     targets = { '*' },
     command = user_highlights,
   },
-  {
-    events = { 'FileType' },
-    targets = sidebar_fts,
-    command = on_sidebar_enter,
-  },
+  -- {
+  --   events = { 'FileType' },
+  --   targets = sidebar_fts,
+  --   command = on_sidebar_enter,
+  -- },
 })
 
 -- -- }}}

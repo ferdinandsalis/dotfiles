@@ -45,7 +45,7 @@ vim.opt.fillchars = {
 -----------------------------------------------------------------------------//
 -- Use in vertical diff mode, blank lines to keep sides aligned, Ignore whitespace changes
 vim.opt.diffopt = vim.opt.diffopt
-    + {
+  + {
     'vertical',
     'iwhite',
     'hiddenoff',
@@ -53,7 +53,7 @@ vim.opt.diffopt = vim.opt.diffopt
     'context:4',
     'algorithm:histogram',
     'indent-heuristic',
-    }
+  }
 -----------------------------------------------------------------------------//
 -- Format Options {{{1
 -----------------------------------------------------------------------------//
@@ -91,11 +91,11 @@ vim.opt.foldmethod = 'expr'
 -----------------------------------------------------------------------------//
 -- Use faster grep alternatives if possible
 if fss.executable 'rg' then
-    vim.o.grepprg = [[rg --glob "!.git" --no-heading --vimgrep --follow $*]]
-    vim.opt.grepformat = vim.opt.grepformat ^ { '%f:%l:%c:%m' }
+  vim.o.grepprg = [[rg --glob "!.git" --no-heading --vimgrep --follow $*]]
+  vim.opt.grepformat = vim.opt.grepformat ^ { '%f:%l:%c:%m' }
 elseif fss.executable 'ag' then
-    vim.o.grepprg = [[ag --nogroup --nocolor --vimgrep]]
-    vim.opt.grepformat = vim.opt.grepformat ^ { '%f:%l:%c:%m' }
+  vim.o.grepprg = [[ag --nogroup --nocolor --vimgrep]]
+  vim.opt.grepformat = vim.opt.grepformat ^ { '%f:%l:%c:%m' }
 end
 -----------------------------------------------------------------------------//
 -- Wild and file globbing stuff in command mode {{{1
@@ -219,7 +219,7 @@ vim.opt.sessionoptions = {
   'buffers',
   'curdir',
   'help',
-  'winpos'
+  'winpos',
 }
 vim.opt.viewoptions = { 'cursor', 'folds' } -- save/restore just these (with `:{mk,load}view`)
 vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode
@@ -238,7 +238,7 @@ vim.opt.shada = "!,'0,f0,<50,s10,h"
 vim.opt.backup = false
 vim.opt.writebackup = false
 if fn.isdirectory(vim.o.undodir) == 0 then
-    fn.mkdir(vim.o.undodir, 'p')
+  fn.mkdir(vim.o.undodir, 'p')
 end
 vim.opt.undofile = true
 vim.opt.swapfile = false
@@ -247,7 +247,7 @@ vim.opt.swapfile = false
 -- with the same name from different directories.
 vim.opt.directory = fn.stdpath 'data' .. '/swap//'
 if fn.isdirectory(vim.o.directory) == 0 then
-    fn.mkdir(vim.o.directory, 'p')
+  fn.mkdir(vim.o.directory, 'p')
 end
 --}}}
 -----------------------------------------------------------------------------//
@@ -262,6 +262,7 @@ vim.opt.sidescroll = 1
 -----------------------------------------------------------------------------//
 -- Spelling {{{1
 -----------------------------------------------------------------------------//
+vim.opt.spell = false
 vim.opt.spellsuggest:prepend { 12 }
 vim.opt.spelloptions = 'camel'
 vim.opt.spellcapcheck = '' -- don't check for capital letters at start of sentence
@@ -279,7 +280,7 @@ vim.opt.exrc = true -- Allow project local vimrc files example .nvimrc see :h ex
 -- Git editor
 -----------------------------------------------------------------------------//
 if fss.executable 'nvr' then
-    vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
-    vim.env.EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
+  vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
+  vim.env.EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
 end
 -- vim:foldmethod=marker

@@ -1,5 +1,5 @@
 if not vim.filetype then
-    return
+  return
 end
 
 -- NOTE: A value of 0 for this variable disables filetype.vim. A value of 1 disables both filetype.vim
@@ -13,12 +13,14 @@ vim.g.do_filetype_lua = 1
 vim.filetype.add {
   filename = {
     ['.gitignore'] = 'conf',
+    ['.envrc'] = 'env',
   },
   pattern = {
     ['*.env.*'] = 'env',
+    ['*.conf'] = 'conf',
   },
   extension = {
-    tsx = "typescriptreact",
-    ts = "typescript"
-  }
+    tsx = 'typescriptreact',
+    ts = 'typescript',
+  },
 }

@@ -167,3 +167,7 @@ autocmds
 builtins
 luarocks
 fzy
+ctrl
+cmd
+os
+url

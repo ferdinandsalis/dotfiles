@@ -38,15 +38,19 @@ return function()
     diagnostics = {
       enable = true,
     },
-    disable_netrw = false,
-    hijack_netrw = false,
-    open_on_setup = false,
-    hijack_cursor = true,
-    update_cwd = false,
-    update_focused_file = {
+    hijack_directories = {
       enable = true,
-      update_cwd = false,
+      auto_open = true,
     },
+    system_open = {
+      cmd = 'open',
+    },
+    sort_by = 'modification_time',
+    disable_netrw = false,
+    hijack_netrw = true,
+    open_on_setup = false,
+    hijack_cursor = false,
+    update_cwd = true,
     filters = {
       custom = { '.DS_Store', 'fugitive:', '.git' },
     },

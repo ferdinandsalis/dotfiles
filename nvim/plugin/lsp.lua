@@ -8,8 +8,6 @@ if vim.env.DEVELOPING then
   vim.lsp.set_log_level(L.DEBUG)
 end
 
-local icons = fss.style.icons
-
 -----------------------------------------------------------------------------//
 -- Commands
 -----------------------------------------------------------------------------//
@@ -61,22 +59,14 @@ fss.nnoremap('<leader>ll', '<Cmd>LspDiagnostics<CR>', 'toggle quickfix diagnosti
 
 local prefix = fss.nightly and 'DiagnosticSign' or 'LspDiagnosticsSign'
 
-local diagnostic_types = {
-  { 'Error', icon = icons.error },
-  { 'Warn', icon = icons.warn },
-  { 'Hint', icon = icons.hint },
-  { 'Info', icon = icons.info },
-}
+local icons = fss.style.icons
 
-fn.sign_define(vim.tbl_map(function(t)
-  local hl = prefix .. t[1]
-  return {
-    name = hl,
-    text = t.icon,
-    texthl = hl,
-    linehl = fmt('%sLine', hl),
-  }
-end, diagnostic_types))
+local signs = { Error = icons.error, Warn = icons.warn, Hint = icons.hint, Info = icons.info }
+
+for type, icon in pairs(signs) do
+  local hl = 'DiagnosticSign' .. type
+  vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+end
 
 ---Override diagnostics signs helper to only show the single most relevant sign
 ---@see: http://reddit.com/r/neovim/comments/mvhfw7/can_built_in_lsp_diagnostics_be_limited_to_show_a
