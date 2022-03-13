@@ -1,4 +1,5 @@
 fss.lsp = {}
+local fmt = string.format
 
 -----------------------------------------------------------------------------//
 -- Autocommands
@@ -42,15 +43,10 @@ local function setup_autocommands(client, _)
         events = { 'BufWritePre' },
         targets = { '<buffer>' },
         command = function()
-          -- BUG: folds are are removed when formatting is done, so we save the current state of the
-          -- view and re-apply it manually after formatting the buffer
-          -- @see: https://github.com/nvim-treesitter/nvim-treesitter/issues/1424#issuecomment-909181939
-          vim.cmd 'mkview!'
           local ok, msg = pcall(vim.lsp.buf.formatting_sync, nil, 2000)
           if not ok then
             vim.notify(fmt('Error formatting file: %s', msg))
           end
-          vim.cmd 'loadview'
         end,
       },
     })
