@@ -71,6 +71,14 @@ return function()
   end
 
   cmp.setup {
+    window = {
+      completion = {
+        border = 'rounded',
+      },
+      documentation = {
+        border = 'rounded',
+      },
+    },
     experimental = {
       ghost_text = false, -- disable whilst using copilot
     },
