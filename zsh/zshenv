@@ -62,14 +62,8 @@ else
 fi
 
 export USE_EDITOR=$EDITOR
-
 export SSH_KEY_PATH="~/.ssh/rsa_id"
-
 export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=241'
-
-if ! type "$bat" > /dev/null; then
-  export BAT_THEME="ansi"
-fi
 
 # Fuzzy Finder
 export FZF_DEFAULT_COMMAND='rg --files --no-ignore-vcs --hidden'

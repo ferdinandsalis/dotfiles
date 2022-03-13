@@ -16,7 +16,6 @@ alias t=_t
 alias del="rm -rf"
 alias dots="cd $DOTFILES"
 alias work="cd $WORK_DIR"
-alias coding="cd $PROJECTS_DIR"
 alias lp="lsp"
 alias v='nvim'
 alias minimalvim="nvim -u ~/minimal.vim"
