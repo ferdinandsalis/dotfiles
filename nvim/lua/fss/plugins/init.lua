@@ -339,18 +339,16 @@ require('packer').startup {
           debounce = 150,
           on_attach = fss.lsp.on_attach,
           sources = {
-            -- builtins.hover.dictionary,
+            builtins.hover.dictionary,
+            builtins.diagnostics.zsh,
             builtins.diagnostics.write_good,
             builtins.code_actions.gitsigns,
             builtins.formatting.mix,
             builtins.formatting.prettier,
-            -- builtins.formatting.prettier_d_slim.with {
-            --   local_path = 'node_modules/.bin/prettier_d_slim',
-            --   arg = '--'
-            -- },
-            builtins.formatting.stylua.with {
+            null_ls.builtins.formatting.stylua.with {
               condition = function(_utils)
-                return _utils.root_has_file 'stylua.toml'
+                return fss.executable 'stylua'
+                  and _utils.root_has_file { 'stylua.toml', '.stylua.toml' }
               end,
             },
           },
