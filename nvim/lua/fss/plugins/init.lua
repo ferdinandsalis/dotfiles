@@ -628,6 +628,15 @@ require('packer').startup {
     }
 
     use {
+      'akinsho/git-conflict.nvim',
+      disable = true,
+      local_path = 'personal',
+      config = function()
+        require('git-conflict').setup()
+      end,
+    }
+
+    use {
       'pwntester/octo.nvim',
       cmd = 'Octo*',
       setup = function()
@@ -692,6 +701,7 @@ require('packer').startup {
           show_first_indent_level = true,
           show_current_context = true,
           show_current_context_start = true,
+          show_current_context_start_on_current_line = false,
           filetype_exclude = {
             'startify',
             'dashboard',
@@ -935,43 +945,47 @@ require('packer').startup {
     }
 
     use {
-      'rcarriga/nvim-notify',
+      'karb94/neoscroll.nvim',
       config = function()
-        local notify = require 'notify'
-        notify.setup {
-          timeout = 3000,
+        require('neoscroll').setup {
+          mappings = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', 'zt', 'zz', 'zb' },
+          stop_eof = false,
+          hide_cursor = true,
         }
-        ---Send a notification
-        --@param msg of the notification to show to the user
-        --@param level Optional log level
-        --@param opts Dictionary with optional options (timeout, etc)
-        vim.notify = function(msg, level, opts)
-          local l = vim.log.levels
-          assert(type(level) ~= 'table', 'level should be one of vim.log.levels or a string')
-          opts = opts or {}
-          level = level or l.INFO
-          local levels = {
-            [l.DEBUG] = 'Debug',
-            [l.INFO] = 'Information',
-            [l.WARN] = 'Warning',
-            [l.ERROR] = 'Error',
-          }
-          opts.title = opts.title or type(level) == 'string' and level or levels[level]
-          notify(msg, level, opts)
+      end,
+    }
+
+    use {
+      'itchyny/vim-highlighturl',
+      config = function()
+        vim.g.highlighturl_guifg = require('fss.highlights').get_hl('Keyword', 'fg')
+      end,
+    }
+
+    use {
+      'rcarriga/nvim-notify',
+      cond = utils.not_headless, -- TODO: causes blocking output in headless mode
+      config = function()
+        -- this plugin is not safe to reload
+        if vim.g.packer_compiled_loaded then
+          return
         end
-        local hls = { DEBUG = 'Normal', INFO = 'Directory', WARN = 'WarningMsg', ERROR = 'Error' }
-        fss.command {
-          'NotificationHistory',
-          function()
-            local history = notify.history()
-            local messages = vim.tbl_map(function(notif)
-              return { unpack(notif.message), hls[notif.level] }
-            end, history)
-            for _, message in ipairs(messages) do
-              vim.api.nvim_echo({ message }, true, {})
+        local notify = require 'notify'
+        ---@type table<string, fun(bufnr: number, notif: table, highlights: table)>
+        local renderer = require 'notify.render'
+        notify.setup {
+          stages = 'fade_in_slide_out',
+          timeout = 3000,
+          render = function(bufnr, notif, highlights)
+            if notif.title[1] == '' then
+              return renderer.minimal(bufnr, notif, highlights)
             end
+            return renderer.default(bufnr, notif, highlights)
           end,
         }
+        vim.notify = notify
+        require('telescope').load_extension 'notify'
+        fss.nnoremap('<leader>nd', notify.dismiss, { label = 'dismiss notifications' })
       end,
     }
 
@@ -1043,6 +1057,28 @@ require('packer').startup {
       end,
     }
 
+    use {
+      'gbprod/substitute.nvim',
+      config = function()
+        require('substitute').setup()
+        fss.nnoremap('S', function()
+          require('substitute').operator()
+        end)
+        fss.xnoremap('S', function()
+          require('substitute').visual()
+        end)
+        fss.nnoremap('X', function()
+          require('substitute.exchange').operator()
+        end)
+        fss.xnoremap('X', function()
+          require('substitute.exchange').visual()
+        end)
+        fss.nnoremap('Xc', function()
+          require('substitute.exchange').cancel()
+        end)
+      end,
+    }
+
     -- Provides Line wise and delimiter sorting via :Sort
     use 'sQVe/sort.nvim'
 
@@ -1052,6 +1088,47 @@ require('packer').startup {
 
     -- Cycle open and closed folds
     use 'arecarn/vim-fold-cycle'
+
+    use {
+      'monaqa/dial.nvim',
+      disable = true,
+      config = function()
+        local dial = require 'dial.map'
+        local augend = require 'dial.augend'
+        local map = vim.keymap.set
+        map('n', '<C-a>', dial.inc_normal(), { remap = false })
+        map('n', '<C-x>', dial.dec_normal(), { remap = false })
+        map('v', '<C-a>', dial.inc_visual(), { remap = false })
+        map('v', '<C-x>', dial.dec_visual(), { remap = false })
+        map('v', 'g<C-a>', dial.inc_gvisual(), { remap = false })
+        map('v', 'g<C-x>', dial.dec_gvisual(), { remap = false })
+        require('dial.config').augends:register_group {
+          -- default augends used when no group name is specified
+          default = {
+            augend.integer.alias.decimal,
+            augend.integer.alias.hex,
+            augend.date.alias['%Y/%m/%d'],
+            augend.constant.alias.bool,
+            augend.constant.new {
+              elements = { '&&', '||' },
+              word = false,
+              cyclic = true,
+            },
+          },
+          dep_files = {
+            augend.semver.alias.semver,
+          },
+        }
+
+        vim.api.nvim_create_autocmd {
+          pattern = { 'yaml', 'toml' },
+          event = 'FileType',
+          callback = function()
+            map('n', '<C-a>', require('dial.map').inc_normal 'dep_files', { remap = true })
+          end,
+        }
+      end,
+    }
 
     -- See the cursor jump
     use {

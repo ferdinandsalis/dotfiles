@@ -51,6 +51,10 @@ return function()
     open_on_setup = false,
     hijack_cursor = false,
     update_cwd = true,
+    update_focused_file = {
+      enable = true,
+      update_cwd = false,
+    },
     filters = {
       custom = { '.DS_Store', 'fugitive:', '.git' },
     },

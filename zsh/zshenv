@@ -1,21 +1,28 @@
 #!/usr/bin/zsh
-#=======================================================================
+#===============================================================================
 # ENV VARIABLES
-#=======================================================================
+#===============================================================================
 
-export DOTFILES=$HOME/.dotfiles
-export PROJECTS_DIR=$HOME/Desktop/Personal/Code
-export WORK_DIR=$HOME/Desktop/Work
+export DOTFILES=${HOME}/.dotfiles
+export PROJECTS_DIR=${HOME}/Desktop/Personal/Code
+export WORK_DIR=${HOME}/Desktop/Work
+export SYNC_DIR=${HOME}/Desktop/Personal
 
 if which yarn >/dev/null; then
   path+=("$(yarn global bin)")
 fi
 
+#-------------------------------------------------------------------------------
+# Go
+#-------------------------------------------------------------------------------
+export GOPATH=$HOME/go
+
 path+=(
-  "/usr/local/bin"
-  "$HOME/.npm/bin"
-  "$HOME/.local/bin"
-  "$HOME/.cargo/bin"
+  /usr/local/bin
+  ${HOME}/.npm/bin(N-/)
+  ${HOME}/.local/bin(N-/)
+  ${HOME}/.cargo/bin
+  ${GOPATH}/bin(N-/)
 )
 
 export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"

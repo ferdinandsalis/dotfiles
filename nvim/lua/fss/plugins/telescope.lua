@@ -81,7 +81,7 @@ return function()
           ['<C-w>'] = actions.send_selected_to_qflist,
         },
       },
-      file_ignore_patterns = { '%.jpg', '%.jpeg', '%.png', '%.otf', '%.ttf', 'node_modules' },
+      file_ignore_patterns = { '%.jpg', '%.jpeg', '%.png', '%.otf', '%.ttf', '%.DS_Store' },
       path_display = { 'truncate' },
       use_less = true,
       layout_config = {
