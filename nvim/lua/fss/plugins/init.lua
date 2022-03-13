@@ -461,8 +461,8 @@ require('packer').startup {
           { 'TroubleNormal', { link = 'PanelBackground' } },
           { 'TroubleText', { link = 'PanelBackground' } },
           { 'TroubleIndent', { link = 'PanelVertSplit' } },
-          { 'TroubleFoldIcon', { guifg = 'yellow', gui = 'bold' } },
-          { 'TroubleLocation', { guifg = H.get_hl('Comment', 'fg') } }
+          { 'TroubleFoldIcon', { foreground = 'yellow', bold = true } },
+          { 'TroubleLocation', { foreground = H.get_hl('Comment', 'fg') } }
         )
         local trouble = require 'trouble'
         fss.nnoremap('<leader>ld', '<cmd>TroubleToggle workspace_diagnostics<CR>')
@@ -613,11 +613,11 @@ require('packer').startup {
       config = function()
         require('fss.highlights').plugin(
           'conflictMarker',
-          { 'ConflictMarkerBegin', { guibg = '#2f7366' } },
-          { 'ConflictMarkerOurs', { guibg = '#2e5049' } },
-          { 'ConflictMarkerTheirs', { guibg = '#344f69' } },
-          { 'ConflictMarkerEnd', { guibg = '#2f628e' } },
-          { 'ConflictMarkerCommonAncestorsHunk', { guibg = '#754a81' } }
+          { 'ConflictMarkerBegin', { background = '#2f7366' } },
+          { 'ConflictMarkerOurs', { background = '#2e5049' } },
+          { 'ConflictMarkerTheirs', { background = '#344f69' } },
+          { 'ConflictMarkerEnd', { background = '#2f628e' } },
+          { 'ConflictMarkerCommonAncestorsHunk', { background = '#754a81' } }
         )
         -- disable the default highlight group
         vim.g.conflict_marker_highlight_group = ''
@@ -886,10 +886,7 @@ require('packer').startup {
         vim.g.copilot_no_tab_map = true
         vim.g.copilot_assume_mapped = true
         vim.g.copilot_tab_fallback = ''
-        require('fss.highlights').plugin('copilot', {
-          'CopilotSuggestion',
-          { link = 'Comment', force = true },
-        })
+        require('fss.highlights').plugin('copilot', { 'CopilotSuggestion', { link = 'Comment' } })
       end,
     }
 
@@ -900,10 +897,7 @@ require('packer').startup {
       'yorickpeterse/nvim-pqf',
       event = 'BufReadPre',
       config = function()
-        require('fss.highlights').plugin(
-          'NvimPQF',
-          { 'qfPosition', { link = 'Tag', force = true } }
-        )
+        require('fss.highlights').plugin('NvimPQF', { 'qfPosition', { link = 'Tag' } })
         require('pqf').setup {}
       end,
     }
@@ -911,9 +905,9 @@ require('packer').startup {
     use {
       'kevinhwang91/nvim-bqf',
       config = function()
-        local H = require 'fss.highlights'
-        local comment_fg = H.get_hl('Comment', 'fg')
-        H.plugin('bqf', { 'BqfPreviewBorder', { guifg = comment_fg } })
+        local h = require 'fss.highlights'
+        local comment_fg = h.get_hl('Comment', 'fg')
+        h.plugin('nvim-bqf', { 'BqfPreviewBorder', { foreground = comment_fg } })
       end,
     }
 
@@ -1134,14 +1128,14 @@ require('packer').startup {
     use {
       'danilamihailov/beacon.nvim',
       config = function()
-        require('fss.highlights').plugin('beacon', { 'Beacon', { ctermbg = 50 } })
+        -- require('fss.highlights').plugin('beacon', { 'Beacon', { cterm = { background = 50 } } })
       end,
     }
 
     use {
       'chentau/marks.nvim',
       config = function()
-        require('fss.highlights').plugin('marks', { 'MarkSignHL', { guifg = 'Red' } })
+        require('fss.highlights').plugin('marks', { 'MarkSignHL', { foreground = 'Red' } })
         require('marks').setup {
           -- builtin_marks = { '.', '^' },
           bookmark_0 = {
@@ -1252,7 +1246,7 @@ require('packer').startup {
     ---}}}
     --------------------------------------------------------------------------------
   end,
-  log = { level = 'info' },
+  log = { level = 'debug' },
   config = {
     compile_path = PACKER_COMPILED_PATH,
     display = {

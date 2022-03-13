@@ -50,6 +50,18 @@ function M.has_win_highlight(win_id, ...)
   return false, win_hl
 end
 
+---@param group_name string A highlight group name
+local function get_hl(group_name)
+  local ok, hl = pcall(api.nvim_get_hl_by_name, group_name, true)
+  if ok then
+    hl.foreground = hl.foreground and '#' .. bit.tohex(hl.foreground, 6)
+    hl.background = hl.background and '#' .. bit.tohex(hl.background, 6)
+    hl[true] = nil -- BUG: API returns a true key which errors during the merge
+    return hl
+  end
+  return {}
+end
+
 ---A mechanism to allow inheritance of the winhighlight of a specific
 ---group in a window
 ---@param win_id number
@@ -68,78 +80,21 @@ function M.adopt_winhighlight(win_id, target, name, default)
     if found then
       local hl_group = vim.split(found, ':')[2]
       local bg = M.get_hl(hl_group, 'bg')
-      local fg = M.get_hl(default, 'fg')
-      local gui = M.get_hl(default, 'gui')
-      M.set_hl(name, { guibg = bg, guifg = fg, gui = gui })
+      M.set_hl(name, { background = bg, inherit = default })
     end
   end
   return name
 end
 
----get a highlight groups details from the nvim API and format the result
----to match the attributes seen when using `:highlight GroupName`
---- `nvim_get_hl_by_name` e.g.
----```json
----{
---- foreground: 123456
---- background: 123456
---- italic: true
---- bold: true
---}
----```
---- is converted to
----```json
----{
---- gui: {"italic", "bold"}
---- guifg: #FFXXXX
---- guibg: #FFXXXX
---}
----```
----@param group_name string A highlight group name
-local function get_hl(group_name)
-  local attrs = { foreground = 'guifg', background = 'guibg' }
-  local hl = api.nvim_get_hl_by_name(group_name, true)
-  local result = {}
-  if hl then
-    local gui = {}
-    for key, value in pairs(hl) do
-      local t = type(value)
-      if t == 'number' and attrs[key] then
-        result[attrs[key]] = '#' .. bit.tohex(value, 6)
-      elseif t == 'boolean' then -- NOTE: we presume that a boolean value is a GUI attribute
-        table.insert(gui, key)
-      end
-    end
-    result.gui = #gui > 0 and gui or nil
-  end
-  return result
-end
-
---- NOTE: vim.highlight's link and create are private, so eventually move to using `nvim_set_hl`
 ---@param name string
 ---@param opts table
 function M.set_hl(name, opts)
   assert(name and opts, "Both 'name' and 'opts' must be specified")
-  if not vim.tbl_isempty(opts) then
-    if opts.link then
-      vim.highlight.link(name, opts.link, opts.force)
-    else
-      if opts.inherit then
-        local attrs = get_hl(opts.inherit)
-        --- FIXME: deep extending does not merge { a = {'one'}} with {b = {'two'}}
-        --- correctly in nvim 0.5.1, but should do in 0.6
-        if opts.gui and not opts.gui:match 'NONE' and attrs.gui then
-          opts.gui = opts.gui .. ',' .. table.concat(attrs.gui, ',')
-        end
-        opts = vim.tbl_deep_extend('force', attrs, opts)
-        opts.inherit = nil
-      end
-      opts.gui = type(opts.gui) == 'table' and table.concat(opts.gui, ', ') or opts.gui
-      local ok, msg = pcall(vim.highlight.create, name, opts)
-      if not ok then
-        vim.notify(fmt('Failed to set %s because: %s', name, msg))
-      end
-    end
+  local hl = get_hl(opts.inherit or name)
+  opts.inherit = nil
+  local ok, msg = pcall(api.nvim_set_hl, 0, name, vim.tbl_deep_extend('force', hl, opts))
+  if not ok then
+    vim.notify(fmt('Failed to set %s because: %s', name, msg))
   end
 end
 
@@ -155,9 +110,12 @@ function M.get_hl(grp, attr, fallback)
     return 'NONE'
   end
   local hl = get_hl(grp)
-  local color = hl[attr:match 'gui' and attr or fmt('gui%s', attr)] or fallback
+  attr = ({ fg = 'foreground', bg = 'background' })[attr] or attr
+  local color = hl[attr] or fallback
   if not color then
-    vim.notify(fmt('%s %s does not exist', grp, attr), levels.INFO)
+    vim.schedule(function()
+      vim.notify(fmt('%s %s does not exist', grp, attr), levels.INFO)
+    end)
     return 'NONE'
   end
   -- convert the decimal RGBA value from the hl by name to a 6 character hex + padding if needed
@@ -203,8 +161,7 @@ function M.plugin(name, ...)
   M.all(hls)
   fss.augroup(fmt('%sHighlightOverrides', name), {
     {
-      events = { 'ColorScheme' },
-      targets = { '*' },
+      event = 'ColorScheme',
       command = function()
         M.all(hls)
       end,
@@ -224,28 +181,28 @@ local function general_overrides()
   local colors = require('tokyonight.colors').setup()
 
   M.all {
-    { 'ColorColumn', { guibg = '#272b40' } },
-    { 'CursorLine', { guibg = '#272b40' } },
+    { 'ColorColumn', { background = '#272b40' } },
+    { 'CursorLine', { background = '#272b40' } },
     -----------------------------------------------------------------------------//
     -- Commandline
     -----------------------------------------------------------------------------//
-    { 'MsgArea', { guifg = colors.fg_sidebar, guibg = colors.bg_sidebar } },
-    { 'MsgSeparator', { guifg = colors.fg_sidebar, guibg = colors.bg_sidebar } },
+    { 'MsgArea', { foreground = colors.fg_sidebar, background = colors.bg_sidebar } },
+    { 'MsgSeparator', { foreground = colors.fg_sidebar, background = colors.bg_sidebar } },
     -----------------------------------------------------------------------------//
     -- Treesitter
     -----------------------------------------------------------------------------//
     {
       'TSKeywordReturn',
-      { gui = 'italic' },
-      { 'TSParameter', { gui = 'italic,bold' } },
-      { 'TSError', { link = 'LspDiagnosticsUnderlineError', force = true } },
+      { italic = true },
+      { 'TSParameter', { italic = true, bold = true } },
+      { 'TSError', { link = 'LspDiagnosticsUnderlineError' } },
       -----------------------------------------------------------------------------//
       -- LSP
       -----------------------------------------------------------------------------//
-      { 'DiagnosticSignHintLine', { guibg = hint_line } },
-      { 'DiagnosticSignErrorLine', { guibg = error_line } },
-      { 'DiagnosticSignWarnLine', { guibg = warn_line } },
-      { 'DiagnosticSignInfoLine', { guibg = info_line } },
+      { 'DiagnosticSignHintLine', { background = hint_line } },
+      { 'DiagnosticSignErrorLine', { background = error_line } },
+      { 'DiagnosticSignWarnLine', { background = warn_line } },
+      { 'DiagnosticSignInfoLine', { background = info_line } },
     },
   }
 end
@@ -258,11 +215,11 @@ local function set_sidebar_highlight()
   local bg_color = M.alter_color(normal_bg, -8)
   local st_color = M.alter_color(M.get_hl('Visual', 'bg'), -20)
   local hls = {
-    { 'PanelBackground', { guibg = bg_color } },
-    { 'PanelHeading', { guibg = bg_color, gui = 'bold' } },
-    { 'PanelVertSplit', { guifg = split_color, guibg = bg_color } },
-    { 'PanelStNC', { guibg = st_color, cterm = 'italic' } },
-    { 'PanelSt', { guibg = st_color } },
+    { 'PanelBackground', { background = bg_color } },
+    { 'PanelHeading', { background = bg_color, bold = true } },
+    { 'PanelVertSplit', { foreground = split_color, background = bg_color } },
+    { 'PanelStNC', { background = st_color, cterm = { italic = true } } },
+    { 'PanelSt', { background = st_color } },
   }
   for _, grp in ipairs(hls) do
     M.set_hl(unpack(grp))
@@ -289,13 +246,11 @@ local function colorscheme_overrides()
     local bg = M.get_hl('Normal', 'bg')
     local fg = M.get_hl('Normal', 'fg')
     M.all {
-      { 'Folded', { guifg = fg, guibg = bg } },
-      -- { 'FoldColumn', { guifg = keyword_fg, guibg = bg } },
-      -- { 'FoldColumnLine', { guifg = keyword_fg, guibg = bg } },
-      { 'TSVariable', { guifg = 'NONE' } },
+      { 'Folded', { foreground = fg, background = bg } },
+      { 'TSVariable', { foreground = 'NONE' } },
       { 'WhichKeyFloat', { link = 'PanelBackground' } },
-      { 'Cursor', { guibg = keyword_fg, gui = 'NONE' } },
-      { 'Pmenu', { guibg = dark_bg, blend = 6 } },
+      { 'Cursor', { background = keyword_fg, gui = 'NONE' } },
+      { 'Pmenu', { background = dark_bg, blend = 6 } },
     }
   end
 end

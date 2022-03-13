@@ -9,17 +9,20 @@ return function()
   local normal_fg = H.get_hl('TelescopeNormal', 'fg')
   H.plugin(
     'telescope',
-    { 'TelescopeNormal', { guifg = normal_fg, guibg = P.bg_dark } },
-    { 'TelescopeBorder', { guifg = P.bg_dark, guibg = P.bg_dark } },
-    { 'TelescopePreviewTitle', { guifg = P.bg_dark, guibg = H.alter_color(P.green, -20) } },
-    { 'TelescopeSelection', { guibg = normal_bg } },
-    { 'TelescopeMatching', { guifg = P.red } },
+    { 'TelescopeNormal', { foreground = normal_fg, background = P.bg_dark } },
+    { 'TelescopeBorder', { foreground = P.bg_dark, background = P.bg_dark } },
+    {
+      'TelescopePreviewTitle',
+      { foreground = P.bg_dark, background = H.alter_color(P.green, -20) },
+    },
+    { 'TelescopeSelection', { background = normal_bg } },
+    { 'TelescopeMatching', { foreground = P.red } },
 
-    { 'TelescopePrompt', { guifg = normal_fg, guibg = normal_bg } },
-    { 'TelescopePromptPrefix', { guifg = H.alter_color(P.red, -20), guibg = normal_bg } },
-    { 'TelescopePromptNormal', { guifg = normal_fg, guibg = normal_bg } },
-    { 'TelescopePromptBorder', { guifg = normal_bg, guibg = normal_bg } },
-    { 'TelescopePromptTitle', { guifg = P.bg_dark, guibg = H.alter_color(P.red, -20) } }
+    { 'TelescopePrompt', { foreground = normal_fg, background = normal_bg } },
+    { 'TelescopePromptPrefix', { foreground = H.alter_color(P.red, -20), background = normal_bg } },
+    { 'TelescopePromptNormal', { foreground = normal_fg, background = normal_bg } },
+    { 'TelescopePromptBorder', { foreground = normal_bg, background = normal_bg } },
+    { 'TelescopePromptTitle', { foreground = P.bg_dark, background = H.alter_color(P.red, -20) } }
   )
 
   local function get_border(opts)
