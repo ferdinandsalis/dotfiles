@@ -3,22 +3,19 @@ return function()
   local t = fss.replace_termcodes
   local cmp = require 'cmp'
   local h = require 'fss.highlights'
-  local fmt = string.format
 
   local keyword_fg = h.get_hl('Keyword', 'fg')
-  local lsp_hls = fss.style.lsp.kind_highlights
-  local kind_hls = vim.tbl_map(function(key)
-    return { 'CmpItemKind' .. key, { foreground = h.get_hl(lsp_hls[key], 'fg') } }
-  end, vim.tbl_keys(lsp_hls))
-
   h.plugin(
     'Cmp',
-    { 'CmpItemAbbr', { foreground = 'fg', background = 'NONE', italic = false, bold = false } },
+    {
+      'CmpItemAbbr',
+      { foreground = 'fg', background = 'NONE', italic = false, bold = false },
+    },
+    { 'CmpDocumentationBorder', { background = fss.style.palette.terminal_black } },
     { 'CmpItemMenu', { inherit = 'NonText', italic = false, bold = false } },
     { 'CmpItemAbbrMatch', { foreground = keyword_fg } },
     { 'CmpItemAbbrDeprecated', { strikethrough = true, inherit = 'Comment' } },
-    { 'CmpItemAbbrMatchFuzzy', { italic = true, foreground = keyword_fg } },
-    unpack(kind_hls)
+    { 'CmpItemAbbrMatchFuzzy', { italic = true, foreground = keyword_fg } }
   )
 
   local function feed(key, mode)

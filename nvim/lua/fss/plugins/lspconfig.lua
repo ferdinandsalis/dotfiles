@@ -9,8 +9,8 @@ local function setup_autocommands(client, _)
   if client and client.resolved_capabilities.code_lens then
     fss.augroup('LspCodeLens', {
       {
-        events = { 'BufEnter', 'CursorHold', 'InsertLeave' },
-        targets = { '<buffer>' },
+        event = { 'BufEnter', 'CursorHold', 'InsertLeave' },
+        buffer = 0,
         command = vim.lsp.codelens.refresh,
       },
     })
@@ -18,18 +18,18 @@ local function setup_autocommands(client, _)
   if client and client.resolved_capabilities.document_highlight then
     fss.augroup('LspCursorCommands', {
       {
-        events = { 'CursorHold' },
-        targets = { '<buffer>' },
+        event = { 'CursorHold' },
+        buffer = 0,
         command = vim.lsp.buf.document_highlight,
       },
       {
-        events = { 'CursorHoldI' },
-        targets = { '<buffer>' },
+        event = { 'CursorHoldI' },
+        buffer = 0,
         command = vim.lsp.buf.document_highlight,
       },
       {
-        events = { 'CursorMoved' },
-        targets = { '<buffer>' },
+        event = { 'CursorMoved' },
+        buffer = 0,
         command = function()
           vim.lsp.buf.clear_references()
         end,
@@ -40,8 +40,8 @@ local function setup_autocommands(client, _)
     -- format on save
     fss.augroup('LspFormat', {
       {
-        events = { 'BufWritePre' },
-        targets = { '<buffer>' },
+        event = 'BufWritePre',
+        buffer = 0,
         command = function()
           local ok, msg = pcall(vim.lsp.buf.formatting_sync, nil, 2000)
           if not ok then

@@ -23,8 +23,8 @@ function M.setup(enabled)
   end
   fss.augroup('DevReload', {
     {
-      events = { 'VimEnter' },
-      targets = { '*' },
+      event = 'VimEnter',
+      pattern = { '*' },
       command = function()
         local cwd = vim.loop.cwd()
         if not cwd:match(vim.env.PROJECTS_DIR) then

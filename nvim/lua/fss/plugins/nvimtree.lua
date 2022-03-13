@@ -21,6 +21,22 @@ return function()
   vim.g.nvim_tree_root_folder_modifier = ':t'
   vim.g.nvim_tree_highlight_opened_files = 1
 
+  require('fss.highlights').plugin(
+    'NvimTree',
+    { 'NvimTreeIndentMarker', { link = 'Comment' } },
+    { 'NvimTreeNormal', { link = 'PanelBackground' } },
+    { 'NvimTreeNormalNC', { link = 'PanelBackground' } },
+    { 'NvimTreeSignColumn', { link = 'PanelBackground' } },
+    { 'NvimTreeEndOfBuffer', { link = 'PanelBackground' } },
+    { 'NvimTreeVertSplit', { link = 'PanelVertSplit' } },
+    { 'NvimTreeStatusLine', { link = 'PanelSt' } },
+    { 'NvimTreeStatusLineNC', { link = 'PanelStNC' } },
+    {
+      'NvimTreeRootFolder',
+      { bold = true, italic = true, foreground = 'LightMagenta' },
+    }
+  )
+
   fss.nnoremap('<c-n>', [[<cmd>NvimTreeToggle<CR>]])
 
   require('nvim-tree').setup {
@@ -38,6 +54,8 @@ return function()
     diagnostics = {
       enable = true,
     },
+    hijack_unnamed_buffer_when_opening = true,
+    sort_by = 'modification_time',
     hijack_directories = {
       enable = true,
       auto_open = true,
@@ -45,11 +63,11 @@ return function()
     system_open = {
       cmd = 'open',
     },
-    sort_by = 'modification_time',
     disable_netrw = false,
     hijack_netrw = true,
+
     open_on_setup = false,
-    hijack_cursor = false,
+    hijack_cursor = true,
     update_cwd = true,
     update_focused_file = {
       enable = true,

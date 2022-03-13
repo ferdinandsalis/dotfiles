@@ -36,8 +36,8 @@ command {
     if fss.is_vim_list_open() then
       fss.augroup('LspDiagnosticUpdate', {
         {
-          events = { 'DiagnosticChanged' },
-          targets = { '*' },
+          event = 'DiagnosticChanged',
+          pattern = { '*' },
           command = function()
             set_diagnostics()
             if fss.is_vim_list_open() then

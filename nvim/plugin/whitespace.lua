@@ -37,22 +37,22 @@ H.set_hl('ExtraWhitespace', { foreground = 'red' })
 
 fss.augroup('WhitespaceMatch', {
   {
-    events = { 'ColorScheme' },
-    targets = { '*' },
+    event = 'ColorScheme',
+    pattern = { '*' },
     command = function()
       H.set_hl('ExtraWhitespace', { foreground = 'red' })
     end,
   },
   {
-    events = { 'BufEnter', 'FileType', 'InsertLeave' },
-    targets = { '*' },
+    event = { 'BufEnter', 'FileType', 'InsertLeave' },
+    pattern = { '*' },
     command = function()
       toggle_trailing 'n'
     end,
   },
   {
-    events = { 'InsertEnter' },
-    targets = { '*' },
+    event = 'InsertEnter',
+    pattern = { '*' },
     command = function()
       toggle_trailing 'i'
     end,

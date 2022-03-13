@@ -62,10 +62,10 @@ require('packer').startup {
           requires = 'tami5/sqlite.lua',
         },
         {
-          'camgraff/telescope-tmux.nvim',
+          'nvim-telescope/telescope-github.nvim',
           after = 'telescope.nvim',
           config = function()
-            require('telescope').load_extension 'tmux'
+            require('telescope').load_extension 'gh'
           end,
         },
         {
@@ -128,8 +128,8 @@ require('packer').startup {
         local test_patterns = { '*.test.*', '*_test.*', '*_spec.*' }
         fss.augroup('UltestTests', {
           {
-            events = { 'BufWritePost' },
-            targets = test_patterns,
+            event = 'BufWritePost',
+            pattern = test_patterns,
             command = 'UltestNearest',
           },
         })
@@ -149,35 +149,16 @@ require('packer').startup {
       disable = false,
       config = function()
         require('auto-session').setup {
-          auto_session_root_dir = ('%s/session/auto/'):format(vim.fn.stdpath 'data'),
+          auto_session_root_dir = ('%s/session/auto/'):format(
+            vim.fn.stdpath 'data'
+          ),
         }
-      end,
-    }
-
-    use {
-      'christoomey/vim-tmux-navigator',
-      cond = function()
-        return vim.env.TMUX ~= nil
-      end,
-      config = function()
-        vim.g.tmux_navigator_no_mappings = 1
-        fss.nnoremap('<C-H>', '<cmd>TmuxNavigateLeft<cr>')
-        fss.nnoremap('<C-J>', '<cmd>TmuxNavigateDown<cr>')
-        fss.nnoremap('<C-K>', '<cmd>TmuxNavigateUp<cr>')
-        fss.nnoremap('<C-L>', '<cmd>TmuxNavigateRight<cr>')
-        -- Disable tmux navigator when zooming the Vim pane
-        vim.g.tmux_navigator_disable_when_zoomed = 1
-        vim.g.tmux_navigator_preserve_zoom = 1
-        vim.g.tmux_navigator_save_on_switch = 2
       end,
     }
 
     use {
       'knubie/vim-kitty-navigator',
       run = 'cp ./*.py ~/.config/kitty/',
-      cond = function()
-        return vim.env.TMUX == nil
-      end,
     }
 
     use {
@@ -266,7 +247,11 @@ require('packer').startup {
         local opts = { silent = false }
         fss.nnoremap('<localleader>[', ':S/<C-R><C-W>//<LEFT>', opts)
         fss.nnoremap('<localleader>]', ':%S/<C-r><C-w>//c<left><left>', opts)
-        fss.xnoremap('<localleader>[', [["zy:%S/<C-r><C-o>"//c<left><left>]], opts)
+        fss.xnoremap(
+          '<localleader>[',
+          [["zy:%S/<C-r><C-o>"//c<left><left>]],
+          opts
+        )
       end,
     }
 
@@ -465,7 +450,10 @@ require('packer').startup {
           { 'TroubleLocation', { foreground = H.get_hl('Comment', 'fg') } }
         )
         local trouble = require 'trouble'
-        fss.nnoremap('<leader>ld', '<cmd>TroubleToggle workspace_diagnostics<CR>')
+        fss.nnoremap(
+          '<leader>ld',
+          '<cmd>TroubleToggle workspace_diagnostics<CR>'
+        )
         fss.nnoremap('<leader>lr', '<cmd>TroubleToggle lsp_references<CR>')
         fss.nnoremap(']d', function()
           trouble.previous { skip_groups = true, jump = true }
@@ -479,7 +467,10 @@ require('packer').startup {
 
     use {
       'narutoxy/dim.lua',
-      requires = { 'nvim-treesitter/nvim-treesitter', 'neovim/nvim-lspconfig' },
+      requires = {
+        'nvim-treesitter/nvim-treesitter',
+        'neovim/nvim-lspconfig',
+      },
       config = function()
         require('dim').setup {
           disable_lsp_decorations = true,
@@ -588,7 +579,9 @@ require('packer').startup {
       module = 'diffview',
       keys = '<localleader>gd',
       setup = function()
-        require('which-key').register { ['<localleader>gd'] = 'diffview: diff HEAD' }
+        require('which-key').register {
+          ['<localleader>gd'] = 'diffview: diff HEAD',
+        }
       end,
       config = function()
         fss.nnoremap('<localleader>gd', '<Cmd>DiffviewOpen<CR>')
@@ -643,8 +636,14 @@ require('packer').startup {
         require('which-key').register {
           ['<localleader>o'] = {
             name = '+octo',
-            p = { name = '+pull-request', l = { '<cmd>Octo pr list<CR>', 'list' } },
-            i = { name = '+issues', l = { '<cmd>Octo issue list<CR>', 'list' } },
+            p = {
+              name = '+pull-request',
+              l = { '<cmd>Octo pr list<CR>', 'list' },
+            },
+            i = {
+              name = '+issues',
+              l = { '<cmd>Octo issue list<CR>', 'list' },
+            },
           },
         }
       end,
@@ -699,7 +698,7 @@ require('packer').startup {
           char = '│', -- ┆ ┊ 
           show_foldtext = false,
           show_first_indent_level = true,
-          show_current_context = true,
+          show_current_context = false,
           show_current_context_start = true,
           show_current_context_start_on_current_line = false,
           filetype_exclude = {
@@ -882,11 +881,28 @@ require('packer').startup {
           typescriptreact = true,
           javascriptreact = true,
         }
-        fss.imap('<c-h>', [[copilot#Accept("\<CR>")]], { expr = true, script = true })
+        fss.imap(
+          '<c-h>',
+          [[copilot#Accept("\<CR>")]],
+          { expr = true, script = true }
+        )
         vim.g.copilot_no_tab_map = true
         vim.g.copilot_assume_mapped = true
         vim.g.copilot_tab_fallback = ''
-        require('fss.highlights').plugin('copilot', { 'CopilotSuggestion', { link = 'Comment' } })
+        require('fss.highlights').plugin(
+          'copilot',
+          { 'CopilotSuggestion', { link = 'Comment' } }
+        )
+      end,
+    }
+
+    use {
+      'norcalli/nvim-colorizer.lua',
+      config = function()
+        require('colorizer').setup({ '*' }, {
+          RGB = false,
+          mode = 'background',
+        })
       end,
     }
 
@@ -897,7 +913,10 @@ require('packer').startup {
       'yorickpeterse/nvim-pqf',
       event = 'BufReadPre',
       config = function()
-        require('fss.highlights').plugin('NvimPQF', { 'qfPosition', { link = 'Tag' } })
+        require('fss.highlights').plugin(
+          'NvimPQF',
+          { 'qfPosition', { link = 'Tag' } }
+        )
         require('pqf').setup {}
       end,
     }
@@ -907,7 +926,10 @@ require('packer').startup {
       config = function()
         local h = require 'fss.highlights'
         local comment_fg = h.get_hl('Comment', 'fg')
-        h.plugin('nvim-bqf', { 'BqfPreviewBorder', { foreground = comment_fg } })
+        h.plugin(
+          'nvim-bqf',
+          { 'BqfPreviewBorder', { foreground = comment_fg } }
+        )
       end,
     }
 
@@ -942,7 +964,16 @@ require('packer').startup {
       'karb94/neoscroll.nvim',
       config = function()
         require('neoscroll').setup {
-          mappings = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', 'zt', 'zz', 'zb' },
+          mappings = {
+            '<C-u>',
+            '<C-d>',
+            '<C-b>',
+            '<C-f>',
+            '<C-y>',
+            'zt',
+            'zz',
+            'zb',
+          },
           stop_eof = false,
           hide_cursor = true,
         }
@@ -952,7 +983,10 @@ require('packer').startup {
     use {
       'itchyny/vim-highlighturl',
       config = function()
-        vim.g.highlighturl_guifg = require('fss.highlights').get_hl('Keyword', 'fg')
+        vim.g.highlighturl_guifg = require('fss.highlights').get_hl(
+          'Keyword',
+          'fg'
+        )
       end,
     }
 
@@ -979,7 +1013,11 @@ require('packer').startup {
         }
         vim.notify = notify
         require('telescope').load_extension 'notify'
-        fss.nnoremap('<leader>nd', notify.dismiss, { label = 'dismiss notifications' })
+        fss.nnoremap(
+          '<leader>nd',
+          notify.dismiss,
+          { label = 'dismiss notifications' }
+        )
       end,
     }
 
@@ -1012,15 +1050,27 @@ require('packer').startup {
           d = {
             name = '+dsf: function text object',
             s = {
-              f = { '<Plug>(DeleteSurroundingFunction)', 'delete surrounding function' },
-              F = { '<Plug>(DeleteSurroundingFUNCTION)', 'delete surrounding outer function' },
+              f = {
+                '<Plug>(DeleteSurroundingFunction)',
+                'delete surrounding function',
+              },
+              F = {
+                '<Plug>(DeleteSurroundingFUNCTION)',
+                'delete surrounding outer function',
+              },
             },
           },
           c = {
             name = '+dsf: function text object',
             s = {
-              f = { '<Plug>(ChangeSurroundingFunction)', 'change surrounding function' },
-              F = { '<Plug>(ChangeSurroundingFUNCTION)', 'change outer surrounding function' },
+              f = {
+                '<Plug>(ChangeSurroundingFunction)',
+                'change surrounding function',
+              },
+              F = {
+                '<Plug>(ChangeSurroundingFUNCTION)',
+                'change outer surrounding function',
+              },
             },
           },
         }
@@ -1118,7 +1168,12 @@ require('packer').startup {
           pattern = { 'yaml', 'toml' },
           event = 'FileType',
           callback = function()
-            map('n', '<C-a>', require('dial.map').inc_normal 'dep_files', { remap = true })
+            map(
+              'n',
+              '<C-a>',
+              require('dial.map').inc_normal 'dep_files',
+              { remap = true }
+            )
           end,
         }
       end,
@@ -1128,14 +1183,22 @@ require('packer').startup {
     use {
       'danilamihailov/beacon.nvim',
       config = function()
-        -- require('fss.highlights').plugin('beacon', { 'Beacon', { cterm = { background = 50 } } })
+        local P = fss.style.palette
+        require('fss.highlights').plugin(
+          'beacon',
+          { 'Beacon', { background = P.comment } }
+        )
+        vim.g.beacon_size = 30
       end,
     }
 
     use {
       'chentau/marks.nvim',
       config = function()
-        require('fss.highlights').plugin('marks', { 'MarkSignHL', { foreground = 'Red' } })
+        require('fss.highlights').plugin(
+          'marks',
+          { 'MarkSignHL', { foreground = 'Red' } }
+        )
         require('marks').setup {
           -- builtin_marks = { '.', '^' },
           bookmark_0 = {
@@ -1282,20 +1345,34 @@ end
 
 fss.augroup('PackerSetupInit', {
   {
-    events = { 'BufWritePost' },
-    targets = { '*/fss/plugins/*.lua' },
+    event = 'BufWritePost',
+    description = 'Packer setup and reload',
+    pattern = { '*/fss/plugins/*.lua' },
     command = function()
       fss.invalidate('fss.plugins', true)
       require('packer').compile()
     end,
   },
   {
-    events = { 'User PackerCompileDone' },
+    event = 'BufEnter',
+    --- Open a repository from an authorname/repository string
+    --- e.g. 'akinso/example-repo'
+    buffer = 0,
     command = function()
-      vim.notify('Packer compile complete', nil, { title = 'Packer' })
+      fss.nnoremap('gf', function()
+        local repo = fn.expand '<cfile>'
+        if not repo or #vim.split(repo, '/') ~= 2 then
+          return vim.cmd 'norm! gf'
+        end
+        local url = fmt('https://www.github.com/%s', repo)
+        fn.jobstart('open ' .. url)
+        vim.notify(fmt('Opening %s at %s', repo, url))
+      end)
     end,
   },
 })
+
+vim.cmd [[autocmd! User PackerCompileDone lua vim.notify('Packer compile complete', nil, { title = 'Packer' })]]
 
 fss.nnoremap('<leader>ps', [[<Cmd>PackerSync<CR>]])
 fss.nnoremap('<leader>pc', [[<Cmd>PackerClean<CR>]])

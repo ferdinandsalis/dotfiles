@@ -249,6 +249,15 @@ local function filename(ctx, modifier)
   return dir, parent, fname
 end
 
+---@param name string
+---@param fg string
+---@param bg string
+local function create_hl(name, fg, bg)
+  if fg and bg then
+    api.nvim_set_hl(0, name, { foreground = fg, background = bg })
+  end
+end
+
 --- @param hl string
 --- @param bg_hl string
 local function highlight_ft_icon(hl, bg_hl)
@@ -260,10 +269,15 @@ local function highlight_ft_icon(hl, bg_hl)
   local fg_color = H.get_hl(hl, 'fg')
   local bg_color = H.get_hl(bg_hl, 'bg')
   if bg_color and fg_color then
-    local cmd = { 'highlight ', name, ' guibg=', bg_color, ' guifg=', fg_color }
-    local str = table.concat(cmd)
-    fss.augroup(name, { { events = { 'ColorScheme' }, targets = { '*' }, command = str } })
-    vim.cmd(string.format("silent execute '%s'", str))
+    fss.augroup(name, {
+      {
+        event = 'ColorScheme',
+        command = function()
+          create_hl(name, fg_color, bg_color)
+        end,
+      },
+    })
+    create_hl(name, fg_color, bg_color)
   end
   return name
 end

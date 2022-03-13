@@ -13,7 +13,9 @@ local M = {}
 ---@return number
 local function hex_to_rgb(color)
   local hex = color:gsub('#', '')
-  return tonumber(hex:sub(1, 2), 16), tonumber(hex:sub(3, 4), 16), tonumber(hex:sub(5), 16)
+  return tonumber(hex:sub(1, 2), 16),
+    tonumber(hex:sub(3, 4), 16),
+    tonumber(hex:sub(5), 16)
 end
 
 local function alter(attr, percent)
@@ -92,7 +94,12 @@ function M.set_hl(name, opts)
   assert(name and opts, "Both 'name' and 'opts' must be specified")
   local hl = get_hl(opts.inherit or name)
   opts.inherit = nil
-  local ok, msg = pcall(api.nvim_set_hl, 0, name, vim.tbl_deep_extend('force', hl, opts))
+  local ok, msg = pcall(
+    api.nvim_set_hl,
+    0,
+    name,
+    vim.tbl_deep_extend('force', hl, opts)
+  )
   if not ok then
     vim.notify(fmt('Failed to set %s because: %s', name, msg))
   end
@@ -106,7 +113,10 @@ end
 ---@return string
 function M.get_hl(grp, attr, fallback)
   if not grp then
-    vim.notify('Cannot get a highlight without specifying a group', levels.ERROR)
+    vim.notify(
+      'Cannot get a highlight without specifying a group',
+      levels.ERROR
+    )
     return 'NONE'
   end
   local hl = get_hl(grp)
@@ -143,7 +153,6 @@ end
 
 if fss.plugin_installed 'tokyonight.nvim' then
   vim.g.tokyonight_italic_functions = true
-  vim.g.tokyonight_sidebars = { 'qf', 'terminal', 'packer', 'NvimTree' }
   vim.cmd 'colorscheme tokyonight'
 end
 
@@ -183,11 +192,27 @@ local function general_overrides()
   M.all {
     { 'ColorColumn', { background = '#272b40' } },
     { 'CursorLine', { background = '#272b40' } },
+    { 'Pmenu', { foreground = colors.fg, background = colors.bg } },
+    { 'FloatNormal', { background = colors.bg } },
+    {
+      'FloatBorder',
+      { background = colors.bg, foreground = colors.terminal_black },
+    },
+    {
+      'GreyFloatBorder',
+      { foreground = colors.fg, background = colors.terminal_black },
+    },
     -----------------------------------------------------------------------------//
     -- Commandline
     -----------------------------------------------------------------------------//
-    { 'MsgArea', { foreground = colors.fg_sidebar, background = colors.bg_sidebar } },
-    { 'MsgSeparator', { foreground = colors.fg_sidebar, background = colors.bg_sidebar } },
+    {
+      'MsgArea',
+      { foreground = colors.fg_sidebar, background = colors.bg_sidebar },
+    },
+    {
+      'MsgSeparator',
+      { foreground = colors.fg_sidebar, background = colors.bg_sidebar },
+    },
     -----------------------------------------------------------------------------//
     -- Treesitter
     -----------------------------------------------------------------------------//
@@ -213,7 +238,7 @@ local function set_sidebar_highlight()
   local normal_bg = M.get_hl('Normal', 'bg')
   local split_color = M.get_hl('VertSplit', 'fg')
   local bg_color = M.alter_color(normal_bg, -8)
-  local st_color = M.alter_color(M.get_hl('Visual', 'bg'), -20)
+  local st_color = P.bg_highlight
   local hls = {
     { 'PanelBackground', { background = bg_color } },
     { 'PanelHeading', { background = bg_color, bold = true } },
@@ -226,18 +251,18 @@ local function set_sidebar_highlight()
   end
 end
 
--- local sidebar_fts = { 'packer', 'NvimTree', 'dap-repl', 'undotree' }
---
--- local function on_sidebar_enter()
---   vim.wo.winhighlight = table.concat({
---     'Normal:PanelBackground',
---     'EndOfBuffer:PanelBackground',
---     'StatusLine:PanelSt',
---     'StatusLineNC:PanelStNC',
---     'SignColumn:PanelBackground',
---     'VertSplit:PanelVertSplit',
---   }, ',')
--- end
+local sidebar_fts = { 'packer', 'NvimTree', 'dap-repl', 'undotree' }
+
+local function on_sidebar_enter()
+  vim.wo.winhighlight = table.concat({
+    'Normal:PanelBackground',
+    'EndOfBuffer:PanelBackground',
+    'StatusLine:PanelSt',
+    'StatusLineNC:PanelStNC',
+    'SignColumn:PanelBackground',
+    'VertSplit:PanelVertSplit',
+  }, ',')
+end
 
 local function colorscheme_overrides()
   if vim.g.colors_name == 'tokyonight' then
@@ -249,8 +274,8 @@ local function colorscheme_overrides()
       { 'Folded', { foreground = fg, background = bg } },
       { 'TSVariable', { foreground = 'NONE' } },
       { 'WhichKeyFloat', { link = 'PanelBackground' } },
-      { 'Cursor', { background = keyword_fg, gui = 'NONE' } },
-      { 'Pmenu', { background = dark_bg, blend = 6 } },
+      { 'Cursor', { background = keyword_fg } },
+      { 'Pmenu', { blend = 6 } },
     }
   end
 end
@@ -267,15 +292,19 @@ user_highlights()
 
 fss.augroup('UserHighlights', {
   {
-    events = { 'ColorScheme' },
-    targets = { '*' },
-    command = user_highlights,
+    event = 'ColorScheme',
+    pattern = { '*' },
+    command = function()
+      user_highlights()
+    end,
   },
-  -- {
-  --   events = { 'FileType' },
-  --   targets = sidebar_fts,
-  --   command = on_sidebar_enter,
-  -- },
+  {
+    event = 'FileType',
+    pattern = sidebar_fts,
+    command = function()
+      on_sidebar_enter()
+    end,
+  },
 })
 
 -- -- }}}

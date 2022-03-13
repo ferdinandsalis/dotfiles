@@ -2,27 +2,26 @@ return function()
   local telescope = require 'telescope'
   local actions = require 'telescope.actions'
   local layout_actions = require 'telescope.actions.layout'
+  local themes = require 'telescope.themes'
 
-  local P = fss.style.palette
   local H = require 'fss.highlights'
-  local normal_bg = H.alter_color(H.get_hl('TelescopeNormal', 'bg'), 30)
-  local normal_fg = H.get_hl('TelescopeNormal', 'fg')
+
   H.plugin(
     'telescope',
-    { 'TelescopeNormal', { foreground = normal_fg, background = P.bg_dark } },
-    { 'TelescopeBorder', { foreground = P.bg_dark, background = P.bg_dark } },
+    { 'TelescopeMatching', { link = 'Title' } },
+    { 'TelescopeBorder', { link = 'FloatBorder' } },
+    { 'TelescopeNormal', { link = 'FloatNormal' } },
+    { 'TelescopeResultsNormal', { link = 'FloatNormal' } },
+    { 'TelescopePreviewNormal', { link = 'FloatNormal' } },
+    { 'TelescopePromptPrefix', { link = 'Statement' } },
+    { 'TelescopeTitle', { inherit = 'Normal', bold = true } },
     {
-      'TelescopePreviewTitle',
-      { foreground = P.bg_dark, background = H.alter_color(P.green, -20) },
-    },
-    { 'TelescopeSelection', { background = normal_bg } },
-    { 'TelescopeMatching', { foreground = P.red } },
-
-    { 'TelescopePrompt', { foreground = normal_fg, background = normal_bg } },
-    { 'TelescopePromptPrefix', { foreground = H.alter_color(P.red, -20), background = normal_bg } },
-    { 'TelescopePromptNormal', { foreground = normal_fg, background = normal_bg } },
-    { 'TelescopePromptBorder', { foreground = normal_bg, background = normal_bg } },
-    { 'TelescopePromptTitle', { foreground = P.bg_dark, background = H.alter_color(P.red, -20) } }
+      'TelescopeSelectionCaret',
+      {
+        foreground = H.get_hl('Identifier', 'fg'),
+        background = H.get_hl('TelescopeSelection', 'bg'),
+      },
+    }
   )
 
   local function get_border(opts)
@@ -39,37 +38,18 @@ return function()
   ---@param opts table
   ---@return table
   local function dropdown(opts)
-    return require('telescope.themes').get_dropdown(get_border(opts))
+    return themes.get_dropdown(get_border(opts))
   end
-
-  -- telescope.load_extension 'projects'
 
   telescope.setup {
     defaults = {
       set_env = { ['TERM'] = vim.env.TERM },
       borderchars = { '─', '│', '─', '│', '┌', '┐', '┘', '└' },
-      border = {},
-      results_title = false,
-      color_devicons = false,
-      vimgrep_arguments = {
-        'rg',
-        '--color=never',
-        '--no-heading',
-        '--with-filename',
-        '--line-number',
-        '--column',
-        '--smart-case',
-      },
-      prompt_prefix = '   ',
-      selection_caret = '  ',
-      entry_prefix = '  ',
-      initial_mode = 'insert',
-      selection_strategy = 'reset',
-      sorting_strategy = 'ascending',
-      layout_strategy = 'horizontal',
+      prompt_prefix = ' ',
+      selection_caret = '» ',
       mappings = {
         i = {
-          ['<c-w>'] = actions.send_selected_to_qflist,
+          ['<C-w>'] = actions.send_selected_to_qflist,
           ['<c-c>'] = function()
             vim.cmd 'stopinsert!'
           end,
@@ -85,20 +65,12 @@ return function()
         },
       },
       file_ignore_patterns = { '%.jpg', '%.jpeg', '%.png', '%.otf', '%.ttf', '%.DS_Store' },
-      path_display = { 'truncate' },
-      use_less = true,
+      path_display = { 'smart', 'absolute', 'truncate' },
+      layout_strategy = 'flex',
       layout_config = {
         horizontal = {
-          prompt_position = 'top',
-          preview_width = 0.55,
-          results_width = 0.8,
+          preview_width = 0.45,
         },
-        vertical = {
-          mirror = false,
-        },
-        width = 0.80,
-        height = 0.80,
-        preview_cutoff = 120,
         cursor = { -- FIXME: this does not change the size of the cursor layout
           width = 0.4,
           height = function(self, _, max_lines)
@@ -155,7 +127,9 @@ return function()
       },
       find_files = {
         hidden = true,
-        file_ignore_patterns = { 'node_modules', '.git' },
+      },
+      git_files = dropdown {
+        previewer = false,
       },
       git_branches = dropdown(),
       git_bcommits = {
@@ -218,6 +192,10 @@ return function()
     })
   end
 
+  local function prs()
+    telescope.extensions.gh.pull_request(dropdown())
+  end
+
   local function gh_notifications()
     telescope.extensions.ghn.ghn(dropdown())
   end
@@ -225,16 +203,6 @@ return function()
   local function installed_plugins()
     require('telescope.builtin').find_files {
       cwd = vim.fn.stdpath 'data' .. '/site/pack/packer',
-    }
-  end
-
-  local function tmux_sessions()
-    telescope.extensions.tmux.sessions {}
-  end
-
-  local function tmux_windows()
-    telescope.extensions.tmux.windows {
-      entry_format = '#S: #T',
     }
   end
 
@@ -251,6 +219,7 @@ return function()
         name = '+git',
         c = { builtins.git_commits, 'commits' },
         b = { builtins.git_branches, 'branches' },
+        p = { prs, 'PRs' },
       },
       m = { builtins.man_pages, 'man pages' },
       h = { frecency, 'history' },
@@ -261,11 +230,6 @@ return function()
       R = { builtins.reloader, 'module reloader' },
       r = { builtins.resume, 'resume last picker' },
       s = { builtins.live_grep, 'grep string' },
-      t = {
-        name = '+tmux',
-        s = { tmux_sessions, 'sessions' },
-        w = { tmux_windows, 'windows' },
-      },
       ['?'] = { builtins.help_tags, 'help' },
     },
     ['<leader>c'] = {
