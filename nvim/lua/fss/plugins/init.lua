@@ -110,13 +110,7 @@ require('packer').startup {
         })
       end,
       config = function()
-        vim.cmd [[
-          function! ToggleTermStrategy(cmd) abort
-            call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
-          endfunction
-          let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
-        ]]
-        vim.g['test#strategy'] = 'toggleterm'
+        vim.g['test#strategy'] = 'kitty'
         fss.nnoremap('<localleader>tf', '<cmd>TestFile<CR>')
         fss.nnoremap('<localleader>tn', '<cmd>TestNearest<CR>')
         fss.nnoremap('<localleader>ts', '<cmd>TestSuite<CR>')
@@ -128,7 +122,7 @@ require('packer').startup {
       cmd = 'Ultest',
       wants = 'vim-test',
       event = { 'BufEnter *_test.*,*_spec.*' },
-      requires = { 'vim-test/vim-test' },
+      requires = { 'vim-test' },
       run = ':UpdateRemotePlugins',
       config = function()
         local test_patterns = { '*.test.*', '*_test.*', '*_spec.*' }
