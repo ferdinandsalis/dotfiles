@@ -559,6 +559,7 @@ require('packer').startup {
 
     use 'windwp/nvim-ts-autotag'
     use 'mtdl9/vim-log-highlighting'
+    use 'fladson/vim-kitty'
     use 'slime-lang/vim-slime-syntax'
     use 'plasticboy/vim-markdown'
     use 'jparise/vim-graphql'
