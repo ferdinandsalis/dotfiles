@@ -51,7 +51,11 @@ command {
     end
   end,
 }
-fss.nnoremap('<leader>ll', '<Cmd>LspDiagnostics<CR>', 'toggle quickfix diagnostics')
+fss.nnoremap(
+  '<leader>ll',
+  '<Cmd>LspDiagnostics<CR>',
+  'toggle quickfix diagnostics'
+)
 
 -----------------------------------------------------------------------------//
 -- Signs
@@ -61,7 +65,12 @@ local prefix = fss.nightly and 'DiagnosticSign' or 'LspDiagnosticsSign'
 
 local icons = fss.style.icons
 
-local signs = { Error = icons.error, Warn = icons.warn, Hint = icons.hint, Info = icons.info }
+local signs = {
+  Error = icons.error,
+  Warn = icons.warn,
+  Hint = icons.hint,
+  Info = icons.info,
+}
 
 for type, icon in pairs(signs) do
   local hl = 'DiagnosticSign' .. type
@@ -117,8 +126,11 @@ lsp.handlers['textDocument/hover'] = lsp.with(
   lsp.handlers.hover,
   { border = 'rounded', max_width = max_width, max_height = max_height }
 )
-lsp.handlers['textDocument/signatureHelp'] = lsp.with(lsp.handlers.signature_help, {
-  border = 'rounded',
-  max_width = max_width,
-  max_height = max_height,
-})
+lsp.handlers['textDocument/signatureHelp'] = lsp.with(
+  lsp.handlers.signature_help,
+  {
+    border = 'rounded',
+    max_width = max_width,
+    max_height = max_height,
+  }
+)

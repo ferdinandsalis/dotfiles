@@ -49,7 +49,10 @@ local function load_rc(path)
   -- check if we own the localrc file before opening it
   if stat and stat.uid ~= uv.getuid() then
     return notify(
-      fmt('Found localrc at %s but not opening it as it is owned by someone else', path),
+      fmt(
+        'Found localrc at %s but not opening it as it is owned by someone else',
+        path
+      ),
       vim.log.levels.WARN
     )
   end
@@ -57,7 +60,11 @@ local function load_rc(path)
   if success then
     setup_localrc(path)
   end
-  local message = success and 'Successfully loaded ' .. vim.fn.fnamemodify(path, ':~:.')
+  local message = success
+      and 'Successfully loaded ' .. vim.fn.fnamemodify(
+        path,
+        ':~:.'
+      )
     or 'Failed to load because: ' .. msg
   notify(message)
 end

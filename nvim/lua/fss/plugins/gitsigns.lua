@@ -39,8 +39,14 @@ return function()
       -- Default keymap options
       noremap = true,
       buffer = true,
-      ['n [h'] = { expr = true, "&diff ? ']h' : '<cmd>lua require\"gitsigns\".next_hunk()<CR>'" },
-      ['n ]h'] = { expr = true, "&diff ? '[h' : '<cmd>lua require\"gitsigns\".prev_hunk()<CR>'" },
+      ['n [h'] = {
+        expr = true,
+        "&diff ? ']h' : '<cmd>lua require\"gitsigns\".next_hunk()<CR>'",
+      },
+      ['n ]h'] = {
+        expr = true,
+        "&diff ? '[h' : '<cmd>lua require\"gitsigns\".prev_hunk()<CR>'",
+      },
       ['n <localleader>gw'] = '<cmd>lua require"gitsigns".stage_buffer()<CR>',
       ['n <localleader>gre'] = '<cmd>lua require"gitsigns".reset_buffer()<CR>',
       ['n <localleader>gbl'] = '<cmd>lua require"gitsigns".blame_line()<CR>',

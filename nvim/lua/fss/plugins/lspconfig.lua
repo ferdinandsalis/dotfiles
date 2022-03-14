@@ -103,11 +103,17 @@ local function setup_mappings(client, bufnr)
   end
 
   if client.resolved_capabilities.type_definition then
-    maps.n['<leader>gd'] = { vim.lsp.buf.type_definition, 'lsp: go to type definition' }
+    maps.n['<leader>gd'] = {
+      vim.lsp.buf.type_definition,
+      'lsp: go to type definition',
+    }
   end
 
   maps.n['<leader>ca'] = { vim.lsp.buf.code_action, 'lsp: code action' }
-  maps.x['<leader>ca'] = { '<esc><Cmd>lua vim.lsp.buf.range_code_action()<CR>', 'lsp: code action' }
+  maps.x['<leader>ca'] = {
+    '<esc><Cmd>lua vim.lsp.buf.range_code_action()<CR>',
+    'lsp: code action',
+  }
 
   if client.supports_method 'textDocument/rename' then
     maps.n['<leader>rn'] = { vim.lsp.buf.rename, 'lsp: rename' }
@@ -138,7 +144,11 @@ function fss.lsp.tagfunc(pattern, flags)
       table.insert(results, {
         name = pattern,
         filename = vim.uri_to_fname(location.uri),
-        cmd = string.format('call cursor(%d, %d)', start.line + 1, start.character + 1),
+        cmd = string.format(
+          'call cursor(%d, %d)',
+          start.line + 1,
+          start.character + 1
+        ),
       })
     end
   end
@@ -259,7 +269,8 @@ function fss.lsp.get_server_config(server)
     config.on_attach = fss.lsp.on_attach
   end
 
-  config.capabilities = config.capabilities or vim.lsp.protocol.make_client_capabilities()
+  config.capabilities = config.capabilities
+    or vim.lsp.protocol.make_client_capabilities()
   if nvim_lsp_ok then
     cmp_nvim_lsp.update_capabilities(config.capabilities)
   end

@@ -26,7 +26,13 @@ function M.kitty.set_background()
   end
   if vim.env.KITTY_LISTEN_ON then
     local bg = H.get_hl('MsgArea', 'bg')
-    fn.jobstart(fmt('kitty @ --to %s set-colors background=%s', vim.env.KITTY_LISTEN_ON, bg))
+    fn.jobstart(
+      fmt(
+        'kitty @ --to %s set-colors background=%s',
+        vim.env.KITTY_LISTEN_ON,
+        bg
+      )
+    )
   end
 end
 
@@ -38,7 +44,13 @@ function M.kitty.clear_background()
   if vim.env.KITTY_LISTEN_ON then
     local bg = H.get_hl('Normal', 'bg')
     -- this is intentionally synchronous so it has time to execute fully
-    fn.system(fmt('kitty @ --to %s set-colors background=%s', vim.env.KITTY_LISTEN_ON, bg))
+    fn.system(
+      fmt(
+        'kitty @ --to %s set-colors background=%s',
+        vim.env.KITTY_LISTEN_ON,
+        bg
+      )
+    )
   end
 end
 
@@ -47,7 +59,11 @@ local function fileicon()
   local icon, hl
   local loaded, devicons = fss.safe_require 'nvim-web-devicons'
   if loaded then
-    icon, hl = devicons.get_icon(name, fn.fnamemodify(name, ':e'), { default = true })
+    icon, hl = devicons.get_icon(
+      name,
+      fn.fnamemodify(name, ':e'),
+      { default = true }
+    )
   end
   return icon, hl
 end
@@ -62,7 +78,8 @@ function M.title_string()
     return (icon or '') .. ' '
   end
   local has_tmux = os.getenv 'TMUX'
-  return has_tmux and fmt('%s #[fg=%s]%s ', dir, H.get_hl(hl, 'fg'), icon) or dir .. ' ' .. icon
+  return has_tmux and fmt('%s #[fg=%s]%s ', dir, H.get_hl(hl, 'fg'), icon)
+    or dir .. ' ' .. icon
 end
 
 function M.tmux.clear_pane_title()

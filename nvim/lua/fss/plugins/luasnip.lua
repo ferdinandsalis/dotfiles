@@ -24,8 +24,16 @@ return function()
     enable_autosnippets = true,
   }
   local opts = { expr = true }
-  fss.imap('<c-j>', "luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<c-j>'", opts)
-  fss.imap('<c-k>', "luasnip#jumpable(-1) ? '<Plug>luasnip-jump-prev': '<c-k>'", opts)
+  fss.imap(
+    '<c-j>',
+    "luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<c-j>'",
+    opts
+  )
+  fss.imap(
+    '<c-k>',
+    "luasnip#jumpable(-1) ? '<Plug>luasnip-jump-prev': '<c-k>'",
+    opts
+  )
   fss.snoremap('<c-j>', function()
     ls.jump(1)
   end)

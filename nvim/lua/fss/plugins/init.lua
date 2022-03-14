@@ -20,7 +20,11 @@ fss.safe_require 'impatient'
 
 -- NOTE: luarocks install on every single PackerInstall https://github.com/wbthomason/packer.nvim/issues/180
 
-require('packer').startup {
+local packer = require 'packer'
+--- NOTE "use" functions cannot call *upvalues* i.e. the functions
+--- passed to setup or config etc. cannot reference aliased functions
+--- or local variables
+packer.startup {
   function(use, use_rocks)
     use { 'wbthomason/packer.nvim', opt = true }
 
@@ -602,30 +606,12 @@ require('packer').startup {
     }
 
     use {
-      'rhysd/conflict-marker.vim',
-      config = function()
-        require('fss.highlights').plugin(
-          'conflictMarker',
-          { 'ConflictMarkerBegin', { background = '#2f7366' } },
-          { 'ConflictMarkerOurs', { background = '#2e5049' } },
-          { 'ConflictMarkerTheirs', { background = '#344f69' } },
-          { 'ConflictMarkerEnd', { background = '#2f628e' } },
-          { 'ConflictMarkerCommonAncestorsHunk', { background = '#754a81' } }
-        )
-        -- disable the default highlight group
-        vim.g.conflict_marker_highlight_group = ''
-        -- Include text after begin and end markers
-        vim.g.conflict_marker_begin = '^<<<<<<< .*$'
-        vim.g.conflict_marker_end = '^>>>>>>> .*$'
-      end,
-    }
-
-    use {
       'akinsho/git-conflict.nvim',
-      disable = true,
       local_path = 'personal',
       config = function()
-        require('git-conflict').setup()
+        require('git-conflict').setup {
+          disable_diagnostics = true,
+        }
       end,
     }
 
@@ -840,9 +826,7 @@ require('packer').startup {
 
     use {
       'iamcco/markdown-preview.nvim',
-      run = function()
-        vim.fn['mkdp#util#install']()
-      end,
+      run = 'cd app && yarn install',
       ft = { 'markdown' },
       config = function()
         vim.g.mkdp_auto_start = 0
@@ -1050,11 +1034,11 @@ require('packer').startup {
           d = {
             name = '+dsf: function text object',
             s = {
-              f = {
+              F = {
                 '<Plug>(DeleteSurroundingFunction)',
                 'delete surrounding function',
               },
-              F = {
+              f = {
                 '<Plug>(DeleteSurroundingFUNCTION)',
                 'delete surrounding outer function',
               },
@@ -1063,11 +1047,11 @@ require('packer').startup {
           c = {
             name = '+dsf: function text object',
             s = {
-              f = {
+              F = {
                 '<Plug>(ChangeSurroundingFunction)',
                 'change surrounding function',
               },
-              F = {
+              f = {
                 '<Plug>(ChangeSurroundingFUNCTION)',
                 'change outer surrounding function',
               },
@@ -1080,6 +1064,7 @@ require('packer').startup {
     -- Easy accessible digraphs
     use {
       'protex/better-digraphs.nvim',
+      keys = { { 'i', '<C-k><C-k>' } },
       config = function()
         fss.inoremap('<C-k><C-k>', function()
           require('betterdigraphs').digraphs 'i'
@@ -1350,7 +1335,7 @@ fss.augroup('PackerSetupInit', {
     pattern = { '*/fss/plugins/*.lua' },
     command = function()
       fss.invalidate('fss.plugins', true)
-      require('packer').compile()
+      packer.compile()
     end,
   },
   {

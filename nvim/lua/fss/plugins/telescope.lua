@@ -64,7 +64,14 @@ return function()
           ['<C-w>'] = actions.send_selected_to_qflist,
         },
       },
-      file_ignore_patterns = { '%.jpg', '%.jpeg', '%.png', '%.otf', '%.ttf', '%.DS_Store' },
+      file_ignore_patterns = {
+        '%.jpg',
+        '%.jpeg',
+        '%.png',
+        '%.otf',
+        '%.ttf',
+        '%.DS_Store',
+      },
       path_display = { 'smart', 'absolute', 'truncate' },
       layout_strategy = 'flex',
       layout_config = {
@@ -233,9 +240,15 @@ return function()
       ['?'] = { builtins.help_tags, 'help' },
     },
     ['<leader>c'] = {
-      d = { builtins.lsp_workspace_diagnostics, 'telescope: workspace diagnostics' },
+      d = {
+        builtins.lsp_workspace_diagnostics,
+        'telescope: workspace diagnostics',
+      },
       s = { builtins.lsp_document_symbols, 'telescope: document symbols' },
-      w = { builtins.lsp_dynamic_workspace_symbols, 'telescope: workspace symbols' },
+      w = {
+        builtins.lsp_dynamic_workspace_symbols,
+        'telescope: workspace symbols',
+      },
     },
   }
 end

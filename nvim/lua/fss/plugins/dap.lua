@@ -21,8 +21,14 @@ end
 function M.config()
   local dap = require 'dap'
 
-  vim.fn.sign_define('DapBreakpoint', { text = '🛑', texthl = '', linehl = '', numhl = '' })
-  vim.fn.sign_define('DapStopped', { text = '🟢', texthl = '', linehl = '', numhl = '' })
+  vim.fn.sign_define(
+    'DapBreakpoint',
+    { text = '🛑', texthl = '', linehl = '', numhl = '' }
+  )
+  vim.fn.sign_define(
+    'DapStopped',
+    { text = '🟢', texthl = '', linehl = '', numhl = '' }
+  )
 
   dap.configurations.lua = {
     {
@@ -55,7 +61,10 @@ function M.config()
   fss.nnoremap('<localleader>di', "<Cmd>lua require'dap'.step_into()<CR>")
   fss.nnoremap('<localleader>do', "<Cmd>lua require'dap'.step_over()<CR>")
   fss.nnoremap('<localleader>dl', "<Cmd>lua require'dap'.run_lfss()<CR>")
-  fss.nnoremap('<localleader>db', "<Cmd>lua require'dap'.toggle_breakpoint()<CR>")
+  fss.nnoremap(
+    '<localleader>db',
+    "<Cmd>lua require'dap'.toggle_breakpoint()<CR>"
+  )
   fss.nnoremap(
     '<localleader>dB',
     "<Cmd>lua require'dap'.set_breakpoint(vim.fn.input 'Breakpoint condition: ')"

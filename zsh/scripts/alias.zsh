@@ -1,12 +1,10 @@
 alias ls="ls --color=auto --hyperlink=auto $@"
-alias l='exa -lb --git --group-directories-first --icons'
-alias ll='exa -lbG --git --group-directories-first'
-alias la='exa -lba --git --group-directories-first --icons'
-alias lx='exa -lbahFHigUmuS@ --git --group-directories-first'
+alias l='ls -lFh'     # size,show type,human readable
+alias la='l -a'
 
 # specialty views
-alias lS='exa -1'                                                              # one column, just names
-alias lt='exa --tree --level=2'
+alias lS='ls -1'                                                              # one column, just names
+alias lt='ls --tree --level=2'
 
 alias zshrc='${=EDITOR} ${ZDOTDIR:-$HOME}/.zshrc' # Quick access to the .zshrc file
 alias grep='grep --color'

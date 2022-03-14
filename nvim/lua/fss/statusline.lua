@@ -35,37 +35,89 @@ local function colors()
     { 'StMetadata', { background = bg_color, inherit = 'Comment' } },
     {
       'StMetadataPrefix',
-      { background = bg_color, inherit = 'Comment', bold = false, italic = false },
+      {
+        background = bg_color,
+        inherit = 'Comment',
+        bold = false,
+        italic = false,
+      },
     },
-    { 'StIndicator', { background = bg_color, foreground = indicator_color } },
+    {
+      'StIndicator',
+      { background = bg_color, foreground = indicator_color },
+    },
     { 'StModified', { foreground = string_fg, background = bg_color } },
     { 'StGit', { foreground = P.gitSigns.delete, background = bg_color } },
     { 'StGreen', { foreground = P.green, background = bg_color } },
     { 'StBlue', { foreground = P.blue, background = bg_color, bold = true } },
     { 'StNumber', { foreground = number_fg, background = bg_color } },
-    { 'StCount', { foreground = 'bg', background = indicator_color, bold = true } },
+    {
+      'StCount',
+      { foreground = 'bg', background = indicator_color, bold = true },
+    },
     { 'StPrefix', { background = pmenu_bg, foreground = normal_fg } },
-    { 'StDirectory', { background = bg_color, foreground = P.comment, italic = true } },
-    { 'StParentDirectory', { background = bg_color, foreground = P.dark5, bold = true } },
+    {
+      'StDirectory',
+      { background = bg_color, foreground = P.comment, italic = true },
+    },
+    {
+      'StParentDirectory',
+      { background = bg_color, foreground = P.dark5, bold = true },
+    },
     { 'StIdentifier', { foreground = identifier_fg, background = bg_color } },
-    { 'StTitle', { background = bg_color, foreground = P.dark5, bold = true } },
+    {
+      'StTitle',
+      { background = bg_color, foreground = P.dark5, bold = true },
+    },
     { 'StComment', { background = bg_color, inherit = 'Comment' } },
-    { 'StInactive', { foreground = bg_color, background = P.terminal_black } },
+    {
+      'StInactive',
+      { foreground = bg_color, background = P.terminal_black },
+    },
     { 'StatusLine', { background = bg_color } },
-    { 'StatusLineNC', { background = bg_color, bold = false, italic = false } },
-    { 'StInfo', { foreground = info_color, background = bg_color, bold = true } },
+    {
+      'StatusLineNC',
+      { background = bg_color, bold = false, italic = false },
+    },
+    {
+      'StInfo',
+      { foreground = info_color, background = bg_color, bold = true },
+    },
     { 'StWarning', { foreground = warning_fg, background = bg_color } },
     { 'StError', { foreground = error_color, background = bg_color } },
-    { 'StFilename', { background = bg_color, foreground = P.fg, bold = true } },
+    {
+      'StFilename',
+      { background = bg_color, foreground = P.fg, bold = true },
+    },
     {
       'StFilenameInactive',
-      { foreground = P.terminal_black, background = bg_color, italic = true, bold = true },
+      {
+        foreground = P.terminal_black,
+        background = bg_color,
+        italic = true,
+        bold = true,
+      },
     },
-    { 'StModeNormal', { background = bg_color, foreground = P.dark3, bold = true } },
-    { 'StModeInsert', { background = bg_color, foreground = P.blue, bold = true } },
-    { 'StModeVisual', { background = bg_color, foreground = P.magenta, bold = true } },
-    { 'StModeReplace', { background = bg_color, foreground = P.red, bold = true } },
-    { 'StModeCommand', { background = bg_color, foreground = inc_search_bg, bold = true } },
+    {
+      'StModeNormal',
+      { background = bg_color, foreground = P.dark3, bold = true },
+    },
+    {
+      'StModeInsert',
+      { background = bg_color, foreground = P.blue, bold = true },
+    },
+    {
+      'StModeVisual',
+      { background = bg_color, foreground = P.magenta, bold = true },
+    },
+    {
+      'StModeReplace',
+      { background = bg_color, foreground = P.red, bold = true },
+    },
+    {
+      'StModeCommand',
+      { background = bg_color, foreground = inc_search_bg, bold = true },
+    },
   }
 end
 
@@ -76,7 +128,10 @@ local function append(tbl, next, priority)
   priority = priority or 0
   local component, length = unpack(next)
   if component and component ~= '' and next and tbl then
-    table.insert(tbl, { component = component, priority = priority, length = length })
+    table.insert(
+      tbl,
+      { component = component, priority = priority, length = length }
+    )
   end
 end
 
@@ -151,7 +206,10 @@ function _G.__statusline()
   local add = make_status(statusline)
 
   add(
-    { item_if('▌', not minimal, 'StIndicator', { before = '', after = '' }), 0 },
+    {
+      item_if('▌', not minimal, 'StIndicator', { before = '', after = '' }),
+      0,
+    },
     { utils.spacer(1), 0 }
   )
   ----------------------------------------------------------------------------//
@@ -169,7 +227,12 @@ function _G.__statusline()
   -- show a minimal statusline with only the mode and file component
   ----------------------------------------------------------------------------//
   if minimal then
-    add({ readonly_item, 1 }, { dir_item, 3 }, { parent_item, 2 }, { file_item, 0 })
+    add(
+      { readonly_item, 1 },
+      { dir_item, 3 },
+      { parent_item, 2 },
+      { file_item, 0 }
+    )
     return display(statusline, available_space)
   end
   -----------------------------------------------------------------------------//
@@ -209,13 +272,18 @@ function _G.__statusline()
     },
     -- Local plugin dev indicator
     {
-      item_if(available_space > 100 and 'local dev' or '', vim.env.DEVELOPING ~= nil, 'StComment', {
-        prefix = '',
-        padding = 'none',
-        before = '  ',
-        prefix_color = 'StWarning',
-        small = 1,
-      }),
+      item_if(
+        available_space > 100 and 'local dev' or '',
+        vim.env.DEVELOPING ~= nil,
+        'StComment',
+        {
+          prefix = '',
+          padding = 'none',
+          before = '  ',
+          prefix_color = 'StWarning',
+          small = 1,
+        }
+      ),
       2,
     },
     { separator },
@@ -247,11 +315,23 @@ function _G.__statusline()
       item(
         ahead,
         'StTitle',
-        { prefix = '⇡', prefix_color = 'StGreen', after = behind > 0 and '' or ' ', before = '' }
+        {
+          prefix = '⇡',
+          prefix_color = 'StGreen',
+          after = behind > 0 and '' or ' ',
+          before = '',
+        }
       ),
       5,
     },
-    { item(behind, 'StTitle', { prefix = '⇣', prefix_color = 'StNumber', after = ' ' }), 5 },
+    {
+      item(
+        behind,
+        'StTitle',
+        { prefix = '⇣', prefix_color = 'StNumber', after = ' ' }
+      ),
+      5,
+    },
     -- Current line number/total line number,  alternatives 
     {
       utils.line_info {
@@ -265,10 +345,15 @@ function _G.__statusline()
     },
     -- (Unexpected) Indentation
     {
-      item_if(ctx.shiftwidth, ctx.shiftwidth > 2 or not ctx.expandtab, 'StTitle', {
-        prefix = ctx.expandtab and 'Ξ' or '⇥',
-        prefix_color = 'PmenuSbar',
-      }),
+      item_if(
+        ctx.shiftwidth,
+        ctx.shiftwidth > 2 or not ctx.expandtab,
+        'StTitle',
+        {
+          prefix = ctx.expandtab and 'Ξ' or '⇥',
+          prefix_color = 'PmenuSbar',
+        }
+      ),
       6,
     },
     { end_marker }
@@ -279,8 +364,16 @@ end
 
 local function setup_autocommands()
   fss.augroup('CustomStatusline', {
-    { event = 'FocusGained', pattern = { '*' }, command = 'let g:vim_in_focus = v:true' },
-    { event = 'FocusLost', pattern = { '*' }, command = 'let g:vim_in_focus = v:false' },
+    {
+      event = 'FocusGained',
+      pattern = { '*' },
+      command = 'let g:vim_in_focus = v:true',
+    },
+    {
+      event = 'FocusLost',
+      pattern = { '*' },
+      command = 'let g:vim_in_focus = v:false',
+    },
     {
       event = { 'VimEnter', 'ColorScheme' },
       pattern = { '*' },

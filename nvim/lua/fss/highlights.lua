@@ -194,13 +194,16 @@ local function general_overrides()
     { 'CursorLine', { background = '#272b40' } },
     { 'Pmenu', { foreground = colors.fg, background = colors.bg } },
     { 'FloatNormal', { background = colors.bg } },
+    { 'LspFloatNormal', { background = colors.bg } },
+    { 'LspFloatWinNormal', { background = colors.bg } },
+    { 'NormalFloat', { background = colors.bg } },
     {
       'FloatBorder',
       { background = colors.bg, foreground = colors.terminal_black },
     },
     {
       'GreyFloatBorder',
-      { foreground = colors.fg, background = colors.terminal_black },
+      { link = 'FloatBorder' },
     },
     -----------------------------------------------------------------------------//
     -- Commandline

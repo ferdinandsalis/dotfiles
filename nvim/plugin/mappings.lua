@@ -52,7 +52,11 @@ vim.cmd [[
   endfunction
 ]]
 
-xnoremap('@', ':<C-u>call ExecuteMacroOverVisualRange()<CR>', { silent = false })
+xnoremap(
+  '@',
+  ':<C-u>call ExecuteMacroOverVisualRange()<CR>',
+  { silent = false }
+)
 --}}}
 ------------------------------------------------------------------------------
 -- Credit: JGunn Choi ?il | inner line
@@ -175,9 +179,17 @@ vnoremap('>', '>gv')
 nnoremap("'", '`')
 -----------------------------------------------------------------------------//
 --open a new file in the same directory
-nnoremap('<leader>nf', [[:e <C-R>=expand("%:p:h") . "/" <CR>]], { silent = false })
+nnoremap(
+  '<leader>nf',
+  [[:e <C-R>=expand("%:p:h") . "/" <CR>]],
+  { silent = false }
+)
 --open a new file in the same directory
-nnoremap('<leader>ns', [[:vsp <C-R>=expand("%:p:h") . "/" <CR>]], { silent = false })
+nnoremap(
+  '<leader>ns',
+  [[:vsp <C-R>=expand("%:p:h") . "/" <CR>]],
+  { silent = false }
+)
 --Open command line window - :<c-f>
 nnoremap(
   '<localleader>l',
@@ -224,9 +236,16 @@ cnoremap('<C-a>', '<Home>')
 cnoremap('<C-e>', '<End>')
 cnoremap('<C-b>', '<Left>')
 cnoremap('<C-d>', '<Del>')
-cnoremap('<C-k>', [[<C-\>e getcmdpos() == 1 ? '' : getcmdline()[:getcmdpos() - 2]<CR>]])
+cnoremap(
+  '<C-k>',
+  [[<C-\>e getcmdpos() == 1 ? '' : getcmdline()[:getcmdpos() - 2]<CR>]]
+)
 -- move cursor one character backwards unless at the end of the command line
-cnoremap('<C-f>', [[getcmdpos() > strlen(getcmdline())? &cedit: "\<Lt>Right>"]], { expr = true })
+cnoremap(
+  '<C-f>',
+  [[getcmdpos() > strlen(getcmdline())? &cedit: "\<Lt>Right>"]],
+  { expr = true }
+)
 -- see :h cmdline-editing
 cnoremap('<Esc>b', [[<S-Left>]])
 cnoremap('<Esc>f', [[<S-Right>]])
@@ -266,12 +285,24 @@ onoremap('ie', [[<cmd>execute "normal! m`"<Bar>keepjumps normal! ggVG<CR>]])
 -- Core navigation
 ----------------------------------------------------------------------------//
 -- Store relative line number jumps in the jumplist.
-nnoremap('j', [[(v:count > 1 ? 'm`' . v:count : '') . 'gj']], { expr = true, silent = true })
-nnoremap('k', [[(v:count > 1 ? 'm`' . v:count : '') . 'gk']], { expr = true, silent = true })
+nnoremap(
+  'j',
+  [[(v:count > 1 ? 'm`' . v:count : '') . 'gj']],
+  { expr = true, silent = true }
+)
+nnoremap(
+  'k',
+  [[(v:count > 1 ? 'm`' . v:count : '') . 'gk']],
+  { expr = true, silent = true }
+)
 -- Zero should go to the first non-blank character not to the first column (which could be blank)
 -- but if already at the first character then jump to the beginning
 --@see: https://github.com/yuki-yano/zero.nvim/blob/main/lua/zero.lua
-nnoremap('0', "getline('.')[0 : col('.') - 2] =~# '^\\s\\+$' ? '0' : '^'", { expr = true })
+nnoremap(
+  '0',
+  "getline('.')[0 : col('.') - 2] =~# '^\\s\\+$' ? '0' : '^'",
+  { expr = true }
+)
 -- when going to the end of the line in visual mode ignore whitespace characters
 vnoremap('$', 'g_')
 -- jk is escape, THEN move to the right to preserve the cursor position, unless
@@ -288,10 +319,16 @@ nmap(
 -- This line opens the vimrc in a vertical split
 nnoremap('<leader>ev', [[<Cmd>vsplit $MYVIMRC<cr>]])
 -- This line opens my plugins file in a vertical split
-nnoremap('<leader>ep', fmt('<Cmd>vsplit %s/lua/fss/plugins/init.lua<CR>', fn.stdpath 'config'))
+nnoremap(
+  '<leader>ep',
+  fmt('<Cmd>vsplit %s/lua/fss/plugins/init.lua<CR>', fn.stdpath 'config')
+)
 
 -- This line allows the current file to source the vimrc allowing me use bindings as they're added
-nnoremap('<leader>sv', [[<Cmd>source $MYVIMRC<cr> <bar> :lua vim.notify('Sourced init.vim')<cr>]])
+nnoremap(
+  '<leader>sv',
+  [[<Cmd>source $MYVIMRC<cr> <bar> :lua vim.notify('Sourced init.vim')<cr>]]
+)
 -----------------------------------------------------------------------------//
 -- Quotes
 -----------------------------------------------------------------------------//
@@ -315,7 +352,10 @@ nnoremap('cN', '*``cgN')
 -- 3. Once you are done with the macro, go back to normal mode.
 -- 4. Hit Enter to repeat the macro over search matches.
 function fss.mappings.setup_CR()
-  nmap('<Enter>', [[:nnoremap <lt>Enter> n@z<CR>q:<C-u>let @z=strpart(@z,0,strlen(@z)-1)<CR>n@z]])
+  nmap(
+    '<Enter>',
+    [[:nnoremap <lt>Enter> n@z<CR>q:<C-u>let @z=strpart(@z,0,strlen(@z)-1)<CR>n@z]]
+  )
 end
 
 vim.g.mc = [[y/\\V\<C-r>=escape(@\", '/')\<CR>\<CR>]]
@@ -361,7 +401,12 @@ cnoremap('::', "<C-r>=fnameescape(expand('%:p:h'))<cr>/")
 ------------------------------------------------------------------------------
 function fss.mappings.google(pat, lucky)
   local query = '"' .. fn.substitute(pat, '["\n]', ' ', 'g') .. '"'
-  query = fn.substitute(query, '[[:punct:] ]', [[\=printf("%%%02X", char2nr(submatch(0)))]], 'g')
+  query = fn.substitute(
+    query,
+    '[[:punct:] ]',
+    [[\=printf("%%%02X", char2nr(submatch(0)))]],
+    'g'
+  )
   fn.system(
     fn.printf(
       vim.g.open_command .. ' "https://www.google.com/search?%sq=%s"',
@@ -371,9 +416,18 @@ function fss.mappings.google(pat, lucky)
   )
 end
 
-nnoremap('<localleader>?', [[:lua fss.mappings.google(vim.fn.expand("<cWORD>"), false)<cr>]])
-nnoremap('<localleader>!', [[:lua fss.mappings.google(vim.fn.expand("<cWORD>"), true)<cr>]])
-xnoremap('<localleader>?', [["gy:lua fss.mappings.google(vim.api.nvim_eval("@g"), false)<cr>gv]])
+nnoremap(
+  '<localleader>?',
+  [[:lua fss.mappings.google(vim.fn.expand("<cWORD>"), false)<cr>]]
+)
+nnoremap(
+  '<localleader>!',
+  [[:lua fss.mappings.google(vim.fn.expand("<cWORD>"), true)<cr>]]
+)
+xnoremap(
+  '<localleader>?',
+  [["gy:lua fss.mappings.google(vim.api.nvim_eval("@g"), false)<cr>gv]]
+)
 xnoremap(
   '<localleader>!',
   [["gy:lua fss.mappings.google(vim.api.nvim_eval("@g"), false, true)<cr>gv]]
@@ -400,8 +454,14 @@ function fss.mappings.grep_operator(type)
 end
 
 -- http://travisjeffery.com/b/2011/10/m-x-occur-for-vim/
-nnoremap('<leader>g', [[:silent! set operatorfunc=v:lua.fss.mappings.grep_operator<cr>g@]])
-xnoremap('<leader>g', [[:call v:lua.fss.mappings.grep_operator(visualmode())<cr>]])
+nnoremap(
+  '<leader>g',
+  [[:silent! set operatorfunc=v:lua.fss.mappings.grep_operator<cr>g@]]
+)
+xnoremap(
+  '<leader>g',
+  [[:call v:lua.fss.mappings.grep_operator(visualmode())<cr>]]
+)
 ---------------------------------------------------------------------------------
 -- Toggle list
 ---------------------------------------------------------------------------------

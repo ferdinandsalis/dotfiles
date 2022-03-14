@@ -12,7 +12,11 @@ local M = {}
 
 local function get_toggleterm_name(_, buf)
   local shell = fnamemodify(vim.env.SHELL, ':t')
-  return fmt('Terminal(%s)[%s]', shell, api.nvim_buf_get_var(buf, 'toggle_number'))
+  return fmt(
+    'Terminal(%s)[%s]',
+    shell,
+    api.nvim_buf_get_var(buf, 'toggle_number')
+  )
 end
 
 local plain_filetypes = {
@@ -240,9 +244,14 @@ local function filename(ctx, modifier)
     return '', '', 'No Name'
   end
 
-  local path = (ctx.buftype == '' and not ctx.preview) and buf_expand(ctx.bufnum, ':~:.:h') or nil
+  local path = (ctx.buftype == '' and not ctx.preview)
+      and buf_expand(ctx.bufnum, ':~:.:h')
+    or nil
   local is_root = path and #path == 1 -- "~" or "."
-  local dir = path and not is_root and fn.pathshorten(fnamemodify(path, ':h')) .. '/' or ''
+  local dir = path
+      and not is_root
+      and fn.pathshorten(fnamemodify(path, ':h')) .. '/'
+    or ''
   local parent = path and (is_root and path or fnamemodify(path, ':t')) or ''
   parent = parent ~= '' and parent .. '/' or ''
 
@@ -354,14 +363,33 @@ function M.file(ctx, minimal)
   local parent_hl = minimal and directory_hl or 'StParentDirectory'
 
   if H.has_win_highlight(curwin, 'Normal', 'StatusLine') then
-    directory_hl = H.adopt_winhighlight(curwin, 'StatusLine', 'StCustomDirectory', 'StTitle')
-    filename_hl = H.adopt_winhighlight(curwin, 'StatusLine', 'StCustomFilename', 'StTitle')
-    parent_hl = H.adopt_winhighlight(curwin, 'StatusLine', 'StCustomParentDir', 'StTitle')
+    directory_hl = H.adopt_winhighlight(
+      curwin,
+      'StatusLine',
+      'StCustomDirectory',
+      'StTitle'
+    )
+    filename_hl = H.adopt_winhighlight(
+      curwin,
+      'StatusLine',
+      'StCustomFilename',
+      'StTitle'
+    )
+    parent_hl = H.adopt_winhighlight(
+      curwin,
+      'StatusLine',
+      'StCustomParentDir',
+      'StTitle'
+    )
   end
 
-  local ft_icon, icon_highlight = filetype(ctx, { icon_bg = 'StatusLine', default = 'StComment' })
+  local ft_icon, icon_highlight = filetype(
+    ctx,
+    { icon_bg = 'StatusLine', default = 'StComment' }
+  )
 
-  local file_opts, parent_opts, dir_opts = empty_opts(), empty_opts(), empty_opts()
+  local file_opts, parent_opts, dir_opts =
+    empty_opts(), empty_opts(), empty_opts()
   local directory, parent, file = filename(ctx)
 
   -- Depending on which filename segments are empty we select a section to add the file icon to
@@ -611,7 +639,8 @@ local function fetch_github_notifications()
         vim.defer_fn(function()
           -- data is a table, so check that the first value isn't an empty string
           if validate_github_response(data) then
-            local notifications = vim.json and vim.json.decode(data[1]) or vim.fn.json_decode(data)
+            local notifications = vim.json and vim.json.decode(data[1])
+              or vim.fn.json_decode(data)
             vim.g.github_notifications = #notifications
           end
         end, 1)

@@ -58,7 +58,8 @@ fss.augroup('SmartClose', {
     event = 'FileType',
     pattern = { '*' },
     command = function()
-      local is_readonly = (vim.bo.readonly or not vim.bo.modifiable) and fn.hasmapto('q', 'n') == 0
+      local is_readonly = (vim.bo.readonly or not vim.bo.modifiable)
+        and fn.hasmapto('q', 'n') == 0
 
       local is_eligible = vim.bo.buftype ~= ''
         or is_readonly
@@ -99,7 +100,9 @@ fss.augroup('ExternalCommands', {
     event = 'BufEnter',
     pattern = { '*.png', '*.jpg', '*.gif' },
     command = function()
-      vim.cmd(fmt('silent! "%s | :bw"', vim.g.open_command .. ' ' .. fn.expand '%'))
+      vim.cmd(
+        fmt('silent! "%s | :bw"', vim.g.open_command .. ' ' .. fn.expand '%')
+      )
     end,
   },
 })
@@ -107,7 +110,14 @@ fss.augroup('ExternalCommands', {
 fss.augroup('CheckOutsideTime', {
   {
     -- automatically check for changed files outside vim
-    event = { 'WinEnter', 'BufWinEnter', 'BufWinLeave', 'BufRead', 'BufEnter', 'FocusGained' },
+    event = {
+      'WinEnter',
+      'BufWinEnter',
+      'BufWinLeave',
+      'BufRead',
+      'BufEnter',
+      'FocusGained',
+    },
     pattern = { '*' },
     command = 'silent! checktime',
   },
@@ -271,8 +281,12 @@ fss.augroup('UpdateVim', {
     pattern = { '$DOTFILES/**/nvim/plugin/*.{lua,vim}', '$MYVIMRC' },
     nested = true,
     command = function()
-      local ok, msg = pcall(vim.cmd, 'source $MYVIMRC | redraw | silent doautocmd ColorScheme')
-      msg = ok and 'sourced ' .. vim.fn.fnamemodify(vim.env.MYVIMRC, ':t') or msg
+      local ok, msg = pcall(
+        vim.cmd,
+        'source $MYVIMRC | redraw | silent doautocmd ColorScheme'
+      )
+      msg = ok and 'sourced ' .. vim.fn.fnamemodify(vim.env.MYVIMRC, ':t')
+        or msg
       vim.notify(msg)
     end,
   },

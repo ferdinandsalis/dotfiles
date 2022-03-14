@@ -53,7 +53,12 @@ do
     teal = '#1abc9c',
     red = '#f7768e',
     red1 = '#db4b4b',
-    git = { change = '#6183bb', add = '#449dab', delete = '#914c54', conflict = '#bb7a61' },
+    git = {
+      change = '#6183bb',
+      add = '#449dab',
+      delete = '#914c54',
+      conflict = '#bb7a61',
+    },
     gitSigns = { add = '#164846', change = '#394b70', delete = '#823c41' },
   }
 
@@ -163,8 +168,16 @@ local installed
 ---@return boolean
 function fss.plugin_installed(plugin_name)
   if not installed then
-    local dirs = fn.expand(fn.stdpath 'data' .. '/site/pack/packer/start/*', true, true)
-    local opt = fn.expand(fn.stdpath 'data' .. '/site/pack/packer/opt/*', true, true)
+    local dirs = fn.expand(
+      fn.stdpath 'data' .. '/site/pack/packer/start/*',
+      true,
+      true
+    )
+    local opt = fn.expand(
+      fn.stdpath 'data' .. '/site/pack/packer/opt/*',
+      true,
+      true
+    )
     vim.list_extend(dirs, opt)
     installed = vim.tbl_map(function(path)
       return fn.fnamemodify(path, ':t')
@@ -260,7 +273,11 @@ function fss.safe_require(module, opts)
   opts = opts or { silent = false }
   local ok, result = pcall(require, module)
   if not ok and not opts.silent then
-    vim.notify(result, vim.log.levels.ERROR, { title = fmt('Error requiring: %s', module) })
+    vim.notify(
+      result,
+      vim.log.levels.ERROR,
+      { title = fmt('Error requiring: %s', module) }
+    )
   end
   return ok, result
 end
@@ -359,11 +376,17 @@ function fss.command(args)
   local nargs = args.nargs or 0
   local name = args[1]
   local rhs = args[2]
-  local types = (args.types and type(args.types) == 'table') and table.concat(args.types, ' ') or ''
+  local types = (args.types and type(args.types) == 'table')
+      and table.concat(args.types, ' ')
+    or ''
 
   if type(rhs) == 'function' then
     local fn_id = fss._create(rhs)
-    rhs = string.format('lua fss._execute(%d%s)', fn_id, nargs > 0 and ', <f-args>' or '')
+    rhs = string.format(
+      'lua fss._execute(%d%s)',
+      fn_id,
+      nargs > 0 and ', <f-args>' or ''
+    )
   end
 
   vim.cmd(string.format('command! -nargs=%s %s %s %s', nargs, types, name, rhs))

@@ -34,10 +34,18 @@ local function make_mapper(mode, o)
   ---@param rhs string|function
   ---@param opts table
   return function(lhs, rhs, opts)
-    assert(lhs ~= mode, fmt('The lhs should not be the same as mode for %s', lhs))
-    assert(type(rhs) == 'string' or type(rhs) == 'function', '"rhs" should be a function or string')
+    assert(
+      lhs ~= mode,
+      fmt('The lhs should not be the same as mode for %s', lhs)
+    )
+    assert(
+      type(rhs) == 'string' or type(rhs) == 'function',
+      '"rhs" should be a function or string'
+    )
     -- If the label is all that was passed in, set the opts automagically
-    opts = type(opts) == 'string' and { label = opts } or opts and vim.deepcopy(opts) or {}
+    opts = type(opts) == 'string' and { label = opts }
+      or opts and vim.deepcopy(opts)
+      or {}
 
     local buffer = opts.buffer
     opts.buffer = nil

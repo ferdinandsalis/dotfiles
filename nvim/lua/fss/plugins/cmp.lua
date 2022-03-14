@@ -9,13 +9,19 @@ return function()
     'Cmp',
     {
       'CmpItemAbbr',
-      { foreground = 'fg', background = 'NONE', italic = false, bold = false },
+      {
+        foreground = 'fg',
+        background = 'NONE',
+        italic = false,
+        bold = false,
+      },
     },
-    { 'CmpDocumentationBorder', { background = fss.style.palette.terminal_black } },
+    { 'CmpDocumentationBorder', { link = 'FloatBorder' } },
     { 'CmpItemMenu', { inherit = 'NonText', italic = false, bold = false } },
     { 'CmpItemAbbrMatch', { foreground = keyword_fg } },
     { 'CmpItemAbbrDeprecated', { strikethrough = true, inherit = 'Comment' } },
-    { 'CmpItemAbbrMatchFuzzy', { italic = true, foreground = keyword_fg } }
+    { 'CmpItemAbbrMatchFuzzy', { italic = true, foreground = keyword_fg } },
+    { 'CmpBorderedWindow_FloatBorder', { link = 'FloatBorder' } }
   )
 
   local function feed(key, mode)
@@ -107,7 +113,6 @@ return function()
           emoji = '[Emoji]',
           path = '[Path]',
           calc = '[Calc]',
-          neorg = '[Neorg]',
           cmp_tabnine = '[TN]',
           luasnip = '[Luasnip]',
           buffer = '[Buffer]',
@@ -137,12 +142,19 @@ return function()
       { name = 'path' },
       { name = 'cmp_tabnine' },
       { name = 'spell' },
-      { name = 'neorg' },
-      { name = 'cmp_git' },
+      -- { name = 'cmp_git' },
     }, {
       { name = 'fuzzy_buffer' },
     }),
   }
+
+  cmp.setup.filetype('NeogitCommitMessage', {
+    sources = cmp.config.sources({
+      { name = 'cmp_git' },
+    }, {
+      { name = 'buffer' },
+    }),
+  })
 
   local search_sources = {
     sources = cmp.config.sources({
