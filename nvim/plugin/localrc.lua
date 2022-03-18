@@ -115,4 +115,4 @@ fss.augroup('LoadLocalInit', {
   },
 })
 
-fss.command { 'LocalrcEdit', open }
+fss.command('LocalrcEdit', open)

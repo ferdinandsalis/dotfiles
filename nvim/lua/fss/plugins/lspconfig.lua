@@ -18,17 +18,21 @@ local function setup_autocommands(client, _)
   if client and client.resolved_capabilities.document_highlight then
     fss.augroup('LspCursorCommands', {
       {
-        event = { 'CursorHold' },
+        event = 'CursorHold',
         buffer = 0,
-        command = vim.lsp.buf.document_highlight,
+        command = function()
+          vim.lsp.buf.document_highlight()
+        end,
       },
       {
-        event = { 'CursorHoldI' },
+        event = 'CursorHoldI',
         buffer = 0,
-        command = vim.lsp.buf.document_highlight,
+        command = function()
+          vim.lsp.buf.document_highlight()
+        end,
       },
       {
-        event = { 'CursorMoved' },
+        event = 'CursorMoved',
         buffer = 0,
         command = function()
           vim.lsp.buf.clear_references()
@@ -59,16 +63,14 @@ end
 
 ---Setup mapping when an lsp attaches to a buffer
 ---@param client table lsp client
----@param bufnr integer?
-local function setup_mappings(client, bufnr)
+local function setup_mappings(client)
   local maps = {
     n = {
       ['<leader>rf'] = { vim.lsp.buf.formatting, 'lsp: format buffer' },
-      ['gi'] = 'lsp: implementation',
-      ['gd'] = { vim.lsp.buf.definition, 'lsp: definition' },
-      ['gr'] = { vim.lsp.buf.references, 'lsp: references' },
-      ['gI'] = { vim.lsp.buf.incoming_calls, 'lsp: incoming calls' },
-      ['K'] = { vim.lsp.buf.hover, 'lsp: hover' },
+      gd = { vim.lsp.buf.definition, 'lsp: definition' },
+      gr = { vim.lsp.buf.references, 'lsp: references' },
+      gI = { vim.lsp.buf.incoming_calls, 'lsp: incoming calls' },
+      K = { vim.lsp.buf.hover, 'lsp: hover' },
     },
     x = {},
   }
@@ -77,7 +79,7 @@ local function setup_mappings(client, bufnr)
     function()
       vim.diagnostic.goto_prev {
         float = {
-          border = 'rounded',
+          border = fss.style.border.line,
           focusable = false,
           source = 'always',
         },
@@ -89,7 +91,7 @@ local function setup_mappings(client, bufnr)
     function()
       vim.diagnostic.goto_next {
         float = {
-          border = 'rounded',
+          border = fss.style.border.line,
           focusable = false,
           source = 'always',
         },
@@ -157,7 +159,7 @@ end
 
 local function tsserver_on_attach(client, bufnr)
   setup_autocommands(client, bufnr)
-  setup_mappings(client, bufnr)
+  setup_mappings(client)
 
   if client.resolved_capabilities.goto_definition then
     vim.bo[bufnr].tagfunc = 'v:lua.fss.lsp.tagfunc'
@@ -213,7 +215,7 @@ end
 
 function fss.lsp.on_attach(client, bufnr)
   setup_autocommands(client, bufnr)
-  setup_mappings(client, bufnr)
+  setup_mappings(client)
 
   if client.resolved_capabilities.goto_definition then
     vim.bo[bufnr].tagfunc = 'v:lua.fss.lsp.tagfunc'
@@ -228,31 +230,39 @@ fss.lsp.servers = {
   bashls = true,
   tsserver = true,
   elixirls = true,
-  --- NOTE: This is the secret sauce that allows reading requires and variables
-  --- between different modules in the nvim lua context
-  --- @see https://gist.github.com/folke/fe5d28423ea5380929c3f7ce674c41d8
-  --- if I ever decide to move away from lua dev then use the above
-  sumneko_lua = require('lua-dev').setup {
-    lspconfig = {
-      settings = {
-        Lua = {
-          diagnostics = {
-            globals = {
-              'vim',
-              'describe',
-              'it',
-              'before_each',
-              'after_each',
-              'pending',
-              'teardown',
-              'packer_plugins',
+  sumneko_lua = function()
+    local ok, lua_dev = fss.safe_require 'lua-dev'
+    if not ok then
+      return {}
+    end
+    return lua_dev.setup {
+      library = {
+        plugins = { 'plenary.nvim' },
+      },
+      lspconfig = {
+        settings = {
+          Lua = {
+            diagnostics = {
+              globals = {
+                'vim',
+                'describe',
+                'it',
+                'before_each',
+                'after_each',
+                'pending',
+                'teardown',
+                'packer_plugins',
+              },
+            },
+            completion = {
+              keywordSnippet = 'Replace',
+              callSnippet = 'Replace',
             },
           },
-          completion = { keywordSnippet = 'Replace', callSnippet = 'Replace' },
         },
       },
-    },
-  },
+    }
+  end,
 }
 
 --Logic to (re)start installed language servers for use initialising lsps
@@ -260,17 +270,19 @@ fss.lsp.servers = {
 function fss.lsp.get_server_config(server)
   local nvim_lsp_ok, cmp_nvim_lsp = fss.safe_require 'cmp_nvim_lsp'
   local conf = fss.lsp.servers[server.name]
-  local config = type(conf) == 'table' and conf or {}
+  local conf_type = type(conf)
+  local config = conf_type == 'table' and conf
+    or conf_type == 'function' and conf()
+    or {}
   config.flags = { debounce_text_changes = 500 }
-  config.on_attach = fss.lsp.on_attach
+  config.capabilities = config.capabilities
+    or vim.lsp.protocol.make_client_capabilities()
   if server.name == 'tsserver' then
     config.on_attach = tsserver_on_attach
   else
     config.on_attach = fss.lsp.on_attach
   end
 
-  config.capabilities = config.capabilities
-    or vim.lsp.protocol.make_client_capabilities()
   if nvim_lsp_ok then
     cmp_nvim_lsp.update_capabilities(config.capabilities)
   end
@@ -278,14 +290,8 @@ function fss.lsp.get_server_config(server)
 end
 
 return function()
-  if vim.g.lspconfig_has_setup then
-    return
-  end
-  vim.g.lspconfig_has_setup = true
-
   local lsp_installer = require 'nvim-lsp-installer'
   lsp_installer.on_server_ready(function(server)
     server:setup(fss.lsp.get_server_config(server))
-    vim.cmd [[ do User LspAttachBuffers ]]
   end)
 end

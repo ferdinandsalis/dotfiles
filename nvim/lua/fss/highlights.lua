@@ -183,23 +183,28 @@ end
 -- General highlights {{{
 ---------------------------------------------------------------------------------
 local function general_overrides()
-  local hint_line = M.alter_color(L.hint, -80)
-  local error_line = M.alter_color(L.error, -80)
-  local warn_line = M.alter_color(L.warn, -80)
-  local info_line = M.alter_color(L.info, -80)
   local colors = require('tokyonight.colors').setup()
 
   M.all {
+    {
+      'VertSplit',
+      { background = 'NONE', foreground = P.bg_highlight },
+    },
+    {
+      'WinSeparator',
+      { background = 'NONE', foreground = P.fg_gutter },
+    },
+
     { 'ColorColumn', { background = '#272b40' } },
     { 'CursorLine', { background = '#272b40' } },
-    { 'Pmenu', { foreground = colors.fg, background = colors.bg } },
-    { 'FloatNormal', { background = colors.bg } },
-    { 'LspFloatNormal', { background = colors.bg } },
-    { 'LspFloatWinNormal', { background = colors.bg } },
-    { 'NormalFloat', { background = colors.bg } },
+    { 'Pmenu', { foreground = colors.fg, background = colors.bg_popup } },
+    { 'LspFloatNormal', { background = colors.bg_popup } },
+    { 'LspFloatWinNormal', { background = colors.bg_popup } },
+    { 'NormalFloat', { background = colors.bg_popup } },
+    { 'FloatNormal', { background = colors.bg_popup } },
     {
       'FloatBorder',
-      { background = colors.bg, foreground = colors.terminal_black },
+      { background = colors.bg_popup, foreground = colors.bg_popup },
     },
     {
       'GreyFloatBorder',
@@ -219,19 +224,9 @@ local function general_overrides()
     -----------------------------------------------------------------------------//
     -- Treesitter
     -----------------------------------------------------------------------------//
-    {
-      'TSKeywordReturn',
-      { italic = true },
-      { 'TSParameter', { italic = true, bold = true } },
-      { 'TSError', { link = 'LspDiagnosticsUnderlineError' } },
-      -----------------------------------------------------------------------------//
-      -- LSP
-      -----------------------------------------------------------------------------//
-      { 'DiagnosticSignHintLine', { background = hint_line } },
-      { 'DiagnosticSignErrorLine', { background = error_line } },
-      { 'DiagnosticSignWarnLine', { background = warn_line } },
-      { 'DiagnosticSignInfoLine', { background = info_line } },
-    },
+    { 'TSKeywordReturn', { italic = true } },
+    { 'TSParameter', { italic = true, bold = true } },
+    { 'TSError', { link = 'LspDiagnosticsUnderlineError' } },
   }
 end
 
@@ -244,6 +239,10 @@ local function set_sidebar_highlight()
   local st_color = P.bg_highlight
   local hls = {
     { 'PanelBackground', { background = bg_color } },
+    {
+      'PanelWinSeparator',
+      { foreground = split_color, background = bg_color },
+    },
     { 'PanelHeading', { background = bg_color, bold = true } },
     { 'PanelVertSplit', { foreground = split_color, background = bg_color } },
     { 'PanelStNC', { background = st_color, cterm = { italic = true } } },
@@ -254,7 +253,7 @@ local function set_sidebar_highlight()
   end
 end
 
-local sidebar_fts = { 'packer', 'NvimTree', 'dap-repl', 'undotree' }
+local sidebar_fts = { 'packer', 'dap-repl', 'undotree' }
 
 local function on_sidebar_enter()
   vim.wo.winhighlight = table.concat({
@@ -269,16 +268,10 @@ end
 
 local function colorscheme_overrides()
   if vim.g.colors_name == 'tokyonight' then
-    local keyword_fg = M.get_hl('Keyword', 'fg')
-    local dark_bg = M.alter_color(M.get_hl('Normal', 'bg'), -6)
     local bg = M.get_hl('Normal', 'bg')
-    local fg = M.get_hl('Normal', 'fg')
+    local fg = M.get_hl('Comment', 'fg')
     M.all {
       { 'Folded', { foreground = fg, background = bg } },
-      { 'TSVariable', { foreground = 'NONE' } },
-      { 'WhichKeyFloat', { link = 'PanelBackground' } },
-      { 'Cursor', { background = keyword_fg } },
-      { 'Pmenu', { blend = 6 } },
     }
   end
 end

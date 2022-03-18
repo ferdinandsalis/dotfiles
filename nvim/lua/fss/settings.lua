@@ -31,7 +31,7 @@ vim.opt.eadirection = 'hor'
 -- do not use split or vsplit to ensure we don't open any new windows
 vim.o.switchbuf = 'useopen,uselast'
 vim.opt.fillchars = {
-  vert = '▕', -- alternatives │
+  -- vert = '▕', -- alternatives │
   fold = ' ',
   eob = ' ', -- suppress ~ at EndOfBuffer
   diff = '╱', -- alternatives = ⣿ ░ ─
@@ -54,6 +54,7 @@ vim.opt.diffopt = vim.opt.diffopt
     'algorithm:histogram',
     'indent-heuristic',
   }
+
 -----------------------------------------------------------------------------//
 -- Format Options {{{1
 -----------------------------------------------------------------------------//
@@ -72,6 +73,7 @@ vim.opt.formatoptions = {
   l = true,
   v = true,
 }
+
 -----------------------------------------------------------------------------//
 -- Folds {{{1
 -----------------------------------------------------------------------------//
@@ -80,12 +82,14 @@ vim.opt.foldopen = vim.opt.foldopen + 'search'
 vim.opt.foldlevelstart = 5
 vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
 vim.opt.foldmethod = 'expr'
+
 -----------------------------------------------------------------------------//
 -- Quickfix {{{1
 -----------------------------------------------------------------------------//
 --- FIXME: Need to use a lambda rather than a lua function directly
 --- @see https://github.com/neovim/neovim/pull/14886
 -- vim.o.quickfixtextfunc = '{i -> v:lua.fss.qftf(i)}'
+
 -----------------------------------------------------------------------------//
 -- Grepprg {{{1
 -----------------------------------------------------------------------------//
@@ -97,6 +101,7 @@ elseif fss.executable 'ag' then
   vim.o.grepprg = [[ag --nogroup --nocolor --vimgrep]]
   vim.opt.grepformat = vim.opt.grepformat ^ { '%f:%l:%c:%m' }
 end
+
 -----------------------------------------------------------------------------//
 -- Wild and file globbing stuff in command mode {{{1
 -----------------------------------------------------------------------------//
@@ -131,7 +136,8 @@ vim.opt.wildignore = {
   'tags.lock',
 }
 vim.opt.wildoptions = 'pum'
-vim.opt.pumblend = 3 -- Make popup window translucent
+vim.opt.pumblend = fss.style.blend
+
 -----------------------------------------------------------------------------//
 -- Display {{{1
 -----------------------------------------------------------------------------//
@@ -152,6 +158,7 @@ vim.g.markdown_fenced_languages = {
   'bash=sh',
   'console=sh',
 }
+
 -----------------------------------------------------------------------------//
 -- List chars {{{1
 -----------------------------------------------------------------------------//
@@ -163,6 +170,7 @@ vim.opt.listchars = {
   precedes = '‹', -- Alternatives: … «
   trail = '•', -- BULLET (U+2022, UTF-8: E2 80 A2)
 }
+
 -----------------------------------------------------------------------------//
 -- Indentation
 -----------------------------------------------------------------------------//
@@ -173,6 +181,7 @@ vim.opt.autoindent = true
 vim.opt.shiftround = true
 vim.opt.expandtab = true
 vim.opt.shiftwidth = 2
+
 -----------------------------------------------------------------------------//
 -- vim.o.debug = "msg"
 vim.opt.gdefault = true
@@ -182,9 +191,9 @@ vim.opt.completeopt = { 'menuone', 'noselect' }
 vim.opt.hlsearch = false
 vim.opt.autowriteall = true -- automatically :write before running commands and changing files
 vim.opt.clipboard = { 'unnamedplus' }
-vim.opt.laststatus = 2
+vim.opt.laststatus = 3
 vim.opt.termguicolors = true
-vim.opt.guifont = 'Fira Code Regular Nerd Font Complete Mono:h14'
+
 -----------------------------------------------------------------------------//
 -- Emoji {{{1
 -----------------------------------------------------------------------------//
@@ -203,13 +212,15 @@ vim.opt.guicursor = {
 }
 
 vim.opt.cursorlineopt = 'screenline,number'
+
 -----------------------------------------------------------------------------//
 -- Title {{{1
 -----------------------------------------------------------------------------//
-vim.opt.titlestring = ' ❐ %t %r %m'
+vim.opt.titlestring = ' ❐ %{fnamemodify(getcwd(), ":t")} %m'
 vim.opt.titleold = fn.fnamemodify(vim.loop.os_getenv 'SHELL', ':t')
 vim.opt.title = true
 vim.opt.titlelen = 70
+
 -----------------------------------------------------------------------------//
 -- Utilities {{{1
 -----------------------------------------------------------------------------//
@@ -223,6 +234,7 @@ vim.opt.sessionoptions = {
 }
 vim.opt.viewoptions = { 'cursor', 'folds' } -- save/restore just these (with `:{mk,load}view`)
 vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode
+
 -----------------------------------------------------------------------------//
 -- Shada (Shared Data)
 -----------------------------------------------------------------------------//
@@ -232,6 +244,7 @@ vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in 
 -- add f0 so file marks aren't stored
 -- @credit: wincent
 vim.opt.shada = "!,'0,f0,<50,s10,h"
+
 -------------------------------------------------------------------------------
 -- BACKUP AND SWAPS {{{
 -------------------------------------------------------------------------------
@@ -250,6 +263,7 @@ if fn.isdirectory(vim.o.directory) == 0 then
   fn.mkdir(vim.o.directory, 'p')
 end
 --}}}
+
 -----------------------------------------------------------------------------//
 -- Match and search {{{1
 -----------------------------------------------------------------------------//
@@ -259,6 +273,7 @@ vim.opt.wrapscan = true -- Searches wrap around the end of the file
 vim.opt.scrolloff = 9
 vim.opt.sidescrolloff = 10
 vim.opt.sidescroll = 1
+
 -----------------------------------------------------------------------------//
 -- Spelling {{{1
 -----------------------------------------------------------------------------//
@@ -267,15 +282,18 @@ vim.opt.spellsuggest:prepend { 12 }
 vim.opt.spelloptions = 'camel'
 vim.opt.spellcapcheck = '' -- don't check for capital letters at start of sentence
 vim.opt.fileformats = { 'unix', 'mac', 'dos' }
+
 -----------------------------------------------------------------------------//
 -- Mouse {{{1
 -----------------------------------------------------------------------------//
 vim.opt.mouse = 'a'
 vim.opt.mousefocus = true
+
 -----------------------------------------------------------------------------//
 -- these only read ".vim" files
 vim.opt.secure = true -- Disable autocmd etc for project local vimrc files.
 vim.opt.exrc = true -- Allow project local vimrc files example .nvimrc see :h exrc
+
 -----------------------------------------------------------------------------//
 -- Git editor
 -----------------------------------------------------------------------------//
@@ -283,4 +301,5 @@ if fss.executable 'nvr' then
   vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
   vim.env.EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
 end
+
 -- vim:foldmethod=marker

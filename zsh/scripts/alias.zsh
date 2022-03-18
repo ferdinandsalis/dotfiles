@@ -60,15 +60,7 @@ if which kitty >/dev/null; then
   alias icat="kitty +kitten icat"
 fi
 
-if [[ `uname` == 'Linux' ]]; then
-  # https://stackoverflow.com/questions/53298843/how-do-i-install-bundletool
-  alias bundletool='java -jar ~/bundletool-all.jar'
-  alias o='a -e xdg-open' # quick opening files with xdg-open
-  alias open='xdg-open'
-elif [[ `uname` == 'Darwin' ]]; then
-  alias brewfile="cd $DOTFILES/.config/homebrew/ && brew bundle dump --force"
-  alias brewupdate="brew bundle dump --force"
-fi
+alias brewfile="brew bundle dump --global --force"
 
 # Check if main exists and use instead of master
 function git_main_branch() {

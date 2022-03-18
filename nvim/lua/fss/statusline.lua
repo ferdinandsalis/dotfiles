@@ -196,26 +196,21 @@ function _G.__statusline()
   ----------------------------------------------------------------------------//
   local plain = utils.is_plain(ctx)
   local file_modified = utils.modified(ctx, '●')
-  local inactive = vim.api.nvim_get_current_win() ~= curwin
   local focused = vim.g.vim_in_focus or true
-  local minimal = plain or inactive or not focused
   ----------------------------------------------------------------------------//
   -- Setup
   ----------------------------------------------------------------------------//
   local statusline = {}
   local add = make_status(statusline)
 
-  add(
-    {
-      item_if('▌', not minimal, 'StIndicator', { before = '', after = '' }),
-      0,
-    },
-    { utils.spacer(1), 0 }
-  )
+  add({
+    item_if('▌', not plain, 'StIndicator', { before = '', after = '' }),
+    0,
+  }, { utils.spacer(1), 0 })
   ----------------------------------------------------------------------------//
   -- Filename
   ----------------------------------------------------------------------------//
-  local segments = utils.file(ctx, minimal)
+  local segments = utils.file(ctx, plain)
   local dir, parent, file = segments.dir, segments.parent, segments.file
   local dir_item = utils.item(dir.item, dir.hl, dir.opts)
   local parent_item = utils.item(parent.item, parent.hl, parent.opts)
@@ -226,7 +221,7 @@ function _G.__statusline()
   ----------------------------------------------------------------------------//
   -- show a minimal statusline with only the mode and file component
   ----------------------------------------------------------------------------//
-  if minimal then
+  if plain or not focused then
     add(
       { readonly_item, 1 },
       { dir_item, 3 },
@@ -244,8 +239,8 @@ function _G.__statusline()
   local behind = updates.behind and tonumber(updates.behind) or 0
 
   -- Github notifications
-  -- local ghn_ok, ghn = pcall(require, 'github-notifications')
-  -- -- local notifications = ghn_ok and ghn.statusline_notification_count() or ''
+  local ghn_ok, ghn = pcall(require, 'github-notifications')
+  local notifications = ghn_ok and ghn.statusline_notification_count() or ''
 
   -- LSP Diagnostics
   local diagnostics = utils.diagnostic_info(ctx)
@@ -299,29 +294,38 @@ function _G.__statusline()
     -- Right section
     -----------------------------------------------------------------------------//
     { item(utils.lsp_client(), 'StMetadata'), 4 },
+    { item(utils.debugger(), 'StMetadata', { prefix = 'ﴫ' }), 4 },
     {
       item_if(diagnostics.error.count, diagnostics.error, 'StError', {
         prefix = diagnostics.error.sign,
       }),
       1,
     },
-    -- { item(notifications, 'StTitle'), 3 },
+    {
+      item_if(diagnostics.warning.count, diagnostics.warning, 'StWarning', {
+        prefix = diagnostics.warning.sign,
+      }),
+      3,
+    },
+    {
+      item_if(diagnostics.info.count, diagnostics.info, 'StInfo', {
+        prefix = diagnostics.info.sign,
+      }),
+      4,
+    },
+    { item(notifications, 'StTitle'), 3 },
     -- Git Status
     { item(status.head, 'StBlue', { prefix = '', prefix_color = 'StGit' }), 1 },
     -- { item(status.changed, 'StTitle', { prefix = '', prefix_color = 'StWarning' }), 3 },
     -- { item(status.removed, 'StTitle', { prefix = '', prefix_color = 'StError' }), 3 },
     -- { item(status.added, 'StTitle', { prefix = '', prefix_color = 'StGreen' }), 3 },
     {
-      item(
-        ahead,
-        'StTitle',
-        {
-          prefix = '⇡',
-          prefix_color = 'StGreen',
-          after = behind > 0 and '' or ' ',
-          before = '',
-        }
-      ),
+      item(ahead, 'StTitle', {
+        prefix = '⇡',
+        prefix_color = 'StGreen',
+        after = behind > 0 and '' or ' ',
+        before = '',
+      }),
       5,
     },
     {
@@ -366,17 +370,17 @@ local function setup_autocommands()
   fss.augroup('CustomStatusline', {
     {
       event = 'FocusGained',
-      pattern = { '*' },
+      pattern = '*',
       command = 'let g:vim_in_focus = v:true',
     },
     {
       event = 'FocusLost',
-      pattern = { '*' },
+      pattern = '*',
       command = 'let g:vim_in_focus = v:false',
     },
     {
       event = { 'VimEnter', 'ColorScheme' },
-      pattern = { '*' },
+      pattern = '*',
       command = function()
         colors()
       end,
@@ -384,21 +388,21 @@ local function setup_autocommands()
     {
       event = 'BufReadPre',
       once = true,
-      pattern = { '*' },
+      pattern = '*',
       command = function()
         utils.git_updates()
       end,
     },
     {
       event = 'DirChanged',
-      pattern = { '*' },
+      pattern = '*',
       command = function()
         utils.git_update_toggle()
       end,
     },
     {
       event = 'BufWritePre',
-      pattern = { '*' },
+      pattern = '*',
       command = function()
         if not vim.g.is_saving and vim.bo.modified then
           vim.g.is_saving = true
@@ -408,15 +412,9 @@ local function setup_autocommands()
         end
       end,
     },
-    -- NOTE: user autocommands can't be joined into one autocommand
     {
-      event = 'User NeogitStatusRefresh',
-      command = function()
-        utils.git_updates_refresh()
-      end,
-    },
-    {
-      event = 'User FugitiveChanged',
+      event = 'User',
+      pattern = 'NeogitStatusRefresh',
       command = function()
         utils.git_updates_refresh()
       end,

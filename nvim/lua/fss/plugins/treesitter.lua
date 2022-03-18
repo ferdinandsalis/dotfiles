@@ -1,20 +1,6 @@
 return function()
-  local parser_configs = require('nvim-treesitter.parsers').get_parser_configs()
-  parser_configs.norg = {
-    install_info = {
-      url = 'https://github.com/vhyrro/tree-sitter-norg',
-      files = { 'src/parser.c', 'src/scanner.cc' },
-      branch = 'main',
-    },
-  }
-  parser_configs.org = {
-    install_info = {
-      url = 'https://github.com/milisims/tree-sitter-org',
-      revision = 'main',
-      files = { 'src/parser.c', 'src/scanner.cc' },
-    },
-    filetype = 'org',
-  }
+  local parsers = require 'nvim-treesitter.parsers'
+  local rainbow_enabled = {}
 
   require('nvim-treesitter.configs').setup {
     ensure_installed = 'maintained',
@@ -75,7 +61,7 @@ return function()
       },
       lsp_interop = {
         enable = true,
-        border = 'rounded',
+        border = fss.style.border.line,
         peek_definition_code = {
           ['<leader>df'] = '@function.outer',
           ['<leader>dF'] = '@class.outer',
@@ -83,22 +69,16 @@ return function()
       },
     },
     rainbow = {
-      enable = false,
-      disable = {
-        'lua',
-        'json',
-        'javascript',
-        'javascriptreact',
-        'typescript',
-        'typescriptreact',
-      },
-      colors = {
-        'royalblue3',
-        'darkorange3',
-        'seagreen3',
-        'firebrick',
-        'darkorchid3',
-      },
+      enable = true,
+      disable = vim.tbl_filter(function(p)
+        local disable = true
+        for _, lang in pairs(rainbow_enabled) do
+          if p == lang then
+            disable = false
+          end
+        end
+        return disable
+      end, parsers.available_parsers()),
     },
     autopairs = { enable = true },
     query_linter = {

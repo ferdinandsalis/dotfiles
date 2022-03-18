@@ -1,8 +1,8 @@
 return function()
-  local api = vim.api
-  local t = fss.replace_termcodes
   local cmp = require 'cmp'
   local h = require 'fss.highlights'
+  local t = fss.replace_termcodes
+  local line_border = fss.style.border.line
 
   local keyword_fg = h.get_hl('Keyword', 'fg')
   h.plugin(
@@ -16,6 +16,7 @@ return function()
         bold = false,
       },
     },
+    { 'CmpBorderedWindow_Normal', { link = 'NormalFloat' } },
     { 'CmpDocumentationBorder', { link = 'FloatBorder' } },
     { 'CmpItemMenu', { inherit = 'NonText', italic = false, bold = false } },
     { 'CmpItemAbbrMatch', { foreground = keyword_fg } },
@@ -24,60 +25,35 @@ return function()
     { 'CmpBorderedWindow_FloatBorder', { link = 'FloatBorder' } }
   )
 
-  local function feed(key, mode)
-    api.nvim_feedkeys(t(key), mode or '', true)
-  end
-
-  local function get_luasnip()
-    local ok, luasnip = fss.safe_require('luasnip', { silent = true })
-    if not ok then
-      return nil
-    end
-    return luasnip
-  end
-
   local function tab(fallback)
-    local luasnip = get_luasnip()
-    local copilot_keys = vim.fn['copilot#Accept']()
+    local ok, luasnip = fss.safe_require('luasnip', { silent = true })
     if cmp.visible() then
       cmp.select_next_item()
-    elseif copilot_keys ~= '' then -- prioritise copilot over snippets
-      -- Copilot keys do not need to be wrapped in termcodes
-      api.nvim_feedkeys(copilot_keys, 'i', true)
-    elseif luasnip and luasnip.expand_or_locally_jumpable() then
+    elseif ok and luasnip.expand_or_locally_jumpable() then
       luasnip.expand_or_jump()
-    elseif api.nvim_get_mode().mode == 'c' then
-      fallback()
     else
-      feed '<Plug>(Tabout)'
+      fallback()
     end
   end
 
   local function shift_tab(fallback)
-    local luasnip = get_luasnip()
+    local ok, luasnip = fss.safe_require('luasnip', { silent = true })
     if cmp.visible() then
       cmp.select_prev_item()
-    elseif luasnip and luasnip.jumpable(-1) then
+    elseif ok and luasnip.jumpable(-1) then
       luasnip.jump(-1)
-    elseif api.nvim_get_mode().mode == 'c' then
-      fallback()
     else
-      local copilot_keys = vim.fn['copilot#Accept']()
-      if copilot_keys ~= '' then
-        feed(copilot_keys, 'i')
-      else
-        feed '<Plug>(Tabout)'
-      end
+      fallback()
     end
   end
 
   cmp.setup {
     window = {
       completion = {
-        border = 'rounded',
+        border = line_border,
       },
       documentation = {
-        border = 'rounded',
+        border = line_border,
       },
     },
     experimental = {
@@ -89,6 +65,9 @@ return function()
       end,
     },
     mapping = {
+      ['<c-h>'] = cmp.mapping(function()
+        vim.api.nvim_feedkeys(vim.fn['copilot#Accept'](t '<Tab>'), 'n', true)
+      end),
       ['<Tab>'] = cmp.mapping(tab, { 'i', 'c' }),
       ['<S-Tab>'] = cmp.mapping(shift_tab, { 'i', 'c' }),
       ['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
@@ -106,18 +85,17 @@ return function()
         vim_item.kind = fss.style.lsp.kinds[vim_item.kind]
         local name = entry.source.name
         local completion = entry.completion_item.data
-        -- FIXME: automate this using a regex to normalise names
         local menu = ({
           nvim_lsp = '[LSP]',
           nvim_lua = '[Lua]',
           emoji = '[Emoji]',
           path = '[Path]',
           calc = '[Calc]',
+          neorg = '[Neorg]',
+          orgmode = '[Org]',
           cmp_tabnine = '[TN]',
           luasnip = '[Luasnip]',
           buffer = '[Buffer]',
-          fuzzy_buffer = '[Fuzzy Buffer]',
-          fuzzy_path = '[Fuzzy Path]',
           spell = '[Spell]',
           cmdline = '[Command]',
           cmp_git = '[Git]',
@@ -134,7 +112,7 @@ return function()
       end,
     },
     documentation = {
-      border = 'rounded',
+      border = line_border,
     },
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
@@ -142,7 +120,7 @@ return function()
       { name = 'path' },
       { name = 'cmp_tabnine' },
       { name = 'spell' },
-      -- { name = 'cmp_git' },
+      { name = 'cmp_git' },
     }, {
       { name = 'fuzzy_buffer' },
     }),
@@ -156,6 +134,15 @@ return function()
     }),
   })
 
+  cmp.setup.filetype('norg', {
+    sources = cmp.config.sources({
+      { name = 'neorg' },
+    }, {
+      { name = 'buffer' },
+      { name = 'cmp_tabnine' },
+    }),
+  })
+
   local search_sources = {
     sources = cmp.config.sources({
       { name = 'nvim_lsp_document_symbol' },
@@ -163,13 +150,12 @@ return function()
       { name = 'fuzzy_buffer' },
     }),
   }
+
   cmp.setup.cmdline('/', search_sources)
   cmp.setup.cmdline('?', search_sources)
   cmp.setup.cmdline(':', {
-    sources = cmp.config.sources({
-      { name = 'fuzzy_path' },
-    }, {
-      { name = 'cmdline' },
-    }),
+    sources = cmp.config.sources {
+      { name = 'cmdline', keyword_pattern = [=[[^[:blank:]\!]*]=] },
+    },
   })
 end

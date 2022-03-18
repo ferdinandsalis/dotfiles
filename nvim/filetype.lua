@@ -14,6 +14,7 @@ vim.filetype.add {
   filename = {
     ['.gitignore'] = 'conf',
     ['.envrc'] = 'env',
+    ['Brewfile'] = 'ruby',
   },
   pattern = {
     ['*.env.*'] = 'env',

@@ -77,13 +77,10 @@ nnoremap(']<space>', [[<cmd>put =repeat(nr2char(10), v:count1)<cr>]])
 xnoremap('p', 'pgvy')
 -- search visual selection
 vnoremap('//', [[y/<C-R>"<CR>]])
-
 -- Credit: Justinmk
 nnoremap('g>', [[<cmd>set nomore<bar>40messages<bar>set more<CR>]])
-
 -- Enter key should repeat the last macro recorded or just act as enter
 nnoremap('<leader><CR>', [[empty(&buftype) ? '@@' : '<CR>']], { expr = true })
-
 -- Evaluates whether there is a fold on the current line if so unfold it else return a normal space
 nnoremap('<space><space>', [[@=(foldlevel('.')?'za':"\<Space>")<CR>]])
 -- Refocus folds
@@ -116,23 +113,8 @@ inoremap('<C-u>', '<cmd>norm!gUiw`]a<CR>')
 ------------------------------------------------------------------------------
 -- Moving lines/visual block
 ------------------------------------------------------------------------------
--- source: https://www.reddit.com/r/vim/comments/i8b5z1/is_there_a_more_elegant_way_to_move_lines_than_eg/
-if has 'mac' then
-  -- Allow using alt in macOS without enabling “Use Option as Meta key”
-  nmap('¬', '<a-l>')
-  nmap('˙', '<a-h>')
-  nmap('∆', '<a-j>')
-  nmap('˚', '<a-k>')
-  nnoremap('∆', '<cmd>move+<CR>==')
-  nnoremap('˚', '<cmd>move-2<CR>==')
-  xnoremap('˚', ":move-2<CR>='[gv")
-  xnoremap('∆', ":move'>+<CR>='[gv")
-else
-  nnoremap('<a-k>', '<cmd>move-2<CR>==')
-  nnoremap('<a-j>', '<cmd>move+<CR>==')
-  xnoremap('<a-k>', ":move-2<CR>='[gv")
-  xnoremap('<a-j>', ":move'>+<CR>='[gv")
-end
+nnoremap('<a-k>', '<cmd>move-2<CR>==')
+nnoremap('<a-j>', '<cmd>move+<CR>==')
 ----------------------------------------------------------------------------------
 -- Windows
 ----------------------------------------------------------------------------------
@@ -140,6 +122,7 @@ end
 nnoremap('<localleader>wh', '<C-W>t <C-W>K')
 -- Change two vertically split windows to horizontal splits
 nnoremap('<localleader>wv', '<C-W>t <C-W>H')
+----------------------------------------------------------------------------------
 -- equivalent to gf but opens the window in a vertical split
 -- vim doesn't have a native mapping for this as <C-w>f normally
 -- opens a horizontal split
@@ -148,17 +131,6 @@ nnoremap('<C-w>f', '<C-w>vgf')
 vnoremap('*', [[y/<C-R>"<CR>]])
 -- make . work with visually selected lines
 vnoremap('.', ':norm.<CR>')
-
--- Change two horizontally split windows to vertical splits
-nnoremap('<localleader>wh', '<C-W>t <C-W>K')
-
--- Change two vertically split windows to horizontal splits
-nnoremap('<localleader>wv', '<C-W>t <C-W>H')
-
--- nnoremap('<C-Left>', '<C-w><')
--- nnoremap("<C-j>", "<C-w>j")
--- nnoremap("<C-k>", "<C-w>k")
--- nnoremap('<C-Right>', '<C-w>>')
 
 ----------------------------------------------------------------------------------
 -- Operators
@@ -184,12 +156,6 @@ nnoremap(
   [[:e <C-R>=expand("%:p:h") . "/" <CR>]],
   { silent = false }
 )
---open a new file in the same directory
-nnoremap(
-  '<leader>ns',
-  [[:vsp <C-R>=expand("%:p:h") . "/" <CR>]],
-  { silent = false }
-)
 --Open command line window - :<c-f>
 nnoremap(
   '<localleader>l',
@@ -207,7 +173,6 @@ end
 -- Open Common files
 -----------------------------------------------------------------------------//
 nnoremap('<leader>ez', ':e ~/.zshrc<cr>')
-nnoremap('<leader>et', ':e ~/.tmux.conf<cr>')
 -----------------------------------------------------------------------------//
 -- Arrows
 -----------------------------------------------------------------------------//
@@ -254,10 +219,7 @@ cnoremap('/', [[getcmdtype() == "/" ? "\/" : "/"]], { expr = true })
 -----------------------------------------------------------------------------//
 -- Save
 -----------------------------------------------------------------------------//
--- NOTE: this uses write specifically because we need to trigger a filesystem event
--- even if the file isn't change so that things like hot reload work
 nnoremap('<c-s>', ':silent! write<CR>')
-
 -- Write and quit all files, ZZ is NOT equivalent to this
 nnoremap('qa', '<cmd>qa<CR>')
 ------------------------------------------------------------------------------
@@ -327,11 +289,10 @@ nnoremap(
 -- This line allows the current file to source the vimrc allowing me use bindings as they're added
 nnoremap(
   '<leader>sv',
-  [[<Cmd>source $MYVIMRC<cr> <bar> :lua vim.notify('Sourced init.vim')<cr>]]
+  [[<Cmd>source $MYVIMRC<cr> <bar> :lua vim.notify('Sourced init.lua')<cr>]]
 )
------------------------------------------------------------------------------//
+
 -- Quotes
------------------------------------------------------------------------------//
 nnoremap([[<leader>"]], [[ciw"<c-r>""<esc>]])
 nnoremap('<leader>`', [[ciw`<c-r>"`<esc>]])
 nnoremap("<leader>'", [[ciw'<c-r>"'<esc>]])
@@ -340,6 +301,7 @@ nnoremap('<leader>}', [[ciw{<c-r>"}<esc>]])
 
 -- Map Q to replay q register
 nnoremap('Q', '@q')
+
 -----------------------------------------------------------------------------//
 -- Multiple Cursor Replacement
 -- http://www.kevinli.co/posts/2017-01-19-multiple-cursors-in-500-bytes-of-vimscript/
@@ -358,23 +320,24 @@ function fss.mappings.setup_CR()
   )
 end
 
-vim.g.mc = [[y/\\V\<C-r>=escape(@\", '/')\<CR>\<CR>]]
+vim.g.mc = fss.replace_termcodes [[y/\V<C-r>=escape(@", '/')<CR><CR>]]
 xnoremap('cn', [[g:mc . "``cgn"]], { expr = true, silent = true })
 xnoremap('cN', [[g:mc . "``cgN"]], { expr = true, silent = true })
-nnoremap('cq', [[:lua fss.mappings.setup_CR()<CR>*``qz]])
-nnoremap('cQ', [[:lua fss.mappings.setup_CR()<CR>#``qz]])
+nnoremap('cq', [[:\<C-u>call v:lua.fss.mappings.setup_CR()<CR>*``qz]])
+nnoremap('cQ', [[:\<C-u>call v:lua.fss.mappings.setup_CR()<CR>#``qz]])
 xnoremap(
   'cq',
-  [[":\<C-u>lua fss.mappings.setup_CR()\<CR>" . "gv" . g:mc . "``qz"]],
+  [[":\<C-u>call v:lua.fss.mappings.setup_CR()<CR>gv" . g:mc . "``qz"]],
   { expr = true }
 )
 xnoremap(
   'cQ',
-  [[":\<C-u>lua fss.mappings.setup_CR()\<CR>" . "gv" . substitute(g:mc, '/', '?', 'g') . "``qz"]],
+  [[":\<C-u>call v:lua.fss.mappings.setup_CR()<CR>gv" . substitute(g:mc, '/', '?', 'g') . "``qz"]],
   { expr = true }
 )
 
 nnoremap('gf', '<Cmd>e <cfile><CR>')
+
 -----------------------------------------------------------------------------//
 -- Command mode related
 -----------------------------------------------------------------------------//
@@ -462,6 +425,7 @@ xnoremap(
   '<leader>g',
   [[:call v:lua.fss.mappings.grep_operator(visualmode())<cr>]]
 )
+
 ---------------------------------------------------------------------------------
 -- Toggle list
 ---------------------------------------------------------------------------------
@@ -507,51 +471,76 @@ inoremap('<s-tab>', [[pumvisible() ? "\<C-p>" : "\<S-Tab>"]], { expr = true })
 -----------------------------------------------------------------------------//
 -- Commands
 -----------------------------------------------------------------------------//
-command {
-  'ToggleBackground',
-  function()
-    vim.o.background = vim.o.background == 'dark' and 'light' or 'dark'
-  end,
-}
+command('ToggleBackground', function()
+  vim.o.background = vim.o.background == 'dark' and 'light' or 'dark'
+end)
+
 ------------------------------------------------------------------------------
-command { 'Todo', [[noautocmd silent! grep! 'TODO\|FIXME\|BUG\|HACK' | copen]] }
-command {
-  'ReloadModule',
-  function(args)
-    require('plenary.reload').reload_module(args)
-  end,
+command('Todo', [[noautocmd silent! grep! 'TODO\|FIXME\|BUG\|HACK' | copen]])
+command('ReloadModule', function(args)
+  require('plenary.reload').reload_module(args)
+end, {
   nargs = 1,
-}
-command {
-  'TabMessage',
-  [[call utils#tab_message(<q-args>)]],
-  nargs = '+',
-  types = { '-complete=command' },
-}
+})
 -- source https://superuser.com/a/540519
 -- write the visual selection to the filename passed in as a command argument then delete the
 -- selection placing into the black hole register
-command {
+command(
   'MoveWrite',
   [[<line1>,<line2>write<bang> <args> | <line1>,<line2>delete _]],
-  types = { '-bang', '-range', '-complete=file' },
-  nargs = 1,
-}
-command {
+  {
+    nargs = 1,
+    bang = true,
+    range = true,
+    complete = 'file',
+  }
+)
+command(
   'MoveAppend',
   [[<line1>,<line2>write<bang> >> <args> | <line1>,<line2>delete _]],
-  types = { '-bang', '-range', '-complete=file' },
-  nargs = 1,
-}
-command { 'AutoResize', [[call utils#auto_resize(<args>)]], { '-nargs=?' } }
+  {
+    nargs = 1,
+    bang = true,
+    range = true,
+    complete = 'file',
+  }
+)
 
-command {
-  'LuaInvalidate',
-  function(pattern)
-    require('fss.utils').invalidate(pattern, true)
-  end,
-  nargs = 1,
-}
+-----------------------------------------------------------------------------//
+-- Autoresize
+-----------------------------------------------------------------------------//
+-- Auto resize Vim splits to active split to 70% -
+-- https://stackoverflow.com/questions/11634804/vim-auto-resize-focused-window
+
+local auto_resize = function()
+  local auto_resize_on = false
+  return function(args)
+    if not auto_resize_on then
+      local factor = args and tonumber(args) or 70
+      local fraction = factor / 10
+      -- NOTE: mutating &winheight/&winwidth are key to how
+      -- this functionality works, the API fn equivalents do
+      -- not work the same way
+      vim.cmd(fmt('let &winheight=&lines * %d / 10 ', fraction))
+      vim.cmd(fmt('let &winwidth=&columns * %d / 10 ', fraction))
+      auto_resize_on = true
+      vim.notify 'Auto resize ON'
+    else
+      vim.cmd 'let &winheight=30'
+      vim.cmd 'let &winwidth=30'
+      vim.cmd 'wincmd ='
+      auto_resize_on = false
+      vim.notify 'Auto resize OFF'
+    end
+  end
+end
+command('AutoResize', auto_resize(), { nargs = '?' })
+-----------------------------------------------------------------------------//
+
+command('LuaInvalidate', function(pattern)
+  require('fss.utils').invalidate(pattern, true)
+end, { nargs = 1 })
+
 -----------------------------------------------------------------------------//
 -- References
 -----------------------------------------------------------------------------//

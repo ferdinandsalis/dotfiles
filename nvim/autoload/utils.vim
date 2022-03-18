@@ -1,47 +1,6 @@
-function! utils#tab_zoom()
-  if winnr('$') > 1
-    tab split
-  elseif len(filter(map(range(tabpagenr('$')), 'tabpagebuflist(v:val + 1)'),
-        \ 'index(v:val, '.bufnr('').') >= 0')) > 1
-    tabclose
-  endif
-endfunction
-
-"
-" Verbatim matching for *.
-"
-function! utils#search() abort
-  let regsave = @@
-  normal! gvy
-  let @/ = '\V' . substitute(escape(@@, '\'), '\n', '\\n', 'g')
-  let @@ = regsave
-endfunction
-""---------------------------------------------------------------------------//
-" Windows
-""---------------------------------------------------------------------------//
-" Auto resize Vim splits to active split to 70% -
-" https://stackoverflow.com/questions/11634804/vim-auto-resize-focused-window
-
-let s:auto_resize_on = 0
-
-function! utils#auto_resize(...)
-  if s:auto_resize_on == 0
-    let factor = get(a:, '1', 70)
-    let fraction = factor / 10
-    let &winheight = &lines * fraction / 10
-    let &winwidth = &columns * fraction / 10
-    let s:auto_resize_on = 1
-    echom 'Auto resize ON'
-  else
-    let &winheight = 30
-    let &winwidth = 30
-    wincmd =
-    let s:auto_resize_on = 0
-    echom 'Auto resize OFF'
-  endif
-endfunction
-
-"==========[ ModifyLineEndDelimiter ]==========
+"-------------------------------------------------------------------------------
+" ModifyLineEndDelimiter
+"-------------------------------------------------------------------------------
 " Description:
 "	This function takes a delimiter character and:
 "	- removes that character from the end of the line if the character at the end
@@ -55,7 +14,7 @@ endfunction
 " Delimiters:
 " - ","
 " - ";"
-"==========================================
+"-------------------------------------------------------------------------------
 function! utils#modify_line_end_delimiter(character)
   let line_modified = 0
   let line = getline('.')
@@ -95,20 +54,6 @@ function! utils#modify_line_end_delimiter(character)
   call setline('.', newline)
 endfunction
 "}}}
-
-function! utils#tab_message(cmd)
-  redir => message
-  silent execute a:cmd
-  redir END
-  if empty(message)
-    echoerr "no output"
-  else
-    " use "tabnew" instead of "new" below if you prefer tabs instead of split windows
-    vnew
-    setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified
-    silent put=message
-  endif
-endfunction
 
 " NOTE: we define this outside of our ftplugin/qf.vim
 " since that is loaded on each run of our qf window

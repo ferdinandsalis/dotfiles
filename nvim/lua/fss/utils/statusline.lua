@@ -5,7 +5,6 @@ local api = vim.api
 local expand = fn.expand
 local strwidth = fn.strwidth
 local fnamemodify = fn.fnamemodify
-local contains = vim.tbl_contains
 local fmt = string.format
 
 local M = {}
@@ -19,30 +18,26 @@ local function get_toggleterm_name(_, buf)
   )
 end
 
-local plain_filetypes = {
-  'help',
-  'ctrlsf',
-  'minimap',
-  'Trouble',
-  'tsplayground',
-  'coc-explorer',
-  'NvimTree',
-  'undotree',
-  'neoterm',
-  'vista',
-  'fugitive',
-  'startify',
-  'vimwiki',
-  'markdown',
-  'NeogitStatus',
-}
-
-local plain_buftypes = {
-  'terminal',
-  'quickfix',
-  'nofile',
-  'nowrite',
-  'acwrite',
+local plain = {
+  filetypes = {
+    'help',
+    'ctrlsf',
+    'minimap',
+    'Trouble',
+    'tsplayground',
+    'NvimTree',
+    'undotree',
+    'fugitive',
+    'markdown',
+    'NeogitStatus',
+  },
+  buftypes = {
+    'terminal',
+    'quickfix',
+    'nofile',
+    'nowrite',
+    'acwrite',
+  },
 }
 
 local exceptions = {
@@ -161,10 +156,16 @@ function M.prioritize(statusline, space, length)
   return M.prioritize(statusline, space, length - lowest.length)
 end
 
+local function matches(str, list)
+  return #vim.tbl_filter(function(item)
+    return item == str or string.match(str, item)
+  end, list) > 0
+end
+
 --- @param ctx table
 function M.is_plain(ctx)
-  return contains(plain_filetypes, ctx.filetype)
-    or contains(plain_buftypes, ctx.buftype)
+  return matches(ctx.filetype, plain.filetypes)
+    or matches(ctx.buftype, plain.buftypes)
     or ctx.preview
 end
 
@@ -421,7 +422,7 @@ function M.diagnostic_info(context)
   if vim.tbl_isempty(vim.lsp.buf_get_clients(buf)) then
     return { error = {}, warning = {}, info = {} }
   end
-  local icons = fss.style.icons
+  local icons = fss.style.icons.lsp
   return {
     error = { count = get_count(buf, 'Error'), sign = icons.error },
     warning = { count = get_count(buf, 'Warning'), sign = icons.warn },
@@ -438,6 +439,13 @@ end
 ---@return string?
 function M.current_function()
   return vim.b.lsp_current_function
+end
+
+function M.debugger()
+  if not package.loaded['dap'] then
+    return ''
+  end
+  return require('dap').status()
 end
 
 local function printf(format, current, total)
@@ -504,13 +512,16 @@ local function mode_highlight(mode)
   end
 end
 
+-- FIXME: operator pending mode doesn't show up
 function M.mode()
-  local current_mode = vim.fn.mode()
+  local current_mode = api.nvim_get_mode().mode
   local hl = mode_highlight(current_mode)
 
   local mode_map = {
     ['n'] = 'NORMAL',
-    ['no'] = 'N·OPERATOR PENDING ',
+    ['no'] = 'N·OPERATOR PENDING',
+    ['nov'] = 'N·OPERATOR BLOCK',
+    ['noV'] = 'N·OPERATOR LINE',
     ['v'] = 'VISUAL',
     ['V'] = 'V·LINE',
     [''] = 'V·BLOCK',

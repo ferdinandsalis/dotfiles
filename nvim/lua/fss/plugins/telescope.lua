@@ -3,7 +3,9 @@ return function()
   local actions = require 'telescope.actions'
   local layout_actions = require 'telescope.actions.layout'
   local themes = require 'telescope.themes'
+  local icons = fss.style.icons
 
+  local P = fss.style.palette
   local H = require 'fss.highlights'
 
   H.plugin(
@@ -14,7 +16,10 @@ return function()
     { 'TelescopeResultsNormal', { link = 'FloatNormal' } },
     { 'TelescopePreviewNormal', { link = 'FloatNormal' } },
     { 'TelescopePromptPrefix', { link = 'Statement' } },
-    { 'TelescopeTitle', { inherit = 'Normal', bold = true } },
+    {
+      'TelescopeTitle',
+      { inherit = 'Normal', background = P.bg_highlight, bold = true },
+    },
     {
       'TelescopeSelectionCaret',
       {
@@ -27,10 +32,19 @@ return function()
   local function get_border(opts)
     return vim.tbl_deep_extend('force', opts or {}, {
       borderchars = {
-        { '─', '│', '─', '│', '┌', '┐', '┘', '└' },
-        prompt = { '─', '│', ' ', '│', '┌', '┐', '│', '│' },
-        results = { '─', '│', '─', '│', '├', '┤', '┘', '└' },
-        preview = { '─', '│', '─', '│', '┌', '┐', '┘', '└' },
+        { '─', '│', '─', '│', '╭', '╮', '╯', '╰' },
+        prompt = { '─', '│', ' ', '│', '╭', '╮', '│', '│' },
+        results = { '─', '│', '─', '│', '├', '┤', '╯', '╰' },
+        preview = {
+          '─',
+          '│',
+          '─',
+          '│',
+          '╭',
+          '╮',
+          '╯',
+          '╰',
+        },
       },
     })
   end
@@ -44,8 +58,8 @@ return function()
   telescope.setup {
     defaults = {
       set_env = { ['TERM'] = vim.env.TERM },
-      borderchars = { '─', '│', '─', '│', '┌', '┐', '┘', '└' },
-      prompt_prefix = ' ',
+      borderchars = { '─', '│', '─', '│', '╭', '╮', '╯', '╰' },
+      prompt_prefix = icons.misc.telescope .. ' ',
       selection_caret = '» ',
       mappings = {
         i = {
@@ -72,21 +86,8 @@ return function()
         '%.ttf',
         '%.DS_Store',
       },
-      path_display = { 'smart', 'absolute', 'truncate' },
-      layout_strategy = 'flex',
-      layout_config = {
-        horizontal = {
-          preview_width = 0.45,
-        },
-        cursor = { -- FIXME: this does not change the size of the cursor layout
-          width = 0.4,
-          height = function(self, _, max_lines)
-            local results = #self.finder.results
-            return (results <= max_lines and results or max_lines - 10) + 4
-          end,
-        },
-      },
-      winblend = 3,
+      path_display = { 'truncate', 'absolute' },
+      winblend = fss.style.float.blend,
       history = {
         path = vim.fn.stdpath 'data' .. '/telescope_history.sqlite3',
       },
@@ -132,8 +133,9 @@ return function()
       colorscheme = {
         enable_preview = true,
       },
-      find_files = {
+      find_files = dropdown {
         hidden = true,
+        previewer = false,
       },
       git_files = dropdown {
         previewer = false,
@@ -170,7 +172,7 @@ return function()
 
   local function nvim_config()
     builtins.find_files {
-      prompt_title = '~ nvim config ~',
+      prompt_title = 'Nvim Config',
       cwd = vim.fn.stdpath 'config',
       file_ignore_patterns = { '.git/.*', 'dotbot/.*' },
     }
@@ -178,15 +180,15 @@ return function()
 
   local function dotfiles()
     builtins.find_files {
-      prompt_title = '~ dotfiles ~',
+      prompt_title = 'Dotfiles',
       cwd = vim.g.dotfiles,
     }
   end
 
   local function orgfiles()
     builtins.find_files {
-      prompt_title = 'Org',
-      cwd = vim.fn.expand '~/Desktop/org',
+      prompt_title = 'Neorg',
+      cwd = vim.fn.expand '$SYNC_DIR/neorg',
     }
   end
 
@@ -213,14 +215,20 @@ return function()
     }
   end
 
+  local function dash()
+    require('dash').search()
+  end
+
   require('which-key').register {
-    ['<c-p>'] = { project_files, 'telescope: find files' },
+    ['<c-p>'] = { builtins.find_files, 'telescope: find files' },
     ['<leader>f'] = {
       name = '+telescope',
       a = { builtins.builtin, 'builtins' },
       b = { builtins.current_buffer_fuzzy_find, 'current buffer fuzzy find' },
       d = { dotfiles, 'dotfiles' },
+      D = { dash, 'dash' },
       f = { builtins.find_files, 'find files' },
+      p = { project_files, 'project files' },
       n = { gh_notifications, 'notifications' },
       g = {
         name = '+git',
@@ -232,7 +240,7 @@ return function()
       h = { frecency, 'history' },
       c = { nvim_config, 'nvim config' },
       o = { builtins.buffers, 'buffers' },
-      p = { installed_plugins, 'plugins' },
+      P = { installed_plugins, 'plugins' },
       O = { orgfiles, 'org files' },
       R = { builtins.reloader, 'module reloader' },
       r = { builtins.resume, 'resume last picker' },

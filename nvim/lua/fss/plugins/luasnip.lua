@@ -1,9 +1,8 @@
 return function()
   local ls = require 'luasnip'
-  local snippet = ls.snippet
-  local text = ls.text_node
-  local insert = ls.insert_node
   local types = require 'luasnip.util.types'
+  local extras = require 'luasnip.extras'
+  local fmt = require('luasnip.extras.fmt').fmt
 
   ls.config.set_config {
     history = false,
@@ -12,59 +11,58 @@ return function()
     ext_opts = {
       [types.choiceNode] = {
         active = {
+          hl_mode = 'combine',
           virt_text = { { '●', 'Operator' } },
         },
       },
       [types.insertNode] = {
         active = {
+          hl_mode = 'combine',
           virt_text = { { '●', 'Type' } },
         },
       },
     },
     enable_autosnippets = true,
-  }
-  local opts = { expr = true }
-  fss.imap(
-    '<c-j>',
-    "luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<c-j>'",
-    opts
-  )
-  fss.imap(
-    '<c-k>',
-    "luasnip#jumpable(-1) ? '<Plug>luasnip-jump-prev': '<c-k>'",
-    opts
-  )
-  fss.snoremap('<c-j>', function()
-    ls.jump(1)
-  end)
-  fss.snoremap('<c-k>', function()
-    ls.jump(-1)
-  end)
-
-  ls.snippets = {
-    lua = {
-      snippet({
-        trig = 'use',
-        name = 'packer use',
-        dscr = {
-          'packer use plugin block',
-          'e.g.',
-          "use {'author/plugin'}",
-        },
-      }, {
-        text "use { '",
-        insert(1, 'author/plugin'),
-        text "' ",
-        insert(2, {
-          ', config = function()',
-          '',
-          'end',
-        }),
-        text '}',
-      }),
+    snip_env = {
+      fmt = fmt,
+      m = extras.match,
+      t = ls.text_node,
+      f = ls.function_node,
+      c = ls.choice_node,
+      d = ls.dynamic_node,
+      i = ls.insert_node,
+      snippet = ls.snippet,
     },
   }
 
-  -- NOTE: load external snippets last so they are not overruled by ls.snippets
-  require('luasnip/loaders/from_vscode').load { paths = './snippets/textmate' }
+  fss.command('LuaSnipEdit', function()
+    require('luasnip.loaders.from_lua').edit_snippet_files()
+  end)
+
+  -- <c-l> is selecting within a list of options.
+  vim.keymap.set({ 's', 'i' }, '<c-l>', function()
+    if ls.choice_active() then
+      ls.change_choice(1)
+    end
+  end)
+
+  vim.keymap.set({ 's', 'i' }, '<c-j>', function()
+    if ls.expand_or_jumpable() then
+      ls.expand_or_jump()
+    end
+  end)
+
+  -- <C-K> is easier to hit but swallows the digraph key
+  vim.keymap.set({ 's', 'i' }, '<c-b>', function()
+    if ls.jumpable(-1) then
+      ls.jump(-1)
+    end
+  end)
+
+  require('luasnip.loaders.from_lua').lazy_load {
+    paths = './snippets/luasnip',
+  }
+  require('luasnip.loaders.from_vscode').lazy_load {
+    paths = './snippets/textmate',
+  }
 end

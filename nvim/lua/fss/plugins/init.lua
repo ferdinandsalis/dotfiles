@@ -34,6 +34,7 @@ packer.startup {
 
     use_rocks 'penlight'
 
+    -- Change the current working directory automatically
     use {
       'ahmedkhalf/project.nvim',
       disable = true,
@@ -86,6 +87,14 @@ packer.startup {
 
     use 'nvim-lua/plenary.nvim'
 
+    use {
+      'mrjones2014/dash.nvim',
+      command = 'Dash',
+      module = 'dash',
+      run = 'make install',
+      after = 'telescope.nvim',
+    }
+
     use 'kyazdani42/nvim-web-devicons'
 
     use {
@@ -114,7 +123,15 @@ packer.startup {
         })
       end,
       config = function()
-        vim.g['test#strategy'] = 'kitty'
+        -- vim.g['test#strategy'] = 'kitty'
+        vim.cmd [[
+          function! ToggleTermStrategy(cmd) abort
+            call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
+          endfunction
+          let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
+        ]]
+        vim.g['test#strategy'] = 'toggleterm'
+        vim.g['test#javascript#runner'] = 'jest'
         fss.nnoremap('<localleader>tf', '<cmd>TestFile<CR>')
         fss.nnoremap('<localleader>tn', '<cmd>TestNearest<CR>')
         fss.nnoremap('<localleader>ts', '<cmd>TestSuite<CR>')
@@ -125,9 +142,15 @@ packer.startup {
       'rcarriga/vim-ultest',
       cmd = 'Ultest',
       wants = 'vim-test',
-      event = { 'BufEnter *_test.*,*_spec.*' },
+      event = { 'BufEnter *_test.*,*_spec.*,*.test.*' },
       requires = { 'vim-test' },
       run = ':UpdateRemotePlugins',
+      setup = function()
+        vim.g.ultest_use_pty = 1
+        vim.g.ultest_virtual_text = 0
+        vim.g.ultest_summary_width = 80
+        vim.g.ultest_running_sign = '⭘'
+      end,
       config = function()
         local test_patterns = { '*.test.*', '*_test.*', '*_spec.*' }
         fss.augroup('UltestTests', {
@@ -145,6 +168,25 @@ packer.startup {
           label = 'ultest: previous failure',
           buffer = 0,
         })
+
+        local H = require 'fss.highlights'
+        local P = fss.style.palette
+        H.plugin(
+          'ultest',
+          { 'UltestSummaryInfo', { foreground = P.blue, italic = true } },
+          {
+            'UltestSummaryNamespace',
+            { foreground = P.magenta, italic = false, bold = true },
+          },
+          { 'UltestSummaryFile', { foreground = P.blue, italic = true } },
+          { 'UltestFail', { foreground = P.red } },
+          { 'UltestPass', { foreground = P.green } },
+          { 'UltestRunning', { foreground = P.yellow } }
+        )
+
+        fss.nnoremap('<localleader><localleader>', '<cmd>Ultest<CR>')
+        fss.nnoremap('<localleader>un', '<cmd>UltestNearest<CR>')
+        fss.nnoremap('<localleader>us', '<cmd>UltestSummary<CR>')
       end,
     }
 
@@ -161,13 +203,8 @@ packer.startup {
     }
 
     use {
-      'knubie/vim-kitty-navigator',
-      run = 'cp ./*.py ~/.config/kitty/',
-    }
-
-    use {
       'rmagatti/session-lens',
-      disable = true,
+      disable = false,
       after = 'telescope.nvim',
       config = function()
         local session_lens = require 'session-lens'
@@ -187,7 +224,8 @@ packer.startup {
         require('toggleterm').setup {
           open_mapping = [[<c-\>]],
           shade_filetypes = { 'none' },
-          direction = 'vertical',
+          direction = 'horizontal',
+          insert_mappings = false,
           start_in_insert = true,
           float_opts = { border = 'curved', winblend = 3 },
           size = function(term)
@@ -198,47 +236,12 @@ packer.startup {
             end
           end,
         }
-
-        local float_handler = function(term)
-          if vim.fn.mapcheck('jk', 't') ~= '' then
-            vim.api.nvim_buf_del_keymap(term.bufnr, 't', 'jk')
-            vim.api.nvim_buf_del_keymap(term.bufnr, 't', '<esc>')
-          end
-        end
-
-        local Terminal = require('toggleterm.terminal').Terminal
-
-        local lazygit = Terminal:new {
-          cmd = 'lazygit',
-          dir = 'git_dir',
-          hidden = true,
-          direction = 'float',
-          on_open = float_handler,
-        }
-
-        local htop = Terminal:new {
-          cmd = 'htop',
-          hidden = 'true',
-          direction = 'float',
-          on_open = float_handler,
-        }
-
-        fss.command {
-          'Htop',
-          function()
-            htop:toggle()
-          end,
-        }
-
-        require('which-key').register {
-          ['<leader>lg'] = {
-            function()
-              lazygit:toggle()
-            end,
-            'toggleterm: toggle lazygit',
-          },
-        }
       end,
+    }
+
+    use {
+      'knubie/vim-kitty-navigator',
+      run = 'cp ./*.py ~/.config/kitty/',
     }
 
     use 'tpope/vim-eunuch'
@@ -261,6 +264,7 @@ packer.startup {
 
     -- sets searchable path for filetypes like go so 'gf' works
     use 'tpope/vim-apathy'
+    use { 'tpope/vim-projectionist', config = conf 'vim-projectionist' }
 
     -- }}}
     -----------------------------------------------------------------------------//
@@ -269,17 +273,35 @@ packer.startup {
 
     use {
       'mfussenegger/nvim-dap',
-      module = 'dap',
-      keys = { '<localleader>dc' },
-      wants = 'nvim-dap-ui',
       setup = conf('dap').setup,
       config = conf('dap').config,
       requires = {
         {
           'rcarriga/nvim-dap-ui',
-          opt = true,
+          after = 'nvim-dap',
           config = function()
             require('dapui').setup()
+            fss.nnoremap('<localleader>duc', function()
+              require('dapui').close()
+            end, 'dap-ui: close')
+            fss.nnoremap('<localleader>dut', function()
+              require('dapui').toggle()
+            end, 'dap-ui: toggle')
+
+            -- NOTE: this opens dap UI automatically when dap starts
+            local dap = require 'dap'
+            dap.listeners.before.event_terminated['dapui_config'] = function()
+              require('dapui').close()
+            end
+            dap.listeners.before.event_exited['dapui_config'] = function()
+              require('dapui').close()
+            end
+          end,
+        },
+        {
+          'theHamsta/nvim-dap-virtual-text',
+          config = function()
+            require('nvim-dap-virtual-text').setup()
           end,
         },
       },
@@ -287,7 +309,11 @@ packer.startup {
 
     use 'folke/lua-dev.nvim'
 
-    use { 'neovim/nvim-lspconfig', config = conf 'lspconfig' }
+    use {
+      'neovim/nvim-lspconfig',
+      config = conf 'lspconfig',
+    }
+
     use {
       'williamboman/nvim-lsp-installer',
       requires = 'nvim-lspconfig',
@@ -305,10 +331,18 @@ packer.startup {
       end,
     }
 
+    -- Shows a spinner for the lsp status
     use {
       'j-hui/fidget.nvim',
       config = function()
-        require('fidget').setup {}
+        require('fidget').setup {
+          text = {
+            spinner = 'moon',
+          },
+          window = {
+            blend = 0,
+          },
+        }
       end,
     }
 
@@ -347,14 +381,13 @@ packer.startup {
 
     use {
       'ray-x/lsp_signature.nvim',
-      disable = false,
       config = function()
         require('lsp_signature').setup {
           bind = true,
           fix_pos = false,
           auto_close_after = 15, -- close after 15 seconds
           hint_enable = false,
-          handler_opts = { border = 'rounded' },
+          handler_opts = { border = fss.style.border.line },
         }
       end,
     }
@@ -362,7 +395,6 @@ packer.startup {
     use {
       'hrsh7th/nvim-cmp',
       module = 'cmp',
-      branch = 'dev',
       event = 'InsertEnter',
       requires = {
         { 'hrsh7th/cmp-nvim-lsp' },
@@ -471,6 +503,7 @@ packer.startup {
 
     use {
       'narutoxy/dim.lua',
+      disable = true,
       requires = {
         'nvim-treesitter/nvim-treesitter',
         'neovim/nvim-lspconfig',
@@ -490,12 +523,25 @@ packer.startup {
       'nvim-treesitter/nvim-treesitter',
       run = ':TSUpdate',
       config = conf 'treesitter',
-      local_path = 'contributing',
+      wants = { 'null-ls.nvim', 'lua-dev.nvim' },
       requires = {
+        { 'p00f/nvim-ts-rainbow', after = 'nvim-treesitter' },
+        {
+          'nvim-treesitter/nvim-treesitter-textobjects',
+          after = 'nvim-treesitter',
+        },
         {
           'nvim-treesitter/playground',
-          cmd = 'TSPlaygroundToggle',
-          module = 'nvim-treesitter-playground',
+          keys = '<leader>E',
+          cmd = { 'TSPlaygroundToggle', 'TSHighlightCapturesUnderCursor' },
+          setup = function()
+            require('which-key').register {
+              ['<leader>E'] = 'treesitter: highlight cursor group',
+            }
+          end,
+          config = function()
+            fss.nnoremap('<leader>E', '<Cmd>TSHighlightCapturesUnderCursor<CR>')
+          end,
         },
       },
     }
@@ -504,7 +550,6 @@ packer.startup {
       requires = 'nvim-treesitter',
     }
     use 'RRethy/nvim-treesitter-textsubjects'
-    use { 'p00f/nvim-ts-rainbow', disable = true, requires = 'nvim-treesitter' }
 
     -- Use <Tab> to escape from pairs such as ""|''|() etc.
     use {
@@ -654,14 +699,36 @@ packer.startup {
 
     use {
       'stevearc/dressing.nvim',
+      -- NOTE: Defer loading till telescope is loaded
+      -- this implicitly loads telescope so needs to be delayed
+      after = 'telescope.nvim',
       config = function()
+        require('fss.highlights').plugin(
+          'dressing',
+          { 'FloatTitle', { inherit = 'Normal', bold = true } }
+        )
         require('dressing').setup {
+          input = {
+            insert_only = false,
+            winblend = fss.style.float.blend,
+            border = fss.style.border.line,
+          },
           select = {
-            input = {
-              insert_only = false,
-            },
-            telescope = {
-              theme = 'cursor',
+            telescope = require('telescope.themes').get_cursor {
+              layout_config = {
+                -- NOTE: the limit is half the max lines because this is the cursor theme so
+                -- unless the cursor is at the top or bottom it realistically most often will
+                -- only have half the screen available
+                height = function(self, _, max_lines)
+                  local results = #self.finder.results
+                  local PADDING = 4 -- this represents the size of the telescope window
+                  local LIMIT = math.floor(max_lines / 2)
+                  return (
+                      results <= (LIMIT - PADDING) and results + PADDING
+                      or LIMIT
+                    )
+                end,
+              },
             },
           },
         }
@@ -681,11 +748,11 @@ packer.startup {
       'lukas-reineke/indent-blankline.nvim',
       config = function()
         require('indent_blankline').setup {
-          char = '│', -- ┆ ┊ 
+          char = '┊', -- ┆ ┊ 
           show_foldtext = false,
           show_first_indent_level = true,
-          show_current_context = false,
-          show_current_context_start = true,
+          show_current_context = true,
+          show_current_context_start = false,
           show_current_context_start_on_current_line = false,
           filetype_exclude = {
             'startify',
@@ -761,6 +828,8 @@ packer.startup {
 
     use 'MunifTanjim/nui.nvim'
 
+    use { 'kevinhwang91/nvim-hlslens' }
+
     use {
       'petertriho/nvim-scrollbar',
       config = function()
@@ -770,9 +839,20 @@ packer.startup {
           handle = {
             color = '#32384F',
           },
+          track = {
+            color = colors.bg_visual,
+          },
           -- NOTE: If telescope is not explicitly excluded this garbles input into its prompt buffer
-          excluded_filetypes = { 'packer', 'TelescopePrompt' },
-          excluded_buftypes = { 'terminal', 'prompt' },
+          excluded_filetypes = {
+            'packer',
+            'TelescopePrompt',
+            'NvimTree',
+          },
+          excluded_buftypes = {
+            'nofile',
+            'terminal',
+            'prompt',
+          },
           marks = {
             Search = { color = colors.orange },
             Error = { color = colors.error },
@@ -844,11 +924,36 @@ packer.startup {
       end,
     }
 
+    -- resize windows via hjkl
+    use {
+      'simeji/winresizer',
+      setup = function()
+        vim.g.winresizer_start_key = '<leader>wr'
+      end,
+    }
+
     -- prevent select and visual mode from overwriting the clipboard
     use {
       'kevinhwang91/nvim-hclipboard',
       config = function()
         require('hclipboard').start()
+      end,
+    }
+
+    use {
+      'folke/todo-comments.nvim',
+      requires = 'nvim-lua/plenary.nvim',
+      config = function()
+        -- this plugin is not safe to reload
+        if vim.g.packer_compiled_loaded then
+          return
+        end
+        require('todo-comments').setup {
+          highlight = {
+            exclude = { 'org', 'orgagenda', 'vimwiki', 'markdown' },
+          },
+        }
+        fss.nnoremap('<leader>lt', '<Cmd>TodoTrouble<CR>', 'trouble: todos')
       end,
     }
 
@@ -1002,6 +1107,36 @@ packer.startup {
           notify.dismiss,
           { label = 'dismiss notifications' }
         )
+
+        local P = fss.style.palette
+        require('fss.highlights').plugin(
+          'notify',
+          {
+            'NotifyERRORBorder',
+            { background = P.bg_highlight, foreground = P.bg_highlight },
+          },
+          {
+            'NotifyDEBUGBorder',
+            { background = P.bg_highlight, foreground = P.bg_highlight },
+          },
+          {
+            'NotifyWARNBorder',
+            { background = P.bg_highlight, foreground = P.bg_highlight },
+          },
+          {
+            'NotifyINFOBorder',
+            { background = P.bg_highlight, foreground = P.bg_highlight },
+          },
+          {
+            'NotifyTRACEBorder',
+            { background = P.bg_highlight, foreground = P.bg_highlight },
+          },
+          { 'NotifyERRORBody', { background = P.bg_highlight } },
+          { 'NotifyDEBUGBody', { background = P.bg_highlight } },
+          { 'NotifyWARNBody', { background = P.bg_highlight } },
+          { 'NotifyINFOBody', { background = P.bg_highlight } },
+          { 'NotifyTRACEBody', { background = P.bg_highlight } }
+        )
       end,
     }
 
@@ -1118,25 +1253,25 @@ packer.startup {
     -- Cycle open and closed folds
     use 'arecarn/vim-fold-cycle'
 
+    -- Increment/decrement things
     use {
       'monaqa/dial.nvim',
-      disable = true,
       config = function()
         local dial = require 'dial.map'
         local augend = require 'dial.augend'
         local map = vim.keymap.set
-        map('n', '<C-a>', dial.inc_normal(), { remap = false })
-        map('n', '<C-x>', dial.dec_normal(), { remap = false })
-        map('v', '<C-a>', dial.inc_visual(), { remap = false })
-        map('v', '<C-x>', dial.dec_visual(), { remap = false })
-        map('v', 'g<C-a>', dial.inc_gvisual(), { remap = false })
-        map('v', 'g<C-x>', dial.dec_gvisual(), { remap = false })
+        map('n', '<C-a>', dial.inc_normal(), { noremap = false })
+        map('n', '<C-x>', dial.dec_normal(), { noremap = false })
+        map('v', '<C-a>', dial.inc_visual(), { noremap = false })
+        map('v', '<C-x>', dial.dec_visual(), { noremap = false })
+        map('v', 'g<C-a>', dial.inc_gvisual(), { noremap = false })
+        map('v', 'g<C-x>', dial.dec_gvisual(), { noremap = false })
         require('dial.config').augends:register_group {
-          -- default augends used when no group name is specified
           default = {
             augend.integer.alias.decimal,
             augend.integer.alias.hex,
             augend.date.alias['%Y/%m/%d'],
+            augend.date.alias['%Y-%m-%d'],
             augend.constant.alias.bool,
             augend.constant.new {
               elements = { '&&', '||' },
@@ -1144,22 +1279,6 @@ packer.startup {
               cyclic = true,
             },
           },
-          dep_files = {
-            augend.semver.alias.semver,
-          },
-        }
-
-        vim.api.nvim_create_autocmd {
-          pattern = { 'yaml', 'toml' },
-          event = 'FileType',
-          callback = function()
-            map(
-              'n',
-              '<C-a>',
-              require('dial.map').inc_normal 'dep_files',
-              { remap = true }
-            )
-          end,
         }
       end,
     }
@@ -1177,18 +1296,27 @@ packer.startup {
       end,
     }
 
+    -- Display marks in the sign column
     use {
       'chentau/marks.nvim',
       config = function()
         require('fss.highlights').plugin(
           'marks',
-          { 'MarkSignHL', { foreground = 'Red' } }
+          { 'MarkSignHL', { foreground = fss.style.palette.red } }
         )
+        require('which-key').register({
+          m = {
+            name = '+marks',
+            b = { '<Cmd>MarksListBuf<CR>', 'list buffer' },
+            g = { '<Cmd>MarksQFListGlobal<CR>', 'list global' },
+            ['0'] = { '<Cmd>BookmarksQFList 0<CR>', 'list bookmark' },
+          },
+        }, { prefix = '<leader>' })
         require('marks').setup {
-          -- builtin_marks = { '.', '^' },
           bookmark_0 = {
             sign = '⚑',
             virt_text = 'bookmarks',
+            builtin_marks = { '.' },
           },
         }
       end,
@@ -1215,15 +1343,16 @@ packer.startup {
         fss.nnoremap('<localleader>oc', '<Cmd>Neorg gtd capture<CR>')
         fss.nnoremap('<localleader>ov', '<Cmd>Neorg gtd views<CR>')
         require('neorg').setup {
+          configure_parsers = true,
           load = {
             ['core.defaults'] = {},
-            -- TODO: cannot unmap <c-s> and segfaults, raise an issue
             ['core.integrations.telescope'] = {},
             ['core.keybinds'] = {
               config = {
                 default_keybinds = true,
                 neorg_leader = '<localleader>',
                 hook = function(keybinds)
+                  keybinds.unmap('norg', 'n', '<C-s>')
                   keybinds.map_event(
                     'norg',
                     'n',
@@ -1242,8 +1371,8 @@ packer.startup {
             ['core.norg.dirman'] = {
               config = {
                 workspaces = {
-                  notes = '~/Desktop/Personal/main/',
-                  tasks = '~/Desktop/Personal/tasks/',
+                  notes = '$SYNC_DIR/neorg/notes',
+                  tasks = '$SYNC_DIR/neorg/tasks',
                 },
               },
             },
@@ -1260,9 +1389,28 @@ packer.startup {
     -- This plugin adds horizontal highlights for text filetypes
     use {
       'lukas-reineke/headlines.nvim',
-      disable = true,
+      setup = function()
+        -- https://observablehq.com/@d3/color-schemes?collection=@d3/d3-scale-chromatic
+        -- NOTE: this must be set in the setup function or it will crash nvim...
+        -- require('fss.highlights').plugin(
+        --   'Headlines',
+        --   { 'Headline1', { background = '#003c30', foreground = 'White' } },
+        --   { 'Headline2', { background = '#00441b', foreground = 'White' } },
+        --   { 'Headline3', { background = '#084081', foreground = 'White' } },
+        --   { 'Dash', { background = '#0b60a1', bold = true } }
+        -- )
+      end,
       config = function()
-        require('headlines').setup()
+        require('headlines').setup {
+          markdown = {
+            headline_highlights = { 'Headline1', 'Headline2', 'Headline3' },
+          },
+          yaml = {
+            dash_pattern = '^---+$',
+            dash_highlight = 'Dash',
+            dash_string = '-',
+          },
+        }
       end,
     }
 
@@ -1298,7 +1446,7 @@ packer.startup {
   config = {
     compile_path = PACKER_COMPILED_PATH,
     display = {
-      prompt_border = 'rounded',
+      prompt_border = fss.style.border.line,
       open_cmd = 'silent topleft 65vnew',
     },
     profile = {
@@ -1308,20 +1456,14 @@ packer.startup {
   },
 }
 
-fss.command {
-  'PackerCompiledEdit',
-  function()
-    vim.cmd(fmt('edit %s', PACKER_COMPILED_PATH))
-  end,
-}
+fss.command('PackerCompiledEdit', function()
+  vim.cmd(fmt('edit %s', PACKER_COMPILED_PATH))
+end)
 
-fss.command {
-  'PackerCompiledDelete',
-  function()
-    vim.fn.delete(PACKER_COMPILED_PATH)
-    packer_notify(fmt('Deleted %s', PACKER_COMPILED_PATH))
-  end,
-}
+fss.command('PackerCompiledDelete', function()
+  vim.fn.delete(PACKER_COMPILED_PATH)
+  packer_notify(fmt('Deleted %s', PACKER_COMPILED_PATH))
+end)
 
 if not vim.g.packer_compiled_loaded then
   fss.source(PACKER_COMPILED_PATH)
@@ -1332,17 +1474,24 @@ fss.augroup('PackerSetupInit', {
   {
     event = 'BufWritePost',
     description = 'Packer setup and reload',
-    pattern = { '*/fss/plugins/*.lua' },
+    pattern = '*/fss/plugins/*.lua',
     command = function()
       fss.invalidate('fss.plugins', true)
       packer.compile()
     end,
   },
   {
+    event = 'User',
+    pattern = 'PackerCompileDone',
+    description = 'Packer compilation done',
+    command = function()
+      vim.notify('Packer compile complete', nil, { title = 'Packer' })
+    end,
+  },
+  {
     event = 'BufEnter',
-    --- Open a repository from an authorname/repository string
-    --- e.g. 'akinso/example-repo'
     buffer = 0,
+    description = 'Open a repository from an authorname/repository string',
     command = function()
       fss.nnoremap('gf', function()
         local repo = fn.expand '<cfile>'
@@ -1356,8 +1505,6 @@ fss.augroup('PackerSetupInit', {
     end,
   },
 })
-
-vim.cmd [[autocmd! User PackerCompileDone lua vim.notify('Packer compile complete', nil, { title = 'Packer' })]]
 
 fss.nnoremap('<leader>ps', [[<Cmd>PackerSync<CR>]])
 fss.nnoremap('<leader>pc', [[<Cmd>PackerClean<CR>]])
