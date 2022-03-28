@@ -10,6 +10,7 @@ local utils = require 'fss.utils.statusline'
 local H = require 'fss.highlights'
 
 local P = fss.style.palette
+local icons = fss.style.icons
 local M = {}
 
 local function colors()
@@ -44,7 +45,7 @@ local function colors()
     },
     {
       'StIndicator',
-      { background = bg_color, foreground = indicator_color },
+      { background = bg_color, foreground = bg_color },
     },
     { 'StModified', { foreground = string_fg, background = bg_color } },
     { 'StGit', { foreground = P.gitSigns.delete, background = bg_color } },
@@ -173,10 +174,7 @@ function _G.__statusline()
   -- functions to the window for *that* statusline
   local curwin = vim.g.statusline_winid or 0
   local curbuf = vim.api.nvim_win_get_buf(curwin)
-
-  -- TODO: reduce the available space whenever we add
-  -- a component so we can use it to determine what to add
-  local available_space = vim.api.nvim_win_get_width(curwin)
+  local available_space = vim.o.columns
 
   local ctx = {
     bufnum = curbuf,
@@ -195,7 +193,7 @@ function _G.__statusline()
   -- Modifiers
   ----------------------------------------------------------------------------//
   local plain = utils.is_plain(ctx)
-  local file_modified = utils.modified(ctx, '●')
+  local file_modified = utils.modified(ctx, icons.misc.circle)
   local focused = vim.g.vim_in_focus or true
   ----------------------------------------------------------------------------//
   -- Setup
@@ -204,7 +202,12 @@ function _G.__statusline()
   local add = make_status(statusline)
 
   add({
-    item_if('▌', not plain, 'StIndicator', { before = '', after = '' }),
+    item_if(
+      icons.misc.block,
+      not plain,
+      'StIndicator',
+      { before = '', after = '' }
+    ),
     0,
   }, { utils.spacer(1), 0 })
   ----------------------------------------------------------------------------//
@@ -215,7 +218,13 @@ function _G.__statusline()
   local dir_item = utils.item(dir.item, dir.hl, dir.opts)
   local parent_item = utils.item(parent.item, parent.hl, parent.opts)
   local file_item = utils.item(file.item, file.hl, file.opts)
-  local readonly_item = utils.item(utils.readonly(ctx), 'StError')
+  local readonly_hl = H.adopt_winhighlight(
+    curwin,
+    'StatusLine',
+    'StCustomError',
+    'StError'
+  )
+  local readonly_item = utils.item(utils.readonly(ctx), readonly_hl)
   ----------------------------------------------------------------------------//
   -- Mode
   ----------------------------------------------------------------------------//
@@ -258,10 +267,8 @@ function _G.__statusline()
     { item_if('Saving…', vim.g.is_saving, 'StComment', { before = ' ' }), 1 },
     -- LSP Status
     {
-      item(utils.current_function(), 'StMetadata', {
+      item(utils.current_function(), 'StMetadataPrefix', {
         before = '  ',
-        prefix = '',
-        prefix_color = 'StIdentifier',
       }),
       4,
     },
@@ -272,7 +279,7 @@ function _G.__statusline()
         vim.env.DEVELOPING ~= nil,
         'StComment',
         {
-          prefix = '',
+          prefix = icons.misc.tools,
           padding = 'none',
           before = '  ',
           prefix_color = 'StWarning',
@@ -293,35 +300,61 @@ function _G.__statusline()
     -----------------------------------------------------------------------------//
     -- Right section
     -----------------------------------------------------------------------------//
-    { item(utils.lsp_client(), 'StMetadata'), 4 },
-    { item(utils.debugger(), 'StMetadata', { prefix = 'ﴫ' }), 4 },
+    -- { item(utils.lsp_client(), 'StMetadata'), 4 },
+    { item(utils.debugger(), 'StMetadata', { prefix = icons.misc.bug }), 4 },
+    -- {
+    --   item_if(diagnostics.error.count, diagnostics.error, 'StError', {
+    --     prefix = diagnostics.error.sign,
+    --   }),
+    --   1,
+    -- },
+    -- {
+    --   item_if(diagnostics.warning.count, diagnostics.warning, 'StWarning', {
+    --     prefix = diagnostics.warning.sign,
+    --   }),
+    --   3,
+    -- },
+    -- {
+    --   item_if(diagnostics.info.count, diagnostics.info, 'StInfo', {
+    --     prefix = diagnostics.info.sign,
+    --   }),
+    --   4,
+    -- },
+    { item(notifications, 'StTitle'), 3 },
+    -- Git Status
     {
-      item_if(diagnostics.error.count, diagnostics.error, 'StError', {
-        prefix = diagnostics.error.sign,
-      }),
+      item(
+        status.head,
+        'StBlue',
+        { prefix = icons.git.logo, prefix_color = 'StGit' }
+      ),
       1,
     },
     {
-      item_if(diagnostics.warning.count, diagnostics.warning, 'StWarning', {
-        prefix = diagnostics.warning.sign,
+      item(
+        status.changed,
+        'StTitle',
+        { prefix = icons.git.mod, prefix_color = 'StWarning' }
+      ),
+      3,
+    },
+    {
+      item(status.removed, 'StTitle', {
+        prefix = icons.git.remove,
+        prefix_color = 'StError',
       }),
       3,
     },
     {
-      item_if(diagnostics.info.count, diagnostics.info, 'StInfo', {
-        prefix = diagnostics.info.sign,
+      item(status.added, 'StTitle', {
+        prefix = icons.git.add,
+        prefix_color = 'StGreen',
       }),
-      4,
+      3,
     },
-    { item(notifications, 'StTitle'), 3 },
-    -- Git Status
-    { item(status.head, 'StBlue', { prefix = '', prefix_color = 'StGit' }), 1 },
-    -- { item(status.changed, 'StTitle', { prefix = '', prefix_color = 'StWarning' }), 3 },
-    -- { item(status.removed, 'StTitle', { prefix = '', prefix_color = 'StError' }), 3 },
-    -- { item(status.added, 'StTitle', { prefix = '', prefix_color = 'StGreen' }), 3 },
     {
       item(ahead, 'StTitle', {
-        prefix = '⇡',
+        prefix = icons.misc.up,
         prefix_color = 'StGreen',
         after = behind > 0 and '' or ' ',
         before = '',
@@ -332,14 +365,14 @@ function _G.__statusline()
       item(
         behind,
         'StTitle',
-        { prefix = '⇣', prefix_color = 'StNumber', after = ' ' }
+        { prefix = icons.misc.down, prefix_color = 'StNumber', after = ' ' }
       ),
       5,
     },
     -- Current line number/total line number,  alternatives 
     {
       utils.line_info {
-        prefix = 'ℓ',
+        prefix = icons.misc.line,
         prefix_color = 'StMetadataPrefix',
         current_hl = 'StTitle',
         total_hl = 'StComment',
@@ -354,8 +387,8 @@ function _G.__statusline()
         ctx.shiftwidth > 2 or not ctx.expandtab,
         'StTitle',
         {
-          prefix = ctx.expandtab and 'Ξ' or '⇥',
-          prefix_color = 'PmenuSbar',
+          prefix = ctx.expandtab and icons.misc.indent or icons.misc.tab,
+          prefix_color = 'StatusLine',
         }
       ),
       6,

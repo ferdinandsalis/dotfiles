@@ -84,7 +84,6 @@ return function()
       format = function(entry, vim_item)
         vim_item.kind = fss.style.lsp.kinds[vim_item.kind]
         local name = entry.source.name
-        local completion = entry.completion_item.data
         local menu = ({
           nvim_lsp = '[LSP]',
           nvim_lua = '[Lua]',
@@ -93,7 +92,6 @@ return function()
           calc = '[Calc]',
           neorg = '[Neorg]',
           orgmode = '[Org]',
-          cmp_tabnine = '[TN]',
           luasnip = '[Luasnip]',
           buffer = '[Buffer]',
           spell = '[Spell]',
@@ -101,12 +99,6 @@ return function()
           cmp_git = '[Git]',
         })[name]
 
-        if name == 'cmp_tabnine' then
-          if completion and completion.detail then
-            menu = completion.detail .. ' ' .. menu
-          end
-          vim_item.kind = ''
-        end
         vim_item.menu = menu
         return vim_item
       end,
@@ -118,7 +110,6 @@ return function()
       { name = 'nvim_lsp' },
       { name = 'luasnip' },
       { name = 'path' },
-      { name = 'cmp_tabnine' },
       { name = 'spell' },
       { name = 'cmp_git' },
     }, {
@@ -139,7 +130,6 @@ return function()
       { name = 'neorg' },
     }, {
       { name = 'buffer' },
-      { name = 'cmp_tabnine' },
     }),
   })
 

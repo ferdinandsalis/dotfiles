@@ -66,9 +66,9 @@ fss.style = {
       info = ' ',
     },
     git = {
-      add = '',
-      mod = '',
-      remove = '',
+      add = '', -- '',
+      mod = '', -- '',
+      remove = '', --
       ignore = '',
       rename = '',
       diff = '',
@@ -86,7 +86,12 @@ fss.style = {
       object = '',
     },
     misc = {
-      bug = '',
+      up = '⇡',
+      down = '⇣',
+      line = 'ℓ', -- ''
+      indent = 'Ξ',
+      tab = '⇥',
+      bug = '', -- 'ﴫ'
       question = '',
       lock = '',
       circle = '',
@@ -108,9 +113,12 @@ fss.style = {
       note = '',
       bookmark = '',
       pencil = '',
+      tools = '',
       chevron_right = '',
+      double_chevron_right = '»',
       table = '',
       calendar = '',
+      block = '▌',
     },
   },
   float = {
@@ -189,41 +197,6 @@ fss.style = {
   },
   palette = palette,
 }
-
-----------------------------------------------------------------------------------------------------
--- Debugging
-----------------------------------------------------------------------------------------------------
-
--- inspect the contents of an object very quickly
--- in your code or from the command-line:
--- @see: https://www.reddit.com/r/neovim/comments/p84iu2/useful_functions_to_explore_lua_objects/
--- USAGE:
--- in lua: `P({1, 2, 3})`
--- in commandline: `:lua P(vim.loop)`
----@vararg any
-function P(...)
-  local objects, v = {}, nil
-  for i = 1, select('#', ...) do
-    v = select(i, ...)
-    table.insert(objects, vim.inspect(v))
-  end
-
-  print(table.concat(objects, '\n'))
-  return ...
-end
-
-function _G.dump_text(...)
-  local objects, v = {}, nil
-  for i = 1, select('#', ...) do
-    v = select(i, ...)
-    table.insert(objects, vim.inspect(v))
-  end
-
-  local lines = vim.split(table.concat(objects, '\n'), '\n')
-  local lnum = vim.api.nvim_win_get_cursor(0)[1]
-  vim.fn.append(lnum, lines)
-  return ...
-end
 
 ----------------------------------------------------------------------------------------------------
 -- Utils
@@ -401,9 +374,14 @@ function fss.augroup(name, commands)
   return id
 end
 
+--- @class CommandArgs
+--- @field args string
+--- @field fargs table
+--- @field bang boolean,
+
 ---Create an nvim command
 ---@param name any
----@param rhs string|fun(args: string, fargs: table, bang: boolean)
+---@param rhs string|fun(args: CommandArgs)
 ---@param opts table
 function fss.command(name, rhs, opts)
   opts = opts or {}

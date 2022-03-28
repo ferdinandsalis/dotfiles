@@ -278,7 +278,7 @@ fss.augroup('UpdateVim', {
     -- it correctly sources $MYVIMRC but all the other files that it
     -- requires will need to be resourced or reloaded themselves
     event = 'BufWritePost',
-    pattern = { '$DOTFILES/**/nvim/plugin/*.{lua,vim}', '$MYVIMRC' },
+    pattern = { '$DOTFILES/**/nvim/plugin/*.{lua,vim}', fn.expand '$MYVIMRC' },
     nested = true,
     command = function()
       local ok, msg = pcall(

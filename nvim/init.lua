@@ -1,8 +1,9 @@
----------------------------------------------------------------------------------
+------------------------------------------------------------------------
 -- NVIM CONFIG
--- This is all shamefully taken from https://github.com/akinsho/dotfiles
+-- This is all shamefully taken from
+-- http://github.com/akinsho/dotfiles
 -- with some minor modifications
----------------------------------------------------------------------------------
+------------------------------------------------------------------------
 vim.g.os = vim.loop.os_uname().sysname
 vim.g.open_command = vim.g.os == 'Darwin' and 'open' or 'xdg-open'
 vim.g.dotfiles = '~/.dotfiles'

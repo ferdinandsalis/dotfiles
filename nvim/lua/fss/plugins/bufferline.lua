@@ -33,93 +33,16 @@ return function()
 
   require('bufferline').setup {
     highlights = {
-      -- fill = {
-      --   guifg = colors.comment,
-      --   guibg = colors.bg_sidebar,
-      -- },
-      -- background = {
-      --   guifg = colors.comment,
-      --   guibg = colors.bg_sidebar,
-      -- },
-      --   tab = {
-      --     guifg = { attribute = 'fg', highlight = 'Comment' },
-      --     guibg = colors.bg_statusline,
-      --   },
-      --   tab_selected = {
-      --     guibg = colors.bg_statusline,
-      --   },
-      --   close_button = {
-      --     guifg = { attribute = 'fg', highlight = 'Comment' },
-      --     guibg = colors.bg_sidebar,
-      --   },
-      --   hint_diagnostic = {
-      --     guifg = { attribute = 'fg', highlight = 'Comment' },
-      --     guibg = colors.bg_sidebar,
-      --   },
-      --   hint = {
-      --     guifg = { attribute = 'fg', highlight = 'Comment' },
-      --     guibg = colors.bg_sidebar,
-      --   },
-      --   error_diagnostic = {
-      --     guifg = { attribute = 'fg', highlight = 'Comment' },
-      --     guibg = colors.bg_sidebar,
-      --   },
-      --   error = {
-      --     guifg = { attribute = 'fg', highlight = 'Comment' },
-      --     guibg = colors.bg_sidebar,
-      --   },
-      --   warning_diagnostic = {
-      --     guifg = { attribute = 'fg', highlight = 'Comment' },
-      --     guibg = colors.bg_sidebar,
-      --   },
-      --   warning = {
-      --     guifg = { attribute = 'fg', highlight = 'Comment' },
-      --     guibg = colors.bg_sidebar,
-      --   },
-      --   duplicate = {
-      --     guifg = { attribute = 'fg', highlight = 'Comment' },
-      --     guibg = colors.bg_sidebar,
-      --   },
-      --   duplicate_visible = {
-      --     guifg = { attribute = 'fg', highlight = 'Comment' },
-      --     guibg = colors.bg_sidebar,
-      --     gui = 'bold,italic',
-      --   },
-      --   buffer_visible = {
-      --     guifg = { attribute = 'fg', highlight = 'Comment' },
-      --     guibg = colors.bg_sidebar,
-      --     gui = 'bold,italic',
-      --   },
-      --   separator = {
-      --     guifg = colors.bg_sidebar,
-      --     guibg = colors.bg_sidebar,
-      --   },
-      --   indicator_selected = {
-      --     guifg = colors.bg,
-      --     guibg = colors.bg,
-      --   },
-      --   pick_selected = {
-      --     guifg = colors.red1,
-      --     guibg = colors.bg,
-      --     gui = 'bold,italic',
-      --   },
-      --   pick_visible = {
-      --     guifg = colors.red1,
-      --     guibg = colors.bg_sidebar,
-      --     gui = 'bold,italic',
-      --   },
-      --   pick = {
-      --     guifg = colors.red1,
-      --     guibg = colors.bg_sidebar,
-      --     gui = 'bold,italic',
-      --   },
+      indicator_selected = {
+        guifg = colors.bg,
+        guibg = colors.bg,
+      },
     },
     options = {
       mode = 'buffers', -- tabs
       right_mouse_command = 'vert sbuffer %d',
       show_buffer_icons = false,
       show_close_icon = false,
-      ---based on https://github.com/kovidgoyal/kitty/issues/957
       diagnostics = 'nvim_lsp',
       diagnostics_indicator = diagnostics_indicator,
       diagnostics_update_in_insert = false,
@@ -163,9 +86,6 @@ return function()
     ['<leader>6'] = { '<Cmd>BufferLineGoToBuffer 6<CR>', 'which_key_ignore' },
     ['<leader>7'] = { '<Cmd>BufferLineGoToBuffer 7<CR>', 'which_key_ignore' },
     ['<leader>8'] = { '<Cmd>BufferLineGoToBuffer 8<CR>', 'which_key_ignore' },
-    ['<leader>9'] = {
-      '<Cmd>BufferLineGoToBuffer 9<CR>',
-      'bufferline: goto 9',
-    },
+    ['<leader>9'] = { '<Cmd>BufferLineGoToBuffer 9<CR>', 'which_key_ignore' },
   }
 end

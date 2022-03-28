@@ -1,5 +1,5 @@
-local has = fss.has
 local fn = vim.fn
+local api = vim.api
 local command = fss.command
 local fmt = string.format
 
@@ -91,9 +91,38 @@ nnoremap('zO', [[zCzO]])
 -----------------------------------------------------------------------------//
 -- Delimiters
 -----------------------------------------------------------------------------//
--- Conditionally modify character at end of line
-nnoremap('<localleader>,', "<cmd>call utils#modify_line_end_delimiter(',')<cr>")
-nnoremap('<localleader>;', "<cmd>call utils#modify_line_end_delimiter(';')<cr>")
+-- TLDR: Conditionally modify character at end of line
+-- Description:
+-- This function takes a delimiter character and:
+--   * removes that character from the end of the line if the character at the end
+--     of the line is that character
+--   * removes the character at the end of the line if that character is a
+--     delimiter that is not the input character and appends that character to
+--     the end of the line
+--   * adds that character to the end of the line if the line does not end with
+--     a delimiter
+-- Delimiters:
+-- - ","
+-- - ";"
+---@param character string
+---@return function
+local function modify_line_end_delimiter(character)
+  local delimiters = { ',', ';' }
+  return function()
+    local line = api.nvim_get_current_line()
+    local last_char = line:sub(-1)
+    if last_char == character then
+      api.nvim_set_current_line(line:sub(1, #line - 1))
+    elseif vim.tbl_contains(delimiters, last_char) then
+      api.nvim_set_current_line(line:sub(1, #line - 1) .. character)
+    else
+      api.nvim_set_current_line(line .. character)
+    end
+  end
+end
+nnoremap('<localleader>,', modify_line_end_delimiter ',')
+nnoremap('<localleader>;', modify_line_end_delimiter ';')
+-----------------------------------------------------------------------------//
 
 nmap('<ScrollWheelDown>', '<c-d>')
 nmap('<ScrollWheelUp>', '<c-u>')
@@ -477,8 +506,8 @@ end)
 
 ------------------------------------------------------------------------------
 command('Todo', [[noautocmd silent! grep! 'TODO\|FIXME\|BUG\|HACK' | copen]])
-command('ReloadModule', function(args)
-  require('plenary.reload').reload_module(args)
+command('ReloadModule', function(tbl)
+  require('plenary.reload').reload_module(tbl.args)
 end, {
   nargs = 1,
 })

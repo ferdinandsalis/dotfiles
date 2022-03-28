@@ -60,7 +60,7 @@ return function()
       set_env = { ['TERM'] = vim.env.TERM },
       borderchars = { '─', '│', '─', '│', '╭', '╮', '╯', '╰' },
       prompt_prefix = icons.misc.telescope .. ' ',
-      selection_caret = '» ',
+      selection_caret = icons.misc.double_chevron_right .. ' ',
       mappings = {
         i = {
           ['<C-w>'] = actions.send_selected_to_qflist,
@@ -215,10 +215,6 @@ return function()
     }
   end
 
-  local function dash()
-    require('dash').search()
-  end
-
   require('which-key').register {
     ['<c-p>'] = { builtins.find_files, 'telescope: find files' },
     ['<leader>f'] = {
@@ -226,7 +222,6 @@ return function()
       a = { builtins.builtin, 'builtins' },
       b = { builtins.current_buffer_fuzzy_find, 'current buffer fuzzy find' },
       d = { dotfiles, 'dotfiles' },
-      D = { dash, 'dash' },
       f = { builtins.find_files, 'find files' },
       p = { project_files, 'project files' },
       n = { gh_notifications, 'notifications' },

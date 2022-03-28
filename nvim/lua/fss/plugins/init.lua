@@ -87,55 +87,14 @@ packer.startup {
 
     use 'nvim-lua/plenary.nvim'
 
-    use {
-      'mrjones2014/dash.nvim',
-      command = 'Dash',
-      module = 'dash',
-      run = 'make install',
-      after = 'telescope.nvim',
-    }
-
     use 'kyazdani42/nvim-web-devicons'
-
-    use {
-      'vuki656/package-info.nvim',
-      disable = true,
-      requires = 'MunifTanjim/nui.nvim',
-      config = function()
-        require('package-info').setup()
-      end,
-    }
 
     use {
       'vim-test/vim-test',
       cmd = { 'Test*' },
       keys = { '<localleader>tf', '<localleader>tn', '<localleader>ts' },
-      setup = function()
-        require('which-key').register({
-          t = {
-            name = '+vim-test',
-            f = 'test: file',
-            n = 'test: nearest',
-            s = 'test: suite',
-          },
-        }, {
-          prefix = '<localleader>',
-        })
-      end,
-      config = function()
-        -- vim.g['test#strategy'] = 'kitty'
-        vim.cmd [[
-          function! ToggleTermStrategy(cmd) abort
-            call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
-          endfunction
-          let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
-        ]]
-        vim.g['test#strategy'] = 'toggleterm'
-        vim.g['test#javascript#runner'] = 'jest'
-        fss.nnoremap('<localleader>tf', '<cmd>TestFile<CR>')
-        fss.nnoremap('<localleader>tn', '<cmd>TestNearest<CR>')
-        fss.nnoremap('<localleader>ts', '<cmd>TestSuite<CR>')
-      end,
+      setup = conf('vim-test').setup,
+      config = conf('vim-test').config,
     }
 
     use {
@@ -145,49 +104,8 @@ packer.startup {
       event = { 'BufEnter *_test.*,*_spec.*,*.test.*' },
       requires = { 'vim-test' },
       run = ':UpdateRemotePlugins',
-      setup = function()
-        vim.g.ultest_use_pty = 1
-        vim.g.ultest_virtual_text = 0
-        vim.g.ultest_summary_width = 80
-        vim.g.ultest_running_sign = '⭘'
-      end,
-      config = function()
-        local test_patterns = { '*.test.*', '*_test.*', '*_spec.*' }
-        fss.augroup('UltestTests', {
-          {
-            event = 'BufWritePost',
-            pattern = test_patterns,
-            command = 'UltestNearest',
-          },
-        })
-        fss.nmap(']T', '<Plug>(ultest-next-fail)', {
-          label = 'ultest: next failure',
-          buffer = 0,
-        })
-        fss.nmap('[T', '<Plug>(ultest-prev-fail)', {
-          label = 'ultest: previous failure',
-          buffer = 0,
-        })
-
-        local H = require 'fss.highlights'
-        local P = fss.style.palette
-        H.plugin(
-          'ultest',
-          { 'UltestSummaryInfo', { foreground = P.blue, italic = true } },
-          {
-            'UltestSummaryNamespace',
-            { foreground = P.magenta, italic = false, bold = true },
-          },
-          { 'UltestSummaryFile', { foreground = P.blue, italic = true } },
-          { 'UltestFail', { foreground = P.red } },
-          { 'UltestPass', { foreground = P.green } },
-          { 'UltestRunning', { foreground = P.yellow } }
-        )
-
-        fss.nnoremap('<localleader><localleader>', '<cmd>Ultest<CR>')
-        fss.nnoremap('<localleader>un', '<cmd>UltestNearest<CR>')
-        fss.nnoremap('<localleader>us', '<cmd>UltestSummary<CR>')
-      end,
+      setup = conf('vim-ultest').setup,
+      config = conf('vim-ultest').config,
     }
 
     use {
@@ -204,7 +122,7 @@ packer.startup {
 
     use {
       'rmagatti/session-lens',
-      disable = false,
+      disable = true,
       after = 'telescope.nvim',
       config = function()
         local session_lens = require 'session-lens'
@@ -220,23 +138,7 @@ packer.startup {
     use {
       'akinsho/toggleterm.nvim',
       local_path = 'personal',
-      config = function()
-        require('toggleterm').setup {
-          open_mapping = [[<c-\>]],
-          shade_filetypes = { 'none' },
-          direction = 'horizontal',
-          insert_mappings = false,
-          start_in_insert = true,
-          float_opts = { border = 'curved', winblend = 3 },
-          size = function(term)
-            if term.direction == 'horizontal' then
-              return 15
-            elseif term.direction == 'vertical' then
-              return math.floor(vim.o.columns * 0.4)
-            end
-          end,
-        }
-      end,
+      config = conf 'toggleterm',
     }
 
     use {
@@ -244,27 +146,22 @@ packer.startup {
       run = 'cp ./*.py ~/.config/kitty/',
     }
 
-    use 'tpope/vim-eunuch'
-
-    use 'tpope/vim-repeat'
-
     use {
       'tpope/vim-abolish',
-      config = function()
-        local opts = { silent = false }
-        fss.nnoremap('<localleader>[', ':S/<C-R><C-W>//<LEFT>', opts)
-        fss.nnoremap('<localleader>]', ':%S/<C-r><C-w>//c<left><left>', opts)
-        fss.xnoremap(
-          '<localleader>[',
-          [["zy:%S/<C-r><C-o>"//c<left><left>]],
-          opts
-        )
-      end,
+      config = conf 'vim-abolish',
+    }
+
+    use {
+      'tpope/vim-projectionist',
+      config = conf 'vim-projectionist',
     }
 
     -- sets searchable path for filetypes like go so 'gf' works
     use 'tpope/vim-apathy'
-    use { 'tpope/vim-projectionist', config = conf 'vim-projectionist' }
+
+    use 'tpope/vim-eunuch'
+
+    use 'tpope/vim-repeat'
 
     -- }}}
     -----------------------------------------------------------------------------//
@@ -354,29 +251,7 @@ packer.startup {
         utils.install('write-good', 'npm', 'install -g')
       end,
       requires = { 'nvim-lua/plenary.nvim' },
-      config = function()
-        local null_ls = require 'null-ls'
-        local builtins = null_ls.builtins
-        null_ls.setup {
-          debug = true,
-          debounce = 150,
-          on_attach = fss.lsp.on_attach,
-          sources = {
-            builtins.hover.dictionary,
-            builtins.diagnostics.zsh,
-            builtins.diagnostics.write_good,
-            builtins.code_actions.gitsigns,
-            builtins.formatting.mix,
-            builtins.formatting.prettier,
-            null_ls.builtins.formatting.stylua.with {
-              condition = function(_utils)
-                return fss.executable 'stylua'
-                  and _utils.root_has_file { 'stylua.toml', '.stylua.toml' }
-              end,
-            },
-          },
-        }
-      end,
+      config = conf 'null-ls',
     }
 
     use {
@@ -404,17 +279,7 @@ packer.startup {
         { 'hrsh7th/cmp-path', after = 'nvim-cmp' },
         { 'hrsh7th/cmp-calc', after = 'nvim-cmp' },
         { 'hrsh7th/cmp-buffer', after = 'nvim-cmp' },
-        { 'petertriho/cmp-git', after = 'nvim-cmp' },
         { 'saadparwaiz1/cmp_luasnip', after = 'nvim-cmp' },
-        {
-          'petertriho/cmp-git',
-          after = 'nvim-cmp',
-          config = function()
-            require('cmp_git').setup {
-              filetypes = { 'gitcommit', 'NeogitCommitMessage' },
-            }
-          end,
-        },
         {
           'tzachar/cmp-fuzzy-path',
           after = 'cmp-path',
@@ -475,30 +340,7 @@ packer.startup {
         }
       end,
       requires = 'nvim-web-devicons',
-      config = function()
-        local H = require 'fss.highlights'
-        H.plugin(
-          'trouble',
-          { 'TroubleNormal', { link = 'PanelBackground' } },
-          { 'TroubleText', { link = 'PanelBackground' } },
-          { 'TroubleIndent', { link = 'PanelVertSplit' } },
-          { 'TroubleFoldIcon', { foreground = 'yellow', bold = true } },
-          { 'TroubleLocation', { foreground = H.get_hl('Comment', 'fg') } }
-        )
-        local trouble = require 'trouble'
-        fss.nnoremap(
-          '<leader>ld',
-          '<cmd>TroubleToggle workspace_diagnostics<CR>'
-        )
-        fss.nnoremap('<leader>lr', '<cmd>TroubleToggle lsp_references<CR>')
-        fss.nnoremap(']d', function()
-          trouble.previous { skip_groups = true, jump = true }
-        end)
-        fss.nnoremap('[d', function()
-          trouble.next { skip_groups = true, jump = true }
-        end)
-        trouble.setup { auto_close = true, auto_preview = false }
-      end,
+      config = conf 'trouble',
     }
 
     use {
@@ -685,7 +527,6 @@ packer.startup {
 
     use {
       'rlch/github-notifications.nvim',
-      -- don't load this plugin if the gh cli is not installed
       cond = function()
         return fss.executable 'gh'
       end,
@@ -702,37 +543,7 @@ packer.startup {
       -- NOTE: Defer loading till telescope is loaded
       -- this implicitly loads telescope so needs to be delayed
       after = 'telescope.nvim',
-      config = function()
-        require('fss.highlights').plugin(
-          'dressing',
-          { 'FloatTitle', { inherit = 'Normal', bold = true } }
-        )
-        require('dressing').setup {
-          input = {
-            insert_only = false,
-            winblend = fss.style.float.blend,
-            border = fss.style.border.line,
-          },
-          select = {
-            telescope = require('telescope.themes').get_cursor {
-              layout_config = {
-                -- NOTE: the limit is half the max lines because this is the cursor theme so
-                -- unless the cursor is at the top or bottom it realistically most often will
-                -- only have half the screen available
-                height = function(self, _, max_lines)
-                  local results = #self.finder.results
-                  local PADDING = 4 -- this represents the size of the telescope window
-                  local LIMIT = math.floor(max_lines / 2)
-                  return (
-                      results <= (LIMIT - PADDING) and results + PADDING
-                      or LIMIT
-                    )
-                end,
-              },
-            },
-          },
-        }
-      end,
+      config = conf 'dressing',
     }
 
     use {
@@ -746,54 +557,7 @@ packer.startup {
 
     use {
       'lukas-reineke/indent-blankline.nvim',
-      config = function()
-        require('indent_blankline').setup {
-          char = '┊', -- ┆ ┊ 
-          show_foldtext = false,
-          show_first_indent_level = true,
-          show_current_context = true,
-          show_current_context_start = false,
-          show_current_context_start_on_current_line = false,
-          filetype_exclude = {
-            'startify',
-            'dashboard',
-            'log',
-            'fugitive',
-            'gitcommit',
-            'packer',
-            'vimwiki',
-            'markdown',
-            'json',
-            'txt',
-            'vista',
-            'help',
-            'NvimTree',
-            'NeoTree',
-            'git',
-            'TelescopePrompt',
-            'undotree',
-            'flutterToolsOutline',
-            'norg',
-            'org',
-            'orgagenda',
-            '', -- for all buffers without a file type
-          },
-          buftype_exclude = { 'terminal', 'nofile' },
-          context_patterns = {
-            'class',
-            'function',
-            'method',
-            'block',
-            'list_literal',
-            'selector',
-            '^if',
-            '^table',
-            'if_statement',
-            'while',
-            'for',
-          },
-        }
-      end,
+      config = conf 'indent-blankline',
     }
 
     -- A better bufferline
@@ -828,41 +592,11 @@ packer.startup {
 
     use 'MunifTanjim/nui.nvim'
 
-    use { 'kevinhwang91/nvim-hlslens' }
+    use 'kevinhwang91/nvim-hlslens'
 
     use {
       'petertriho/nvim-scrollbar',
-      config = function()
-        local colors = require('tokyonight.colors').setup()
-
-        require('scrollbar').setup {
-          handle = {
-            color = '#32384F',
-          },
-          track = {
-            color = colors.bg_visual,
-          },
-          -- NOTE: If telescope is not explicitly excluded this garbles input into its prompt buffer
-          excluded_filetypes = {
-            'packer',
-            'TelescopePrompt',
-            'NvimTree',
-          },
-          excluded_buftypes = {
-            'nofile',
-            'terminal',
-            'prompt',
-          },
-          marks = {
-            Search = { color = colors.orange },
-            Error = { color = colors.error },
-            Warn = { color = colors.warning },
-            Info = { color = colors.info },
-            Hint = { color = colors.hint },
-            Misc = { color = colors.purple },
-          },
-        }
-      end,
+      config = conf 'nvim-scrollbar',
     }
 
     use {
@@ -876,30 +610,10 @@ packer.startup {
       end,
     }
 
-    -- use 'tpope/vim-vinegar'
-    -- use 'justinmk/vim-dirvish'
-
     use {
       'folke/zen-mode.nvim',
-      disable = false,
       cmd = { 'ZenMode' },
-      config = function()
-        require('zen-mode').setup {
-          window = {
-            backdrop = 1,
-            options = {
-              number = false,
-              relativenumber = false,
-            },
-          },
-          {
-            gitsigns = true,
-          },
-        }
-        require('which-key').register {
-          ['<leader>ze'] = { '<cmd>ZenMode<CR>', 'Zen' },
-        }
-      end,
+      config = conf 'zen-mode',
     }
 
     use 'folke/twilight.nvim'
@@ -911,16 +625,6 @@ packer.startup {
       config = function()
         vim.g.mkdp_auto_start = 0
         vim.g.mkdp_auto_close = 1
-      end,
-    }
-
-    use {
-      'rrethy/vim-hexokinase',
-      disable = true,
-      run = 'make hexokinase',
-      config = function()
-        vim.g.copilot_no_tab_map = true
-        vim.g.Hexokinase_executable_path = '~/go/bin/hexokinase'
       end,
     }
 
@@ -943,46 +647,12 @@ packer.startup {
     use {
       'folke/todo-comments.nvim',
       requires = 'nvim-lua/plenary.nvim',
-      config = function()
-        -- this plugin is not safe to reload
-        if vim.g.packer_compiled_loaded then
-          return
-        end
-        require('todo-comments').setup {
-          highlight = {
-            exclude = { 'org', 'orgagenda', 'vimwiki', 'markdown' },
-          },
-        }
-        fss.nnoremap('<leader>lt', '<Cmd>TodoTrouble<CR>', 'trouble: todos')
-      end,
+      config = conf 'todo-comments',
     }
 
     use {
       'github/copilot.vim',
-      config = function()
-        vim.g.copilot_filetypes = {
-          ['*'] = false,
-          gitcommit = false,
-          NeogitCommitMessage = false,
-          lua = true,
-          javascript = true,
-          typescript = true,
-          typescriptreact = true,
-          javascriptreact = true,
-        }
-        fss.imap(
-          '<c-h>',
-          [[copilot#Accept("\<CR>")]],
-          { expr = true, script = true }
-        )
-        vim.g.copilot_no_tab_map = true
-        vim.g.copilot_assume_mapped = true
-        vim.g.copilot_tab_fallback = ''
-        require('fss.highlights').plugin(
-          'copilot',
-          { 'CopilotSuggestion', { link = 'Comment' } }
-        )
-      end,
+      config = conf 'copilot',
     }
 
     use {
@@ -1081,63 +751,8 @@ packer.startup {
 
     use {
       'rcarriga/nvim-notify',
-      cond = utils.not_headless, -- TODO: causes blocking output in headless mode
-      config = function()
-        -- this plugin is not safe to reload
-        if vim.g.packer_compiled_loaded then
-          return
-        end
-        local notify = require 'notify'
-        ---@type table<string, fun(bufnr: number, notif: table, highlights: table)>
-        local renderer = require 'notify.render'
-        notify.setup {
-          stages = 'fade_in_slide_out',
-          timeout = 3000,
-          render = function(bufnr, notif, highlights)
-            if notif.title[1] == '' then
-              return renderer.minimal(bufnr, notif, highlights)
-            end
-            return renderer.default(bufnr, notif, highlights)
-          end,
-        }
-        vim.notify = notify
-        require('telescope').load_extension 'notify'
-        fss.nnoremap(
-          '<leader>nd',
-          notify.dismiss,
-          { label = 'dismiss notifications' }
-        )
-
-        local P = fss.style.palette
-        require('fss.highlights').plugin(
-          'notify',
-          {
-            'NotifyERRORBorder',
-            { background = P.bg_highlight, foreground = P.bg_highlight },
-          },
-          {
-            'NotifyDEBUGBorder',
-            { background = P.bg_highlight, foreground = P.bg_highlight },
-          },
-          {
-            'NotifyWARNBorder',
-            { background = P.bg_highlight, foreground = P.bg_highlight },
-          },
-          {
-            'NotifyINFOBorder',
-            { background = P.bg_highlight, foreground = P.bg_highlight },
-          },
-          {
-            'NotifyTRACEBorder',
-            { background = P.bg_highlight, foreground = P.bg_highlight },
-          },
-          { 'NotifyERRORBody', { background = P.bg_highlight } },
-          { 'NotifyDEBUGBody', { background = P.bg_highlight } },
-          { 'NotifyWARNBody', { background = P.bg_highlight } },
-          { 'NotifyINFOBody', { background = P.bg_highlight } },
-          { 'NotifyTRACEBody', { background = P.bg_highlight } }
-        )
-      end,
+      cond = utils.not_headless,
+      config = conf 'nvim-notify',
     }
 
     use {
@@ -1146,11 +761,20 @@ packer.startup {
       config = function()
         require('nvim-autopairs').setup {
           close_triple_quotes = true,
-          check_ts = false,
+          check_ts = true,
+          ts_config = {
+            lua = { 'string' },
+            dart = { 'string' },
+            javascript = { 'template_string' },
+          },
+          fast_wrap = {
+            map = '<c-e>',
+          },
         }
       end,
     }
 
+    -- provides mappings to easily delete, change and add such surroundings in pairs
     use {
       'tpope/vim-surround',
       config = function()
@@ -1159,42 +783,12 @@ packer.startup {
       end,
     }
 
-    use 'AndrewRadev/splitjoin.vim'
-
     use {
       'Matt-A-Bennett/vim-surround-funk',
-      config = function()
-        vim.g.surround_funk_create_mappings = 0
-        require('which-key').register {
-          d = {
-            name = '+dsf: function text object',
-            s = {
-              F = {
-                '<Plug>(DeleteSurroundingFunction)',
-                'delete surrounding function',
-              },
-              f = {
-                '<Plug>(DeleteSurroundingFUNCTION)',
-                'delete surrounding outer function',
-              },
-            },
-          },
-          c = {
-            name = '+dsf: function text object',
-            s = {
-              F = {
-                '<Plug>(ChangeSurroundingFunction)',
-                'change surrounding function',
-              },
-              f = {
-                '<Plug>(ChangeSurroundingFUNCTION)',
-                'change outer surrounding function',
-              },
-            },
-          },
-        }
-      end,
+      config = conf 'vim-surround-funk',
     }
+
+    use 'AndrewRadev/splitjoin.vim'
 
     -- Easy accessible digraphs
     use {
@@ -1221,66 +815,33 @@ packer.startup {
       end,
     }
 
+    -- Provide new operator motions to perform substitutions and exchange
     use {
       'gbprod/substitute.nvim',
-      config = function()
-        require('substitute').setup()
-        fss.nnoremap('S', function()
-          require('substitute').operator()
-        end)
-        fss.xnoremap('S', function()
-          require('substitute').visual()
-        end)
-        fss.nnoremap('X', function()
-          require('substitute.exchange').operator()
-        end)
-        fss.xnoremap('X', function()
-          require('substitute.exchange').visual()
-        end)
-        fss.nnoremap('Xc', function()
-          require('substitute.exchange').cancel()
-        end)
-      end,
+      config = conf 'substitute',
     }
 
     -- Provides Line wise and delimiter sorting via :Sort
     use 'sQVe/sort.nvim'
 
     -- More useful word motions for  vim
-    -- https://github.com/chaoren/vim-wordmotion
     use 'chaoren/vim-wordmotion'
 
     -- Cycle open and closed folds
-    use 'arecarn/vim-fold-cycle'
+    use {
+      'jghauser/fold-cycle.nvim',
+      config = function()
+        require('fold-cycle').setup()
+        fss.nnoremap('<BS>', function()
+          require('fold-cycle').open()
+        end)
+      end,
+    }
 
     -- Increment/decrement things
     use {
       'monaqa/dial.nvim',
-      config = function()
-        local dial = require 'dial.map'
-        local augend = require 'dial.augend'
-        local map = vim.keymap.set
-        map('n', '<C-a>', dial.inc_normal(), { noremap = false })
-        map('n', '<C-x>', dial.dec_normal(), { noremap = false })
-        map('v', '<C-a>', dial.inc_visual(), { noremap = false })
-        map('v', '<C-x>', dial.dec_visual(), { noremap = false })
-        map('v', 'g<C-a>', dial.inc_gvisual(), { noremap = false })
-        map('v', 'g<C-x>', dial.dec_gvisual(), { noremap = false })
-        require('dial.config').augends:register_group {
-          default = {
-            augend.integer.alias.decimal,
-            augend.integer.alias.hex,
-            augend.date.alias['%Y/%m/%d'],
-            augend.date.alias['%Y-%m-%d'],
-            augend.constant.alias.bool,
-            augend.constant.new {
-              elements = { '&&', '||' },
-              word = false,
-              cyclic = true,
-            },
-          },
-        }
-      end,
+      config = conf 'dial',
     }
 
     -- See the cursor jump
@@ -1299,27 +860,7 @@ packer.startup {
     -- Display marks in the sign column
     use {
       'chentau/marks.nvim',
-      config = function()
-        require('fss.highlights').plugin(
-          'marks',
-          { 'MarkSignHL', { foreground = fss.style.palette.red } }
-        )
-        require('which-key').register({
-          m = {
-            name = '+marks',
-            b = { '<Cmd>MarksListBuf<CR>', 'list buffer' },
-            g = { '<Cmd>MarksQFListGlobal<CR>', 'list global' },
-            ['0'] = { '<Cmd>BookmarksQFList 0<CR>', 'list bookmark' },
-          },
-        }, { prefix = '<leader>' })
-        require('marks').setup {
-          bookmark_0 = {
-            sign = '⚑',
-            virt_text = 'bookmarks',
-            builtin_marks = { '.' },
-          },
-        }
-      end,
+      config = conf 'marks',
     }
 
     -- Highlight ranges you enter in the command line
@@ -1336,88 +877,24 @@ packer.startup {
     -- Knowledge and task management {{{
     --------------------------------------------------------------------------------
 
+    -- Getting things done and notes
     use {
       'vhyrro/neorg',
       requires = { 'vhyrro/neorg-telescope' },
-      config = function()
-        fss.nnoremap('<localleader>oc', '<Cmd>Neorg gtd capture<CR>')
-        fss.nnoremap('<localleader>ov', '<Cmd>Neorg gtd views<CR>')
-        require('neorg').setup {
-          configure_parsers = true,
-          load = {
-            ['core.defaults'] = {},
-            ['core.integrations.telescope'] = {},
-            ['core.keybinds'] = {
-              config = {
-                default_keybinds = true,
-                neorg_leader = '<localleader>',
-                hook = function(keybinds)
-                  keybinds.unmap('norg', 'n', '<C-s>')
-                  keybinds.map_event(
-                    'norg',
-                    'n',
-                    '<C-x>',
-                    'core.integrations.telescope.find_linkable'
-                  )
-                end,
-              },
-            },
-            ['core.norg.completion'] = {
-              config = {
-                engine = 'nvim-cmp',
-              },
-            },
-            ['core.norg.concealer'] = {},
-            ['core.norg.dirman'] = {
-              config = {
-                workspaces = {
-                  notes = '$SYNC_DIR/neorg/notes',
-                  tasks = '$SYNC_DIR/neorg/tasks',
-                },
-              },
-            },
-            ['core.gtd.base'] = {
-              config = {
-                workspace = 'tasks',
-              },
-            },
-          },
-        }
-      end,
+      config = conf 'neorg',
     }
 
     -- This plugin adds horizontal highlights for text filetypes
     use {
       'lukas-reineke/headlines.nvim',
-      setup = function()
-        -- https://observablehq.com/@d3/color-schemes?collection=@d3/d3-scale-chromatic
-        -- NOTE: this must be set in the setup function or it will crash nvim...
-        -- require('fss.highlights').plugin(
-        --   'Headlines',
-        --   { 'Headline1', { background = '#003c30', foreground = 'White' } },
-        --   { 'Headline2', { background = '#00441b', foreground = 'White' } },
-        --   { 'Headline3', { background = '#084081', foreground = 'White' } },
-        --   { 'Dash', { background = '#0b60a1', bold = true } }
-        -- )
-      end,
-      config = function()
-        require('headlines').setup {
-          markdown = {
-            headline_highlights = { 'Headline1', 'Headline2', 'Headline3' },
-          },
-          yaml = {
-            dash_pattern = '^---+$',
-            dash_highlight = 'Dash',
-            dash_string = '-',
-          },
-        }
-      end,
+      setup = conf('headlines').setup,
+      config = conf('headlines').config,
     }
 
     -- Replaces the asterisks in org syntax with unicode characters
     use {
       'akinsho/org-bullets.nvim',
-      disable = false,
+      disable = true,
       config = function()
         require('org-bullets').setup()
       end,
