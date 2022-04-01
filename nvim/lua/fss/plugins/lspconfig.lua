@@ -77,25 +77,13 @@ local function setup_mappings(client)
 
   maps.n[']c'] = {
     function()
-      vim.diagnostic.goto_prev {
-        float = {
-          border = fss.style.border.line,
-          focusable = false,
-          source = 'always',
-        },
-      }
+      vim.diagnostic.goto_next()
     end,
     'lsp: go to prev diagnostic',
   }
   maps.n['[c'] = {
     function()
-      vim.diagnostic.goto_next {
-        float = {
-          border = fss.style.border.line,
-          focusable = false,
-          source = 'always',
-        },
-      }
+      vim.diagnostic.goto_next()
     end,
     'lsp: go to next diagnostic',
   }

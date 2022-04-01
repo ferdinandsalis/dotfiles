@@ -2,7 +2,7 @@ return function()
   local cmp = require 'cmp'
   local h = require 'fss.highlights'
   local t = fss.replace_termcodes
-  local line_border = fss.style.border.line
+  local border = fss.style.current.border
 
   local keyword_fg = h.get_hl('Keyword', 'fg')
   h.plugin(
@@ -50,10 +50,10 @@ return function()
   cmp.setup {
     window = {
       completion = {
-        border = line_border,
+        border = border,
       },
       documentation = {
-        border = line_border,
+        border = border,
       },
     },
     experimental = {
@@ -104,7 +104,7 @@ return function()
       end,
     },
     documentation = {
-      border = line_border,
+      border = border,
     },
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },

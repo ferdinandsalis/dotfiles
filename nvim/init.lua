@@ -28,6 +28,7 @@ end
 -- Plugin Configurations
 ------------------------------------------------------------------------
 R 'fss.globals'
+R 'fss.styles'
 R 'fss.settings'
 R 'fss.highlights'
 R 'fss.statusline'

@@ -61,7 +61,7 @@ return function()
       },
       lsp_interop = {
         enable = true,
-        border = fss.style.border.line,
+        border = fss.style.current.border,
         peek_definition_code = {
           ['<leader>df'] = '@function.outer',
           ['<leader>dF'] = '@class.outer',

@@ -1,6 +1,6 @@
---- =====================================================================
+----------------------------------------------------------------------------------------------------
 --- Resources:
---- =====================================================================
+----------------------------------------------------------------------------------------------------
 --- 1. https://gabri.me/blog/diy-vim-statusline
 --- 2. https://github.com/elenapan/dotfiles/blob/master/config/nvim/statusline.vim
 --- 3. https://got-ravings.blogspot.com/2008/08/vim-pr0n-making-statuslines-that-own.html
@@ -8,9 +8,10 @@
 
 local utils = require 'fss.utils.statusline'
 local H = require 'fss.highlights'
-
-local P = fss.style.palette
+local api = vim.api
+local palette = fss.style.palette
 local icons = fss.style.icons
+
 local M = {}
 
 local function colors()
@@ -20,7 +21,7 @@ local function colors()
   --- terminal emulators like kitty handle this by fetching nerd fonts elsewhere
   --- but this is not universal across terminals so should be avoided
 
-  local indicator_color = P.blue
+  local indicator_color = palette.blue
   local warning_fg = fss.style.lsp.colors.warn
   local error_color = fss.style.lsp.colors.error
   local info_color = fss.style.lsp.colors.info
@@ -29,8 +30,7 @@ local function colors()
   local string_fg = H.get_hl('String', 'fg')
   local number_fg = H.get_hl('Number', 'fg')
   local identifier_fg = H.get_hl('Identifier', 'fg')
-  local inc_search_bg = H.get_hl('Search', 'bg')
-  local bg_color = P.bg_highlight
+  local bg_color = palette.bg_highlight
 
   H.all {
     { 'StMetadata', { background = bg_color, inherit = 'Comment' } },
@@ -45,12 +45,19 @@ local function colors()
     },
     {
       'StIndicator',
-      { background = bg_color, foreground = bg_color },
+      { background = bg_color, foreground = indicator_color },
     },
+
     { 'StModified', { foreground = string_fg, background = bg_color } },
-    { 'StGit', { foreground = P.gitSigns.delete, background = bg_color } },
-    { 'StGreen', { foreground = P.green, background = bg_color } },
-    { 'StBlue', { foreground = P.blue, background = bg_color, bold = true } },
+    {
+      'StGit',
+      { foreground = palette.gitSigns.delete, background = bg_color },
+    },
+    { 'StGreen', { foreground = palette.green, background = bg_color } },
+    {
+      'StBlue',
+      { foreground = palette.blue, background = bg_color, bold = true },
+    },
     { 'StNumber', { foreground = number_fg, background = bg_color } },
     {
       'StCount',
@@ -59,21 +66,21 @@ local function colors()
     { 'StPrefix', { background = pmenu_bg, foreground = normal_fg } },
     {
       'StDirectory',
-      { background = bg_color, foreground = P.comment, italic = true },
+      { background = bg_color, foreground = palette.comment, italic = true },
     },
     {
       'StParentDirectory',
-      { background = bg_color, foreground = P.dark5, bold = true },
+      { background = bg_color, foreground = palette.dark5, bold = true },
     },
     { 'StIdentifier', { foreground = identifier_fg, background = bg_color } },
     {
       'StTitle',
-      { background = bg_color, foreground = P.dark5, bold = true },
+      { background = bg_color, foreground = palette.dark5, bold = true },
     },
     { 'StComment', { background = bg_color, inherit = 'Comment' } },
     {
       'StInactive',
-      { foreground = bg_color, background = P.terminal_black },
+      { foreground = bg_color, background = palette.terminal_black },
     },
     { 'StatusLine', { background = bg_color } },
     {
@@ -88,12 +95,12 @@ local function colors()
     { 'StError', { foreground = error_color, background = bg_color } },
     {
       'StFilename',
-      { background = bg_color, foreground = P.fg, bold = true },
+      { background = bg_color, foreground = palette.fg, bold = true },
     },
     {
       'StFilenameInactive',
       {
-        foreground = P.terminal_black,
+        foreground = palette.terminal_black,
         background = bg_color,
         italic = true,
         bold = true,
@@ -101,23 +108,23 @@ local function colors()
     },
     {
       'StModeNormal',
-      { background = bg_color, foreground = P.dark3, bold = true },
+      { background = bg_color, foreground = palette.teal, bold = true },
     },
     {
       'StModeInsert',
-      { background = bg_color, foreground = P.blue, bold = true },
+      { background = bg_color, foreground = palette.blue, bold = true },
     },
     {
       'StModeVisual',
-      { background = bg_color, foreground = P.magenta, bold = true },
+      { background = bg_color, foreground = palette.magenta2, bold = true },
     },
     {
       'StModeReplace',
-      { background = bg_color, foreground = P.red, bold = true },
+      { background = bg_color, foreground = palette.red1, bold = true },
     },
     {
       'StModeCommand',
-      { background = bg_color, foreground = inc_search_bg, bold = true },
+      { background = bg_color, foreground = palette.orange, bold = true },
     },
   }
 end
@@ -173,13 +180,13 @@ function _G.__statusline()
   -- use the statusline global variable which is set inside of statusline
   -- functions to the window for *that* statusline
   local curwin = vim.g.statusline_winid or 0
-  local curbuf = vim.api.nvim_win_get_buf(curwin)
+  local curbuf = api.nvim_win_get_buf(curwin)
   local available_space = vim.o.columns
 
   local ctx = {
     bufnum = curbuf,
     winid = curwin,
-    bufname = vim.fn.bufname(curbuf),
+    bufname = api.nvim_buf_get_name(curbuf),
     preview = vim.wo[curwin].previewwindow,
     readonly = vim.bo[curbuf].readonly,
     filetype = vim.bo[curbuf].ft,
@@ -189,15 +196,15 @@ function _G.__statusline()
     shiftwidth = vim.bo[curbuf].shiftwidth,
     expandtab = vim.bo[curbuf].expandtab,
   }
-  ----------------------------------------------------------------------------//
+  --------------------------------------------------------------------------------------------------
   -- Modifiers
-  ----------------------------------------------------------------------------//
+  --------------------------------------------------------------------------------------------------
   local plain = utils.is_plain(ctx)
   local file_modified = utils.modified(ctx, icons.misc.circle)
   local focused = vim.g.vim_in_focus or true
-  ----------------------------------------------------------------------------//
+  --------------------------------------------------------------------------------------------------
   -- Setup
-  ----------------------------------------------------------------------------//
+  --------------------------------------------------------------------------------------------------
   local statusline = {}
   local add = make_status(statusline)
 
@@ -210,9 +217,9 @@ function _G.__statusline()
     ),
     0,
   }, { utils.spacer(1), 0 })
-  ----------------------------------------------------------------------------//
+  --------------------------------------------------------------------------------------------------
   -- Filename
-  ----------------------------------------------------------------------------//
+  --------------------------------------------------------------------------------------------------
   local segments = utils.file(ctx, plain)
   local dir, parent, file = segments.dir, segments.parent, segments.file
   local dir_item = utils.item(dir.item, dir.hl, dir.opts)
@@ -225,11 +232,10 @@ function _G.__statusline()
     'StError'
   )
   local readonly_item = utils.item(utils.readonly(ctx), readonly_hl)
-  ----------------------------------------------------------------------------//
+  --------------------------------------------------------------------------------------------------
   -- Mode
-  ----------------------------------------------------------------------------//
+  --------------------------------------------------------------------------------------------------
   -- show a minimal statusline with only the mode and file component
-  ----------------------------------------------------------------------------//
   if plain or not focused then
     add(
       { readonly_item, 1 },
@@ -239,9 +245,9 @@ function _G.__statusline()
     )
     return display(statusline, available_space)
   end
-  -----------------------------------------------------------------------------//
+  --------------------------------------------------------------------------------------------------
   -- Variables
-  -----------------------------------------------------------------------------//
+  --------------------------------------------------------------------------------------------------
   local status = vim.b.gitsigns_status_dict or {}
   local updates = vim.g.git_statusline_updates or {}
   local ahead = updates.ahead and tonumber(updates.ahead) or 0
@@ -253,14 +259,13 @@ function _G.__statusline()
 
   -- LSP Diagnostics
   local diagnostics = utils.diagnostic_info(ctx)
-  -----------------------------------------------------------------------------//
+  --------------------------------------------------------------------------------------------------
   -- Left section
-  -----------------------------------------------------------------------------//
+  --------------------------------------------------------------------------------------------------
   add(
     { item_if(file_modified, ctx.modified, 'StModified'), 1 },
     { readonly_item, 2 },
     { item(utils.mode()), 0 },
-    -- { item(utils.search_count(), 'StCount'), 1 },
     { dir_item, 3 },
     { parent_item, 2 },
     { file_item, 0 },
@@ -289,17 +294,16 @@ function _G.__statusline()
       2,
     },
     { separator },
-    -----------------------------------------------------------------------------//
+    ------------------------------------------------------------------------------------------------
     -- Middle section
-    -----------------------------------------------------------------------------//
+    ------------------------------------------------------------------------------------------------
     -- Neovim allows unlimited alignment sections so we can put things in the
     -- middle of our statusline - https://neovim.io/doc/user/vim_diff.html#vim-differences
-    -----------------------------------------------------------------------------//
     -- Start of the right side layout
     { separator },
-    -----------------------------------------------------------------------------//
+    ------------------------------------------------------------------------------------------------
     -- Right section
-    -----------------------------------------------------------------------------//
+    ------------------------------------------------------------------------------------------------
     -- { item(utils.lsp_client(), 'StMetadata'), 4 },
     { item(utils.debugger(), 'StMetadata', { prefix = icons.misc.bug }), 4 },
     -- {

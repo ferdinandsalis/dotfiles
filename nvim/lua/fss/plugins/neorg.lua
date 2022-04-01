@@ -6,6 +6,11 @@ return function()
     load = {
       ['core.defaults'] = {},
       ['core.integrations.telescope'] = {},
+      ['core.presenter'] = {
+        config = {
+          zen_mode = 'zen-mode',
+        },
+      },
       ['core.keybinds'] = {
         config = {
           default_keybinds = true,
@@ -21,6 +26,8 @@ return function()
           end,
         },
       },
+      ['core.norg.qol.toc'] = {},
+      ['core.norg.journal'] = {},
       ['core.norg.completion'] = {
         config = {
           engine = 'nvim-cmp',

@@ -63,19 +63,19 @@ return function()
       selection_caret = icons.misc.double_chevron_right .. ' ',
       mappings = {
         i = {
-          ['<C-w>'] = actions.send_selected_to_qflist,
-          ['<c-c>'] = function()
+          ['<C-q>'] = actions.send_selected_to_qflist,
+          ['<C-c>'] = function()
             vim.cmd 'stopinsert!'
           end,
           ['<esc>'] = actions.close,
-          ['<c-s>'] = actions.select_horizontal,
-          ['<c-j>'] = actions.cycle_history_next,
-          ['<c-k>'] = actions.cycle_history_prev,
-          ['<c-e>'] = layout_actions.toggle_preview,
-          ['<c-l>'] = layout_actions.cycle_layout_next,
+          ['<C-s>'] = actions.select_horizontal,
+          ['<C-j>'] = actions.cycle_history_next,
+          ['<C-k>'] = actions.cycle_history_prev,
+          ['<C-e>'] = layout_actions.toggle_preview,
+          ['<C-l>'] = layout_actions.cycle_layout_next,
         },
         n = {
-          ['<C-w>'] = actions.send_selected_to_qflist,
+          ['<C-q>'] = actions.send_selected_to_qflist,
         },
       },
       file_ignore_patterns = {

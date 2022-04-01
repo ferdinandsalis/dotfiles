@@ -184,8 +184,6 @@ end
 -- General highlights {{{
 ---------------------------------------------------------------------------------
 local function general_overrides()
-  local colors = require('tokyonight.colors').setup()
-
   M.all {
     {
       'VertSplit',
@@ -198,29 +196,25 @@ local function general_overrides()
 
     { 'ColorColumn', { background = '#272b40' } },
     { 'CursorLine', { background = '#272b40' } },
-    { 'Pmenu', { foreground = colors.fg, background = colors.bg_popup } },
-    { 'LspFloatNormal', { background = colors.bg_popup } },
-    { 'LspFloatWinNormal', { background = colors.bg_popup } },
-    { 'NormalFloat', { background = colors.bg_popup } },
-    { 'FloatNormal', { background = colors.bg_popup } },
+    { 'Pmenu', { foreground = P.fg, background = P.bg_popup } },
+    { 'LspFloatNormal', { background = P.bg_popup } },
+    { 'LspFloatWinNormal', { background = P.bg_popup } },
+    { 'NormalFloat', { background = P.bg_popup } },
+    { 'FloatNormal', { background = P.bg_popup } },
     {
       'FloatBorder',
-      { background = colors.bg_popup, foreground = colors.bg_popup },
-    },
-    {
-      'GreyFloatBorder',
-      { link = 'FloatBorder' },
+      { background = P.bg_popup, foreground = P.bg_popup },
     },
     -----------------------------------------------------------------------------//
     -- Commandline
     -----------------------------------------------------------------------------//
     {
       'MsgArea',
-      { foreground = colors.fg_sidebar, background = colors.bg_sidebar },
+      { foreground = P.fg_sidebar, background = P.bg_sidebar },
     },
     {
       'MsgSeparator',
-      { foreground = colors.fg_sidebar, background = colors.bg_sidebar },
+      { foreground = P.fg_sidebar, background = P.bg_sidebar },
     },
     -----------------------------------------------------------------------------//
     -- Treesitter
@@ -233,7 +227,7 @@ end
 
 -- }}}
 
-local function set_sidebar_highlight()
+local function set_panel_highlights()
   local normal_bg = M.get_hl('Normal', 'bg')
   local split_color = M.get_hl('VertSplit', 'fg')
   local bg_color = M.alter_color(normal_bg, -8)
@@ -254,9 +248,9 @@ local function set_sidebar_highlight()
   end
 end
 
-local sidebar_fts = { 'packer', 'dap-repl', 'undotree' }
+local panel_fts = { 'packer', 'dap-repl', 'undotree', 'qf' }
 
-local function on_sidebar_enter()
+local function on_panel_enter()
   vim.wo.winhighlight = table.concat({
     'Normal:PanelBackground',
     'EndOfBuffer:PanelBackground',
@@ -264,6 +258,7 @@ local function on_sidebar_enter()
     'StatusLineNC:PanelStNC',
     'SignColumn:PanelBackground',
     'VertSplit:PanelVertSplit',
+    'WinSeparator:PanelWinSeparator',
   }, ',')
 end
 
@@ -280,7 +275,7 @@ end
 local function user_highlights()
   general_overrides()
   colorscheme_overrides()
-  set_sidebar_highlight()
+  set_panel_highlights()
 end
 
 ---NOTE: apply user highlights when nvim first starts
@@ -297,9 +292,9 @@ fss.augroup('UserHighlights', {
   },
   {
     event = 'FileType',
-    pattern = sidebar_fts,
+    pattern = panel_fts,
     command = function()
-      on_sidebar_enter()
+      on_panel_enter()
     end,
   },
 })

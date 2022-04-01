@@ -108,6 +108,11 @@ diagnostic.config {
   update_in_insert = false,
   severity_sort = true,
   virtual_text = false,
+  float = {
+    border = fss.style.current.border,
+    focusable = false,
+    source = 'always',
+  },
 }
 
 local max_width = math.max(math.floor(vim.o.columns * 0.7), 100)
@@ -115,7 +120,7 @@ local max_height = math.max(math.floor(vim.o.lines * 0.3), 30)
 
 -- NOTE: the hover handler returns the bufnr,winnr so can be used for mappings
 lsp.handlers['textDocument/hover'] = lsp.with(lsp.handlers.hover, {
-  border = fss.style.border.line,
+  border = fss.style.current.border,
   max_width = max_width,
   max_height = max_height,
 })
@@ -123,7 +128,7 @@ lsp.handlers['textDocument/hover'] = lsp.with(lsp.handlers.hover, {
 lsp.handlers['textDocument/signatureHelp'] = lsp.with(
   lsp.handlers.signature_help,
   {
-    border = fss.style.border.line,
+    border = fss.style.current.border,
     max_width = max_width,
     max_height = max_height,
   }

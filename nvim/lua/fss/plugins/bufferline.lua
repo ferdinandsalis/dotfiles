@@ -40,6 +40,7 @@ return function()
     },
     options = {
       mode = 'buffers', -- tabs
+      sort_by = 'insert_after_current',
       right_mouse_command = 'vert sbuffer %d',
       show_buffer_icons = false,
       show_close_icon = false,

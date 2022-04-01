@@ -7,7 +7,7 @@ return function()
     input = {
       insert_only = false,
       winblend = fss.style.float.blend,
-      border = fss.style.border.line,
+      border = fss.style.current.border,
     },
     select = {
       telescope = require('telescope.themes').get_cursor {

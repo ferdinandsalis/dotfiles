@@ -262,7 +262,7 @@ packer.startup {
           fix_pos = false,
           auto_close_after = 15, -- close after 15 seconds
           hint_enable = false,
-          handler_opts = { border = fss.style.border.line },
+          handler_opts = { border = fss.style.current.border },
         }
       end,
     }
@@ -636,6 +636,15 @@ packer.startup {
       end,
     }
 
+    use {
+      'klen/nvim-config-local',
+      config = function()
+        require('config-local').setup {
+          config_files = { '.localrc.lua', '.vimrc', '.vimrc.lua' },
+        }
+      end,
+    }
+
     -- prevent select and visual mode from overwriting the clipboard
     use {
       'kevinhwang91/nvim-hclipboard',
@@ -683,12 +692,15 @@ packer.startup {
     use {
       'kevinhwang91/nvim-bqf',
       config = function()
+        local P = fss.style.palette
         local h = require 'fss.highlights'
-        local comment_fg = h.get_hl('Comment', 'fg')
-        h.plugin(
-          'nvim-bqf',
-          { 'BqfPreviewBorder', { foreground = comment_fg } }
-        )
+        h.plugin('nvim-bqf', {
+          'BqfPreviewBorder',
+          { foreground = P.bg_popup, background = P.bg_popup },
+        }, {
+          'BqfPreviewFloat',
+          { background = P.bg_popup },
+        })
       end,
     }
 
@@ -923,7 +935,7 @@ packer.startup {
   config = {
     compile_path = PACKER_COMPILED_PATH,
     display = {
-      prompt_border = fss.style.border.line,
+      prompt_border = fss.style.current.border,
       open_cmd = 'silent topleft 65vnew',
     },
     profile = {
