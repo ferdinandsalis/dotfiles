@@ -1,13 +1,19 @@
 return function()
   local parsers = require 'nvim-treesitter.parsers'
   local rainbow_enabled = {}
+  local languages = vim.tbl_flatten {
+    { 'c', 'comment', 'make', 'query', 'toml', 'dart', 'bash', 'regex' },
+    { 'ruby', 'elm', 'go', 'markdown', 'help', 'vim', 'norg', 'css' },
+    { 'lua', 'typescript', 'tsx', 'javascript', 'jsdoc', 'json', 'jsonc' },
+    { 'dockerfile', 'graphql', 'html', 'yaml', 'make', 'ocaml' },
+    { 'java', 'python', 'swift', 'rust', 'yaml', 'elixir', 'erlang' },
+  }
 
   require('nvim-treesitter.configs').setup {
-    ensure_installed = 'maintained',
+    ensure_installed = languages,
     highlight = {
       enable = true,
       disable = { 'org' },
-      additional_vim_regex_highlighting = { 'org' },
     },
     autotag = {
       enable = true,
@@ -87,4 +93,8 @@ return function()
       lint_events = { 'BufWrite', 'CursorHold' },
     },
   }
+
+  -- NOTE: this is to allow markdown highlighting in octo buffers
+  local parser_config = parsers.get_parser_configs()
+  parser_config.markdown.filetype_to_parsername = 'octo'
 end

@@ -34,6 +34,9 @@ packer.startup {
 
     use_rocks 'penlight'
 
+    -- @see: https://github.com/neovim/neovim/issues/12587
+    use 'antoinemadec/FixCursorHold.nvim'
+
     -- Change the current working directory automatically
     use {
       'ahmedkhalf/project.nvim',
@@ -65,13 +68,6 @@ packer.startup {
           'nvim-telescope/telescope-frecency.nvim',
           after = 'telescope.nvim',
           requires = 'tami5/sqlite.lua',
-        },
-        {
-          'nvim-telescope/telescope-github.nvim',
-          after = 'telescope.nvim',
-          config = function()
-            require('telescope').load_extension 'gh'
-          end,
         },
         {
           'nvim-telescope/telescope-smart-history.nvim',
@@ -263,6 +259,20 @@ packer.startup {
           auto_close_after = 15, -- close after 15 seconds
           hint_enable = false,
           handler_opts = { border = fss.style.current.border },
+        }
+      end,
+    }
+
+    use {
+      'RRethy/vim-illuminate',
+      config = function()
+        vim.g.Illuminate_delay = 300
+        vim.g.Illuminate_ftblacklist = {
+          'neo-tree',
+          'packer',
+          'DiffviewFiles',
+          'toggleterm',
+          'help',
         }
       end,
     }
@@ -494,31 +504,37 @@ packer.startup {
 
     use {
       'akinsho/git-conflict.nvim',
-      local_path = 'personal',
-      config = function()
-        require('git-conflict').setup {
-          disable_diagnostics = true,
-        }
-      end,
+      -- config = function()
+      --   require('git-conflict').setup {
+      --     disable_diagnostics = true,
+      --   }
+      -- end,
     }
 
     use {
       'pwntester/octo.nvim',
       cmd = 'Octo*',
       setup = function()
-        require('which-key').register {
-          ['<localleader>o'] = {
+        require('which-key').register({
+          O = {
             name = '+octo',
-            p = {
-              name = '+pull-request',
-              l = { '<cmd>Octo pr list<CR>', 'list' },
-            },
-            i = {
-              name = '+issues',
-              l = { '<cmd>Octo issue list<CR>', 'list' },
+            l = {
+              name = '+list',
+              i = { '<Cmd>Octo issue list<CR>', 'issues' },
+              p = { '<Cmd>Octo pr list<CR>', 'pull requests' },
             },
           },
-        }
+        }, { prefix = '<leader>' })
+        fss.augroup('OctoFT', {
+          {
+            event = 'FileType',
+            pattern = 'octo',
+            command = function()
+              require('fss.highlights').clear_hl 'OctoEditable'
+              fss.nnoremap('q', '<Cmd>Bwipeout<CR>', { buffer = 0 })
+            end,
+          },
+        })
       end,
       config = function()
         require('octo').setup()
@@ -584,15 +600,24 @@ packer.startup {
     }
 
     use {
-      'kyazdani42/nvim-tree.lua',
-      disable = false,
-      config = conf 'nvimtree',
-      requires = 'nvim-web-devicons',
+      'nvim-neo-tree/neo-tree.nvim',
+      branch = 'v2.x',
+      keys = { '<C-N>', '-' },
+      cmd = 'NeoTree',
+      config = conf 'neotree',
+      requires = {
+        'nvim-lua/plenary.nvim',
+        'MunifTanjim/nui.nvim',
+        'kyazdani42/nvim-web-devicons',
+      },
     }
 
     use 'MunifTanjim/nui.nvim'
 
-    use 'kevinhwang91/nvim-hlslens'
+    use {
+      'kevinhwang91/nvim-hlslens',
+      disable = true,
+    }
 
     use {
       'petertriho/nvim-scrollbar',
@@ -601,12 +626,33 @@ packer.startup {
 
     use {
       'anuvyklack/pretty-fold.nvim',
-      disable = true,
+      disable = false,
       config = function()
         require('pretty-fold').setup {
-          fill_char = ' ',
+          keep_indentation = false,
+          fill_char = '━',
+          sections = {
+            left = {
+              '━ ',
+              function()
+                return string.rep('*', vim.v.foldlevel)
+              end,
+              ' ',
+              'content',
+            },
+            right = {
+              ' ',
+              'number_of_folded_lines',
+              ': ',
+              'percentage',
+              ' ━━',
+            },
+          },
         }
-        require('pretty-fold.preview').setup_keybinding()
+
+        require('pretty-fold.preview').setup {
+          key = 'h',
+        }
       end,
     }
 
@@ -665,7 +711,17 @@ packer.startup {
     }
 
     use {
+      'RRethy/vim-hexokinase',
+      disable = false,
+      run = 'make hexokinase',
+      config = function()
+        vim.g.Hexokinase_highlighters = { 'virtual' }
+      end,
+    }
+
+    use {
       'norcalli/nvim-colorizer.lua',
+      disable = true,
       config = function()
         require('colorizer').setup({ '*' }, {
           RGB = false,
@@ -709,7 +765,12 @@ packer.startup {
     -- Search Tools {{{
     --------------------------------------------------------------------------------
 
-    use 'ggandor/lightspeed.nvim'
+    use {
+      'phaazon/hop.nvim',
+      keys = { { 'n', 's' }, 'f', 'F' },
+      config = conf 'hop',
+    }
+    -- use 'ggandor/lightspeed.nvim'
 
     ---}}}
     --------------------------------------------------------------------------------

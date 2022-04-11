@@ -8,7 +8,7 @@ return function()
     show_current_context_start = false,
     show_current_context_start_on_current_line = false,
     filetype_exclude = {
-      'startify',
+      'neo-tree-popup',
       'dashboard',
       'log',
       'fugitive',
@@ -27,7 +27,6 @@ return function()
       'undotree',
       'flutterToolsOutline',
       'norg',
-      'org',
       'orgagenda',
       '', -- for all buffers without a file type
     },

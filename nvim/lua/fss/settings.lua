@@ -79,7 +79,7 @@ vim.opt.formatoptions = {
 ----------------------------------------------------------------------------------------------------
 vim.opt.foldtext = 'v:lua.fss.folds()'
 vim.opt.foldopen = vim.opt.foldopen + 'search'
-vim.opt.foldlevelstart = 5
+vim.opt.foldlevelstart = 8
 vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
 vim.opt.foldmethod = 'expr'
 
@@ -250,7 +250,7 @@ vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in 
 vim.opt.shada = "!,'0,f0,<50,s10,h"
 
 ----------------------------------------------------------------------------------------------------
--- BACKUP AND SWAPS {{{1
+-- Backup and Swaps {{{1
 ----------------------------------------------------------------------------------------------------
 vim.opt.backup = false
 vim.opt.writebackup = false
@@ -304,5 +304,6 @@ if fss.executable 'nvr' then
   vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
   vim.env.EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
 end
+-- }}}
 
--- vim:foldmethod=marker
+-- vim:foldmethod=marker:foldlevel=0

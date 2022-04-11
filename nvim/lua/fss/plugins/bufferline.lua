@@ -50,6 +50,11 @@ return function()
       custom_filter = custom_filter,
       offsets = {
         {
+          filetype = 'neo-tree',
+          text = '',
+          highlight = 'PanelHeading',
+        },
+        {
           filetype = 'undotree',
           text = '',
           highlight = 'PanelHeading',

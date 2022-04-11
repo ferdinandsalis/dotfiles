@@ -156,6 +156,8 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Thin wrappers over API functions to make their usage easier/terser
 
+P = vim.pretty_print
+
 ---@class Autocommand
 ---@field description string
 ---@field event  string[] list of autocommand events
@@ -199,7 +201,7 @@ end
 ---@param opts table
 function fss.command(name, rhs, opts)
   opts = opts or {}
-  api.nvim_add_user_command(name, rhs, opts)
+  api.nvim_create_user_command(name, rhs, opts)
 end
 
 ---Source a lua or vimscript file

@@ -1,21 +1,26 @@
 return function()
-  vim.g.copilot_filetypes = {
-    ['*'] = false,
-    gitcommit = false,
-    NeogitCommitMessage = false,
-    lua = true,
-    javascript = true,
-    typescript = true,
-    typescriptreact = true,
-    javascriptreact = true,
-  }
+  vim.g.copilot_no_tab_map = true
+
   fss.imap('<c-h>', [[copilot#Accept("\<CR>")]], {
     expr = true,
     script = true,
   })
-  vim.g.copilot_no_tab_map = true
-  vim.g.copilot_assume_mapped = true
-  vim.g.copilot_tab_fallback = ''
+  fss.imap(
+    '<Plug>(vimrc:copilot-dummy-map)',
+    "copilot#Accept('<Tab>')",
+    { expr = true }
+  )
+  fss.inoremap('<M-]>', '<Plug>(copilot-next)')
+  fss.inoremap('<M-[>', '<Plug>(copilot-previous)')
+  fss.inoremap('<C-\\>', '<Cmd>vertical Copilot panel<CR>')
+
+  vim.g.copilot_filetypes = {
+    ['*'] = true,
+    ['gitcommit'] = false,
+    ['NeogitCommitMessage'] = false,
+    ['neo-tree-popup'] = false,
+  }
+
   require('fss.highlights').plugin(
     'copilot',
     { 'CopilotSuggestion', { link = 'Comment' } }

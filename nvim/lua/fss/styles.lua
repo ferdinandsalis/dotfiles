@@ -202,5 +202,5 @@ fss.style = {
 -- Some styles can be tweaked here to apply globally i.e. by setting the current value for that style
 
 fss.style.current = {
-  border = fss.style.border.line
+  border = fss.style.border.line,
 }

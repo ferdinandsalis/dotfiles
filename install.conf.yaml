@@ -17,9 +17,12 @@
     ~/.zshrc: zsh/zshrc
     ~/.zshenv: zsh/zshenv
     ~/.zprofile: zsh/zprofile
-    ~/.vimrc: vim/vimrc
+    # ~/.vimrc: vim/vimrc
     ~/.gitconfig: git/gitconfig
     ~/.gitmessage: git/gitmessage
+    ~/.config/yabai: yabai
+    ~/.config/qutebrowser: qutebrowser
+    ~/.skhdrc: skhd/skhdrc
     ~/.config/nvim: nvim
     ~/.Brewfile: homebrew/Brewfile
     ~/Library/Application Support/lazygit/config.yml: lazygit/config.yml

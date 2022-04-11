@@ -42,7 +42,10 @@ return function()
         },
         ['[h'] = 'go to next git hunk',
         [']h'] = 'go to previous git hunk',
-        ['<leader>lm'] = { qf_list_modified, 'gitsigns: list modified in quickfix' },
+        ['<leader>lm'] = {
+          qf_list_modified,
+          'gitsigns: list modified in quickfix',
+        },
       }
 
       -- Navigation

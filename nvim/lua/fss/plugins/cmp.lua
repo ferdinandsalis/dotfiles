@@ -75,7 +75,7 @@ return function()
       ['<C-q>'] = cmp.mapping.complete(),
       ['<CR>'] = cmp.mapping.confirm {
         behavior = cmp.ConfirmBehavior.Replace,
-        select = true,
+        select = false,
       },
     },
     formatting = {
@@ -85,18 +85,16 @@ return function()
         vim_item.kind = fss.style.lsp.kinds[vim_item.kind]
         local name = entry.source.name
         local menu = ({
-          nvim_lsp = '[LSP]',
+          nvim_lsp = '[Lsp]',
           nvim_lua = '[Lua]',
           emoji = '[Emoji]',
           path = '[Path]',
           calc = '[Calc]',
           neorg = '[Neorg]',
-          orgmode = '[Org]',
           luasnip = '[Luasnip]',
           buffer = '[Buffer]',
           spell = '[Spell]',
           cmdline = '[Command]',
-          cmp_git = '[Git]',
         })[name]
 
         vim_item.menu = menu
@@ -111,7 +109,6 @@ return function()
       { name = 'luasnip' },
       { name = 'path' },
       { name = 'spell' },
-      { name = 'cmp_git' },
     }, {
       { name = 'fuzzy_buffer' },
     }),
@@ -119,7 +116,10 @@ return function()
 
   cmp.setup.filetype('NeogitCommitMessage', {
     sources = cmp.config.sources({
-      { name = 'cmp_git' },
+      { name = 'luasnip' },
+      { name = 'path' },
+      { name = 'spell' },
+      -- { name = 'cmp_git' },
     }, {
       { name = 'buffer' },
     }),

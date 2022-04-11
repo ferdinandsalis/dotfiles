@@ -366,11 +366,11 @@ function _G.__statusline()
       5,
     },
     {
-      item(
-        behind,
-        'StTitle',
-        { prefix = icons.misc.down, prefix_color = 'StNumber', after = ' ' }
-      ),
+      item(behind, 'StTitle', {
+        prefix = icons.misc.down,
+        prefix_color = 'StNumber',
+        after = ' ',
+      }),
       5,
     },
     -- Current line number/total line number,  alternatives 

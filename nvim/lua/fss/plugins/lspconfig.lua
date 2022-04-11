@@ -5,35 +5,42 @@ local fmt = string.format
 -- Autocommands
 -----------------------------------------------------------------------------//
 
-local function setup_autocommands(client, _)
+--- Add lsp autocommands
+---@param client table<string, any>
+---@param bufnr number
+local function setup_autocommands(client, bufnr)
   if client and client.resolved_capabilities.code_lens then
     fss.augroup('LspCodeLens', {
       {
         event = { 'BufEnter', 'CursorHold', 'InsertLeave' },
-        buffer = 0,
-        command = vim.lsp.codelens.refresh,
+        buffer = bufnr,
+        command = function()
+          vim.lsp.codelens.refresh()
+        end,
       },
     })
   end
   if client and client.resolved_capabilities.document_highlight then
     fss.augroup('LspCursorCommands', {
       {
-        event = 'CursorHold',
-        buffer = 0,
+        event = { 'CursorHold' },
+        buffer = bufnr,
+        command = function()
+          vim.diagnostic.open_float(nil, { focus = false })
+        end,
+      },
+      {
+        event = { 'CursorHold', 'CursorHoldI' },
+        description = 'LSP: Document Highlight',
+        buffer = bufnr,
         command = function()
           vim.lsp.buf.document_highlight()
         end,
       },
       {
-        event = 'CursorHoldI',
-        buffer = 0,
-        command = function()
-          vim.lsp.buf.document_highlight()
-        end,
-      },
-      {
-        event = 'CursorMoved',
-        buffer = 0,
+        event = { 'CursorMoved' },
+        description = 'LSP: Document Highlight (Clear)',
+        buffer = bufnr,
         command = function()
           vim.lsp.buf.clear_references()
         end,
@@ -202,6 +209,7 @@ local function tsserver_on_attach(client, bufnr)
 end
 
 function fss.lsp.on_attach(client, bufnr)
+  require('illuminate').on_attach(client)
   setup_autocommands(client, bufnr)
   setup_mappings(client)
 

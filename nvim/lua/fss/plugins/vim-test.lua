@@ -14,14 +14,14 @@ M.setup = function()
 end
 
 M.config = function()
-  -- vim.g['test#strategy'] = 'kitty'
-  vim.cmd [[
-          function! ToggleTermStrategy(cmd) abort
-            call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
-          endfunction
-          let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
-        ]]
-  vim.g['test#strategy'] = 'toggleterm'
+  -- vim.cmd [[
+  --         function! ToggleTermStrategy(cmd) abort
+  --           call luaeval("require('toggleterm').exec(_A[1])", [a:cmd])
+  --         endfunction
+  --         let g:test#custom_strategies = {'toggleterm': function('ToggleTermStrategy')}
+  --       ]]
+  -- vim.g['test#strategy'] = 'toggleterm'
+  vim.g['test#strategy'] = 'kitty'
   vim.g['test#javascript#runner'] = 'jest'
   fss.nnoremap('<localleader>tf', '<cmd>TestFile<CR>')
   fss.nnoremap('<localleader>tn', '<cmd>TestNearest<CR>')

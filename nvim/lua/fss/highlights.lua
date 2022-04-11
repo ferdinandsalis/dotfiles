@@ -184,6 +184,11 @@ end
 -- General highlights {{{
 ---------------------------------------------------------------------------------
 local function general_overrides()
+  local L = fss.style.lsp.colors
+  local hint_line = M.alter_color(L.hint, -80)
+  local error_line = M.alter_color(L.error, -80)
+  local warn_line = M.alter_color(L.warn, -80)
+
   M.all {
     {
       'VertSplit',
@@ -210,11 +215,11 @@ local function general_overrides()
     -----------------------------------------------------------------------------//
     {
       'MsgArea',
-      { foreground = P.fg_sidebar, background = P.bg_sidebar },
+      { foreground = P.fg_sidebar, background = P.bg_dark },
     },
     {
       'MsgSeparator',
-      { foreground = P.fg_sidebar, background = P.bg_sidebar },
+      { foreground = P.fg_sidebar, background = P.bg_dark },
     },
     -----------------------------------------------------------------------------//
     -- Treesitter
@@ -222,6 +227,55 @@ local function general_overrides()
     { 'TSKeywordReturn', { italic = true } },
     { 'TSParameter', { italic = true, bold = true } },
     { 'TSError', { link = 'LspDiagnosticsUnderlineError' } },
+    -----------------------------------------------------------------------------//
+    -- LSP
+    -----------------------------------------------------------------------------//
+    LspCodeLens = { link = 'NonText' },
+    LspReferenceText = { underline = true, background = 'NONE' },
+    LspReferenceRead = { underline = true, background = 'NONE' },
+    -- This represents when a reference is assigned which is more interesting than regular
+    -- occurrences so should be highlighted more distinctly
+    LspReferenceWrite = {
+      underline = true,
+      bold = true,
+      italic = true,
+      background = 'NONE',
+    },
+    DiagnosticHint = { foreground = L.hint },
+    DiagnosticError = { foreground = L.error },
+    DiagnosticWarning = { foreground = L.warn },
+    DiagnosticInfo = { foreground = L.info },
+    DiagnosticUnderlineError = {
+      undercurl = true,
+      sp = L.error,
+      foreground = 'none',
+    },
+    DiagnosticUnderlineHint = {
+      undercurl = true,
+      sp = L.hint,
+      foreground = 'none',
+    },
+    DiagnosticUnderlineWarn = {
+      undercurl = true,
+      sp = L.warn,
+      foreground = 'none',
+    },
+    DiagnosticUnderlineInfo = {
+      undercurl = true,
+      sp = L.info,
+      foreground = 'none',
+    },
+    DiagnosticSignHintLine = { background = hint_line },
+    DiagnosticSignErrorLine = { background = error_line },
+    DiagnosticSignWarnLine = { background = warn_line },
+    DiagnosticSignWarn = { link = 'DiagnosticWarn' },
+    DiagnosticSignInfo = { link = 'DiagnosticInfo' },
+    DiagnosticSignHint = { link = 'DiagnosticHint' },
+    DiagnosticSignError = { link = 'DiagnosticError' },
+    DiagnosticFloatingWarn = { link = 'DiagnosticWarn' },
+    DiagnosticFloatingInfo = { link = 'DiagnosticInfo' },
+    DiagnosticFloatingHint = { link = 'DiagnosticHint' },
+    DiagnosticFloatingError = { link = 'DiagnosticError' },
   }
 end
 
@@ -264,10 +318,8 @@ end
 
 local function colorscheme_overrides()
   if vim.g.colors_name == 'tokyonight' then
-    local bg = M.get_hl('Normal', 'bg')
-    local fg = M.get_hl('Comment', 'fg')
     M.all {
-      { 'Folded', { foreground = fg, background = bg } },
+      { 'Folded', { inherit = 'Comment', italic = true, bold = true } },
     }
   end
 end

@@ -22,14 +22,12 @@ function M.bootstrap_packer()
   )
   if fn.empty(fn.glob(install_path)) > 0 then
     M.packer_notify 'Downloading packer.nvim...'
-    M.packer_notify(
-      fn.system {
-        'git',
-        'clone',
-        'https://github.com/wbthomason/packer.nvim',
-        install_path,
-      }
-    )
+    M.packer_notify(fn.system {
+      'git',
+      'clone',
+      'https://github.com/wbthomason/packer.nvim',
+      install_path,
+    })
     vim.cmd 'packadd! packer.nvim'
     require('packer').sync()
   else

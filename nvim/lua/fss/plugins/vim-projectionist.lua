@@ -2,13 +2,17 @@ return function()
   vim.g.projectionist_heuristics = {
     ['*.js'] = {
       ['*.js'] = { alternate = 'tests/{}.test.js', type = 'source' },
-      ['tests/*.test.js'] = { alternate = '{}.js', type = 'test', template = {
-        "describe('{}', function() {\n",
-        "  test('should be true', () => {\n",
-        "    expect(true).toBe(true);\n",
-        "  });\n",
-        "});\n"
-      } },
+      ['tests/*.test.js'] = {
+        alternate = '{}.js',
+        type = 'test',
+        template = {
+          "describe('{}', function() {\n",
+          "  test('should be true', () => {\n",
+          '    expect(true).toBe(true);\n',
+          '  });\n',
+          '});\n',
+        },
+      },
     },
   }
 

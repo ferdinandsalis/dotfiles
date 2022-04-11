@@ -9,6 +9,9 @@ vim.g.open_command = vim.g.os == 'Darwin' and 'open' or 'xdg-open'
 vim.g.dotfiles = '~/.dotfiles'
 vim.g.vim_dir = '~/.dotfiles/nvim'
 
+-- NOTE: A value of 0 for this variable disables filetype.vim. A value of 1 disables both filetype.vim
+-- and filetype.lua (which you probably don’t want).
+vim.g.did_load_filetypes = 0
 ------------------------------------------------------------------------
 -- Leader bindings
 ------------------------------------------------------------------------

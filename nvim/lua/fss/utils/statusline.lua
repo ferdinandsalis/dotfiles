@@ -5,6 +5,7 @@ local api = vim.api
 local expand = fn.expand
 local strwidth = fn.strwidth
 local fnamemodify = fn.fnamemodify
+local luv = vim.loop
 local fmt = string.format
 
 local M = {}
@@ -18,6 +19,12 @@ local function get_toggleterm_name(_, buf)
   )
 end
 
+-- Capture the type of the neo tree buffer opened
+local function get_neotree_name(fname, _)
+  local parts = vim.split(fname, ' ')
+  return fmt('Neo Tree(%s)', parts[2])
+end
+
 local plain = {
   filetypes = {
     'help',
@@ -25,11 +32,11 @@ local plain = {
     'minimap',
     'Trouble',
     'tsplayground',
-    'NvimTree',
+    'neo-tree',
     'undotree',
-    'fugitive',
     'markdown',
     'NeogitStatus',
+    'norg',
   },
   buftypes = {
     'terminal',
@@ -67,6 +74,7 @@ local exceptions = {
     undotree = 'פּ',
     ['coc-explorer'] = '',
     NvimTree = 'פּ',
+    ['neo-tree'] = 'פּ',
     toggleterm = ' ',
     calendar = '',
     minimap = '',
@@ -96,10 +104,17 @@ local exceptions = {
     octo = 'Octo',
     ['coc-explorer'] = 'Coc Explorer',
     NvimTree = 'Nvim Tree',
+    ['neo-tree'] = get_neotree_name,
     toggleterm = get_toggleterm_name,
     ['dap-repl'] = 'Debugger REPL',
   },
 }
+
+--- @param hl string
+local function wrap(hl)
+  assert(hl, 'A highlight name must be specified')
+  return '%#' .. hl .. '#'
+end
 
 local function sum_lengths(tbl)
   local length = 0
@@ -333,14 +348,14 @@ function M.line_info(opts)
   return {
     table.concat {
       ' ',
-      M.wrap(prefix_color),
+      wrap(prefix_color),
       prefix,
       ' ',
-      M.wrap(current_hl),
+      wrap(current_hl),
       current,
-      M.wrap(sep_hl),
+      wrap(sep_hl),
       sep,
-      M.wrap(total_hl),
+      wrap(total_hl),
       last,
       ' ',
     },
@@ -545,12 +560,6 @@ function M.mode()
   return (mode_map[current_mode] or 'UNKNOWN'), hl
 end
 
---- @param hl string
-function M.wrap(hl)
-  assert(hl, 'A highlight name must be specified')
-  return '%#' .. hl .. '#'
-end
-
 --- Creates a spacer statusline component i.e. for padding
 --- or to represent an empty component
 --- @param size number
@@ -581,7 +590,7 @@ function M.item(component, hl, opts)
   local prefix_size = strwidth(prefix)
 
   local prefix_color = opts.prefix_color or hl
-  prefix = prefix ~= '' and M.wrap(prefix_color) .. prefix .. ' ' or ''
+  prefix = prefix ~= '' and wrap(prefix_color) .. prefix .. ' ' or ''
 
   --- handle numeric inputs etc.
   if type(component) ~= 'string' then
@@ -592,7 +601,7 @@ function M.item(component, hl, opts)
     component = component:sub(1, opts.max_size - 1) .. '…'
   end
 
-  local parts = { before, prefix, M.wrap(hl), component, '%*', after }
+  local parts = { before, prefix, wrap(hl), component, '%*', after }
   return { table.concat(parts), #component + #before + #after + prefix_size }
 end
 
@@ -614,22 +623,21 @@ end
 ---A thin wrapper around nvim's job api
 ---@param interval number
 ---@param task function
----@param on_complete function?
+---@param on_complete fun(timer: userdata)
 local function job(interval, task, on_complete)
   vim.defer_fn(task, 2000)
   local pending_job
-  local timer = fn.timer_start(interval, function()
+  --- @type userdata
+  local timer = luv.new_timer()
+  timer:start(0, interval, function()
     -- clear previous job
     if pending_job then
-      fn.jobstop(pending_job)
+      vim.schedule(function()
+        fn.jobstop(pending_job)
+        pending_job = task()
+      end)
     end
-    pending_job = task()
-  end, {
-    ['repeat'] = -1,
-  })
-  if on_complete then
-    on_complete(timer)
-  end
+  end)
 end
 
 ---Validate the response from the github CLI is JSON
@@ -707,14 +715,16 @@ function M.git_updates_refresh()
   git_update_job()
 end
 
+--- @type userdata
+local git_timer
+
 function M.git_update_toggle()
-  local on = is_git_repo()
-  if on then
+  local is_repo = is_git_repo()
+  if is_repo then
     M.git_updates()
   end
-  if vim.g.git_statusline_updates_timer then
-    local status = on and 0 or 1
-    fn.timer_pause(vim.g.git_statusline_updates_timer, status)
+  if git_timer and git_timer:is_active() and not is_repo then
+    git_timer:stop()
   end
 end
 
@@ -722,7 +732,7 @@ end
 --- we are currently ahead or behind upstream
 function M.git_updates()
   job(30000, git_update_job, function(timer)
-    vim.g.git_statusline_updates_timer = timer
+    git_timer = timer
   end)
 end
 

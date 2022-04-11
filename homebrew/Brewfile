@@ -12,6 +12,9 @@ tap "homebrew/services"
 tap "khanhas/tap"
 
 #: Brews
+brew "koekeishiya/formulae/yabai"
+brew "koekeishiya/formulae/skhd"
+brew "himalaya"
 brew "automake"
 brew "bat"
 brew "cmake"
@@ -56,7 +59,6 @@ brew "yarn"
 #: Casks
 cask "arq"
 cask "dropbox"
-cask "dash"
 cask "raycast"
 cask "dropbox"
 cask "kitty"
