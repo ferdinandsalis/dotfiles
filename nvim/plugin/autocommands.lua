@@ -2,6 +2,7 @@ local fn = vim.fn
 local api = vim.api
 local fmt = string.format
 local contains = vim.tbl_contains
+local map = vim.keymap.set
 
 vim.api.nvim_exec(
   [[
@@ -12,17 +13,53 @@ vim.api.nvim_exec(
   ''
 )
 
+----------------------------------------------------------------------------------------------------
+-- HLSEARCH
+----------------------------------------------------------------------------------------------------
+map(
+  { 'n', 'v', 'o', 'i', 'c' },
+  '<Plug>(StopHL)',
+  'execute("nohlsearch")[-1]',
+  { expr = true }
+)
+
+local function stop_hl()
+  if vim.v.hlsearch == 0 or api.nvim_get_mode().mode ~= 'n' then
+    return
+  end
+  api.nvim_feedkeys(fss.replace_termcodes '<Plug>(StopHL)', 'm', false)
+end
+
+local function hl_search()
+  local col = api.nvim_win_get_cursor(0)[2]
+  local curr_line = api.nvim_get_current_line()
+  local _, p_start, p_end = unpack(fn.matchstrpos(curr_line, fn.getreg '/', 0))
+  -- if the cursor is in a search result, leave highlighting on
+  if col < p_start or col > p_end then
+    stop_hl()
+  end
+end
+
 fss.augroup('VimrcIncSearchHighlight', {
   {
     -- automatically clear search highlight once leaving the commandline
-    event = 'CmdlineEnter',
-    pattern = { '[/\\?]' },
-    command = ':set hlsearch  | redrawstatus',
+    event = { 'CursorMoved' },
+    command = function()
+      hl_search()
+    end,
   },
   {
-    event = 'CmdlineLeave',
-    pattern = { '[/\\?]' },
-    command = ':set nohlsearch | redrawstatus',
+    event = { 'InsertEnter' },
+    command = function()
+      stop_hl()
+    end,
+  },
+  {
+    event = { 'OptionSet' },
+    pattern = { 'hlsearch' },
+    command = function()
+      vim.cmd 'redrawstatus'
+    end,
   },
 })
 

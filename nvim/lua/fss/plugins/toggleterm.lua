@@ -5,7 +5,7 @@ return function()
     direction = 'horizontal',
     insert_mappings = false,
     start_in_insert = true,
-    float_opts = { border = 'rounded', winblend = 3 },
+    float_opts = { border = 'rounded', winblend = fss.style.float.blend },
     size = function(term)
       if term.direction == 'horizontal' then
         return 15

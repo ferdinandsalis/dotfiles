@@ -37,6 +37,7 @@ return function()
     },
     use_popups_for_input = false,
     filesystem = {
+      use_libuv_file_watcher = true,
       netrw_hijack_behavior = 'open_current',
       find_command = 'fd',
       find_args = {
@@ -46,8 +47,9 @@ return function()
         },
       },
       filtered_items = {
+        visible = true,
         hide_dotfiles = false,
-        hide_gitignored = false,
+        hide_gitignored = true,
       },
     },
     default_component_configs = {
@@ -73,6 +75,10 @@ return function()
       },
     },
     window = {
+      mapping_options = {
+        noremap = true,
+        nowait = true,
+      },
       width = 40,
       mappings = {
         ['o'] = 'toggle_node',

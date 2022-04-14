@@ -195,6 +195,10 @@ local function general_overrides()
       { background = 'NONE', foreground = P.bg_highlight },
     },
     {
+      'IncSearch',
+      { link = 'Visual' },
+    },
+    {
       'WinSeparator',
       { background = 'NONE', foreground = P.fg_gutter },
     },

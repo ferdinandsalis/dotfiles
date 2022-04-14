@@ -7,6 +7,7 @@ return function()
       topdelete = { hl = 'GitSignsDelete', text = '▌' },
       changedelete = { hl = 'GitSignsChange', text = '▌' },
     },
+    _threaded_diff = true,
     word_diff = false,
     numhl = false,
     preview_config = {
@@ -64,8 +65,14 @@ return function()
       end, { expr = true })
 
       vim.keymap.set({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
-      vim.keymap.set({ 'n', 'v' }, '<leader>hs', '<cmd>Gitsigns stage_hunk<CR>')
-      vim.keymap.set({ 'n', 'v' }, '<leader>hr', '<cmd>Gitsigns reset_hunk<CR>')
+      vim.keymap.set('v', '<leader>hs', function()
+        gs.stage_hunk { vim.fn.line '.', vim.fn.line 'v' }
+      end)
+      vim.keymap.set('v', '<leader>hr', function()
+        gs.reset_hunk { vim.fn.line '.', vim.fn.line 'v' }
+      end)
+      vim.keymap.set({ 'n' }, '<leader>hs', '<cmd>Gitsigns stage_hunk<CR>')
+      vim.keymap.set({ 'n' }, '<leader>hr', '<cmd>Gitsigns reset_hunk<CR>')
     end,
   }
 end

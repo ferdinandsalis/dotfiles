@@ -59,6 +59,7 @@ local icons = {
     info = ' ',
   },
   git = {
+    logo = '',
     add = '', -- '',
     mod = '', -- '',
     remove = '', --

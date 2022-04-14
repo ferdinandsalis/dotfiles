@@ -194,7 +194,7 @@ packer.startup {
         {
           'theHamsta/nvim-dap-virtual-text',
           config = function()
-            require('nvim-dap-virtual-text').setup()
+            require('nvim-dap-virtual-text').setup { all_frames = true }
           end,
         },
       },
@@ -615,11 +615,6 @@ packer.startup {
     use 'MunifTanjim/nui.nvim'
 
     use {
-      'kevinhwang91/nvim-hlslens',
-      disable = true,
-    }
-
-    use {
       'petertriho/nvim-scrollbar',
       config = conf 'nvim-scrollbar',
     }
@@ -716,6 +711,28 @@ packer.startup {
       run = 'make hexokinase',
       config = function()
         vim.g.Hexokinase_highlighters = { 'virtual' }
+        vim.g.Hexokinase_optInPatterns = {
+          'full_hex',
+          'triple_hex',
+          'rgb',
+          'rgba',
+          'hsl',
+          'hsla',
+        }
+        vim.g.Hexokinase_ftEnabled = {
+          'css',
+          'html',
+          'lua',
+          'javascript',
+          'typescript',
+          'javascriptreact',
+          'typescriptreact',
+          'markdown',
+          'sh',
+          'json',
+          'toml',
+          'yaml',
+        }
       end,
     }
 
@@ -927,6 +944,17 @@ packer.startup {
           { 'Beacon', { background = P.comment } }
         )
         vim.g.beacon_size = 30
+      end,
+    }
+
+    use {
+      'rainbowhxch/beacon.nvim',
+      disable = true,
+      config = function()
+        require('beacon').setup {
+          ignore_buffers = { 'terminal', 'nofile' },
+          ignore_filetypes = { 'neo-tree', 'qf', 'NeogitStatus', 'packer' },
+        }
       end,
     }
 

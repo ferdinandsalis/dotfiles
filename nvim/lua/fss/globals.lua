@@ -224,7 +224,7 @@ end
 
 ---A terser proxy for `nvim_replace_termcodes`
 ---@param str string
----@return any
+---@return string
 function fss.replace_termcodes(str)
   return api.nvim_replace_termcodes(str, true, true, true)
 end

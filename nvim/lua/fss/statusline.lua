@@ -45,7 +45,7 @@ local function colors()
     },
     {
       'StIndicator',
-      { background = bg_color, foreground = indicator_color },
+      { background = bg_color, foreground = palette.fg_gutter },
     },
 
     { 'StModified', { foreground = string_fg, background = bg_color } },
@@ -61,7 +61,11 @@ local function colors()
     { 'StNumber', { foreground = number_fg, background = bg_color } },
     {
       'StCount',
-      { foreground = 'bg', background = indicator_color, bold = true },
+      {
+        foreground = palette.fg_sidebar,
+        background = palette.fg_gutter,
+        bold = true,
+      },
     },
     { 'StPrefix', { background = pmenu_bg, foreground = normal_fg } },
     {
@@ -266,6 +270,7 @@ function _G.__statusline()
     { item_if(file_modified, ctx.modified, 'StModified'), 1 },
     { readonly_item, 2 },
     { item(utils.mode()), 0 },
+    { item_if(utils.search_count(), vim.v.hlsearch > 0, 'StCount'), 1 },
     { dir_item, 3 },
     { parent_item, 2 },
     { file_item, 0 },
@@ -306,53 +311,55 @@ function _G.__statusline()
     ------------------------------------------------------------------------------------------------
     -- { item(utils.lsp_client(), 'StMetadata'), 4 },
     { item(utils.debugger(), 'StMetadata', { prefix = icons.misc.bug }), 4 },
-    -- {
-    --   item_if(diagnostics.error.count, diagnostics.error, 'StError', {
-    --     prefix = diagnostics.error.sign,
-    --   }),
-    --   1,
-    -- },
-    -- {
-    --   item_if(diagnostics.warning.count, diagnostics.warning, 'StWarning', {
-    --     prefix = diagnostics.warning.sign,
-    --   }),
-    --   3,
-    -- },
-    -- {
-    --   item_if(diagnostics.info.count, diagnostics.info, 'StInfo', {
-    --     prefix = diagnostics.info.sign,
-    --   }),
-    --   4,
-    -- },
-    { item(notifications, 'StTitle'), 3 },
-    -- Git Status
     {
-      item(
-        status.head,
-        'StBlue',
-        { prefix = icons.git.logo, prefix_color = 'StGit' }
-      ),
+      item_if(diagnostics.error.count, diagnostics.error, 'StError', {
+        prefix = diagnostics.error.sign,
+      }),
       1,
     },
     {
-      item(
-        status.changed,
-        'StTitle',
-        { prefix = icons.git.mod, prefix_color = 'StWarning' }
-      ),
+      item_if(diagnostics.warning.count, diagnostics.warning, 'StWarning', {
+        prefix = diagnostics.warning.sign,
+      }),
+      3,
+    },
+    {
+      item_if(diagnostics.info.count, diagnostics.info, 'StInfo', {
+        prefix = diagnostics.info.sign,
+      }),
+      4,
+    },
+    {
+      item(notifications, 'StTitle', {
+        after = ' ',
+      }),
+      3,
+    },
+    -- Git Status
+    {
+      item(status.head, 'StBlue', {
+        prefix = icons.git.logo,
+        prefix_color = 'StTitle',
+        before = ' ',
+        after = ' ',
+      }),
+      1,
+    },
+    {
+      item(status.changed, 'StTitle', {
+        prefix = icons.git.mod,
+      }),
       3,
     },
     {
       item(status.removed, 'StTitle', {
         prefix = icons.git.remove,
-        prefix_color = 'StError',
       }),
       3,
     },
     {
       item(status.added, 'StTitle', {
         prefix = icons.git.add,
-        prefix_color = 'StGreen',
       }),
       3,
     },
@@ -360,7 +367,6 @@ function _G.__statusline()
       item(ahead, 'StTitle', {
         prefix = icons.misc.up,
         prefix_color = 'StGreen',
-        after = behind > 0 and '' or ' ',
         before = '',
       }),
       5,
@@ -373,8 +379,7 @@ function _G.__statusline()
       }),
       5,
     },
-    -- Current line number/total line number,  alternatives 
-    {
+    { -- Current line number/total line number,  alternatives 
       utils.line_info {
         prefix = icons.misc.line,
         prefix_color = 'StMetadataPrefix',
@@ -382,6 +387,14 @@ function _G.__statusline()
         total_hl = 'StComment',
         sep_hl = 'StComment',
       },
+      7,
+    },
+    { -- column
+      item('%-3c', 'StTitle', {
+        prefix = 'Col:',
+        prefix_color = 'StMetadataPrefix',
+        before = ' ',
+      }),
       7,
     },
     -- (Unexpected) Indentation

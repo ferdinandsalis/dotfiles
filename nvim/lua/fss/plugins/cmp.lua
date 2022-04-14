@@ -16,13 +16,10 @@ return function()
         bold = false,
       },
     },
-    { 'CmpBorderedWindow_Normal', { link = 'NormalFloat' } },
-    { 'CmpDocumentationBorder', { link = 'FloatBorder' } },
     { 'CmpItemMenu', { inherit = 'NonText', italic = false, bold = false } },
     { 'CmpItemAbbrMatch', { foreground = keyword_fg } },
     { 'CmpItemAbbrDeprecated', { strikethrough = true, inherit = 'Comment' } },
-    { 'CmpItemAbbrMatchFuzzy', { italic = true, foreground = keyword_fg } },
-    { 'CmpBorderedWindow_FloatBorder', { link = 'FloatBorder' } }
+    { 'CmpItemAbbrMatchFuzzy', { italic = true, foreground = keyword_fg } }
   )
 
   local function tab(fallback)
@@ -47,17 +44,20 @@ return function()
     end
   end
 
+  local cmp_window = {
+    border = border,
+    winhighlight = table.concat({
+      'Normal:NormalFloat',
+      'FloatBorder:FloatBorder',
+      'CursorLine:Visual',
+      'Search:None',
+    }, ','),
+  }
+
   cmp.setup {
     window = {
-      completion = {
-        border = border,
-      },
-      documentation = {
-        border = border,
-      },
-    },
-    experimental = {
-      ghost_text = false, -- disable whilst using copilot
+      completion = cmp.config.window.bordered(cmp_window),
+      documentation = cmp.config.window.bordered(cmp_window),
     },
     snippet = {
       expand = function(args)
@@ -100,9 +100,6 @@ return function()
         vim_item.menu = menu
         return vim_item
       end,
-    },
-    documentation = {
-      border = border,
     },
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
