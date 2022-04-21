@@ -208,6 +208,18 @@ packer.startup {
     }
 
     use {
+      'lukas-reineke/lsp-format.nvim',
+      config = function()
+        require('lsp-format').setup {}
+        fss.nnoremap(
+          '<leader>rd',
+          '<Cmd>FormatToggle<CR>',
+          'lsp format: toggle'
+        )
+      end,
+    }
+
+    use { -- easy installing of lsp servers
       'williamboman/nvim-lsp-installer',
       requires = 'nvim-lspconfig',
       config = function()
@@ -224,9 +236,9 @@ packer.startup {
       end,
     }
 
-    -- Shows a spinner for the lsp status
-    use {
+    use { -- Shows a spinner for the lsp status
       'j-hui/fidget.nvim',
+      disable = true,
       config = function()
         require('fidget').setup {
           text = {
@@ -375,7 +387,6 @@ packer.startup {
       'nvim-treesitter/nvim-treesitter',
       run = ':TSUpdate',
       config = conf 'treesitter',
-      wants = { 'null-ls.nvim', 'lua-dev.nvim' },
       requires = {
         { 'p00f/nvim-ts-rainbow', after = 'nvim-treesitter' },
         {
@@ -388,11 +399,11 @@ packer.startup {
           cmd = { 'TSPlaygroundToggle', 'TSHighlightCapturesUnderCursor' },
           setup = function()
             require('which-key').register {
-              ['<leader>E'] = 'treesitter: highlight cursor group',
+              ['<leader>E'] = {
+                '<Cmd>TSHighlightCapturesUnderCursor<CR>',
+                'treesitter: highlight cursor group',
+              },
             }
-          end,
-          config = function()
-            fss.nnoremap('<leader>E', '<Cmd>TSHighlightCapturesUnderCursor<CR>')
           end,
         },
       },
@@ -553,6 +564,37 @@ packer.startup {
     --------------------------------------------------------------------------------
     -- Utilites {{{
     --------------------------------------------------------------------------------
+    -- use {
+    --   'b0o/incline.nvim',
+    --   config = function()
+    --     require('incline').setup {
+    --       window = {
+    --         placement = { horizontal = 'left', vertical = 'bottom' },
+    --         margin = {
+    --           horizontal = { left = 0, right = 0 },
+    --           vertical = { bottom = 0, top = 1 },
+    --         },
+    --         padding = { left = 1, right = 1 },
+    --       },
+    --     }
+    --   end,
+    -- }
+
+    use {
+      'b0o/incline.nvim',
+      config = function()
+        require('incline').setup {
+          hide = {
+            focused_win = true,
+          },
+          window = {
+            options = {
+              winhighlight = 'Normal:StatusLine',
+            },
+          },
+        }
+      end,
+    }
 
     use {
       'stevearc/dressing.nvim',
@@ -602,8 +644,6 @@ packer.startup {
     use {
       'nvim-neo-tree/neo-tree.nvim',
       branch = 'v2.x',
-      keys = { '<C-N>', '-' },
-      cmd = 'NeoTree',
       config = conf 'neotree',
       requires = {
         'nvim-lua/plenary.nvim',
@@ -624,15 +664,10 @@ packer.startup {
       disable = false,
       config = function()
         require('pretty-fold').setup {
-          keep_indentation = false,
+          keep_indentation = true,
           fill_char = '━',
           sections = {
             left = {
-              '━ ',
-              function()
-                return string.rep('*', vim.v.foldlevel)
-              end,
-              ' ',
               'content',
             },
             right = {
@@ -691,6 +726,22 @@ packer.startup {
       'kevinhwang91/nvim-hclipboard',
       config = function()
         require('hclipboard').start()
+      end,
+    }
+
+    use {
+      'simrat39/symbols-outline.nvim',
+      cmd = 'SymbolsOutline',
+      setup = function()
+        fss.nnoremap(
+          '<leader>lS',
+          '<Cmd>SymbolsOutline<CR>',
+          'toggle: symbols outline'
+        )
+        vim.g.symbols_outline = {
+          border = fss.style.current.border,
+          auto_preview = false,
+        }
       end,
     }
 
@@ -754,10 +805,10 @@ packer.startup {
       'yorickpeterse/nvim-pqf',
       event = 'BufReadPre',
       config = function()
-        require('fss.highlights').plugin(
-          'NvimPQF',
-          { 'qfPosition', { link = 'Tag' } }
-        )
+        local h = require 'fss.highlights'
+        h.plugin('NvimPQF', {
+          qfPosition = { link = 'Tag' },
+        })
         require('pqf').setup {}
       end,
     }
@@ -768,11 +819,11 @@ packer.startup {
         local P = fss.style.palette
         local h = require 'fss.highlights'
         h.plugin('nvim-bqf', {
-          'BqfPreviewBorder',
-          { foreground = P.bg_popup, background = P.bg_popup },
-        }, {
-          'BqfPreviewFloat',
-          { background = P.bg_popup },
+          BqfPreviewBorder = {
+            foreground = P.bg_popup,
+            background = P.bg_popup,
+          },
+          BqfPreviewFloat = { background = P.bg_popup },
         })
       end,
     }
@@ -809,6 +860,15 @@ packer.startup {
       end,
     }
 
+    use { -- NOTE: alternative: 'karb94/neoscroll.nvim'
+      'declancm/cinnamon.nvim',
+      config = function()
+        require('cinnamon').setup {
+          extra_keymaps = true,
+          extended_keymaps = true,
+        }
+      end,
+    }
     use {
       'karb94/neoscroll.nvim',
       config = function()
@@ -843,6 +903,14 @@ packer.startup {
       'rcarriga/nvim-notify',
       cond = utils.not_headless,
       config = conf 'nvim-notify',
+    }
+
+    use {
+      'mfussenegger/nvim-treehopper',
+      config = function()
+        fss.omap('m', ":<C-U>lua require('tsht').nodes()<CR>")
+        fss.vnoremap('m', ":lua require('tsht').nodes()<CR>")
+      end,
     }
 
     use {
@@ -939,22 +1007,10 @@ packer.startup {
       'danilamihailov/beacon.nvim',
       config = function()
         local P = fss.style.palette
-        require('fss.highlights').plugin(
-          'beacon',
-          { 'Beacon', { background = P.comment } }
-        )
+        require('fss.highlights').plugin('beacon', {
+          Beacon = { background = P.comment },
+        })
         vim.g.beacon_size = 30
-      end,
-    }
-
-    use {
-      'rainbowhxch/beacon.nvim',
-      disable = true,
-      config = function()
-        require('beacon').setup {
-          ignore_buffers = { 'terminal', 'nofile' },
-          ignore_filetypes = { 'neo-tree', 'qf', 'NeogitStatus', 'packer' },
-        }
       end,
     }
 
@@ -1022,6 +1078,7 @@ packer.startup {
   end,
   log = { level = 'debug' },
   config = {
+    max_jobs = 50,
     compile_path = PACKER_COMPILED_PATH,
     display = {
       prompt_border = fss.style.current.border,
@@ -1048,6 +1105,21 @@ if not vim.g.packer_compiled_loaded then
   vim.g.packer_compiled_loaded = true
 end
 
+local function open_plugin_url()
+  fss.nnoremap('gf', function()
+    local repo = fn.expand '<cfile>'
+    if repo:match 'https://' then
+      return vim.cmd 'norm gx'
+    end
+    if not repo or #vim.split(repo, '/') ~= 2 then
+      return vim.cmd 'norm! gf'
+    end
+    local url = fmt('https://www.github.com/%s', repo)
+    fn.jobstart(fmt('%s %s', vim.g.open_command, url))
+    vim.notify(fmt('Opening %s at %s', repo, url))
+  end)
+end
+
 fss.augroup('PackerSetupInit', {
   {
     event = 'BufWritePost',
@@ -1070,17 +1142,7 @@ fss.augroup('PackerSetupInit', {
     event = 'BufEnter',
     buffer = 0,
     description = 'Open a repository from an authorname/repository string',
-    command = function()
-      fss.nnoremap('gf', function()
-        local repo = fn.expand '<cfile>'
-        if not repo or #vim.split(repo, '/') ~= 2 then
-          return vim.cmd 'norm! gf'
-        end
-        local url = fmt('https://www.github.com/%s', repo)
-        fn.jobstart('open ' .. url)
-        vim.notify(fmt('Opening %s at %s', repo, url))
-      end)
-    end,
+    command = open_plugin_url,
   },
 })
 

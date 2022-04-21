@@ -20,18 +20,18 @@ M.config = function()
 
   local H = require 'fss.highlights'
   local P = fss.style.palette
-  H.plugin(
-    'ultest',
-    { 'UltestSummaryInfo', { foreground = P.blue, italic = true } },
-    {
-      'UltestSummaryNamespace',
-      { foreground = P.magenta, italic = false, bold = true },
+  H.plugin('ultest', {
+    UltestSummaryInfo = { foreground = P.blue, italic = true },
+    UltestSummaryNamespace = {
+      foreground = P.magenta,
+      italic = false,
+      bold = true,
     },
-    { 'UltestSummaryFile', { foreground = P.blue, italic = true } },
-    { 'UltestFail', { foreground = P.red } },
-    { 'UltestPass', { foreground = P.green } },
-    { 'UltestRunning', { foreground = P.yellow } }
-  )
+    UltestSummaryFile = { foreground = P.blue, italic = true },
+    UltestFail = { foreground = P.red },
+    UltestPass = { foreground = P.green },
+    UltestRunning = { foreground = P.yellow },
+  })
 
   fss.nnoremap('<localleader><localleader>', '<cmd>Ultest<CR>')
   fss.nnoremap('<localleader>un', '<cmd>UltestNearest<CR>')

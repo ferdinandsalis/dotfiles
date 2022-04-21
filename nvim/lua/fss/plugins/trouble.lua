@@ -1,13 +1,12 @@
 return function()
-  local H = require 'fss.highlights'
-  H.plugin(
-    'trouble',
-    { 'TroubleNormal', { link = 'PanelBackground' } },
-    { 'TroubleText', { link = 'PanelBackground' } },
-    { 'TroubleIndent', { link = 'PanelVertSplit' } },
-    { 'TroubleFoldIcon', { foreground = 'yellow', bold = true } },
-    { 'TroubleLocation', { foreground = H.get_hl('Comment', 'fg') } }
-  )
+  -- local H = require 'fss.highlights'
+  -- H.plugin('trouble', {
+  --   TroubleNormal = { link = 'PanelBackground' },
+  --   TroubleText = { link = 'PanelBackground' },
+  --   TroubleIndent = { link = 'PanelVertSplit' },
+  --   TroubleFoldIcon = { foreground = 'yellow', bold = true },
+  --   TroubleLocation = { foreground = H.get_hl('Comment', 'fg') },
+  -- })
   local trouble = require 'trouble'
   fss.nnoremap('<leader>ld', '<cmd>TroubleToggle workspace_diagnostics<CR>')
   fss.nnoremap('<leader>lr', '<cmd>TroubleToggle lsp_references<CR>')

@@ -6,132 +6,14 @@
 --- 3. https://got-ravings.blogspot.com/2008/08/vim-pr0n-making-statuslines-that-own.html
 --- 4. Right sided truncation - https://stackoverflow.com/a/20899652
 
-local utils = require 'fss.utils.statusline'
+local U = require 'fss.utils.statusline'
 local H = require 'fss.highlights'
+
 local api = vim.api
 local palette = fss.style.palette
 local icons = fss.style.icons
 
 local M = {}
-
-local function colors()
-  --- NOTE: Unicode characters including vim devicons should NOT be highlighted
-  --- as italic or bold, this is because the underlying bold font is not necessarily
-  --- patched with the nerd font characters
-  --- terminal emulators like kitty handle this by fetching nerd fonts elsewhere
-  --- but this is not universal across terminals so should be avoided
-
-  local indicator_color = palette.blue
-  local warning_fg = fss.style.lsp.colors.warn
-  local error_color = fss.style.lsp.colors.error
-  local info_color = fss.style.lsp.colors.info
-  local normal_fg = H.get_hl('Normal', 'fg')
-  local pmenu_bg = H.get_hl('Pmenu', 'bg')
-  local string_fg = H.get_hl('String', 'fg')
-  local number_fg = H.get_hl('Number', 'fg')
-  local identifier_fg = H.get_hl('Identifier', 'fg')
-  local bg_color = palette.bg_highlight
-
-  H.all {
-    { 'StMetadata', { background = bg_color, inherit = 'Comment' } },
-    {
-      'StMetadataPrefix',
-      {
-        background = bg_color,
-        inherit = 'Comment',
-        bold = false,
-        italic = false,
-      },
-    },
-    {
-      'StIndicator',
-      { background = bg_color, foreground = palette.fg_gutter },
-    },
-
-    { 'StModified', { foreground = string_fg, background = bg_color } },
-    {
-      'StGit',
-      { foreground = palette.gitSigns.delete, background = bg_color },
-    },
-    { 'StGreen', { foreground = palette.green, background = bg_color } },
-    {
-      'StBlue',
-      { foreground = palette.blue, background = bg_color, bold = true },
-    },
-    { 'StNumber', { foreground = number_fg, background = bg_color } },
-    {
-      'StCount',
-      {
-        foreground = palette.fg_sidebar,
-        background = palette.fg_gutter,
-        bold = true,
-      },
-    },
-    { 'StPrefix', { background = pmenu_bg, foreground = normal_fg } },
-    {
-      'StDirectory',
-      { background = bg_color, foreground = palette.comment, italic = true },
-    },
-    {
-      'StParentDirectory',
-      { background = bg_color, foreground = palette.dark5, bold = true },
-    },
-    { 'StIdentifier', { foreground = identifier_fg, background = bg_color } },
-    {
-      'StTitle',
-      { background = bg_color, foreground = palette.dark5, bold = true },
-    },
-    { 'StComment', { background = bg_color, inherit = 'Comment' } },
-    {
-      'StInactive',
-      { foreground = bg_color, background = palette.terminal_black },
-    },
-    { 'StatusLine', { background = bg_color } },
-    {
-      'StatusLineNC',
-      { background = bg_color, bold = false, italic = false },
-    },
-    {
-      'StInfo',
-      { foreground = info_color, background = bg_color, bold = true },
-    },
-    { 'StWarning', { foreground = warning_fg, background = bg_color } },
-    { 'StError', { foreground = error_color, background = bg_color } },
-    {
-      'StFilename',
-      { background = bg_color, foreground = palette.fg, bold = true },
-    },
-    {
-      'StFilenameInactive',
-      {
-        foreground = palette.terminal_black,
-        background = bg_color,
-        italic = true,
-        bold = true,
-      },
-    },
-    {
-      'StModeNormal',
-      { background = bg_color, foreground = palette.teal, bold = true },
-    },
-    {
-      'StModeInsert',
-      { background = bg_color, foreground = palette.blue, bold = true },
-    },
-    {
-      'StModeVisual',
-      { background = bg_color, foreground = palette.magenta2, bold = true },
-    },
-    {
-      'StModeReplace',
-      { background = bg_color, foreground = palette.red1, bold = true },
-    },
-    {
-      'StModeCommand',
-      { background = bg_color, foreground = palette.orange, bold = true },
-    },
-  }
-end
 
 --- @param tbl table
 --- @param next string
@@ -151,7 +33,7 @@ end
 --- @param available_space number
 local function display(statusline, available_space)
   local str = ''
-  local items = utils.prioritize(statusline, available_space)
+  local items = U.prioritize(statusline, available_space)
   for _, item in ipairs(items) do
     if type(item.component) == 'string' then
       str = str .. item.component
@@ -175,8 +57,8 @@ end
 local separator = { '%=' }
 local end_marker = { '%<' }
 
-local item = utils.item
-local item_if = utils.item_if
+local item = U.item
+local item_if = U.item_if
 
 ---A very over-engineered statusline, heavily inspired by doom-modeline
 ---@return string
@@ -203,8 +85,8 @@ function _G.__statusline()
   --------------------------------------------------------------------------------------------------
   -- Modifiers
   --------------------------------------------------------------------------------------------------
-  local plain = utils.is_plain(ctx)
-  local file_modified = utils.modified(ctx, icons.misc.circle)
+  local plain = U.is_plain(ctx)
+  local file_modified = U.modified(ctx, icons.misc.circle)
   local focused = vim.g.vim_in_focus or true
   --------------------------------------------------------------------------------------------------
   -- Setup
@@ -220,22 +102,22 @@ function _G.__statusline()
       { before = '', after = '' }
     ),
     0,
-  }, { utils.spacer(1), 0 })
+  }, { U.spacer(1), 0 })
   --------------------------------------------------------------------------------------------------
   -- Filename
   --------------------------------------------------------------------------------------------------
-  local segments = utils.file(ctx, plain)
+  local segments = U.file(ctx, plain)
   local dir, parent, file = segments.dir, segments.parent, segments.file
-  local dir_item = utils.item(dir.item, dir.hl, dir.opts)
-  local parent_item = utils.item(parent.item, parent.hl, parent.opts)
-  local file_item = utils.item(file.item, file.hl, file.opts)
+  local dir_item = U.item(dir.item, dir.hl, dir.opts)
+  local parent_item = U.item(parent.item, parent.hl, parent.opts)
+  local file_item = U.item(file.item, file.hl, file.opts)
   local readonly_hl = H.adopt_winhighlight(
     curwin,
     'StatusLine',
     'StCustomError',
     'StError'
   )
-  local readonly_item = utils.item(utils.readonly(ctx), readonly_hl)
+  local readonly_item = U.item(U.readonly(ctx), readonly_hl)
   --------------------------------------------------------------------------------------------------
   -- Mode
   --------------------------------------------------------------------------------------------------
@@ -262,22 +144,22 @@ function _G.__statusline()
   local notifications = ghn_ok and ghn.statusline_notification_count() or ''
 
   -- LSP Diagnostics
-  local diagnostics = utils.diagnostic_info(ctx)
+  local diagnostics = U.diagnostic_info(ctx)
   --------------------------------------------------------------------------------------------------
   -- Left section
   --------------------------------------------------------------------------------------------------
   add(
     { item_if(file_modified, ctx.modified, 'StModified'), 1 },
     { readonly_item, 2 },
-    { item(utils.mode()), 0 },
-    { item_if(utils.search_count(), vim.v.hlsearch > 0, 'StCount'), 1 },
+    { item(U.mode()), 0 },
+    { item_if(U.search_count(), vim.v.hlsearch > 0, 'StCount'), 1 },
     { dir_item, 3 },
     { parent_item, 2 },
     { file_item, 0 },
     { item_if('Saving…', vim.g.is_saving, 'StComment', { before = ' ' }), 1 },
     -- LSP Status
     {
-      item(utils.current_function(), 'StMetadataPrefix', {
+      item(U.current_function(), 'StMetadataPrefix', {
         before = '  ',
       }),
       4,
@@ -309,8 +191,8 @@ function _G.__statusline()
     ------------------------------------------------------------------------------------------------
     -- Right section
     ------------------------------------------------------------------------------------------------
-    -- { item(utils.lsp_client(), 'StMetadata'), 4 },
-    { item(utils.debugger(), 'StMetadata', { prefix = icons.misc.bug }), 4 },
+    { item(U.lsp_client(ctx), 'StMetadata'), 4 },
+    { item(U.debugger(), 'StMetadata', { prefix = icons.misc.bug }), 4 },
     {
       item_if(diagnostics.error.count, diagnostics.error, 'StError', {
         prefix = diagnostics.error.sign,
@@ -363,7 +245,7 @@ function _G.__statusline()
       }),
       3,
     },
-    {
+    { -- Ahead upstream
       item(ahead, 'StTitle', {
         prefix = icons.misc.up,
         prefix_color = 'StGreen',
@@ -371,7 +253,7 @@ function _G.__statusline()
       }),
       5,
     },
-    {
+    { -- Behind upstream
       item(behind, 'StTitle', {
         prefix = icons.misc.down,
         prefix_color = 'StNumber',
@@ -379,8 +261,8 @@ function _G.__statusline()
       }),
       5,
     },
-    { -- Current line number/total line number,  alternatives 
-      utils.line_info {
+    { -- Current line
+      U.line_info {
         prefix = icons.misc.line,
         prefix_color = 'StMetadataPrefix',
         current_hl = 'StTitle',
@@ -389,16 +271,15 @@ function _G.__statusline()
       },
       7,
     },
-    { -- column
+    { -- Current column
       item('%-3c', 'StTitle', {
-        prefix = 'Col:',
+        prefix = '',
         prefix_color = 'StMetadataPrefix',
         before = ' ',
       }),
       7,
     },
-    -- (Unexpected) Indentation
-    {
+    { -- Unexpected Indentation
       item_if(
         ctx.shiftwidth,
         ctx.shiftwidth > 2 or not ctx.expandtab,
@@ -414,6 +295,140 @@ function _G.__statusline()
   )
   -- removes 5 columns to add some padding
   return display(statusline, available_space - 5)
+end
+
+local function colors()
+  --- NOTE: Unicode characters including vim devicons should NOT be highlighted
+  --- as italic or bold, this is because the underlying bold font is not necessarily
+  --- patched with the nerd font characters
+  --- terminal emulators like kitty handle this by fetching nerd fonts elsewhere
+  --- but this is not universal across terminals so should be avoided
+
+  local warning_fg = fss.style.lsp.colors.warn
+  local error_color = fss.style.lsp.colors.error
+  local info_color = fss.style.lsp.colors.info
+  local normal_fg = H.get_hl('Normal', 'fg')
+  local pmenu_bg = H.get_hl('Pmenu', 'bg')
+  local string_fg = H.get_hl('String', 'fg')
+  local number_fg = H.get_hl('Number', 'fg')
+  local identifier_fg = H.get_hl('Identifier', 'fg')
+  local bg_color = palette.bg_highlight
+
+  H.all {
+    StMetadata = { background = bg_color, inherit = 'Comment' },
+    StMetadataPrefix = {
+      background = bg_color,
+      inherit = 'Comment',
+      bold = false,
+      italic = false,
+    },
+    StIndicator = { background = bg_color, foreground = palette.fg_gutter },
+    StModified = { foreground = string_fg, background = bg_color },
+    StGit = { foreground = palette.gitSigns.delete, background = bg_color },
+    StGreen = { foreground = palette.green, background = bg_color },
+    StBlue = {
+      foreground = palette.blue,
+      background = bg_color,
+      bold = true,
+    },
+    StNumber = {
+      foreground = number_fg,
+      background = bg_color,
+    },
+    StCount = {
+      foreground = palette.fg_sidebar,
+      background = palette.fg_gutter,
+      bold = true,
+    },
+    StPrefix = {
+      background = pmenu_bg,
+      foreground = normal_fg,
+    },
+    StDirectory = {
+      background = bg_color,
+      foreground = palette.comment,
+      italic = true,
+    },
+    StParentDirectory = {
+      background = bg_color,
+      foreground = palette.dark5,
+      bold = true,
+    },
+    StIdentifier = {
+      foreground = identifier_fg,
+      background = bg_color,
+    },
+    StTitle = {
+      background = bg_color,
+      foreground = palette.dark5,
+      bold = true,
+    },
+    StComment = {
+      background = bg_color,
+      inherit = 'Comment',
+    },
+    StInactive = {
+      foreground = bg_color,
+      background = palette.terminal_black,
+    },
+    StatusLine = {
+      background = bg_color,
+    },
+    StatusLineNC = {
+      background = bg_color,
+      bold = false,
+      italic = false,
+    },
+    StInfo = {
+      foreground = info_color,
+      background = bg_color,
+      bold = true,
+    },
+    StWarning = {
+      foreground = warning_fg,
+      background = bg_color,
+    },
+    StError = {
+      foreground = error_color,
+      background = bg_color,
+    },
+    StFilename = {
+      background = bg_color,
+      foreground = palette.fg,
+      bold = true,
+    },
+    StFilenameInactive = {
+      foreground = palette.terminal_black,
+      background = bg_color,
+      italic = true,
+      bold = true,
+    },
+    StModeNormal = {
+      background = bg_color,
+      foreground = palette.teal,
+      bold = true,
+    },
+    StModeInsert = {
+      background = bg_color,
+      foreground = palette.blue,
+      bold = true,
+    },
+    StModeVisual = {
+      background = bg_color,
+      foreground = palette.magenta2,
+      bold = true,
+    },
+    StModeReplace = {
+      background = bg_color,
+      foreground = palette.red1,
+      bold = true,
+    },
+    StModeCommand = {
+      background = bg_color,
+      foreground = palette.orange,
+      bold = true,
+    },
+  }
 end
 
 local function setup_autocommands()
@@ -440,14 +455,14 @@ local function setup_autocommands()
       once = true,
       pattern = '*',
       command = function()
-        utils.git_updates()
+        U.git_updates()
       end,
     },
     {
       event = 'DirChanged',
       pattern = '*',
       command = function()
-        utils.git_update_toggle()
+        U.git_update_toggle()
       end,
     },
     {
@@ -466,7 +481,7 @@ local function setup_autocommands()
       event = 'User',
       pattern = 'NeogitStatusRefresh',
       command = function()
-        utils.git_updates_refresh()
+        U.git_updates_refresh()
       end,
     },
   })

@@ -1,17 +1,15 @@
 return function()
   local P = fss.style.palette
-  require('fss.highlights').plugin(
-    'NeoTree',
-    { 'NeoTreeIndentMarker', { link = 'Comment' } },
-    { 'NeoTreeNormal', { link = 'PanelBackground' } },
-    { 'NeoTreeNormalNC', { link = 'PanelBackground' } },
-    { 'NeoTreeIndentMarker', { foreground = P.fg_gutter } },
-    {
-      'NeoTreeRootName',
-      { bold = true, italic = true, foreground = P.magenta },
-    },
-    { 'NeoTreeCursorLine', { link = 'Visual' } }
-  )
+  require('fss.highlights').plugin('NeoTree', {
+    NeoTreeNormal = { link = 'PanelBackground' },
+    NeoTreeNormalNC = { link = 'PanelBackground' },
+    NeoTreeCursorLine = { link = 'Visual' },
+    NeoTreeGitIgnored = { foreground = P.comment },
+    NeoTreeGitUntracked = { foreground = P.yellow },
+    NeoTreeGitModified = { foreground = P.blue1 },
+    NeoTreeIndentMarker = { foreground = P.fg_gutter },
+    NeoTreeRootName = { bold = true, italic = true, foreground = P.magenta },
+  })
   vim.g.neo_tree_remove_legacy_commands = 1
   local icons = fss.style.icons
   fss.nnoremap('<c-n>', '<Cmd>Neotree toggle reveal<CR>')
@@ -38,7 +36,7 @@ return function()
     use_popups_for_input = false,
     filesystem = {
       use_libuv_file_watcher = true,
-      netrw_hijack_behavior = 'open_current',
+      hijack_netrw_behavior = 'open_current',
       find_command = 'fd',
       find_args = {
         fd = {

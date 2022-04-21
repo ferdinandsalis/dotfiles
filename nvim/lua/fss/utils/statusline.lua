@@ -197,13 +197,13 @@ local function special_buffers(ctx)
     return 'Location List'
   end
   if ctx.buftype == 'quickfix' then
-    return 'Quickfix'
+    return 'Quickfix List'
   end
   if normal_term then
     return 'Terminal(' .. fnamemodify(vim.env.SHELL, ':t') .. ')'
   end
   if ctx.preview then
-    return 'preview'
+    return 'Preview'
   end
 
   return nil
@@ -445,10 +445,16 @@ function M.diagnostic_info(context)
   }
 end
 
-function M.lsp_client()
-  local clients = vim.lsp.buf_get_clients(0)
-  return #clients > 0 and clients[#clients].name or ''
-end
+function M.lsp_client(ctx)
+   local names = {}
+   local clients = vim.lsp.buf_get_clients(ctx.bufnum)
+   for _, client in ipairs(clients) do
+     if client.name and (not client.name:match 'null' or #clients == 1) then
+       table.insert(names, client.name)
+     end
+   end
+   return table.concat(names, ' ')
+ end
 
 ---The currently focused function
 ---@return string?

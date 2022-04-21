@@ -4,30 +4,27 @@ return function()
   local layout_actions = require 'telescope.actions.layout'
   local themes = require 'telescope.themes'
   local icons = fss.style.icons
+  local palette = fss.style.palette
 
-  local P = fss.style.palette
   local H = require 'fss.highlights'
 
-  H.plugin(
-    'telescope',
-    { 'TelescopeMatching', { link = 'Title' } },
-    { 'TelescopeBorder', { link = 'FloatBorder' } },
-    { 'TelescopeNormal', { link = 'FloatNormal' } },
-    { 'TelescopeResultsNormal', { link = 'FloatNormal' } },
-    { 'TelescopePreviewNormal', { link = 'FloatNormal' } },
-    { 'TelescopePromptPrefix', { link = 'Statement' } },
-    {
-      'TelescopeTitle',
-      { inherit = 'Normal', background = P.bg_highlight, bold = true },
+  H.plugin('telescope', {
+    TelescopeMatching = { link = 'Title' },
+    TelescopeBorder = { link = 'FloatBorder' },
+    TelescopeNormal = { link = 'FloatNormal' },
+    TelescopeResultsNormal = { link = 'FloatNormal' },
+    TelescopePreviewNormal = { link = 'FloatNormal' },
+    TelescopePromptPrefix = { link = 'Statement' },
+    TelescopeTitle = {
+      inherit = 'Normal',
+      background = palette.bg_highlight,
+      bold = true,
     },
-    {
-      'TelescopeSelectionCaret',
-      {
-        foreground = H.get_hl('Identifier', 'fg'),
-        background = H.get_hl('TelescopeSelection', 'bg'),
-      },
-    }
-  )
+    TelescopeSelectionCaret = {
+      foreground = H.get_hl('Identifier', 'fg'),
+      background = H.get_hl('TelescopeSelection', 'bg'),
+    },
+  })
 
   local function get_border(opts)
     return vim.tbl_deep_extend('force', opts or {}, {
@@ -225,6 +222,18 @@ return function()
         name = '+git',
         c = { builtins.git_commits, 'commits' },
         b = { builtins.git_branches, 'branches' },
+      },
+      l = {
+        name = '+lsp',
+        e = {
+          builtins.lsp_workspace_diagnostics,
+          'telescope: workspace diagnostics',
+        },
+        d = { builtins.lsp_document_symbols, 'telescope: document symbols' },
+        s = {
+          builtins.lsp_dynamic_workspace_symbols,
+          'telescope: workspace symbols',
+        },
       },
       m = { builtins.man_pages, 'man pages' },
       h = { frecency, 'history' },

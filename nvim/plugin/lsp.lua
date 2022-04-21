@@ -22,25 +22,35 @@ command('LspFormat', function()
   vim.lsp.buf.formatting_sync(nil, 1000)
 end)
 
-command('LspDiagnostics', function()
-  vim.diagnostic.setqflist { open = false }
-  fss.toggle_list 'quickfix'
-  if fss.is_vim_list_open() then
-    fss.augroup('LspDiagnosticUpdate', {
-      {
-        event = { 'DiagnosticChanged' },
-        pattern = { '*' },
-        command = function()
-          if fss.is_vim_list_open() then
+-- A helper function to auto-update the quickfix list when new diagnostics come
+-- in and close it once everything is resolved. This functionality only runs whilst
+-- the list is open.
+local function make_diagnostic_qf_updater()
+  local cmd_id = nil
+  return function()
+    vim.diagnostic.setqflist { open = false }
+    fss.toggle_list 'quickfix'
+    if not fss.is_vim_list_open() and cmd_id then
+      api.nvim_del_autocmd(cmd_id)
+      cmd_id = nil
+    end
+    if cmd_id then
+      return
+    end
+    cmd_id = api.nvim_create_autocmd('DiagnosticChanged', {
+      callback = function()
+        if fss.is_vim_list_open() then
+          vim.diagnostic.setqflist { open = false }
+          if #vim.fn.getqflist() == 0 then
             fss.toggle_list 'quickfix'
           end
-        end,
-      },
+        end
+      end,
     })
-  elseif fn.exists '#LspDiagnosticUpdate' > 0 then
-    vim.cmd 'autocmd! LspDiagnosticUpdate'
   end
-end)
+end
+
+command('LspDiagnostics', make_diagnostic_qf_updater())
 fss.nnoremap(
   '<leader>ll',
   '<Cmd>LspDiagnostics<CR>',
@@ -102,6 +112,9 @@ diagnostic.handlers.signs = {
 -- Handler overrides
 -----------------------------------------------------------------------------//
 
+local max_width = math.max(math.floor(vim.o.columns * 0.7), 100)
+local max_height = math.max(math.floor(vim.o.lines * 0.3), 30)
+
 diagnostic.config {
   signs = true,
   underline = true,
@@ -109,14 +122,13 @@ diagnostic.config {
   severity_sort = true,
   virtual_text = false,
   float = {
+    max_width = max_width,
+    max_height = max_height,
     border = fss.style.current.border,
     focusable = false,
     source = 'always',
   },
 }
-
-local max_width = math.max(math.floor(vim.o.columns * 0.7), 100)
-local max_height = math.max(math.floor(vim.o.lines * 0.3), 30)
 
 -- NOTE: the hover handler returns the bufnr,winnr so can be used for mappings
 lsp.handlers['textDocument/hover'] = lsp.with(lsp.handlers.hover, {

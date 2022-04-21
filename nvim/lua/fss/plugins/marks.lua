@@ -1,8 +1,7 @@
 return function()
-  require('fss.highlights').plugin(
-    'marks',
-    { 'MarkSignHL', { foreground = fss.style.palette.red } }
-  )
+  require('fss.highlights').plugin('marks', {
+    MarkSignHL = { foreground = fss.style.palette.red },
+  })
   require('which-key').register({
     m = {
       name = '+marks',

@@ -1,7 +1,8 @@
 local fmt = string.format
-local api = vim.api
 local fn = vim.fn
+local api = vim.api
 local P = fss.style.palette
+local L = fss.style.lsp.colors
 local levels = vim.log.levels
 
 local M = {}
@@ -141,10 +142,10 @@ function M.clear_hl(name)
 end
 
 ---Apply a list of highlights
----@param hls table[]
+---@param hls table<string, table<string, boolean|string>>
 function M.all(hls)
-  for _, hl in ipairs(hls) do
-    M.set_hl(unpack(hl))
+  for name, hl in pairs(hls) do
+    M.set_hl(name, hl)
   end
 end
 
@@ -165,9 +166,8 @@ end
 ---Apply highlights for a plugin and refresh on colorscheme change
 ---@param name string plugin name
 ---@vararg table list of highlights
-function M.plugin(name, ...)
+function M.plugin(name, hls)
   name = name:gsub('^%l', string.upper) -- capitalise the name for autocommand convention sake
-  local hls = { ... }
   M.all(hls)
   fss.augroup(fmt('%sHighlightOverrides', name), {
     {
@@ -183,62 +183,45 @@ end
 ---------------------------------------------------------------------------------
 -- General highlights {{{
 ---------------------------------------------------------------------------------
-local function general_overrides()
-  local L = fss.style.lsp.colors
+local function overrides()
   local hint_line = M.alter_color(L.hint, -80)
   local error_line = M.alter_color(L.error, -80)
   local warn_line = M.alter_color(L.warn, -80)
 
   M.all {
-    {
-      'VertSplit',
-      { background = 'NONE', foreground = P.bg_highlight },
-    },
-    {
-      'IncSearch',
-      { link = 'Visual' },
-    },
-    {
-      'WinSeparator',
-      { background = 'NONE', foreground = P.fg_gutter },
-    },
-
-    { 'ColorColumn', { background = '#272b40' } },
-    { 'CursorLine', { background = '#272b40' } },
-    { 'Pmenu', { foreground = P.fg, background = P.bg_popup } },
-    { 'LspFloatNormal', { background = P.bg_popup } },
-    { 'LspFloatWinNormal', { background = P.bg_popup } },
-    { 'NormalFloat', { background = P.bg_popup } },
-    { 'FloatNormal', { background = P.bg_popup } },
-    {
-      'FloatBorder',
-      { background = P.bg_popup, foreground = P.bg_popup },
-    },
+    VertSplit = { background = 'NONE', foreground = P.bg_highlight },
+    IncSearch = { link = 'Visual' },
+    Folded = { inherit = 'Comment', italic = true, bold = true },
+    WinSeparator = { background = 'NONE', foreground = P.fg_gutter },
+    ColorColumn = { background = '#272b40' },
+    CursorLine = { background = '#272b40' },
+    Pmenu = { foreground = P.fg, background = P.bg_dark },
+    LspFloatNormal = { background = P.bg_dark },
+    LspFloatWinNormal = { background = P.bg_dark },
+    PanelBackground = { background = P.bg_dark },
+    PanelVertSplit = { foreground = P.fg_gutter },
+    PanelWinSeparator = { foreground = P.fg_gutter },
+    PanelSt = { background = P.bg_statusline },
+    NormalFloat = { background = P.bg_dark },
+    FloatNormal = { background = P.bg_dark },
+    FloatBorder = { background = P.bg_dark, foreground = P.bg_dark },
     -----------------------------------------------------------------------------//
     -- Commandline
     -----------------------------------------------------------------------------//
-    {
-      'MsgArea',
-      { foreground = P.fg_sidebar, background = P.bg_dark },
-    },
-    {
-      'MsgSeparator',
-      { foreground = P.fg_sidebar, background = P.bg_dark },
-    },
+    MsgArea = { foreground = P.fg_sidebar, background = P.bg_dark },
+    MsgSeparator = { foreground = P.fg_sidebar, background = P.bg_dark },
     -----------------------------------------------------------------------------//
     -- Treesitter
     -----------------------------------------------------------------------------//
-    { 'TSKeywordReturn', { italic = true } },
-    { 'TSParameter', { italic = true, bold = true } },
-    { 'TSError', { link = 'LspDiagnosticsUnderlineError' } },
+    TSKeywordReturn = { italic = true },
+    TSParameter = { italic = true, bold = true },
+    TSError = { link = 'LspDiagnosticsUnderlineError' },
     -----------------------------------------------------------------------------//
     -- LSP
     -----------------------------------------------------------------------------//
     LspCodeLens = { link = 'NonText' },
     LspReferenceText = { underline = true, background = 'NONE' },
     LspReferenceRead = { underline = true, background = 'NONE' },
-    -- This represents when a reference is assigned which is more interesting than regular
-    -- occurrences so should be highlighted more distinctly
     LspReferenceWrite = {
       underline = true,
       bold = true,
@@ -285,28 +268,22 @@ end
 
 -- }}}
 
-local function set_panel_highlights()
-  local normal_bg = M.get_hl('Normal', 'bg')
+local function set_sidebar_highlights()
   local split_color = M.get_hl('VertSplit', 'fg')
-  local bg_color = M.alter_color(normal_bg, -8)
-  local st_color = P.bg_highlight
   local hls = {
-    { 'PanelBackground', { background = bg_color } },
-    {
-      'PanelWinSeparator',
-      { foreground = split_color, background = bg_color },
-    },
-    { 'PanelHeading', { background = bg_color, bold = true } },
-    { 'PanelVertSplit', { foreground = split_color, background = bg_color } },
-    { 'PanelStNC', { background = st_color, cterm = { italic = true } } },
-    { 'PanelSt', { background = st_color } },
+    PanelBackground = { background = P.bg_popup },
+    PanelWinSeparator = { foreground = split_color, background = P.bg_popup },
+    PanelHeading = { background = P.bg_popup, bold = true },
+    PanelVertSplit = { foreground = split_color, background = P.bg_popup },
+    PanelStNC = { background = P.bg_statusline, cterm = { italic = true } },
+    PanelSt = { background = P.bg_statusline },
   }
   for _, grp in ipairs(hls) do
     M.set_hl(unpack(grp))
   end
 end
 
-local panel_fts = { 'packer', 'dap-repl', 'undotree', 'qf' }
+local panel_fts = { 'packer', 'undotree', 'Outline' }
 
 local function on_panel_enter()
   vim.wo.winhighlight = table.concat({
@@ -320,18 +297,9 @@ local function on_panel_enter()
   }, ',')
 end
 
-local function colorscheme_overrides()
-  if vim.g.colors_name == 'tokyonight' then
-    M.all {
-      { 'Folded', { inherit = 'Comment', italic = true, bold = true } },
-    }
-  end
-end
-
 local function user_highlights()
-  general_overrides()
-  colorscheme_overrides()
-  set_panel_highlights()
+  overrides()
+  set_sidebar_highlights()
 end
 
 ---NOTE: apply user highlights when nvim first starts
@@ -340,14 +308,14 @@ user_highlights()
 
 fss.augroup('UserHighlights', {
   {
-    event = 'ColorScheme',
+    event = { 'ColorScheme' },
     pattern = { '*' },
     command = function()
       user_highlights()
     end,
   },
   {
-    event = 'FileType',
+    event = { 'FileType' },
     pattern = panel_fts,
     command = function()
       on_panel_enter()

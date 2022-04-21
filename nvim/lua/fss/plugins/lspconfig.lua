@@ -1,5 +1,4 @@
 fss.lsp = {}
-local fmt = string.format
 
 -----------------------------------------------------------------------------//
 -- Autocommands
@@ -47,21 +46,6 @@ local function setup_autocommands(client, bufnr)
       },
     })
   end
-  if client and client.resolved_capabilities.document_formatting then
-    -- format on save
-    fss.augroup('LspFormat', {
-      {
-        event = 'BufWritePre',
-        buffer = 0,
-        command = function()
-          local ok, msg = pcall(vim.lsp.buf.formatting_sync, nil, 2000)
-          if not ok then
-            vim.notify(fmt('Error formatting file: %s', msg))
-          end
-        end,
-      },
-    })
-  end
 end
 
 -----------------------------------------------------------------------------//
@@ -71,9 +55,12 @@ end
 ---Setup mapping when an lsp attaches to a buffer
 ---@param client table lsp client
 local function setup_mappings(client)
+  local ok = pcall(require, 'lsp-format')
+  local format = ok and '<Cmd>Format<CR>' or vim.lsp.buf.formatting
+
   local maps = {
     n = {
-      ['<leader>rf'] = { vim.lsp.buf.formatting, 'lsp: format buffer' },
+      ['<leader>rf'] = { format, 'lsp: format buffer' },
       gd = { vim.lsp.buf.definition, 'lsp: definition' },
       gr = { vim.lsp.buf.references, 'lsp: references' },
       gI = { vim.lsp.buf.incoming_calls, 'lsp: incoming calls' },
@@ -209,10 +196,17 @@ local function tsserver_on_attach(client, bufnr)
 end
 
 function fss.lsp.on_attach(client, bufnr)
-  require('illuminate').on_attach(client)
   setup_autocommands(client, bufnr)
   setup_mappings(client)
-
+  local format_ok, lsp_format = pcall(require, 'lsp-format')
+  if format_ok then
+    lsp_format.on_attach(client)
+  end
+  local illuminate_ok, illuminate = pcall(require, 'illuminate')
+  if illuminate_ok then
+    illuminate.on_attach(client)
+  end
+  -- require('illuminate').on_attach(client)
   if client.resolved_capabilities.goto_definition then
     vim.bo[bufnr].tagfunc = 'v:lua.fss.lsp.tagfunc'
   end

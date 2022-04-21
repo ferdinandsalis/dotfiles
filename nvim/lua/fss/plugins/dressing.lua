@@ -1,8 +1,7 @@
 return function()
-  require('fss.highlights').plugin(
-    'dressing',
-    { 'FloatTitle', { inherit = 'Normal', bold = true } }
-  )
+  require('fss.highlights').plugin('dressing', {
+    FloatTitle = { inherit = 'Normal', bold = true },
+  })
   require('dressing').setup {
     input = {
       insert_only = false,

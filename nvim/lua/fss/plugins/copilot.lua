@@ -5,8 +5,9 @@ return function()
     expr = true,
     script = true,
   })
+
   fss.imap(
-    '<Plug>(vimrc:copilot-dummy-map)',
+    '<Plug>(as-copilot-accept)',
     "copilot#Accept('<Tab>')",
     { expr = true }
   )
@@ -23,6 +24,6 @@ return function()
 
   require('fss.highlights').plugin(
     'copilot',
-    { 'CopilotSuggestion', { link = 'Comment' } }
+    { CopilotSuggestion = { link = 'Comment' } }
   )
 end

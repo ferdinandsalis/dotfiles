@@ -5,22 +5,18 @@ return function()
   local border = fss.style.current.border
 
   local keyword_fg = h.get_hl('Keyword', 'fg')
-  h.plugin(
-    'Cmp',
-    {
-      'CmpItemAbbr',
-      {
-        foreground = 'fg',
-        background = 'NONE',
-        italic = false,
-        bold = false,
-      },
+  h.plugin('Cmp', {
+    CmpItemAbbr = {
+      foreground = 'fg',
+      background = 'NONE',
+      italic = false,
+      bold = false,
     },
-    { 'CmpItemMenu', { inherit = 'NonText', italic = false, bold = false } },
-    { 'CmpItemAbbrMatch', { foreground = keyword_fg } },
-    { 'CmpItemAbbrDeprecated', { strikethrough = true, inherit = 'Comment' } },
-    { 'CmpItemAbbrMatchFuzzy', { italic = true, foreground = keyword_fg } }
-  )
+    CmpItemMenu = { inherit = 'NonText', italic = false, bold = false },
+    CmpItemAbbrMatch = { foreground = keyword_fg },
+    CmpItemAbbrDeprecated = { strikethrough = true, inherit = 'Comment' },
+    CmpItemAbbrMatchFuzzy = { italic = true, foreground = keyword_fg },
+  })
 
   local function tab(fallback)
     local ok, luasnip = fss.safe_require('luasnip', { silent = true })
@@ -55,6 +51,7 @@ return function()
   }
 
   cmp.setup {
+    preselect = cmp.PreselectMode.None,
     window = {
       completion = cmp.config.window.bordered(cmp_window),
       documentation = cmp.config.window.bordered(cmp_window),

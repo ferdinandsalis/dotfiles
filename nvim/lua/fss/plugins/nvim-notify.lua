@@ -24,33 +24,42 @@ return function()
     { label = 'dismiss notifications' }
   )
 
-  local P = fss.style.palette
-  require('fss.highlights').plugin(
-    'notify',
-    {
-      'NotifyERRORBorder',
-      { background = P.bg_highlight, foreground = P.bg_highlight },
+  local palette = fss.style.palette
+  require('fss.highlights').plugin('notify', {
+    NotifyERRORBorder = {
+      background = palette.bg_highlight,
+      foreground = palette.bg_highlight,
     },
-    {
-      'NotifyDEBUGBorder',
-      { background = P.bg_highlight, foreground = P.bg_highlight },
+    NotifyDEBUGBorder = {
+      background = palette.bg_highlight,
+      foreground = palette.bg_highlight,
     },
-    {
-      'NotifyWARNBorder',
-      { background = P.bg_highlight, foreground = P.bg_highlight },
+    NotifyWARNBorder = {
+      background = palette.bg_highlight,
+      foreground = palette.bg_highlight,
     },
-    {
-      'NotifyINFOBorder',
-      { background = P.bg_highlight, foreground = P.bg_highlight },
+    NotifyINFOBorder = {
+      background = palette.bg_highlight,
+      foreground = palette.bg_highlight,
     },
-    {
-      'NotifyTRACEBorder',
-      { background = P.bg_highlight, foreground = P.bg_highlight },
+    NotifyTRACEBorder = {
+      background = palette.bg_highlight,
+      foreground = palette.bg_highlight,
     },
-    { 'NotifyERRORBody', { background = P.bg_highlight } },
-    { 'NotifyDEBUGBody', { background = P.bg_highlight } },
-    { 'NotifyWARNBody', { background = P.bg_highlight } },
-    { 'NotifyINFOBody', { background = P.bg_highlight } },
-    { 'NotifyTRACEBody', { background = P.bg_highlight } }
-  )
+    NotifyERRORBody = {
+      background = palette.bg_highlight,
+    },
+    NotifyDEBUGBody = {
+      background = palette.bg_highlight,
+    },
+    NotifyWARNBody = {
+      background = palette.bg_highlight,
+    },
+    NotifyINFOBody = {
+      background = palette.bg_highlight,
+    },
+    NotifyTRACEBody = {
+      background = palette.bg_highlight,
+    },
+  })
 end

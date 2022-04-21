@@ -424,6 +424,20 @@ xnoremap(
   '<localleader>!',
   [["gy:lua fss.mappings.google(vim.api.nvim_eval("@g"), false, true)<cr>gv]]
 )
+
+-----------------------------------------------------------------------------//
+-- GX - replicate netrw functionality
+-----------------------------------------------------------------------------//
+local function open_link()
+  local file = fn.expand '<cfile>'
+  if fn.isdirectory(file) > 0 then
+    vim.cmd('edit ' .. file)
+  else
+    fn.jobstart({ vim.g.open_command, file }, { detach = true })
+  end
+end
+nnoremap('gx', open_link)
+
 ----------------------------------------------------------------------------------
 -- Grep Operator
 ----------------------------------------------------------------------------------

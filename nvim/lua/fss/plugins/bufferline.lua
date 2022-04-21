@@ -65,6 +65,11 @@ return function()
           highlight = 'PanelHeading',
         },
         {
+          filetype = 'Outline',
+          text = 'Symbols',
+          highlight = 'PanelHeading',
+        },
+        {
           filetype = 'packer',
           text = '',
           highlight = 'PanelHeading',
