@@ -488,6 +488,8 @@ packer.startup {
     use 'folke/tokyonight.nvim'
     use 'NTBBloodbath/doom-one.nvim'
 
+    use { 'psliwka/vim-dirtytalk', run = ':DirtytalkUpdate' }
+
     -- }}}
     --------------------------------------------------------------------------------
     -- Git {{{
