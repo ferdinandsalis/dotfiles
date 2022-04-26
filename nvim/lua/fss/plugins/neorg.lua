@@ -37,8 +37,8 @@ return function()
       ['core.norg.dirman'] = {
         config = {
           workspaces = {
-            notes = '$SYNC_DIR/neorg/notes',
-            tasks = '$SYNC_DIR/neorg/tasks',
+            notes = '$SYNC_DIR/Neorg/notes',
+            tasks = '$SYNC_DIR/Neorg/tasks',
           },
         },
       },

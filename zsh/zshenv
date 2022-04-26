@@ -4,13 +4,9 @@
 #===============================================================================
 
 export DOTFILES=${HOME}/.dotfiles
-export PROJECTS_DIR=${HOME}/Desktop/Personal/Code
 export WORK_DIR=${HOME}/Desktop/Work
-export SYNC_DIR=${HOME}/Desktop/Personal
-
-if which yarn >/dev/null; then
-  path+=("$(yarn global bin)")
-fi
+export PROJECTS_DIR=${HOME}/Desktop/Projects
+export SYNC_DIR=${HOME}/Library/Mobile\ Documents/com~apple~CloudDocs
 
 #-------------------------------------------------------------------------------
 # Go
@@ -70,3 +66,10 @@ export FZF_DEFAULT_COMMAND='rg --files --no-ignore-vcs --hidden'
 export FZF_DEFAULT_OPTS="--history=$HOME/.fzf_history"
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_TMUX=0
+
+export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
+--color=fg:#a9b1d6,bg:#1a1b26,hl:#364A82
+--color=fg+:#a9b1d6,bg+:#1a1b26,hl+:#364A82
+--color=info:#7aa2f7,prompt:#7dcfff,pointer:#364A82
+--color=marker:#9ece6a,spinner:#9ece6a,header:#9ece6a
+--color=border:#292e42'
