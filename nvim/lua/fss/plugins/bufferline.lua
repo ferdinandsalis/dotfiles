@@ -29,16 +29,9 @@ return function()
       or (tab_num ~= last_tab and not is_log)
   end
 
-  local colors = fss.style.palette
-
   require('bufferline').setup {
-    highlights = {
-      indicator_selected = {
-        guifg = colors.bg,
-        guibg = colors.bg,
-      },
-    },
     options = {
+      themable = true,
       mode = 'buffers', -- tabs
       sort_by = 'insert_after_current',
       right_mouse_command = 'vert sbuffer %d',
@@ -99,4 +92,21 @@ return function()
     ['<leader>8'] = { '<Cmd>BufferLineGoToBuffer 8<CR>', 'which_key_ignore' },
     ['<leader>9'] = { '<Cmd>BufferLineGoToBuffer 9<CR>', 'which_key_ignore' },
   }
+
+  local colors = fss.style.palette
+  require('fss.highlights').plugin('bufferline', {
+    BufferLineFill = { background = colors.bg_dark },
+    -- BufferLineBackground = { background = colors.bg },
+    BufferLineIndicatorSelected = {
+      foreground = colors.fg_gutter,
+      background = colors.bg,
+    },
+    BufferlineSeparatorSelected = {
+      foreground = colors.fg_gutter,
+    },
+    BufferLineSeparator = {
+      foreground = colors.bg,
+      background = colors.bg_dark,
+    },
+  })
 end

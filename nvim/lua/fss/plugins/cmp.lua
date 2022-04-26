@@ -113,7 +113,7 @@ return function()
       { name = 'luasnip' },
       { name = 'path' },
       { name = 'spell' },
-      -- { name = 'cmp_git' },
+      { name = 'cmp_git' },
     }, {
       { name = 'buffer' },
     }),

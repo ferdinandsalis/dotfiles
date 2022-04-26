@@ -3,10 +3,11 @@ return function()
   local rainbow_enabled = {}
   local languages = vim.tbl_flatten {
     { 'c', 'comment', 'make', 'query', 'toml', 'dart', 'bash', 'regex' },
-    { 'ruby', 'elm', 'go', 'markdown', 'help', 'vim', 'norg', 'css' },
+    { 'ruby', 'elm', 'go', 'markdown', 'help', 'vim', 'css' },
     { 'lua', 'typescript', 'tsx', 'javascript', 'jsdoc', 'json', 'jsonc' },
     { 'dockerfile', 'graphql', 'html', 'yaml', 'make', 'ocaml' },
     { 'java', 'python', 'swift', 'rust', 'yaml', 'elixir', 'erlang' },
+    { 'norg' },
   }
 
   require('nvim-treesitter.configs').setup {

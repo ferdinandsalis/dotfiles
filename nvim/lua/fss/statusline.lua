@@ -297,7 +297,7 @@ function _G.__statusline()
   return display(statusline, available_space - 5)
 end
 
-local function colors()
+local function statusline_colors()
   --- NOTE: Unicode characters including vim devicons should NOT be highlighted
   --- as italic or bold, this is because the underlying bold font is not necessarily
   --- patched with the nerd font characters
@@ -434,12 +434,12 @@ end
 local function setup_autocommands()
   fss.augroup('CustomStatusline', {
     {
-      event = 'FocusGained',
+      event = { 'FocusGained' },
       pattern = '*',
       command = 'let g:vim_in_focus = v:true',
     },
     {
-      event = 'FocusLost',
+      event = { 'FocusLost' },
       pattern = '*',
       command = 'let g:vim_in_focus = v:false',
     },
@@ -447,11 +447,11 @@ local function setup_autocommands()
       event = { 'VimEnter', 'ColorScheme' },
       pattern = '*',
       command = function()
-        colors()
+        statusline_colors()
       end,
     },
     {
-      event = 'BufReadPre',
+      event = { 'BufReadPre' },
       once = true,
       pattern = '*',
       command = function()
@@ -459,14 +459,14 @@ local function setup_autocommands()
       end,
     },
     {
-      event = 'DirChanged',
+      event = { 'DirChanged' },
       pattern = '*',
       command = function()
         U.git_update_toggle()
       end,
     },
     {
-      event = 'BufWritePre',
+      event = { 'BufWritePre' },
       pattern = '*',
       command = function()
         if not vim.g.is_saving and vim.bo.modified then
@@ -478,7 +478,7 @@ local function setup_autocommands()
       end,
     },
     {
-      event = 'User',
+      event = { 'User' },
       pattern = 'NeogitStatusRefresh',
       command = function()
         U.git_updates_refresh()

@@ -56,6 +56,7 @@ return function()
     defaults = {
       set_env = { ['TERM'] = vim.env.TERM },
       borderchars = { '─', '│', '─', '│', '╭', '╮', '╯', '╰' },
+      dynamic_preview_title = true,
       prompt_prefix = icons.misc.telescope .. ' ',
       selection_caret = icons.misc.double_chevron_right .. ' ',
       mappings = {

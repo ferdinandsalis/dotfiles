@@ -32,12 +32,22 @@ local plain = {
     'minimap',
     'Trouble',
     'tsplayground',
+    'coc-explorer',
+    'NvimTree',
     'neo-tree',
     'undotree',
+    'neoterm',
+    'vista',
+    'fugitive',
+    'startify',
+    'vimwiki',
     'markdown',
-    'NeogitStatus',
     'norg',
+    'NeogitStatus',
+    'dap-repl',
+    'dapui',
   },
+
   buftypes = {
     'terminal',
     'quickfix',
@@ -72,7 +82,6 @@ local exceptions = {
     vimwiki = 'ﴬ',
     help = '',
     undotree = 'פּ',
-    ['coc-explorer'] = '',
     NvimTree = 'פּ',
     ['neo-tree'] = 'פּ',
     toggleterm = ' ',
@@ -203,7 +212,7 @@ local function special_buffers(ctx)
     return 'Terminal(' .. fnamemodify(vim.env.SHELL, ':t') .. ')'
   end
   if ctx.preview then
-    return 'Preview'
+    return 'preview'
   end
 
   return nil
@@ -247,6 +256,7 @@ local function filename(ctx, modifier)
 
   local fname = buf_expand(ctx.bufnum, modifier)
 
+  ---@type string|fun(fname: string, buf: number): string
   local name = exceptions.names[ctx.filetype]
   if type(name) == 'function' then
     return '', '', name(fname, ctx.bufnum)
@@ -331,7 +341,7 @@ end
 
 --- This function gets and decorates the current and total line count
 --- it derives this using the line() function rather than the %l/%L statusline
---- format strings because these cannot be
+--- format strings because these cannot be counted before hand
 -- @param opts table
 function M.line_info(opts)
   local sep = opts.sep or '/'
@@ -347,7 +357,6 @@ function M.line_info(opts)
   local length = strwidth(prefix .. current .. sep .. last)
   return {
     table.concat {
-      ' ',
       wrap(prefix_color),
       prefix,
       ' ',
@@ -375,7 +384,7 @@ function M.file(ctx, minimal)
   local curwin = ctx.winid
   -- highlight the filename components separately
   local filename_hl = minimal and 'StFilenameInactive' or 'StFilename'
-  local directory_hl = minimal and 'StInactiveSep' or 'StDirectory'
+  local directory_hl = minimal and 'StDirectoryInactive' or 'StDirectory'
   local parent_hl = minimal and directory_hl or 'StParentDirectory'
 
   if H.winhighlight_exists(curwin, 'Normal', 'StatusLine') then
@@ -446,20 +455,23 @@ function M.diagnostic_info(context)
 end
 
 function M.lsp_client(ctx)
-   local names = {}
-   local clients = vim.lsp.buf_get_clients(ctx.bufnum)
-   for _, client in ipairs(clients) do
-     if client.name and (not client.name:match 'null' or #clients == 1) then
-       table.insert(names, client.name)
-     end
-   end
-   return table.concat(names, ' ')
- end
+  local names = {}
+  local clients = vim.lsp.buf_get_clients(ctx.bufnum)
+  for _, client in ipairs(clients) do
+    if client.name and (not client.name:match 'null' or #clients == 1) then
+      table.insert(names, client.name)
+    end
+  end
+  return table.concat(names, ' ')
+end
 
 ---The currently focused function
 ---@return string?
 function M.current_function()
-  return vim.b.lsp_current_function
+  local gps = require 'nvim-gps'
+  if gps.is_available() then
+    return gps.get_location()
+  end
 end
 
 function M.debugger()
@@ -626,57 +638,22 @@ end
 -- Git/Github helper functions
 -----------------------------------------------------------------------------//
 
----A thin wrapper around nvim's job api
 ---@param interval number
 ---@param task function
----@param on_complete fun(timer: userdata)
-local function job(interval, task, on_complete)
-  vim.defer_fn(task, 2000)
+local function run_task_on_interval(interval, task)
   local pending_job
-  --- @type userdata
   local timer = luv.new_timer()
-  timer:start(0, interval, function()
-    -- clear previous job
+  local function callback()
     if pending_job then
-      vim.schedule(function()
-        fn.jobstop(pending_job)
-        pending_job = task()
-      end)
+      fn.jobstop(pending_job)
     end
-  end)
-end
-
----Validate the response from the github CLI is JSON
----@param data table
----@return boolean
-local function validate_github_response(data)
-  return vim.tbl_islist(data)
-    and not fss.empty(data[1])
-    and type(data[1]) == 'string'
-    and not data[1]:match '<!DOCTYPE html>'
-end
-
-local function fetch_github_notifications()
-  fn.jobstart('gh api notifications', {
-    stdout_buffered = true,
-    on_stdout = function(_, data, _)
-      if data then
-        vim.defer_fn(function()
-          -- data is a table, so check that the first value isn't an empty string
-          if validate_github_response(data) then
-            local notifications = vim.json and vim.json.decode(data[1])
-              or vim.fn.json_decode(data)
-            vim.g.github_notifications = #notifications
-          end
-        end, 1)
-      end
-    end,
-  })
-end
-
-function M.github_notifications()
-  if fn.executable 'gh' > 0 then
-    job(300000, fetch_github_notifications)
+    pending_job = task()
+  end
+  local fail = timer:start(0, interval, vim.schedule_wrap(callback))
+  if fail ~= 0 then
+    vim.schedule(function()
+      vim.notify('Failed to start git update job: ' .. fail)
+    end)
   end
 end
 
@@ -697,9 +674,14 @@ local function collect_data(result)
   end
 end
 
+-- Use git and the native job API to first get the head of the repo
+-- check the state of the repo head against the origin copy we have
 -- the result format is in the format: `1       0`
 -- the first value commits ahead by and the second is commits behind by
 local function git_update_job()
+  if not is_git_repo() then
+    return
+  end
   local result = {}
   fn.jobstart('git rev-list --count --left-right @{upstream}...HEAD', {
     stdout_buffered = true,
@@ -721,25 +703,10 @@ function M.git_updates_refresh()
   git_update_job()
 end
 
---- @type userdata
-local git_timer
-
-function M.git_update_toggle()
-  local is_repo = is_git_repo()
-  if is_repo then
-    M.git_updates()
-  end
-  if git_timer and git_timer:is_active() and not is_repo then
-    git_timer:stop()
-  end
-end
-
 --- starts a timer to check for the whether
 --- we are currently ahead or behind upstream
 function M.git_updates()
-  job(30000, git_update_job, function(timer)
-    git_timer = timer
-  end)
+  run_task_on_interval(10000, git_update_job)
 end
 
 return M

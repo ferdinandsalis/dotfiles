@@ -143,6 +143,14 @@ packer.startup {
     }
 
     use {
+      'SmiteshP/nvim-gps',
+      requires = 'nvim-treesitter/nvim-treesitter',
+      config = function()
+        require('nvim-gps').setup {}
+      end,
+    }
+
+    use {
       'tpope/vim-abolish',
       config = conf 'vim-abolish',
     }
@@ -306,6 +314,15 @@ packer.startup {
           'tzachar/cmp-fuzzy-path',
           after = 'cmp-path',
           requires = { 'hrsh7th/cmp-path', 'tzachar/fuzzy.nvim' },
+        },
+        {
+          'petertriho/cmp-git',
+          after = 'nvim-cmp',
+          config = function()
+            require('cmp_git').setup {
+              filetypes = { 'gitcommit', 'NeogitCommitMessage' },
+            }
+          end,
         },
         {
           'tzachar/cmp-fuzzy-buffer',
