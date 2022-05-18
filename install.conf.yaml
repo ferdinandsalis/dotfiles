@@ -1,0 +1,37 @@
+- defaults:
+    link:
+      create: true
+      relink: true
+
+- create:
+    - ~/.ssh
+    - ~/.config
+    - ~/projects
+    - ~/work
+
+- clean: ["~"]
+
+- link:
+    ~/.tmux.conf: tmux/.tmux.conf
+    ~/.zshrc: zsh/zshrc
+    ~/.zshenv: zsh/zshenv
+    ~/.zprofile: zsh/zprofile
+    ~/.gitconfig: git/gitconfig
+    ~/.gitmessage: git/gitmessage
+    ~/.config/yabai: yabai
+    ~/.config/qutebrowser: qutebrowser
+    ~/.skhdrc: skhd/skhdrc
+    ~/.config/nvim: nvim
+    ~/.Brewfile: homebrew/Brewfile
+    ~/Library/Application Support/lazygit/config.yml: lazygit/config.yml
+    ~/.config/direnv: direnv
+    ~/.config/bat: bat
+    ~/.config/kitty:
+      force: true
+      path: kitty
+    ~/.config/karabiner:
+      force: true
+      path: karabiner
+
+- shell:
+    - [git submodule update --init --recursive, Installing submodules]

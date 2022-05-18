@@ -1,0 +1,22 @@
+[submodule "dotbot"]
+	path = dotbot
+	url = https://github.com/anishathalye/dotbot
+	ignore = dirty
+[submodule "zsh/plugins/zsh-syntax-highlighting"]
+	path = zsh/plugins/zsh-syntax-highlighting
+	url = https://github.com/zsh-users/zsh-syntax-highlighting
+[submodule "zsh/plugins/zsh-autosuggestions"]
+	path = zsh/plugins/zsh-autosuggestions
+	url = https://github.com/zsh-users/zsh-autosuggestions
+[submodule "zsh/plugins/zsh-completions"]
+	path = zsh/plugins/zsh-completions
+	url = https://github.com/zsh-users/zsh-completions
+[submodule "zsh/plugins/zsh-auto-notify"]
+	path = zsh/plugins/zsh-auto-notify
+	url = git@github.com:MichaelAquilina/zsh-auto-notify.git
+[submodule "zsh/plugins/zsh-autopair"]
+	path = zsh/plugins/zsh-autopair
+	url = git@github.com:hlissner/zsh-autopair.git
+[submodule "/Users/ferdinand/.dotfiles/zsh/plugins/zsh-autopair"]
+	path = /Users/ferdinand/.dotfiles/zsh/plugins/zsh-autopair
+	url = git@github.com:hlissner/zsh-autopair.git

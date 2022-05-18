@@ -1,0 +1,895 @@
+WARN  2022-05-16T09:41:18.921 94177 log_path_init:96: Failed to create directory /Users/ferdinand/.local/state/nvim for writing logs: Unknown system error 1
+DEBUG 2022-05-16T09:41:18.922 94177 pty_process_save_termios:166: tty_fd=0
+INFO  2022-05-16T09:41:18.926 94177 set_init_2:786: startup runtimepath/packpath value: /Users/ferdinand/.config/nvim,/etc/xdg/nvim,/Users/ferdinand/.local/share/nvim/site,/usr/local/share/nvim/site,/usr/share/nvim/site,/usr/local/share/nvim/runtime,/usr/local/lib/nvim,/usr/share/nvim/site/after,/usr/local/share/nvim/site/after,/Users/ferdinand/.local/share/nvim/site/after,/etc/xdg/nvim/after,/Users/ferdinand/.config/nvim/after
+DEBUG 2022-05-16T09:41:18.927 94177 tui_get_stty_erase:2202: stty/termios:erase=
+DEBUG 2022-05-16T09:41:18.927 94177 tui_tk_ti_getstr:2218: libtermkey:kbs=
+DEBUG 2022-05-16T09:41:18.927 94177 tui_tk_ti_getstr:2223: libtermkey:kdch1=[3~
+DEBUG 2022-05-16T09:41:18.928 94177 tui_tk_ti_getstr:2229: libtermkey:kmous=[M
+DEBUG 2022-05-16T09:41:18.929 94177 UI: option_set
+DEBUG 2022-05-16T09:41:18.929 94177 UI: option_set (+11 times...)
+DEBUG 2022-05-16T09:41:18.929 94177 UI: default_colors_set
+DEBUG 2022-05-16T09:41:18.930 94177 UI: option_set
+DEBUG 2022-05-16T09:41:18.930 94177 UI: option_set (+4 times...)
+DEBUG 2022-05-16T09:41:18.930 94177 UI: default_colors_set
+DEBUG 2022-05-16T09:41:18.930 94177 UI: grid_resize
+DEBUG 2022-05-16T09:41:18.930 94177 UI: grid_resize (+1 times...)
+DEBUG 2022-05-16T09:41:18.930 94177 UI: grid_clear
+DEBUG 2022-05-16T09:41:18.933 94177 handle_background_color:563: bg response: dark
+DEBUG 2022-05-16T09:41:18.936 94177 UI: option_set
+DEBUG 2022-05-16T09:41:18.946 94177 UI: option_set (+6 times...)
+DEBUG 2022-05-16T09:41:18.946 94177 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:18.947 94177 UI: hl_attr_define (+19 times...)
+DEBUG 2022-05-16T09:41:18.947 94177 UI: default_colors_set
+DEBUG 2022-05-16T09:41:18.947 94177 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:18.973 94177 UI: hl_attr_define (+184 times...)
+DEBUG 2022-05-16T09:41:18.973 94177 UI: option_set
+DEBUG 2022-05-16T09:41:18.973 94177 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:18.976 94177 emsg_multiline:673: (:silent) E184: No such user-defined command: Telescope
+DEBUG 2022-05-16T09:41:18.976 94177 emsg_multiline:673: (:silent) E31: No such mapping
+DEBUG 2022-05-16T09:41:18.976 94177 emsg_multiline:673: (:silent) E31: No such mapping
+DEBUG 2022-05-16T09:41:18.976 94177 emsg_multiline:673: (:silent) E31: No such mapping
+DEBUG 2022-05-16T09:41:18.976 94177 emsg_multiline:673: (:silent) E31: No such mapping
+DEBUG 2022-05-16T09:41:18.991 94177 emsg_multiline:673: (:silent) E216: No such group or event: FileExplorer *
+INFO  2022-05-16T09:41:19.031 94177 emsg_multiline:683: E5113: Error while calling lua chunk: vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	/Users/ferdinand/.dotfiles/nvim/plugin/lsp.lua:1: in main chunk
+DEBUG 2022-05-16T09:41:19.031 94177 UI: hl_attr_define (+27 times...)
+DEBUG 2022-05-16T09:41:19.031 94177 UI: grid_resize
+DEBUG 2022-05-16T09:41:19.031 94177 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:19.031 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:19.033 94177 UI: raw_line (+7 times...)
+DEBUG 2022-05-16T09:41:19.033 94177 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:19.036 94177 RPC: ch 9223372036854775808: invoke nvim_create_buf
+INFO  2022-05-16T09:41:19.047 94177 emsg_multiline:681: E5108: Error executing lua ...ck/packer/start/nvim-lspconfig/lua/lspconfig/configs.lua:1: loop or previous error loading module 'lspconfig.util'
+stack traceback:
+	[C]: in function 'require'
+	...ck/packer/start/nvim-lspconfig/lua/lspconfig/configs.lua:1: in main chunk
+	[C]: in function 'require'
+	.../site/pack/packer/start/nvim-lspconfig/lua/lspconfig.lua:1: in main chunk
+	[C]: in function 'require'
+	[string ":lua"]:9: in main chunk (/Users/ferdinand/.local/share/nvim/site/pack/packer/start/nvim-lspconfig/plugin/lspconfig.vim (line 16))
+INFO  2022-05-16T09:41:19.080 94177 emsg_multiline:683: E886: System error while opening ShaDa file /Users/ferdinand/.local/state/nvim/shada/main.shada for reading: permission denied
+DEBUG 2022-05-16T09:41:19.125 94177 UI: hl_attr_define (+37 times...)
+DEBUG 2022-05-16T09:41:19.125 94177 UI: win_viewport
+DEBUG 2022-05-16T09:41:19.125 94177 UI: grid_scroll
+DEBUG 2022-05-16T09:41:19.125 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:19.125 94177 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:19.125 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:19.126 94177 UI: raw_line (+29 times...)
+DEBUG 2022-05-16T09:41:19.126 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:19.126 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:19.126 94177 UI: mode_info_set
+DEBUG 2022-05-16T09:41:19.126 94177 UI: mode_change
+DEBUG 2022-05-16T09:41:19.126 94177 UI: mouse_on
+DEBUG 2022-05-16T09:41:19.126 94177 UI: flush
+DEBUG 2022-05-16T09:41:19.126 94177 os_delay:64: 1006 ms
+DEBUG 2022-05-16T09:41:20.134 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:20.135 94177 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:20.136 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:20.136 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:20.136 94177 UI: flush
+DEBUG 2022-05-16T09:41:20.137 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:20.137 94177 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:20.138 94177 UI: grid_scroll
+DEBUG 2022-05-16T09:41:20.138 94177 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:20.138 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:20.138 94177 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:20.138 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:20.138 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:20.138 94177 UI: mouse_off
+DEBUG 2022-05-16T09:41:20.138 94177 UI: flush
+DEBUG 2022-05-16T09:41:20.138 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:20.440 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:23.143 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:23.143 94177 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:23.148 94177 UI: hl_attr_define (+6 times...)
+DEBUG 2022-05-16T09:41:23.148 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:23.148 94177 UI: raw_line (+5 times...)
+DEBUG 2022-05-16T09:41:23.148 94177 UI: win_viewport
+DEBUG 2022-05-16T09:41:23.148 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:23.148 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:23.148 94177 UI: flush
+DEBUG 2022-05-16T09:41:23.148 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:23.449 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:24.211 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:24.211 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:24.212 94177 UI: raw_line (+7 times...)
+DEBUG 2022-05-16T09:41:24.212 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:24.212 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:24.212 94177 UI: flush
+DEBUG 2022-05-16T09:41:24.212 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:24.514 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:25.761 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:25.761 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:25.762 94177 UI: raw_line (+5 times...)
+DEBUG 2022-05-16T09:41:25.762 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:25.762 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:25.762 94177 UI: flush
+DEBUG 2022-05-16T09:41:25.762 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:26.064 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:26.202 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:26.203 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:26.203 94177 UI: raw_line (+7 times...)
+DEBUG 2022-05-16T09:41:26.203 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:26.203 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:26.203 94177 UI: flush
+DEBUG 2022-05-16T09:41:26.203 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:26.505 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:26.675 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:26.675 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:26.675 94177 UI: raw_line (+7 times...)
+DEBUG 2022-05-16T09:41:26.675 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:26.676 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:26.676 94177 UI: flush
+DEBUG 2022-05-16T09:41:26.676 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:26.977 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:27.097 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:27.097 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:27.098 94177 UI: raw_line (+5 times...)
+DEBUG 2022-05-16T09:41:27.098 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:27.098 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:27.098 94177 UI: flush
+DEBUG 2022-05-16T09:41:27.098 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:27.399 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:27.419 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:27.420 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:27.420 94177 UI: raw_line (+5 times...)
+DEBUG 2022-05-16T09:41:27.420 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:27.420 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:27.420 94177 UI: flush
+DEBUG 2022-05-16T09:41:27.420 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:27.722 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:27.747 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:27.747 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:27.748 94177 UI: raw_line (+5 times...)
+DEBUG 2022-05-16T09:41:27.748 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:27.748 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:27.748 94177 UI: flush
+DEBUG 2022-05-16T09:41:27.748 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:28.049 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:28.054 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:28.055 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:28.055 94177 UI: raw_line (+5 times...)
+DEBUG 2022-05-16T09:41:28.055 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:28.055 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:28.055 94177 UI: flush
+DEBUG 2022-05-16T09:41:28.055 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+INFO  2022-05-16T09:41:28.275 94177 main:572: starting main loop
+DEBUG 2022-05-16T09:41:28.276 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:28.276 94177 UI: win_viewport
+DEBUG 2022-05-16T09:41:28.276 94177 UI: mouse_on
+DEBUG 2022-05-16T09:41:28.276 94177 UI: flush
+DEBUG 2022-05-16T09:41:28.276 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:28.277 94177 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:28.277 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:28.280 94177 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:28.280 94177 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:28.286 94177 UI: hl_attr_define (+60 times...)
+DEBUG 2022-05-16T09:41:28.286 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:28.287 94177 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:28.287 94177 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:28.287 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:28.290 94177 UI: raw_line (+95 times...)
+DEBUG 2022-05-16T09:41:28.290 94177 UI: hl_attr_define
+INFO  2022-05-16T09:41:28.293 94177 emsg_multiline:683: E5108: Error executing lua vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	/Users/ferdinand/.config/nvim/lua/fss/utils/statusline.lua:418: in function 'diagnostic_info'
+	/Users/ferdinand/.config/nvim/lua/fss/statusline.lua:129: in function </Users/ferdinand/.config/nvim/lua/fss/statusline.lua:62>
+DEBUG 2022-05-16T09:41:28.293 94177 UI: hl_attr_define (+2 times...)
+DEBUG 2022-05-16T09:41:28.293 94177 UI: win_viewport
+DEBUG 2022-05-16T09:41:28.293 94177 UI: grid_scroll
+DEBUG 2022-05-16T09:41:28.293 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:28.293 94177 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:28.293 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:28.293 94177 UI: raw_line (+13 times...)
+DEBUG 2022-05-16T09:41:28.293 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:28.293 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:28.293 94177 UI: mouse_off
+DEBUG 2022-05-16T09:41:28.294 94177 UI: flush
+DEBUG 2022-05-16T09:41:28.294 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:28.598 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:29.020 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:29.020 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:29.022 94177 UI: raw_line (+5 times...)
+DEBUG 2022-05-16T09:41:29.023 94177 UI: set_icon
+DEBUG 2022-05-16T09:41:29.023 94177 UI: set_title
+DEBUG 2022-05-16T09:41:29.023 94177 UI: mouse_on
+DEBUG 2022-05-16T09:41:29.023 94177 UI: flush
+DEBUG 2022-05-16T09:41:29.023 94177 UI: win_viewport
+DEBUG 2022-05-16T09:41:29.023 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:29.023 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:29.023 94177 UI: flush
+DEBUG 2022-05-16T09:41:29.023 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:29.024 94177 log_key:1017: input: K_EVENT
+INFO  2022-05-16T09:41:29.024 94177 emsg_multiline:683: Error executing vim.schedule lua callback: /Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: Error executing lua: vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	...cker/opt/nvim-notify/lua/notify/service/notification.lua:21: in function 'Notification'
+	...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:120: in function <...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:88>
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+stack traceback:
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+DEBUG 2022-05-16T09:41:29.024 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:29.024 94177 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:29.024 94177 UI: grid_scroll
+DEBUG 2022-05-16T09:41:29.025 94177 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:29.025 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:29.025 94177 UI: raw_line (+19 times...)
+DEBUG 2022-05-16T09:41:29.025 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:29.025 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:29.025 94177 UI: mouse_off
+DEBUG 2022-05-16T09:41:29.025 94177 UI: flush
+DEBUG 2022-05-16T09:41:29.025 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:29.327 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+INFO  2022-05-16T09:41:29.392 94177 emsg_multiline:683: Error executing vim.schedule lua callback: /Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: Error executing lua: vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	...cker/opt/nvim-notify/lua/notify/service/notification.lua:21: in function 'Notification'
+	...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:120: in function <...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:88>
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+stack traceback:
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+DEBUG 2022-05-16T09:41:29.393 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:29.393 94177 UI: grid_scroll
+DEBUG 2022-05-16T09:41:29.393 94177 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:29.394 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:29.394 94177 UI: raw_line (+23 times...)
+DEBUG 2022-05-16T09:41:29.394 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:29.394 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:29.394 94177 UI: flush
+DEBUG 2022-05-16T09:41:29.394 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:29.695 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+INFO  2022-05-16T09:41:29.706 94177 emsg_multiline:683: Error executing vim.schedule lua callback: /Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: Error executing lua: vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	...cker/opt/nvim-notify/lua/notify/service/notification.lua:21: in function 'Notification'
+	...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:120: in function <...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:88>
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+stack traceback:
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+DEBUG 2022-05-16T09:41:29.707 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:29.707 94177 UI: grid_scroll
+DEBUG 2022-05-16T09:41:29.707 94177 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:29.707 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:29.707 94177 UI: raw_line (+23 times...)
+DEBUG 2022-05-16T09:41:29.708 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:29.708 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:29.708 94177 UI: flush
+DEBUG 2022-05-16T09:41:29.708 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+INFO  2022-05-16T09:41:30.007 94177 emsg_multiline:683: Error executing vim.schedule lua callback: /Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: Error executing lua: vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	...cker/opt/nvim-notify/lua/notify/service/notification.lua:21: in function 'Notification'
+	...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:120: in function <...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:88>
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+stack traceback:
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+INFO  2022-05-16T09:41:30.014 94177 emsg_multiline:683: Error executing vim.schedule lua callback: /Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: Error executing lua: vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	...cker/opt/nvim-notify/lua/notify/service/notification.lua:21: in function 'Notification'
+	...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:120: in function <...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:88>
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+stack traceback:
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+DEBUG 2022-05-16T09:41:30.020 94177 process_spawn:123: new: pid=94259 argv=[/Users/ferdinand/.asdf/installs/nodejs/17.1.0/bin/node]
+INFO  2022-05-16T09:41:30.020 94177 channel_create_event:210: new channel 3 (function <lambda>13[1]..<SNR>54_Start[4]..copilot#agent#New[12]..<SNR>115_Command[17]..copilot#job#Stream:21) : {"id": 3, "argv": ["/Users/ferdinand/.asdf/installs/nodejs/17.1.0/bin/node", "--version"], "mode": "bytes", "stream": "job"}
+DEBUG 2022-05-16T09:41:30.021 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:30.021 94177 UI: busy_start
+DEBUG 2022-05-16T09:41:30.034 94177 read_cb:119: closing Stream (0x1400b1fc8): EOF (end of file)
+DEBUG 2022-05-16T09:41:30.034 94177 read_cb:119: closing Stream (0x1400b1e18): EOF (end of file)
+INFO  2022-05-16T09:41:30.034 94177 on_process_exit:400: exited: pid=94259 status=0 stoptime=0
+DEBUG 2022-05-16T09:41:30.034 94177 stream_close:107: closing Stream: 0x1400b1c68
+DEBUG 2022-05-16T09:41:30.034 94177 stream_close:107: closing Stream: 0x1400b1e18
+DEBUG 2022-05-16T09:41:30.035 94177 stream_close:107: closing Stream: 0x1400b1fc8
+DEBUG 2022-05-16T09:41:30.035 94177 UI: busy_stop
+DEBUG 2022-05-16T09:41:30.037 94177 process_spawn:123: new: pid=94260 argv=[/Users/ferdinand/.asdf/installs/nodejs/17.1.0/bin/node]
+INFO  2022-05-16T09:41:30.037 94177 channel_create_event:210: new channel 4 (function <lambda>13[1]..<SNR>54_Start[4]..copilot#agent#New[19]..copilot#job#Stream:21) : {"id": 4, "argv": ["/Users/ferdinand/.asdf/installs/nodejs/17.1.0/bin/node", "/Users/ferdinand/.local/share/nvim/site/pack/packer/start/copilot.vim/copilot/dist/agent.js"], "mode": "bytes", "stream": "job"}
+DEBUG 2022-05-16T09:41:30.038 94177 process_spawn:123: new: pid=94261 argv=[/bin/zsh]
+INFO  2022-05-16T09:41:30.038 94177 channel_create_event:210: new channel 5 (?) : {"id": 5, "argv": ["/bin/zsh", "-c", "git rev-list --count --left-right @{upstream}...HEAD"], "mode": "bytes", "stream": "job"}
+DEBUG 2022-05-16T09:41:30.045 94177 process_spawn:123: new: pid=94262 argv=[/bin/zsh]
+INFO  2022-05-16T09:41:30.045 94177 channel_create_event:210: new channel 6 (?) : {"id": 6, "argv": ["/bin/zsh", "-c", "git rev-list --count --left-right @{upstream}...HEAD"], "mode": "bytes", "stream": "job"}
+INFO  2022-05-16T09:41:30.047 94177 on_process_exit:400: exited: pid=94261 status=0 stoptime=0
+DEBUG 2022-05-16T09:41:30.048 94177 read_cb:119: closing Stream (0x1280e0e18): EOF (end of file)
+DEBUG 2022-05-16T09:41:30.048 94177 stream_close:107: closing Stream: 0x1280e0c68
+DEBUG 2022-05-16T09:41:30.048 94177 stream_close:107: closing Stream: 0x1280e0e18
+DEBUG 2022-05-16T09:41:30.048 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:30.048 94177 UI: raw_line (+41 times...)
+DEBUG 2022-05-16T09:41:30.048 94177 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:30.048 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:30.048 94177 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:30.048 94177 UI: win_viewport
+DEBUG 2022-05-16T09:41:30.048 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:30.048 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:30.048 94177 UI: mouse_on
+DEBUG 2022-05-16T09:41:30.048 94177 UI: flush
+DEBUG 2022-05-16T09:41:30.048 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:30.049 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:30.049 94177 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:30.049 94177 UI: flush
+DEBUG 2022-05-16T09:41:30.049 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+INFO  2022-05-16T09:41:30.053 94177 on_process_exit:400: exited: pid=94262 status=0 stoptime=0
+DEBUG 2022-05-16T09:41:30.053 94177 read_cb:119: closing Stream (0x12980a818): EOF (end of file)
+DEBUG 2022-05-16T09:41:30.553 94177 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:30.554 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:30.555 94177 log_key:1017: input: <q>
+DEBUG 2022-05-16T09:41:30.555 94177 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:30.555 94177 UI: flush
+DEBUG 2022-05-16T09:41:30.555 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:30.555 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:30.555 94177 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:30.555 94177 UI: flush
+DEBUG 2022-05-16T09:41:30.555 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:30.793 94177 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:30.794 94177 UI: flush (+2 times...)
+DEBUG 2022-05-16T09:41:30.794 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:30.794 94177 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:30.794 94177 UI: flush
+DEBUG 2022-05-16T09:41:30.795 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:30.795 94177 log_key:1017: input: <:>
+DEBUG 2022-05-16T09:41:30.796 94177 log_key:1017: input: <t_ýT>
+DEBUG 2022-05-16T09:41:30.803 94177 emsg_multiline:673: (:silent) E11: Invalid in command-line window; <CR> executes, CTRL-C quits: silent! checktime
+DEBUG 2022-05-16T09:41:30.804 94177 emsg_multiline:673: (:silent) E11: Invalid in command-line window; <CR> executes, CTRL-C quits: silent! checktime
+INFO  2022-05-16T09:41:30.805 94177 emsg_multiline:683: E5108: Error executing lua ...start/todo-comments.nvim/lua/todo-comments/highlight.lua:175: Vim:E11: Invalid in command-line window; <CR> executes, CTRL-C quits
+stack traceback:
+	[C]: in function 'nvim_set_current_win'
+	...start/todo-comments.nvim/lua/todo-comments/highlight.lua:175: in function 'highlight_win'
+	...start/todo-comments.nvim/lua/todo-comments/highlight.lua:263: in function 'attach'
+	[string ":lua"]:1: in main chunk
+DEBUG 2022-05-16T09:41:30.856 94177 UI: raw_line (+5 times...)
+DEBUG 2022-05-16T09:41:30.856 94177 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:30.856 94177 UI: win_viewport
+DEBUG 2022-05-16T09:41:30.856 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:30.856 94177 UI: mode_change
+DEBUG 2022-05-16T09:41:30.857 94177 UI: flush
+DEBUG 2022-05-16T09:41:30.857 94177 os_delay:64: 1006 ms
+DEBUG 2022-05-16T09:41:31.879 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:31.880 94177 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:31.880 94177 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:31.880 94177 UI: hl_attr_define (+1 times...)
+DEBUG 2022-05-16T09:41:31.880 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:31.880 94177 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:31.880 94177 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:31.880 94177 UI: hl_attr_define (+1 times...)
+DEBUG 2022-05-16T09:41:31.881 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:31.882 94177 UI: raw_line (+27 times...)
+DEBUG 2022-05-16T09:41:31.882 94177 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:31.882 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:31.883 94177 UI: raw_line (+15 times...)
+DEBUG 2022-05-16T09:41:31.883 94177 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:31.884 94177 UI: raw_line
+DEBUG 2022-05-16T09:41:31.907 94177 UI: raw_line (+57 times...)
+DEBUG 2022-05-16T09:41:31.907 94177 UI: win_viewport
+DEBUG 2022-05-16T09:41:31.907 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:31.907 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:31.907 94177 UI: flush
+DEBUG 2022-05-16T09:41:31.907 94177 log_key:1017: input: <Cmd>
+DEBUG 2022-05-16T09:41:31.908 94177 RPC: ch 9223372036854775808: invoke nvim_win_get_config
+DEBUG 2022-05-16T09:41:31.908 94177 RPC: ch 9223372036854775808: invoke nvim_open_win
+DEBUG 2022-05-16T09:41:31.908 94177 RPC: ch 9223372036854775808: invoke nvim_win_set_option
+DEBUG 2022-05-16T09:41:31.908 94177 RPC: ch 9223372036854775808: invoke nvim_win_set_option
+INFO  2022-05-16T09:41:31.912 94177 emsg_multiline:683: E886: System error while opening ShaDa file /Users/ferdinand/.local/state/nvim/shada/main.shada for reading to merge before writing it: permission denied
+DEBUG 2022-05-16T09:41:31.912 94177 UI: raw_line
+INFO  2022-05-16T09:41:31.912 94177 emsg_multiline:683: E886: Failed to create directory /Users/ferdinand/.local/state/nvim for writing ShaDa file: permission denied
+DEBUG 2022-05-16T09:41:31.913 94177 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:31.913 94177 UI: set_title
+DEBUG 2022-05-16T09:41:31.913 94177 UI: win_viewport
+DEBUG 2022-05-16T09:41:31.913 94177 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:31.913 94177 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:31.913 94177 UI: mode_change
+DEBUG 2022-05-16T09:41:31.913 94177 UI: flush
+DEBUG 2022-05-16T09:41:31.913 94177 stream_close:107: closing Stream: 0x1200181e8
+DEBUG 2022-05-16T09:41:31.922 94177 UI: stop
+DEBUG 2022-05-16T09:41:31.922 94177 stream_close:107: closing Stream: 0x12980a668
+DEBUG 2022-05-16T09:41:31.922 94177 stream_close:107: closing Stream: 0x12980a818
+DEBUG 2022-05-16T09:41:31.955 94177 RPC: ch 9223372036854775808: invoke nvim_win_is_valid
+DEBUG 2022-05-16T09:41:31.955 94177 RPC: ch 9223372036854775808: invoke nvim_win_get_option
+DEBUG 2022-05-16T09:41:31.955 94177 RPC: ch 9223372036854775808: invoke nvim_win_get_width
+DEBUG 2022-05-16T09:41:31.955 94177 RPC: ch 9223372036854775808: invoke nvim_win_set_option
+DEBUG 2022-05-16T09:41:31.955 94177 RPC: ch 9223372036854775808: invoke nvim_win_set_width
+DEBUG 2022-05-16T09:41:31.957 94177 stream_close:107: closing Stream: 0x1280d9e68
+DEBUG 2022-05-16T09:41:31.957 94177 stream_close:107: closing Stream: 0x1280da018
+DEBUG 2022-05-16T09:41:31.957 94177 stream_close:107: closing Stream: 0x1280da1c8
+INFO  2022-05-16T09:41:31.957 94177 os_proc_tree_kill:96: sending SIGTERM to PID -94260
+DEBUG 2022-05-16T09:41:31.957 94177 RPC: ch 9223372036854775808: invoke nvim_win_is_valid
+DEBUG 2022-05-16T09:41:31.957 94177 RPC: ch 9223372036854775808: invoke nvim_win_get_option
+DEBUG 2022-05-16T09:41:31.957 94177 RPC: ch 9223372036854775808: invoke nvim_win_get_width
+DEBUG 2022-05-16T09:41:31.957 94177 RPC: ch 9223372036854775808: invoke nvim_win_set_option
+DEBUG 2022-05-16T09:41:31.958 94177 RPC: ch 9223372036854775808: invoke nvim_win_set_width
+INFO  2022-05-16T09:41:31.958 94177 emsg_multiline:681: Can't send data to closed stream (function <SNR>115_Callback[3]..<lambda>19[1]..<SNR>115_GetCapabilitiesResult[2]..<SNR>115_AgentRequest[3]..<SNR>115_Send (line 3))
+DEBUG 2022-05-16T09:41:31.958 94177 UI: raw_line
+INFO  2022-05-16T09:41:31.959 94177 on_process_exit:400: exited: pid=94260 status=143 stoptime=656331952174208
+WARN  2022-05-16T09:41:34.649 94383 log_path_init:96: Failed to create directory /Users/ferdinand/.local/state/nvim for writing logs: Unknown system error 1
+DEBUG 2022-05-16T09:41:34.650 94383 pty_process_save_termios:166: tty_fd=0
+INFO  2022-05-16T09:41:34.655 94383 set_init_2:786: startup runtimepath/packpath value: /Users/ferdinand/.config/nvim,/etc/xdg/nvim,/Users/ferdinand/.local/share/nvim/site,/usr/local/share/nvim/site,/usr/share/nvim/site,/usr/local/share/nvim/runtime,/usr/local/lib/nvim,/usr/share/nvim/site/after,/usr/local/share/nvim/site/after,/Users/ferdinand/.local/share/nvim/site/after,/etc/xdg/nvim/after,/Users/ferdinand/.config/nvim/after
+DEBUG 2022-05-16T09:41:34.656 94383 tui_get_stty_erase:2202: stty/termios:erase=
+DEBUG 2022-05-16T09:41:34.656 94383 tui_tk_ti_getstr:2218: libtermkey:kbs=
+DEBUG 2022-05-16T09:41:34.656 94383 tui_tk_ti_getstr:2223: libtermkey:kdch1=[3~
+DEBUG 2022-05-16T09:41:34.657 94383 tui_tk_ti_getstr:2229: libtermkey:kmous=[M
+DEBUG 2022-05-16T09:41:34.658 94383 UI: option_set
+DEBUG 2022-05-16T09:41:34.658 94383 UI: option_set (+11 times...)
+DEBUG 2022-05-16T09:41:34.658 94383 UI: default_colors_set
+DEBUG 2022-05-16T09:41:34.658 94383 UI: option_set
+DEBUG 2022-05-16T09:41:34.658 94383 UI: option_set (+4 times...)
+DEBUG 2022-05-16T09:41:34.659 94383 UI: default_colors_set
+DEBUG 2022-05-16T09:41:34.659 94383 UI: grid_resize
+DEBUG 2022-05-16T09:41:34.659 94383 UI: grid_resize (+1 times...)
+DEBUG 2022-05-16T09:41:34.659 94383 UI: grid_clear
+DEBUG 2022-05-16T09:41:34.661 94383 handle_background_color:563: bg response: dark
+DEBUG 2022-05-16T09:41:34.665 94383 UI: option_set
+DEBUG 2022-05-16T09:41:34.676 94383 UI: option_set (+6 times...)
+DEBUG 2022-05-16T09:41:34.676 94383 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:34.677 94383 UI: hl_attr_define (+25 times...)
+DEBUG 2022-05-16T09:41:34.677 94383 UI: default_colors_set
+DEBUG 2022-05-16T09:41:34.677 94383 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:34.703 94383 UI: hl_attr_define (+178 times...)
+DEBUG 2022-05-16T09:41:34.703 94383 UI: option_set
+DEBUG 2022-05-16T09:41:34.703 94383 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:34.706 94383 emsg_multiline:673: (:silent) E184: No such user-defined command: Telescope
+DEBUG 2022-05-16T09:41:34.706 94383 emsg_multiline:673: (:silent) E31: No such mapping
+DEBUG 2022-05-16T09:41:34.706 94383 emsg_multiline:673: (:silent) E31: No such mapping
+DEBUG 2022-05-16T09:41:34.706 94383 emsg_multiline:673: (:silent) E31: No such mapping
+DEBUG 2022-05-16T09:41:34.706 94383 emsg_multiline:673: (:silent) E31: No such mapping
+DEBUG 2022-05-16T09:41:34.721 94383 emsg_multiline:673: (:silent) E216: No such group or event: FileExplorer *
+INFO  2022-05-16T09:41:34.758 94383 emsg_multiline:683: E5113: Error while calling lua chunk: vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	/Users/ferdinand/.dotfiles/nvim/plugin/lsp.lua:1: in main chunk
+DEBUG 2022-05-16T09:41:34.759 94383 UI: hl_attr_define (+27 times...)
+DEBUG 2022-05-16T09:41:34.759 94383 UI: grid_resize
+DEBUG 2022-05-16T09:41:34.759 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:34.759 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:34.760 94383 UI: raw_line (+7 times...)
+DEBUG 2022-05-16T09:41:34.760 94383 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:34.762 94383 RPC: ch 9223372036854775808: invoke nvim_create_buf
+INFO  2022-05-16T09:41:34.771 94383 emsg_multiline:681: E5108: Error executing lua ...ck/packer/start/nvim-lspconfig/lua/lspconfig/configs.lua:1: loop or previous error loading module 'lspconfig.util'
+stack traceback:
+	[C]: in function 'require'
+	...ck/packer/start/nvim-lspconfig/lua/lspconfig/configs.lua:1: in main chunk
+	[C]: in function 'require'
+	.../site/pack/packer/start/nvim-lspconfig/lua/lspconfig.lua:1: in main chunk
+	[C]: in function 'require'
+	[string ":lua"]:9: in main chunk (/Users/ferdinand/.local/share/nvim/site/pack/packer/start/nvim-lspconfig/plugin/lspconfig.vim (line 16))
+INFO  2022-05-16T09:41:34.795 94383 emsg_multiline:683: E886: System error while opening ShaDa file /Users/ferdinand/.local/state/nvim/shada/main.shada for reading: permission denied
+DEBUG 2022-05-16T09:41:34.825 94383 UI: hl_attr_define (+37 times...)
+DEBUG 2022-05-16T09:41:34.825 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:34.825 94383 UI: grid_scroll
+DEBUG 2022-05-16T09:41:34.825 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:34.825 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:34.825 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:34.825 94383 UI: raw_line (+29 times...)
+DEBUG 2022-05-16T09:41:34.825 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:34.825 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:34.825 94383 UI: mode_info_set
+DEBUG 2022-05-16T09:41:34.825 94383 UI: mode_change
+DEBUG 2022-05-16T09:41:34.825 94383 UI: mouse_on
+DEBUG 2022-05-16T09:41:34.825 94383 UI: flush
+DEBUG 2022-05-16T09:41:34.825 94383 os_delay:64: 1006 ms
+DEBUG 2022-05-16T09:41:35.834 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:35.835 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:35.836 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:35.836 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:35.836 94383 UI: flush
+DEBUG 2022-05-16T09:41:35.837 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:35.837 94383 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:35.837 94383 UI: grid_scroll
+DEBUG 2022-05-16T09:41:35.837 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:35.837 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:35.837 94383 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:35.838 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:35.838 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:35.838 94383 UI: mouse_off
+DEBUG 2022-05-16T09:41:35.838 94383 UI: flush
+DEBUG 2022-05-16T09:41:35.838 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:36.140 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:36.426 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:36.426 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:36.430 94383 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:36.430 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:36.431 94383 UI: raw_line (+5 times...)
+DEBUG 2022-05-16T09:41:36.431 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:36.431 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:36.431 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:36.431 94383 UI: flush
+DEBUG 2022-05-16T09:41:36.431 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:36.732 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:36.761 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:36.762 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+INFO  2022-05-16T09:41:36.762 94383 main:572: starting main loop
+DEBUG 2022-05-16T09:41:36.762 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:36.762 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:36.763 94383 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:36.763 94383 UI: mouse_on
+DEBUG 2022-05-16T09:41:36.763 94383 UI: flush
+DEBUG 2022-05-16T09:41:36.763 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:36.763 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:36.763 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:36.771 94383 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:36.771 94383 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:36.780 94383 UI: hl_attr_define (+61 times...)
+DEBUG 2022-05-16T09:41:36.780 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:36.782 94383 UI: raw_line (+97 times...)
+DEBUG 2022-05-16T09:41:36.782 94383 UI: hl_attr_define
+INFO  2022-05-16T09:41:36.788 94383 emsg_multiline:683: E5108: Error executing lua vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	/Users/ferdinand/.config/nvim/lua/fss/utils/statusline.lua:418: in function 'diagnostic_info'
+	/Users/ferdinand/.config/nvim/lua/fss/statusline.lua:129: in function </Users/ferdinand/.config/nvim/lua/fss/statusline.lua:62>
+DEBUG 2022-05-16T09:41:36.788 94383 UI: hl_attr_define (+2 times...)
+DEBUG 2022-05-16T09:41:36.788 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:36.788 94383 UI: grid_scroll
+DEBUG 2022-05-16T09:41:36.788 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:36.788 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:36.788 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:36.788 94383 UI: raw_line (+13 times...)
+DEBUG 2022-05-16T09:41:36.789 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:36.789 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:36.789 94383 UI: mouse_off
+DEBUG 2022-05-16T09:41:36.789 94383 UI: flush
+DEBUG 2022-05-16T09:41:36.789 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.090 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.238 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.239 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.239 94383 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:37.240 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.240 94383 UI: raw_line (+5 times...)
+DEBUG 2022-05-16T09:41:37.240 94383 UI: set_icon
+DEBUG 2022-05-16T09:41:37.240 94383 UI: set_title
+DEBUG 2022-05-16T09:41:37.240 94383 UI: mouse_on
+DEBUG 2022-05-16T09:41:37.240 94383 UI: flush
+DEBUG 2022-05-16T09:41:37.241 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.241 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.241 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.241 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.242 94383 log_key:1017: input: <C-C>
+DEBUG 2022-05-16T09:41:37.242 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.242 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.242 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.242 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.242 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.242 94383 UI: raw_line (+5 times...)
+DEBUG 2022-05-16T09:41:37.242 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:37.242 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:37.242 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:37.243 94383 UI: mouse_off
+DEBUG 2022-05-16T09:41:37.243 94383 UI: flush
+DEBUG 2022-05-16T09:41:37.243 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.487 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.487 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.488 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.489 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.489 94383 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:37.489 94383 UI: mouse_on
+DEBUG 2022-05-16T09:41:37.489 94383 UI: flush
+DEBUG 2022-05-16T09:41:37.489 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.490 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.490 94383 UI: raw_line (+7 times...)
+DEBUG 2022-05-16T09:41:37.490 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:37.491 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.491 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:37.491 94383 UI: set_icon
+DEBUG 2022-05-16T09:41:37.491 94383 UI: set_title
+DEBUG 2022-05-16T09:41:37.492 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:37.492 94383 UI: flush
+DEBUG 2022-05-16T09:41:37.492 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:37.492 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:37.492 94383 UI: flush
+DEBUG 2022-05-16T09:41:37.492 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.492 94383 log_key:1017: input: K_EVENT
+INFO  2022-05-16T09:41:37.492 94383 emsg_multiline:683: Error executing vim.schedule lua callback: /Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: Error executing lua: vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	...cker/opt/nvim-notify/lua/notify/service/notification.lua:21: in function 'Notification'
+	...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:120: in function <...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:88>
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+stack traceback:
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+DEBUG 2022-05-16T09:41:37.493 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.493 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:37.493 94383 UI: grid_scroll
+DEBUG 2022-05-16T09:41:37.493 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.493 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:37.493 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.493 94383 UI: raw_line (+19 times...)
+DEBUG 2022-05-16T09:41:37.494 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:37.494 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:37.494 94383 UI: mouse_off
+DEBUG 2022-05-16T09:41:37.494 94383 UI: flush
+DEBUG 2022-05-16T09:41:37.494 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.715 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.715 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.716 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.716 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.717 94383 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:37.717 94383 UI: mouse_on
+DEBUG 2022-05-16T09:41:37.717 94383 UI: flush
+DEBUG 2022-05-16T09:41:37.717 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.717 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.717 94383 UI: raw_line (+10 times...)
+DEBUG 2022-05-16T09:41:37.718 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:37.718 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.719 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:37.719 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:37.719 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:37.719 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:37.719 94383 UI: flush
+DEBUG 2022-05-16T09:41:37.719 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.719 94383 log_key:1017: input: K_EVENT
+INFO  2022-05-16T09:41:37.719 94383 emsg_multiline:683: Error executing vim.schedule lua callback: /Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: Error executing lua: vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	...cker/opt/nvim-notify/lua/notify/service/notification.lua:21: in function 'Notification'
+	...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:120: in function <...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:88>
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+stack traceback:
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+DEBUG 2022-05-16T09:41:37.720 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.720 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:37.720 94383 UI: grid_scroll
+DEBUG 2022-05-16T09:41:37.720 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.720 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:37.720 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.720 94383 UI: raw_line (+19 times...)
+DEBUG 2022-05-16T09:41:37.720 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:37.721 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:37.721 94383 UI: mouse_off
+DEBUG 2022-05-16T09:41:37.721 94383 UI: flush
+DEBUG 2022-05-16T09:41:37.721 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.898 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.899 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.899 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.899 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.900 94383 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:37.900 94383 UI: mouse_on
+DEBUG 2022-05-16T09:41:37.900 94383 UI: flush
+DEBUG 2022-05-16T09:41:37.900 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.900 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.901 94383 UI: raw_line (+10 times...)
+DEBUG 2022-05-16T09:41:37.901 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:37.901 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.902 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:37.902 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:37.902 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:37.903 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:37.903 94383 UI: flush
+DEBUG 2022-05-16T09:41:37.903 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:37.903 94383 log_key:1017: input: K_EVENT
+INFO  2022-05-16T09:41:37.903 94383 emsg_multiline:683: Error executing vim.schedule lua callback: /Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: Error executing lua: vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	...cker/opt/nvim-notify/lua/notify/service/notification.lua:21: in function 'Notification'
+	...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:120: in function <...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:88>
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+stack traceback:
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+DEBUG 2022-05-16T09:41:37.903 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.904 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:37.904 94383 UI: grid_scroll
+DEBUG 2022-05-16T09:41:37.904 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.904 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:37.904 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:37.904 94383 UI: raw_line (+19 times...)
+DEBUG 2022-05-16T09:41:37.904 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:37.904 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:37.904 94383 UI: mouse_off
+DEBUG 2022-05-16T09:41:37.904 94383 UI: flush
+DEBUG 2022-05-16T09:41:37.904 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.062 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.062 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.063 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.063 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.064 94383 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:38.064 94383 UI: mouse_on
+DEBUG 2022-05-16T09:41:38.064 94383 UI: flush
+DEBUG 2022-05-16T09:41:38.064 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.064 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.064 94383 UI: raw_line (+10 times...)
+DEBUG 2022-05-16T09:41:38.064 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:38.065 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.065 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:38.065 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:38.065 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:38.065 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:38.065 94383 UI: flush
+DEBUG 2022-05-16T09:41:38.065 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.065 94383 log_key:1017: input: K_EVENT
+INFO  2022-05-16T09:41:38.065 94383 emsg_multiline:683: Error executing vim.schedule lua callback: /Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: Error executing lua: vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	...cker/opt/nvim-notify/lua/notify/service/notification.lua:21: in function 'Notification'
+	...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:120: in function <...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:88>
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+stack traceback:
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+DEBUG 2022-05-16T09:41:38.066 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.066 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:38.066 94383 UI: grid_scroll
+DEBUG 2022-05-16T09:41:38.066 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.066 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:38.066 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.067 94383 UI: raw_line (+19 times...)
+DEBUG 2022-05-16T09:41:38.067 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:38.067 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:38.067 94383 UI: mouse_off
+DEBUG 2022-05-16T09:41:38.067 94383 UI: flush
+DEBUG 2022-05-16T09:41:38.067 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.230 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.231 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.231 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.232 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.232 94383 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:38.232 94383 UI: mouse_on
+DEBUG 2022-05-16T09:41:38.232 94383 UI: flush
+DEBUG 2022-05-16T09:41:38.232 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.232 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.232 94383 UI: raw_line (+10 times...)
+DEBUG 2022-05-16T09:41:38.233 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:38.233 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.233 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:38.234 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:38.234 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:38.234 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:38.234 94383 UI: flush
+DEBUG 2022-05-16T09:41:38.234 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.234 94383 log_key:1017: input: K_EVENT
+INFO  2022-05-16T09:41:38.239 94383 emsg_multiline:683: Error executing vim.schedule lua callback: /Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: Error executing lua: vim/_init_packages.lua:60: loop or previous error loading module 'vim.lsp'
+stack traceback:
+	[C]: in function 'require'
+	vim/_init_packages.lua:60: in function '__index'
+	...cker/opt/nvim-notify/lua/notify/service/notification.lua:21: in function 'Notification'
+	...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:120: in function <...vim/site/pack/packer/opt/nvim-notify/lua/notify/init.lua:88>
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+stack traceback:
+	[C]: in function 'nvim_notify'
+	/Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:63: in function </Users/ferdinand/.cache/nvim/packer/packer_compiled.lua:62>
+DEBUG 2022-05-16T09:41:38.239 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.239 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:38.239 94383 UI: grid_scroll
+DEBUG 2022-05-16T09:41:38.239 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.240 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:38.240 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.240 94383 UI: raw_line (+19 times...)
+DEBUG 2022-05-16T09:41:38.240 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:38.240 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:38.240 94383 UI: mouse_off
+DEBUG 2022-05-16T09:41:38.240 94383 UI: flush
+DEBUG 2022-05-16T09:41:38.240 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.543 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.783 94383 process_spawn:123: new: pid=94465 argv=[/Users/ferdinand/.asdf/installs/nodejs/17.1.0/bin/node]
+INFO  2022-05-16T09:41:38.783 94383 channel_create_event:210: new channel 3 (function <lambda>13[1]..<SNR>54_Start[4]..copilot#agent#New[12]..<SNR>113_Command[17]..copilot#job#Stream:21) : {"id": 3, "argv": ["/Users/ferdinand/.asdf/installs/nodejs/17.1.0/bin/node", "--version"], "mode": "bytes", "stream": "job"}
+DEBUG 2022-05-16T09:41:38.784 94383 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:38.784 94383 UI: busy_start
+DEBUG 2022-05-16T09:41:38.797 94383 read_cb:119: closing Stream (0x1220341c8): EOF (end of file)
+DEBUG 2022-05-16T09:41:38.797 94383 read_cb:119: closing Stream (0x122034018): EOF (end of file)
+INFO  2022-05-16T09:41:38.797 94383 on_process_exit:400: exited: pid=94465 status=0 stoptime=0
+DEBUG 2022-05-16T09:41:38.797 94383 stream_close:107: closing Stream: 0x122033e68
+DEBUG 2022-05-16T09:41:38.797 94383 stream_close:107: closing Stream: 0x122034018
+DEBUG 2022-05-16T09:41:38.797 94383 stream_close:107: closing Stream: 0x1220341c8
+DEBUG 2022-05-16T09:41:38.798 94383 UI: busy_stop
+DEBUG 2022-05-16T09:41:38.799 94383 process_spawn:123: new: pid=94466 argv=[/Users/ferdinand/.asdf/installs/nodejs/17.1.0/bin/node]
+INFO  2022-05-16T09:41:38.800 94383 channel_create_event:210: new channel 4 (function <lambda>13[1]..<SNR>54_Start[4]..copilot#agent#New[19]..copilot#job#Stream:21) : {"id": 4, "argv": ["/Users/ferdinand/.asdf/installs/nodejs/17.1.0/bin/node", "/Users/ferdinand/.local/share/nvim/site/pack/packer/start/copilot.vim/copilot/dist/agent.js"], "mode": "bytes", "stream": "job"}
+DEBUG 2022-05-16T09:41:38.801 94383 process_spawn:123: new: pid=94467 argv=[/bin/zsh]
+INFO  2022-05-16T09:41:38.801 94383 channel_create_event:210: new channel 5 (?) : {"id": 5, "argv": ["/bin/zsh", "-c", "git rev-list --count --left-right @{upstream}...HEAD"], "mode": "bytes", "stream": "job"}
+DEBUG 2022-05-16T09:41:38.807 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.807 94383 UI: raw_line (+10 times...)
+DEBUG 2022-05-16T09:41:38.807 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:38.807 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.807 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:38.807 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:38.808 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:38.808 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:38.808 94383 UI: mouse_on
+DEBUG 2022-05-16T09:41:38.808 94383 UI: flush
+DEBUG 2022-05-16T09:41:38.808 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.808 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:38.808 94383 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:38.808 94383 UI: flush
+DEBUG 2022-05-16T09:41:38.808 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:38.809 94383 read_cb:119: closing Stream (0x11280a418): EOF (end of file)
+INFO  2022-05-16T09:41:38.809 94383 on_process_exit:400: exited: pid=94467 status=0 stoptime=0
+DEBUG 2022-05-16T09:41:39.119 94383 UI: flush (+1 times...)
+DEBUG 2022-05-16T09:41:39.119 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:39.119 94383 log_key:1017: input: <q>
+DEBUG 2022-05-16T09:41:39.119 94383 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:39.119 94383 UI: flush
+DEBUG 2022-05-16T09:41:39.120 94383 inbuf_poll:451: blocking... events_enabled=0 events_pending=0
+DEBUG 2022-05-16T09:41:39.120 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:39.120 94383 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:39.120 94383 UI: flush
+DEBUG 2022-05-16T09:41:39.120 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:39.120 94383 log_key:1017: input: <:>
+DEBUG 2022-05-16T09:41:39.120 94383 log_key:1017: input: <t_ýT>
+DEBUG 2022-05-16T09:41:39.122 94383 emsg_multiline:673: (:silent) E11: Invalid in command-line window; <CR> executes, CTRL-C quits: silent! checktime
+DEBUG 2022-05-16T09:41:39.122 94383 emsg_multiline:673: (:silent) E11: Invalid in command-line window; <CR> executes, CTRL-C quits: silent! checktime
+INFO  2022-05-16T09:41:39.123 94383 emsg_multiline:683: E5108: Error executing lua ...start/todo-comments.nvim/lua/todo-comments/highlight.lua:175: Vim:E11: Invalid in command-line window; <CR> executes, CTRL-C quits
+stack traceback:
+	[C]: in function 'nvim_set_current_win'
+	...start/todo-comments.nvim/lua/todo-comments/highlight.lua:175: in function 'highlight_win'
+	...start/todo-comments.nvim/lua/todo-comments/highlight.lua:263: in function 'attach'
+	[string ":lua"]:1: in main chunk
+DEBUG 2022-05-16T09:41:39.143 94383 UI: raw_line (+5 times...)
+DEBUG 2022-05-16T09:41:39.143 94383 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:39.152 94383 UI: hl_attr_define (+6 times...)
+DEBUG 2022-05-16T09:41:39.152 94383 UI: msg_set_pos
+DEBUG 2022-05-16T09:41:39.152 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:39.152 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:39.152 94383 UI: mode_change
+DEBUG 2022-05-16T09:41:39.153 94383 UI: flush
+DEBUG 2022-05-16T09:41:39.153 94383 os_delay:64: 1006 ms
+DEBUG 2022-05-16T09:41:40.175 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:40.175 94383 UI: raw_line (+1 times...)
+DEBUG 2022-05-16T09:41:40.176 94383 UI: hl_attr_define
+DEBUG 2022-05-16T09:41:40.176 94383 UI: raw_line
+DEBUG 2022-05-16T09:41:40.195 94383 UI: raw_line (+103 times...)
+DEBUG 2022-05-16T09:41:40.195 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:40.196 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:40.196 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:40.196 94383 UI: flush
+DEBUG 2022-05-16T09:41:40.196 94383 log_key:1017: input: <Cmd>
+DEBUG 2022-05-16T09:41:40.197 94383 RPC: ch 9223372036854775808: invoke nvim_win_get_config
+DEBUG 2022-05-16T09:41:40.197 94383 RPC: ch 9223372036854775808: invoke nvim_open_win
+DEBUG 2022-05-16T09:41:40.197 94383 RPC: ch 9223372036854775808: invoke nvim_win_set_option
+DEBUG 2022-05-16T09:41:40.197 94383 RPC: ch 9223372036854775808: invoke nvim_win_set_option
+INFO  2022-05-16T09:41:40.200 94383 emsg_multiline:683: E886: System error while opening ShaDa file /Users/ferdinand/.local/state/nvim/shada/main.shada for reading to merge before writing it: permission denied
+DEBUG 2022-05-16T09:41:40.200 94383 UI: raw_line
+INFO  2022-05-16T09:41:40.200 94383 emsg_multiline:683: E886: Failed to create directory /Users/ferdinand/.local/state/nvim for writing ShaDa file: permission denied
+DEBUG 2022-05-16T09:41:40.200 94383 UI: raw_line (+3 times...)
+DEBUG 2022-05-16T09:41:40.200 94383 UI: set_title
+DEBUG 2022-05-16T09:41:40.200 94383 UI: win_viewport
+DEBUG 2022-05-16T09:41:40.200 94383 UI: grid_cursor_goto
+DEBUG 2022-05-16T09:41:40.201 94383 UI: grid_cursor_goto (+1 times...)
+DEBUG 2022-05-16T09:41:40.201 94383 UI: mode_change
+DEBUG 2022-05-16T09:41:40.201 94383 UI: flush
+DEBUG 2022-05-16T09:41:40.201 94383 stream_close:107: closing Stream: 0x1180381e8
+DEBUG 2022-05-16T09:41:40.210 94383 UI: stop
+DEBUG 2022-05-16T09:41:40.210 94383 stream_close:107: closing Stream: 0x11280a268
+DEBUG 2022-05-16T09:41:40.210 94383 stream_close:107: closing Stream: 0x11280a418
+DEBUG 2022-05-16T09:41:40.241 94383 RPC: ch 9223372036854775808: invoke nvim_win_is_valid
+DEBUG 2022-05-16T09:41:40.241 94383 RPC: ch 9223372036854775808: invoke nvim_win_get_option
+DEBUG 2022-05-16T09:41:40.241 94383 RPC: ch 9223372036854775808: invoke nvim_win_get_width
+DEBUG 2022-05-16T09:41:40.241 94383 RPC: ch 9223372036854775808: invoke nvim_win_set_option
+DEBUG 2022-05-16T09:41:40.241 94383 RPC: ch 9223372036854775808: invoke nvim_win_set_width
+DEBUG 2022-05-16T09:41:40.244 94383 RPC: ch 9223372036854775808: invoke nvim_win_is_valid
+DEBUG 2022-05-16T09:41:40.244 94383 RPC: ch 9223372036854775808: invoke nvim_win_get_option
+DEBUG 2022-05-16T09:41:40.244 94383 RPC: ch 9223372036854775808: invoke nvim_win_get_width
+DEBUG 2022-05-16T09:41:40.244 94383 RPC: ch 9223372036854775808: invoke nvim_win_set_option
+DEBUG 2022-05-16T09:41:40.244 94383 RPC: ch 9223372036854775808: invoke nvim_win_set_width
+DEBUG 2022-05-16T09:41:40.244 94383 stream_close:107: closing Stream: 0x112808868
+DEBUG 2022-05-16T09:41:40.244 94383 stream_close:107: closing Stream: 0x112808a18
+DEBUG 2022-05-16T09:41:40.244 94383 stream_close:107: closing Stream: 0x112808bc8
+INFO  2022-05-16T09:41:40.244 94383 os_proc_tree_kill:96: sending SIGTERM to PID -94466
+INFO  2022-05-16T09:41:40.247 94383 on_process_exit:400: exited: pid=94466 status=143 stoptime=656340239488708

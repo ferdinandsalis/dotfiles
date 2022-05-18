@@ -1,0 +1,85 @@
+#!/usr/bin/zsh
+#===============================================================================
+# ENV VARIABLES
+#===============================================================================
+
+export XDG_CONFIG_HOME="$HOME/.config"
+# export ZDOTDIR="$XDG_CONFIG_HOME/zsh"
+
+export DOTFILES=${HOME}/.dotfiles
+export WORK_DIR=${HOME}/Desktop/Work
+export PROJECTS_DIR=${HOME}/Desktop/Projects
+export SYNC_DIR=${HOME}/Library/Mobile\ Documents/com~apple~CloudDocs
+
+#-------------------------------------------------------------------------------
+# Go
+#-------------------------------------------------------------------------------
+export GOPATH=$HOME/go
+
+path+=(
+  /usr/local/bin
+  ${HOME}/.npm/bin(N-/)
+  ${HOME}/.local/bin(N-/)
+  ${HOME}/.cargo/bin
+  ${GOPATH}/bin(N-/)
+)
+
+export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
+export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+export PATH="/usr/local/opt/terraform@0.12/bin:$PATH"
+
+# Prefer US English and use UTF-8.
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+export MANPATH="/usr/local/man:$MANPATH"
+if which nvim >/dev/null; then
+  export MANPAGER='nvim +Man!'
+fi
+
+if [ -f "$HOME/.environment.secret.sh" ]; then
+  source $HOME/.environment.secret.sh
+fi
+
+# Add LUA_PATH to the environment ensuring the lua version is set since
+# luarocks from homebrew uses lua 5.4 by default so would otherwise add the
+# wrong path
+if which luarocks >/dev/null; then
+  eval "$(luarocks --lua-version=5.1 path)"
+fi
+
+# Compilation flags
+# export ARCHFLAGS="-arch arm64"
+
+# preferred editor for local and remote sessions
+if [ -n "$NVIM_LISTEN_ADDRESS" ]; then
+  export VISUAL="nvr -cc split --remote-wait +'set bufhidden=wipe'"
+  export EDITOR="nvr -cc split --remote-wait +'set bufhidden=wipe'"
+else
+  export VISUAL="nvim"
+  export EDITOR="nvim"
+fi
+
+if [ -f "$HOME/.environment.secret.sh" ]; then
+  source $HOME/.environment.secret.sh
+fi
+
+if [ -f "$HOME/.environment.local.sh" ]; then
+  source $HOME/.environment.local.sh
+fi
+
+export USE_EDITOR=$EDITOR
+export SSH_KEY_PATH="~/.ssh/rsa_id"
+export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=241'
+
+# Fuzzy Finder
+export FZF_DEFAULT_COMMAND='rg --files --no-ignore-vcs --hidden'
+export FZF_DEFAULT_OPTS="--history=$HOME/.fzf_history"
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_TMUX=0
+export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
+--color=fg:#a9b1d6,bg:#1C1F2F,hl:#2ac3de
+--color=fg+:#a9b1d6,bg+:#24283b,hl+:#2ac3de
+--color=info:#7aa2f7,prompt:#7dcfff,pointer:#364A82
+--color=marker:#9ece6a,spinner:#9ece6a,header:#9ece6a
+--color=border:#292e42'

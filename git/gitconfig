@@ -1,0 +1,83 @@
+[user]
+  name = Ferdinand Salis-Samaden
+  email = mail@ferdinandsalis.com
+[core]
+  editor = "nvr --remote-wait-silent" # or nvim
+  excludesfile = ~/.dotfiles/git/gitignore
+  pager = delta
+[commit]
+  template = ~/.gitmessage
+[alias]
+  st = status
+  ci = commit
+  co = checkout
+  di = diff
+  dc = diff --cached
+  amend = commit --amend
+  aa = add --all
+  ff = merge --ff-only
+  pullff = pull --ff-only
+  noff = merge --no-ff
+  fa = fetch --all
+  pom = push origin master
+  b = branch
+  ds = diff --stat=160,120
+  dh1 = diff HEAD~1
+  trim = !git remote prune origin && git gc
+  cleanup = !git clean -df && git stash clear
+  diffc = diff --cached
+  diffst = diff --stat
+  graph = log --date-order --graph
+  grapha = log --date-order --graph --all
+  logp = log --date-order
+  logst = log --stat
+  logsf = log --stat --format=oneline --abbrev-commit
+  finda = "!grepalias() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; grepalias"
+[delta]
+  features = line-numbers decorations
+  navigate = true
+[delta "decorations"]
+  commit-decoration-style = bold yellow box ul
+  file-style = bold yellow ul
+[merge]
+  conflictstyle = diff3
+[diff]
+  colorMoved = default
+[push]
+  default = simple
+[color]
+  branch = auto
+  diff = auto
+  interactive = auto
+  status = auto
+[format]
+  pretty = format:%C(yellow)%h %Cblue%>(15)%ad %Cgreen%<(15)%aN%Cred%d %Creset%s
+[credential]
+  helper = osxkeychain
+[github]
+  user = ferdinandsalis
+[interactive]
+  diffFilter = delta --color-only
+[push]
+  default = current
+[push]
+  followTags = true
+[pull]
+  rebase = true
+[rebase]
+  autoStash = true
+[fetch]
+  prune = true
+[gitsh]
+  prompt = "\n%D %c(%b%#)%w ➜"
+[rerere]
+  enabled = true
+[hub]
+  protocol = ssh
+[init]
+  defaultBranch = main
+[filter "lfs"]
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
