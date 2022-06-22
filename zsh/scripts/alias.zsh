@@ -49,7 +49,7 @@ if which kitty >/dev/null; then
   alias icat="kitty +kitten icat"
 fi
 
-alias brewfile="brew bundle dump --global --force"
+alias brewfile="brew bundle dump --describe --global --force"
 
 # Check if main exists and use instead of master
 function git_main_branch() {
