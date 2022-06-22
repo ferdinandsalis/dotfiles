@@ -35,7 +35,6 @@
   finda = "!grepalias() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; grepalias"
 [delta]
   features = line-numbers decorations
-  navigate = true
 [delta "decorations"]
   commit-decoration-style = bold yellow box ul
   file-style = bold yellow ul
