@@ -2,19 +2,49 @@ local fn = vim.fn
 local api = vim.api
 local fmt = string.format
 
------------------------------------------------------------------------------//
 -- Global namespace
------------------------------------------------------------------------------//
 
 _G.fss = {
-  -- some vim mappings require a mixture of commandline commands and function calls
-  -- this table is place to store lua functions to be called in those mappings
   mappings = {},
+  ui = {}
 }
 
-----------------------------------------------------------------------------------------------------
 -- Utils
-----------------------------------------------------------------------------------------------------
+
+--- Convert a list or map of items into a value by iterating all it's fields and transforming
+--- them with a callback
+---@generic T : table
+---@param callback fun(T, T, key: string | number): T
+---@param list T[]
+---@param accum T
+---@return T
+function fss.fold(callback, list, accum)
+  for k, v in pairs(list) do
+    accum = callback(accum, v, k)
+    assert(accum, 'The accumulator must be returned on each iteration')
+  end
+  return accum
+end
+
+---@generic T : table
+---@param callback fun(item: T, key: string | number, list: T[]): T
+---@param list T[]
+---@return T[]
+function fss.map(callback, list)
+  return fss.fold(function(accum, v, k)
+    accum[#accum + 1] = callback(v, k, accum)
+    return accum
+  end, list, {})
+end
+
+---@generic T : table
+---@param callback fun(T, key: string | number): T
+---@param list T[]
+function fss.foreach(callback, list)
+  for k, v in pairs(list) do
+    callback(v, k)
+  end
+end
 
 ---Find an item in a list
 ---@generic T
@@ -88,6 +118,8 @@ function fss.empty(item)
   local item_type = type(item)
   if item_type == 'string' then
     return item == ''
+  elseif item_type == 'number' then
+    return item <= 0
   elseif item_type == 'table' then
     return vim.tbl_isempty(item)
   end
@@ -150,10 +182,42 @@ end
 ----------------------------------------------------------------------------------------------------
 -- Thin wrappers over API functions to make their usage easier/terser
 
+---Check that the current nvim version is greater than or equal to the given version
+---@param major number
+---@param minor number
+---@param _ number patch
+---@return unknown
+function fss.version(major, minor, _)
+  assert(major and minor, 'major and minor must be provided')
+  local v = vim.version()
+  return major >= v.major and minor >= v.minor
+end
+
 P = vim.pretty_print
 
+--- Validate the keys passed to fss.augroup are valid
+---@param name string
+---@param cmd Autocommand
+local function validate_autocmd(name, cmd)
+  local keys = { 'event', 'buffer', 'pattern', 'desc', 'command', 'group', 'once', 'nested' }
+  local incorrect = fss.fold(function(accum, _, key)
+    if not vim.tbl_contains(keys, key) then
+      table.insert(accum, key)
+    end
+    return accum
+  end, cmd, {})
+  if #incorrect == 0 then
+    return
+  end
+  vim.schedule(function()
+    vim.notify('Incorrect keys: ' .. table.concat(incorrect, ', '), 'error', {
+      title = fmt('Autocmd: %s', name),
+    })
+  end)
+end
+
 ---@class Autocommand
----@field description string
+---@field desc string
 ---@field event  string[] list of autocommand events
 ---@field pattern string[] list of autocommand patterns
 ---@field command string | function
@@ -169,11 +233,12 @@ P = vim.pretty_print
 function fss.augroup(name, commands)
   local id = api.nvim_create_augroup(name, { clear = true })
   for _, autocmd in ipairs(commands) do
+    validate_autocmd(name, autocmd)
     local is_callback = type(autocmd.command) == 'function'
     api.nvim_create_autocmd(autocmd.event, {
-      group = id,
+      group = name,
       pattern = autocmd.pattern,
-      desc = autocmd.description,
+      desc = autocmd.desc,
       callback = is_callback and autocmd.command or nil,
       command = not is_callback and autocmd.command or nil,
       once = autocmd.once,

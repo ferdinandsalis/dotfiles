@@ -1,39 +1,32 @@
+-- Inspiration
+-- 1. vim-relativity
 -- 2. numbers.vim - https://github.com/myusuf3/numbers.vim/blob/master/plugin/numbers.vim
 
 local api = vim.api
 local M = {}
 
 vim.g.number_filetype_exclusions = {
+  'netrw',
   'undotree',
   'log',
   'man',
   'dap-repl',
   'markdown',
-  'vimwiki',
-  'vim-plug',
   'gitcommit',
   'toggleterm',
-  'fugitive',
-  'coc-explorer',
-  'coc-list',
   'list',
-  'NvimTree',
-  'startify',
   'help',
-  'orgagenda',
-  'org',
-  'lsputil_locations_list',
-  'lsputil_symbols_list',
   'Trouble',
+  'NeogitCommitMessage',
 }
 
 vim.g.number_buftype_exclusions = {
+  'prompt',
   'terminal',
   'help',
   'nofile',
   'acwrite',
   'quickfix',
-  'prompt',
 }
 
 vim.g.number_buftype_ignored = { 'quickfix' }
@@ -41,6 +34,8 @@ vim.g.number_buftype_ignored = { 'quickfix' }
 local function is_floating_win()
   return vim.fn.win_gettype() == 'popup'
 end
+
+local is_enabled = true
 
 ---Determines whether or not a window should be ignored by this plugin
 ---@return boolean
@@ -81,15 +76,16 @@ local function is_blocked()
 end
 
 local function enable_relative_number()
+  if not is_enabled then
+    return
+  end
   if is_ignored() then
     return
   end
   if is_blocked() then
-    -- setlocal nonumber norelativenumber
     vim.wo.number = false
     vim.wo.relativenumber = false
   else
-    -- setlocal number relativenumber
     vim.wo.number = true
     vim.wo.relativenumber = true
   end
@@ -100,15 +96,22 @@ local function disable_relative_number()
     return
   end
   if is_blocked() then
-    -- setlocal nonumber norelativenumber
     vim.wo.number = false
     vim.wo.relativenumber = false
   else
-    -- setlocal number norelativenumber
     vim.wo.number = true
     vim.wo.relativenumber = false
   end
 end
+
+fss.command('ToggleRelativeNumber', function()
+  is_enabled = not is_enabled
+  if is_enabled then
+    enable_relative_number()
+  else
+    disable_relative_number()
+  end
+end)
 
 fss.augroup('ToggleRelativeLineNumbers', {
   {

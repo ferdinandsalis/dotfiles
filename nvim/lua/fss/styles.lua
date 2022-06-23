@@ -1,7 +1,4 @@
-----------------------------------------------------------------------------------------------------
 -- Styles
-----------------------------------------------------------------------------------------------------
--- Consistent store of various UI items to reuse throughout my config
 
 local palette = {
   none = 'NONE',
@@ -124,7 +121,7 @@ local lsp = {
     hint = palette.yellow,
     info = palette.teal,
   },
-  kind_highlights = {
+  highlights = {
     Text = 'String',
     Method = 'Method',
     Function = 'Function',
@@ -147,34 +144,55 @@ local lsp = {
     Event = 'Variable',
     Operator = 'Operator',
     TypeParameter = 'Type',
+    Namespace = 'TSNamespace',
+    Package = 'Include',
+    String = 'String',
+    Number = 'Number',
+    Boolean = 'Boolean',
+    Array = 'StorageClass',
+    Object = 'Type',
+    Key = 'Field',
+    Null = 'ErrorMsg',
+    EnumMember = 'Field',
   },
   kinds = {
-    Text = '',
-    Method = '',
-    Function = '',
-    Constructor = '',
-    Field = '', -- '',
-    Variable = '', -- '',
-    Class = '', -- '',
-    Interface = '',
-    Module = '',
-    Property = 'ﰠ',
-    Unit = '塞',
-    Value = '',
-    Enum = '',
-    Keyword = '', -- '',
-    Snippet = '', -- '', '',
-    Color = '',
-    File = '',
-    Reference = '', -- '',
-    Folder = '',
-    EnumMember = '',
-    Constant = '', -- '',
-    Struct = '', -- 'פּ',
-    Event = '',
-    Operator = '',
-    TypeParameter = '',
-  },
+    nerdfonts = {
+      Text = '',
+      Method = '',
+      Function = '',
+      Constructor = '',
+      Field = '', -- '',
+      Variable = '', -- '',
+      Class = '', -- '',
+      Interface = '',
+      Module = '',
+      Property = 'ﰠ',
+      Unit = '塞',
+      Value = '',
+      Enum = '',
+      Keyword = '', -- '',
+      Snippet = '', -- '', '',
+      Color = '',
+      File = '',
+      Reference = '', -- '',
+      Folder = '',
+      EnumMember = '',
+      Constant = '', -- '',
+      Struct = '', -- 'פּ',
+      Event = '',
+      Operator = '',
+      TypeParameter = '',
+      Namespace = '?',
+      Package = '?',
+      String = '?',
+      Number = '?',
+      Boolean = '?',
+      Array = '?',
+      Object = '?',
+      Key = '?',
+      Null = '?',
+    }
+  }
 }
 
 fss.style = {
@@ -206,4 +224,5 @@ fss.style = {
 
 fss.style.current = {
   border = fss.style.border.line,
+  lsp_icons = fss.style.lsp.kinds.nerdfonts,
 }

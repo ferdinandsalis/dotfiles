@@ -1,22 +1,33 @@
 return function()
   local cmp = require('cmp')
-  local fmt = string.format
+
   local fn = vim.fn
   local api = vim.api
-  local h = require('fss.highlights')
+  local fmt = string.format
   local t = fss.replace_termcodes
   local border = fss.style.current.border
+  --local lsp_hls = fss.style.lsp.highlights
+  local ellipsis = fss.style.icons.misc.ellipsis
 
-  local keyword_fg = h.get_hl('Keyword', 'fg')
-  local faded = h.alter_color(h.get_hl('Comment', 'fg'), -8)
+  -- Make the source information less prominent
+  --local faded = h.alter_color(h.get('Pmenu', 'bg'), 30)
 
-  h.plugin('Cmp', {
-    CmpItemAbbr = { foreground = 'fg', background = 'NONE', italic = false, bold = false },
-    CmpItemMenu = { foreground = faded, italic = true, bold = false },
-    CmpItemAbbrMatch = { foreground = keyword_fg },
-    CmpItemAbbrDeprecated = { strikethrough = true, inherit = 'Comment' },
-    CmpItemAbbrMatchFuzzy = { italic = true, foreground = keyword_fg },
-  })
+  --local kind_hls = fss.fold(
+    --function(accum, value, key)
+      --accum['CmpItemKind' .. key] = { foreground = { from = value } }
+      --return accum
+    --end,
+    --lsp_hls,
+    --{
+      --CmpItemAbbr = { foreground = 'fg', background = 'NONE', italic = false, bold = false },
+      --CmpItemMenu = { foreground = faded, italic = true, bold = false },
+      --CmpItemAbbrMatch = { foreground = { from = 'Keyword' } },
+      --CmpItemAbbrDeprecated = { strikethrough = true, inherit = 'Comment' },
+      --CmpItemAbbrMatchFuzzy = { italic = true, foreground = { from = 'Keyword' } },
+    --}
+  --)
+
+  --h.plugin('Cmp', kind_hls)
 
   local function tab(fallback)
     local ok, luasnip = fss.safe_require('luasnip', { silent = true })
@@ -49,7 +60,6 @@ return function()
       'Search:None',
     }, ','),
   }
-
   cmp.setup({
     preselect = cmp.PreselectMode.None,
     window = {
@@ -80,33 +90,34 @@ return function()
       deprecated = true,
       fields = { 'abbr', 'kind', 'menu' },
       format = function(entry, vim_item)
-        vim_item.kind = fmt('%s %s', vim_item.kind, fss.style.lsp.kinds[vim_item.kind])
-        local menu = ({
+        local MAX = math.floor(vim.o.columns * 0.5)
+        vim_item.abbr = #vim_item.abbr >= MAX and string.sub(vim_item.abbr, 1, MAX) .. ellipsis
+          or vim_item.abbr
+        vim_item.kind = fmt('%s %s', fss.style.current.lsp_icons[vim_item.kind], vim_item.kind)
+        vim_item.menu = ({
           nvim_lsp = '[LSP]',
-          nvim_lua = '[LUA]',
+          nvim_lua = '[Lua]',
           emoji = '[E]',
-          path = '[P]',
-          calc = '[C]',
+          path = '[Path]',
           neorg = '[N]',
           luasnip = '[SN]',
-          buffer = '[B]',
           dictionary = '[D]',
+          buffer = '[B]',
           spell = '[SP]',
-          cmdline = '[CMD]',
-          rg = '[RG]',
-          git = '[GIT]',
+          cmdline = '[Cmd]',
+          cmdline_history = '[Hist]',
+          orgmode = '[Org]',
+          norg = '[Norg]',
+          rg = '[Rg]',
+          git = '[Git]',
         })[entry.source.name]
-
-        vim_item.menu = menu
         return vim_item
       end,
     },
     sources = cmp.config.sources({
       { name = 'nvim_lsp' },
       { name = 'luasnip' },
-      { name = 'rg' },
       { name = 'path' },
-      { name = 'spell' },
     }, {
       {
         name = 'buffer',
@@ -138,6 +149,7 @@ return function()
   cmp.setup.cmdline(':', {
     sources = cmp.config.sources({
       { name = 'cmdline', keyword_pattern = [=[[^[:blank:]\!]*]=] },
+      { name = 'cmdline_history' },
       { name = 'path' },
     }),
   })
