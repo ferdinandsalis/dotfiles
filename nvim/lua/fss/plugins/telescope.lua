@@ -1,4 +1,4 @@
-local M =  {}
+local M = {}
 
 fss.telescope = {}
 
@@ -31,7 +31,47 @@ function M.config()
   local actions = require('telescope.actions')
   local layout_actions = require('telescope.actions.layout')
   local which_key = require('which-key')
+  local H = require('fss.highlights')
   local icons = fss.style.icons
+
+  fss.augroup('TelescopePreviews', {
+    {
+      event = 'User',
+      pattern = 'TelescopePreviewerLoaded',
+      command = 'setlocal number',
+    },
+  })
+
+  H.plugin('telescope', {
+    TelescopePromptTitle = {
+      bg = { from = 'PMenu' },
+      fg = { from = 'Directory' },
+      bold = true,
+    },
+    TelescopeResultsTitle = {
+      bg = { from = 'PMenu' },
+      fg = { from = 'Normal' },
+      bold = true,
+    },
+    TelescopePreviewTitle = {
+      bg = { from = 'PMenu' },
+      fg = { from = 'Normal' },
+      bold = true,
+    },
+    TelescopePreviewBorder = {
+      fg = { from = 'FloatBorder' },
+      bg = { from = 'PanelBackground' },
+    },
+    TelescopePreviewNormal = { link = 'PanelBackground' },
+    TelescopePromptPrefix = { link = 'Statement' },
+    -- TelescopeBorder = { foreground = fss.style.palette.grey },
+    TelescopeMatching = { link = 'Title' },
+    TelescopeTitle = { inherit = 'Normal', bold = true },
+    TelescopeSelectionCaret = {
+      fg = { from = 'Identifier' },
+      bg = { from = 'TelescopeSelection' },
+    },
+  })
 
   telescope.setup({
     defaults = {
@@ -107,7 +147,6 @@ function M.config()
         override_generic_sorter = true,
         override_file_sorter = true,
       },
-      howdoi = fss.telescope.ivy(),
     },
     pickers = {
       buffers = fss.telescope.dropdown({
@@ -167,12 +206,56 @@ function M.config()
 
   local builtins = require('telescope.builtin')
 
+  local function delta_opts(opts, is_buf)
+    local previewers = require('telescope.previewers')
+    local delta = previewers.new_termopen_previewer({
+      get_command = function(entry)
+        local args = {
+          'git',
+          '-c',
+          'core.pager=delta',
+          '-c',
+          'delta.side-by-side=false',
+          'diff',
+          entry.value .. '^!',
+        }
+        if is_buf then
+          vim.list_extend(args, { '--', entry.current_file })
+        end
+        return args
+      end,
+    })
+    opts = opts or {}
+    opts.previewer = {
+      delta,
+      previewers.git_commit_message.new(opts),
+    }
+    return opts
+  end
+
+  local function delta_git_commits(opts)
+    require('telescope.builtin').git_commits(delta_opts(opts))
+  end
+
+  local function delta_git_bcommits(opts)
+    require('telescope.builtin').git_bcommits(delta_opts(opts, true))
+  end
+
+  local function dotfiles()
+    require('telescope.builtin').find_files({
+      prompt_title = 'dotfiles',
+      cwd = vim.g.dotfiles,
+    })
+  end
+
   local function pickers()
     require('telescope.builtin').builtin({ include_extensions = true })
   end
 
   local function find_files()
-    require('telescope.builtin').find_files()
+    require('telescope.builtin').find_files(fss.telescope.dropdown({
+      previewer = false,
+    }))
   end
 
   local function buffers()
@@ -190,11 +273,35 @@ function M.config()
   end
 
   local function MFU()
-    require('mru').display_cache(
-      vim.tbl_extend('keep', { algorithm = 'mfu' }, fss.telescope.dropdown({
-        previewer = false
-      }))
-    )
+    require('mru').display_cache(vim.tbl_extend(
+      'keep',
+      { algorithm = 'mfu' },
+      fss.telescope.dropdown({
+        previewer = false,
+      })
+    ))
+  end
+
+  local function notifications()
+    telescope.extensions.notify.notify(fss.telescope.dropdown())
+  end
+
+  local function gh_notifications()
+    telescope.extensions.ghn.ghn(fss.telescope.dropdown())
+  end
+
+  local function installed_plugins()
+    require('telescope.builtin').find_files({
+      prompt_title = 'Installed plugins',
+      cwd = vim.fn.stdpath('data') .. '/site/pack/packer',
+    })
+  end
+
+  local function project_files(opts)
+    local builtin = require('telescope.builtin')
+    if not pcall(builtin.git_files, opts) then
+      builtin.find_files(opts)
+    end
   end
 
   which_key.register({
@@ -210,16 +317,16 @@ function M.config()
         a = { builtins.autocommands, 'autocommands' },
         o = { builtins.vim_options, 'options' },
       },
-      H = { howdoi, 'howdoi' },
       l = {
         name = '+lsp',
         e = { builtins.lsp_workspace_diagnostics, 'telescope: workspace diagnostics' },
         d = { builtins.lsp_document_symbols, 'telescope: document symbols' },
         s = { builtins.lsp_dynamic_workspace_symbols, 'telescope: workspace symbols' },
       },
+      p = { installed_plugins, 'plugins' },
       R = { builtins.resume, 'resume last picker' },
       ['?'] = { builtins.help_tags, 'help' },
-      f = { find_files, 'find files' },
+      f = { project_files, 'find files' },
       r = { MRU, 'Most recently used files' },
       h = { MFU, 'Most frequently used files' },
       g = {
@@ -232,12 +339,8 @@ function M.config()
       o = { buffers, 'buffers' },
       s = { live_grep, 'live grep' },
       d = { dotfiles, 'dotfiles' },
-      c = { nvim_config, 'nvim config' },
-      O = { orgfiles, 'org files' },
-      N = { norgfiles, 'norg files' },
     },
   })
 end
-
 
 return M

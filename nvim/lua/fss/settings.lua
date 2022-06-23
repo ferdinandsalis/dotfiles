@@ -66,17 +66,9 @@ vim.opt.formatoptions = {
 }
 
 -- Folds {{{1
-vim.opt.foldtext = 'v:lua.fss.folds()'
-vim.opt.foldopen = vim.opt.foldopen + 'search'
-vim.opt.foldlevelstart = 8
+-- vim.opt.foldlevelstart = 2
 vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
 vim.opt.foldmethod = 'expr'
-
--- Quickfix {{{1
---- FIXME: Need to use a lambda rather than a lua function directly
---- @see https://github.com/neovim/neovim/pull/14886
--- vim.o.quickfixtextfunc = '{i -> v:lua.fss.qftf(i)}'
-
 -- Grepprg {{{1
 -- Use faster grep alternatives if possible
 if fss.executable('rg') then
@@ -128,7 +120,7 @@ vim.opt.linebreak = true -- lines wrap at words rather than random characters
 vim.opt.synmaxcol = 1024 -- don't syntax highlight long lines
 vim.opt.signcolumn = 'auto:2-4'
 vim.opt.ruler = false
-vim.opt.cmdheight = 2 -- Set command line height to two lines
+vim.opt.cmdheight = 1 -- Set command line height to two lines
 vim.opt.showbreak = [[↪ ]] -- Options include -> '…', '↳ ', '→','↪ '
 --- This is used to handle markdown code blocks where the language might
 --- be set to a value that isn't equivalent to a vim filetype
@@ -191,11 +183,10 @@ function fss.modified_icon()
   return vim.bo.modified and fss.style.icons.misc.circle or ''
 end
 
-vim.opt.titlestring = ' ❐ %{fnamemodify(getcwd(), ":t")} %{v:lua.fss.modified_icon()}'
+vim.opt.titlestring = '%{fnamemodify(getcwd(), ":t")} %{v:lua.fss.modified_icon()}'
 vim.opt.titleold = fn.fnamemodify(vim.loop.os_getenv('SHELL'), ':t')
 vim.opt.title = true
 vim.opt.titlelen = 70
-
 -- Utilities {{{1
 vim.opt.showmode = false
 vim.opt.sessionoptions = {
@@ -207,7 +198,9 @@ vim.opt.sessionoptions = {
 }
 vim.opt.viewoptions = { 'cursor', 'folds' } -- save/restore just these (with `:{mk,load}view`)
 vim.opt.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode
-
+-- Jumplist {{{1
+--vim.opt.jumpoptions = { 'stack', 'view' } -- make the jumplist behave like a browser stack
+-- }}}
 -- Backup and Swaps {{{1
 vim.opt.backup = false
 vim.opt.undofile = true
@@ -231,11 +224,7 @@ vim.opt.spelllang:append('programming')
 -- Mouse {{{1
 vim.opt.mouse = 'a'
 vim.opt.mousefocus = true
-
--- these only read ".vim" files
-vim.opt.secure = true -- Disable autocmd etc for project local vimrc files.
-vim.opt.exrc = true -- Allow project local vimrc files example .nvimrc see :h exrc
-
+vim.opt.mousescroll = { 'ver:1', 'hor:6' }
 -- Git editor {{{1
 if fss.executable('nvr') then
   vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
@@ -243,4 +232,8 @@ if fss.executable('nvr') then
 end
 -- }}}
 
--- vim:foldmethod=marker:foldlevel=0
+-- these only read ".vim" files
+vim.opt.secure = true -- Disable autocmd etc for project local vimrc files.
+vim.opt.exrc = true -- Allow project local vimrc files example .nvimrc see :h exrc
+
+-- vim:foldmethod=marker

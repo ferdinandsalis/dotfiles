@@ -6,28 +6,26 @@ return function()
   local fmt = string.format
   local t = fss.replace_termcodes
   local border = fss.style.current.border
-  --local lsp_hls = fss.style.lsp.highlights
+  local lsp_hls = fss.style.lsp.highlights
   local ellipsis = fss.style.icons.misc.ellipsis
+  local h = require('fss.highlights')
 
-  -- Make the source information less prominent
-  --local faded = h.alter_color(h.get('Pmenu', 'bg'), 30)
-
-  --local kind_hls = fss.fold(
-    --function(accum, value, key)
-      --accum['CmpItemKind' .. key] = { foreground = { from = value } }
-      --return accum
-    --end,
-    --lsp_hls,
-    --{
-      --CmpItemAbbr = { foreground = 'fg', background = 'NONE', italic = false, bold = false },
-      --CmpItemMenu = { foreground = faded, italic = true, bold = false },
-      --CmpItemAbbrMatch = { foreground = { from = 'Keyword' } },
-      --CmpItemAbbrDeprecated = { strikethrough = true, inherit = 'Comment' },
-      --CmpItemAbbrMatchFuzzy = { italic = true, foreground = { from = 'Keyword' } },
-    --}
-  --)
-
-  --h.plugin('Cmp', kind_hls)
+  local faded = h.alter_color(h.get('Pmenu', 'bg'), 30)
+  local kind_hls = fss.fold(
+    function(accum, value, key)
+      accum['CmpItemKind' .. key] = { foreground = { from = value } }
+      return accum
+    end,
+    lsp_hls,
+    {
+      CmpItemAbbr = { foreground = 'fg', background = 'NONE', italic = false, bold = false },
+      CmpItemMenu = { foreground = faded, italic = true, bold = false },
+      CmpItemAbbrMatch = { foreground = { from = 'Keyword' } },
+      CmpItemAbbrDeprecated = { strikethrough = true, inherit = 'Comment' },
+      CmpItemAbbrMatchFuzzy = { italic = true, foreground = { from = 'Keyword' } },
+    }
+  )
+  h.plugin('Cmp', kind_hls)
 
   local function tab(fallback)
     local ok, luasnip = fss.safe_require('luasnip', { silent = true })
@@ -61,6 +59,7 @@ return function()
     }, ','),
   }
   cmp.setup({
+    experimental = { ghost_text = true },
     preselect = cmp.PreselectMode.None,
     window = {
       completion = cmp.config.window.bordered(cmp_window),
@@ -136,7 +135,6 @@ return function()
   })
 
   local search_sources = {
-    view = { entries = { name = 'custom', selection_order = 'near_cursor' } },
     sources = cmp.config.sources({
       { name = 'nvim_lsp_document_symbol' },
     }, {
@@ -149,8 +147,8 @@ return function()
   cmp.setup.cmdline(':', {
     sources = cmp.config.sources({
       { name = 'cmdline', keyword_pattern = [=[[^[:blank:]\!]*]=] },
-      { name = 'cmdline_history' },
       { name = 'path' },
+      { name = 'cmdline_history' },
     }),
   })
 end

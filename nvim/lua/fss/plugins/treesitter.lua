@@ -1,45 +1,20 @@
-fss.treesitter = fss.treesitter or {
-  install_attempted = {},
-}
-
--- When visiting a file with a type we don't have a parser for, ask me if I want to install it.
-function fss.treesitter.ensure_parser_installed()
-  local WAIT_TIME = 6000
-  local parsers = require('nvim-treesitter.parsers')
-  local lang = parsers.get_buf_lang()
-  local fmt = string.format
-  if
-    parsers.get_parser_configs()[lang]
-    and not parsers.has_parser(lang)
-    and not fss.treesitter.install_attempted[lang]
-  then
-    vim.schedule(function()
-      vim.cmd('TSInstall ' .. lang)
-      fss.treesitter.install_attempted[lang] = true
-      vim.notify(fmt('Installing Treesitter parser for %s', lang), 'info', {
-        title = 'Nvim Treesitter',
-        icon = fss.style.icons.misc.down,
-        timeout = WAIT_TIME,
-      })
-    end)
-  end
-end
-
 return function()
   local parsers = require('nvim-treesitter.parsers')
   local rainbow_enabled = { 'dart' }
 
-  fss.augroup('TSParserCheck', {
-    {
-      event = 'FileType',
-      desc = 'Treesitter: install missing parsers',
-      command = fss.treesitter.ensure_parser_installed,
-    },
-  })
-
   require('nvim-treesitter.configs').setup({
-    ensure_installed = { 'lua', 'go', 'dart', 'rust', 'typescript', 'javascript', 'comment' },
-    ignore_install = { 'phpdoc' }, -- list of parser which cause issues or crashes
+    ensure_installed = {
+      'lua',
+      'go',
+      'dart',
+      'rust',
+      'typescript',
+      'javascript',
+      'comment',
+      'markdown',
+      'markdown_inline',
+    },
+    autoinstall = true,
     highlight = {
       enable = true,
     },

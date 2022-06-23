@@ -1,23 +1,68 @@
 -- Language servers
 
+fss.lsp = {}
+
+local fn = vim.fn
+
+function fss.lsp.on_init(client)
+  local path = client.workspace_folders[1].name
+  local config_path = path .. '/.vim/settings.json'
+  if fn.filereadable(config_path) == 0 then
+    return true
+  end
+  local ok, json = pcall(fn.readfile, config_path)
+  if not ok then
+    return
+  end
+  local overrides = vim.json.decode(table.concat(json, '\n'))
+  for name, config in pairs(overrides) do
+    if name == client.name then
+      local original = client.config
+      client.config = vim.tbl_deep_extend('force', original, config)
+      client.notify('workspace/didChangeConfiguration')
+    end
+  end
+  return true
+end
+
 return function()
+  -- FIXME: prevent language servers from being reset because this causes errors
+  -- with in flight requests. Eventually this should be improved or allowed and so
+  -- this won't be necessary
+  if vim.g.lsp_config_complete then
+    return
+  end
+
+  vim.g.lsp_config_complete = true
   local servers = {
-    tsserver = true,
+    tsserver = function()
+      local ts_utils = require('nvim-lsp-ts-utils')
+      return {
+        init_options = ts_utils.init_options,
+        on_attach = function(client, bufnr)
+          ts_utils.setup({
+            -- enable_import_on_completion = true,
+            auto_inlay_hints = false,
+          })
+          ts_utils.setup_client(client)
+          -- keymappings
+          local opts = { silent = true }
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gS', ':TSLspOrganize<CR>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gR', ':TSLspRenameFile<CR>', opts)
+          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gA', ':TSLspImportAll<CR>', opts)
+        end,
+      }
+    end,
+    tailwindcss = true,
+    dockerls = true,
     elixirls = true,
     graphql = true,
     jsonls = true,
     bashls = true,
     vimls = true,
     terraformls = true,
-    yamlls = {
-      settings = {
-        yaml = {
-          customTags = {
-            '!reference sequence', -- necessary for gitlab-ci.yaml files
-          },
-        },
-      },
-    },
+    cssls = true,
+    yamlls = true,
     sqls = function()
       return {
         root_dir = require('lspconfig').util.root_pattern('.git'),
@@ -28,8 +73,8 @@ return function()
         end,
       }
     end,
-    --- @see https://gist.github.com/folke/fe5d28423ea5380929c3f7ce674c41d8
     sumneko_lua = function()
+      --- @see https://gist.github.com/folke/fe5d28423ea5380929c3f7ce674c41d8
       local settings = {
         settings = {
           Lua = {

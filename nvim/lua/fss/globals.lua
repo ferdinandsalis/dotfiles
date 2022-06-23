@@ -4,9 +4,9 @@ local fmt = string.format
 
 -- Global namespace
 
-_G.fss = {
+_G.fss = fss or {
   mappings = {},
-  ui = {}
+  ui = {},
 }
 
 -- Utils
@@ -63,19 +63,27 @@ function fss.find(haystack, matcher)
 end
 
 local installed
+
+function fss.list_installed_plugins()
+  if installed then
+    return installed
+  end
+  local data_dir = fn.stdpath('data')
+  local start = fn.expand(data_dir .. '/site/pack/packer/start/*', true, true)
+  local opt = fn.expand(data_dir .. '/site/pack/packer/opt/*', true, true)
+  vim.list_extend(start, opt)
+  installed = vim.tbl_map(function(path)
+    return fn.fnamemodify(path, ':t')
+  end, start)
+  return installed
+end
+
 ---Check if a plugin is on the system not whether or not it is loaded
 ---@param plugin_name string
 ---@return boolean
 function fss.plugin_installed(plugin_name)
-  if not installed then
-    local dirs = fn.expand(fn.stdpath('data') .. '/site/pack/packer/start/*', true, true)
-    local opt = fn.expand(fn.stdpath('data') .. '/site/pack/packer/opt/*', true, true)
-    vim.list_extend(dirs, opt)
-    installed = vim.tbl_map(function(path)
-      return fn.fnamemodify(path, ':t')
-    end, dirs)
-  end
-  return vim.tbl_contains(installed, plugin_name)
+  local list = installed or fss.list_installed_plugins()
+  return vim.tbl_contains(list, plugin_name)
 end
 
 ---NOTE: this plugin returns the currently loaded state of a plugin given
@@ -102,9 +110,13 @@ function fss.is_vim_list_open()
   return false
 end
 
+---@param str string
+---@param max_len integer
+---@return string
 function fss.truncate(str, max_len)
   assert(str and max_len, 'string and max_len must be provided')
-  return api.nvim_strwidth(str) > max_len and str:sub(1, max_len) .. fss.style.icons.misc.ellipsis
+  return api.nvim_strwidth(str) > max_len
+      and str:sub(1, max_len) .. fss.style.icons.misc.ellipsis
     or str
 end
 
@@ -133,14 +145,47 @@ function fss.safe_require(module, opts)
   opts = opts or { silent = false }
   local ok, result = pcall(require, module)
   if not ok and not opts.silent then
-    vim.notify(result, vim.log.levels.ERROR, { title = fmt('Error requiring: %s', module) })
+    if opts.message then
+      result = opts.message .. '\n' .. result
+    end
+    vim.notify(
+      result,
+      vim.log.levels.ERROR,
+      { title = fmt('Error requiring: %s', module) }
+    )
   end
   return ok, result
 end
 
+---@class PluginTable
+---@field plugin string
+
+--- A convenience wrapper that calls the ftplugin config for a plugin if it exists
+--- and warns me if the plugin is not installed
+--- TODO: find out if it's possible to annotate the plugin as a module
+---@param name string | PluginTable
+---@param callback fun(module: table)
+function fss.ftplugin_conf(name, callback)
+  local plugin_name = type(name) == 'table' and name.plugin or nil
+  if plugin_name and not fss.plugin_loaded(plugin_name) then
+    return
+  end
+
+  local module = type(name) == 'table' and name[1] or name
+  local info = debug.getinfo(1, 'S')
+  local ok, plugin = fss.safe_require(
+    module,
+    { message = fmt('In file: %s', info.source) }
+  )
+
+  if ok then
+    callback(plugin)
+  end
+end
+
 ---Reload lua modules
 ---@param path string
----@param recursive string
+---@param recursive boolean
 function fss.invalidate(path, recursive)
   if recursive then
     for key, value in pairs(package.loaded) do
@@ -199,7 +244,16 @@ P = vim.pretty_print
 ---@param name string
 ---@param cmd Autocommand
 local function validate_autocmd(name, cmd)
-  local keys = { 'event', 'buffer', 'pattern', 'desc', 'command', 'group', 'once', 'nested' }
+  local keys = {
+    'event',
+    'buffer',
+    'pattern',
+    'desc',
+    'command',
+    'group',
+    'once',
+    'nested',
+  }
   local incorrect = fss.fold(function(accum, _, key)
     if not vim.tbl_contains(keys, key) then
       table.insert(accum, key)
@@ -312,7 +366,9 @@ local function make_mapper(mode, o)
   ---@param opts table
   return function(lhs, rhs, opts)
     -- If the label is all that was passed in, set the opts automagically
-    opts = type(opts) == 'string' and { desc = opts } or opts and vim.deepcopy(opts) or {}
+    opts = type(opts) == 'string' and { desc = opts }
+      or opts and vim.deepcopy(opts)
+      or {}
     vim.keymap.set(mode, lhs, rhs, vim.tbl_extend('keep', opts, parent_opts))
   end
 end

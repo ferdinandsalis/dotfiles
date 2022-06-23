@@ -1,24 +1,25 @@
 return function()
   local icons = fss.style.icons
+  require('fss.highlights').plugin('NeoTree', {
+    NeoTreeIndentMarker = { link = 'Comment' },
+    NeoTreeNormal = { link = 'PanelBackground' },
+    NeoTreeNormalNC = { link = 'PanelBackground' },
+    NeoTreeRootName = { bold = true, italic = true },
+    NeoTreeCursorLine = { link = 'Visual' },
+    NeoTreeStatusLine = { link = 'PanelSt' },
+  })
   vim.g.neo_tree_remove_legacy_commands = 1
   fss.nnoremap('<c-n>', '<Cmd>Neotree toggle reveal<CR>')
   fss.nnoremap('-', '<Cmd>Neotree current %:p:h:h %:p<CR>')
 
-  require('neo-tree').setup {
+  require('neo-tree').setup({
     enable_git_status = true,
     git_status_async = true,
     event_handlers = {
       {
         event = 'neo_tree_buffer_enter',
         handler = function()
-          vim.cmd 'setlocal signcolumn=no'
-          vim.cmd 'highlight! Cursor blend=100'
-        end,
-      },
-      {
-        event = 'neo_tree_buffer_leave',
-        handler = function()
-          vim.cmd 'highlight! Cursor blend=0'
+          vim.opt_local.signcolumn = 'no'
         end,
       },
     },
@@ -75,5 +76,5 @@ return function()
         ['<c-v>'] = 'open_vsplit',
       },
     },
-  }
+  })
 end
