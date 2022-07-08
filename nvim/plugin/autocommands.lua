@@ -18,7 +18,12 @@ This is based on the implementation discussed here:
 https://github.com/neovim/neovim/issues/5581
 --]]
 
-map({ 'n', 'v', 'o', 'i', 'c' }, '<Plug>(StopHL)', 'execute("nohlsearch")[-1]', { expr = true })
+map(
+  { 'n', 'v', 'o', 'i', 'c' },
+  '<Plug>(StopHL)',
+  'execute("nohlsearch")[-1]',
+  { expr = true }
+)
 
 local function stop_hl()
   if vim.v.hlsearch == 0 or api.nvim_get_mode().mode ~= 'n' then
@@ -106,7 +111,10 @@ fss.augroup('SmartClose', {
 
       local is_eligible = is_unmapped
         or vim.wo.previewwindow
-        or vim.tbl_contains(smart_close_buftypes, vim.bo.buftype)
+        or vim.tbl_contains(
+          smart_close_buftypes,
+          vim.bo.buftype
+        )
         or vim.tbl_contains(smart_close_filetypes, vim.bo.filetype)
 
       if is_eligible then
@@ -143,7 +151,9 @@ fss.augroup('ExternalCommands', {
     event = { 'BufEnter' },
     pattern = { '*.png', '*.jpg', '*.gif' },
     command = function()
-      vim.cmd(fmt('silent! "%s | :bw"', vim.g.open_command .. ' ' .. fn.expand('%')))
+      vim.cmd(
+        fmt('silent! "%s | :bw"', vim.g.open_command .. ' ' .. fn.expand('%'))
+      )
     end,
   },
 })
@@ -151,7 +161,14 @@ fss.augroup('ExternalCommands', {
 fss.augroup('CheckOutsideTime', {
   {
     -- automatically check for changed files outside vim
-    event = { 'WinEnter', 'BufWinEnter', 'BufWinLeave', 'BufRead', 'BufEnter', 'FocusGained' },
+    event = {
+      'WinEnter',
+      'BufWinEnter',
+      'BufWinLeave',
+      'BufRead',
+      'BufEnter',
+      'FocusGained',
+    },
     pattern = '*',
     command = 'silent! checktime',
   },
@@ -217,7 +234,10 @@ local function check_color_column()
     local buffer = vim.bo[api.nvim_win_get_buf(win)]
     local window = vim.wo[win]
     local is_current = win == api.nvim_get_current_win()
-    if fss.empty(fn.win_gettype()) and not vim.tbl_contains(column_exclude, buffer.filetype) then
+    if
+      fss.empty(fn.win_gettype())
+      and not vim.tbl_contains(column_exclude, buffer.filetype)
+    then
       local too_small = api.nvim_win_get_width(win) <= buffer.textwidth + 1
       local is_excluded = vim.tbl_contains(column_block_list, buffer.filetype)
       if is_excluded or too_small then
@@ -242,13 +262,25 @@ fss.augroup('UpdateVim', {
     -- it correctly sources $MYVIMRC but all the other files that it
     -- requires will need to be resourced or reloaded themselves
     event = 'BufWritePost',
-    pattern = { '$DOTFILES/**/nvim/plugin/*.{lua,vim}', fn.expand('$MYVIMRC') },
+    pattern = {
+      '$DOTFILES/**/nvim/plugin/*.{lua,vim}',
+      fn.expand('$MYVIMRC'),
+    },
     nested = true,
     command = function(args)
       local path = api.nvim_buf_get_name(args.buf)
       vim.cmd('source ' .. path)
-      local ok, msg = pcall(vim.cmd, 'source $MYVIMRC | redraw | silent doautocmd ColorScheme')
-      msg = ok and fmt('sourced %s and %s', path, fn.fnamemodify(vim.env.MYVIMRC, ':t')) or msg
+      local ok, msg = pcall(
+        vim.cmd,
+        'source $MYVIMRC | redraw | silent doautocmd ColorScheme'
+      )
+      msg = ok
+          and fmt(
+            'sourced %s and %s',
+            path,
+            fn.fnamemodify(vim.env.MYVIMRC, ':t')
+          )
+        or msg
       vim.notify(msg)
     end,
   },

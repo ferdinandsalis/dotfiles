@@ -18,11 +18,19 @@ return function()
     end,
     lsp_hls,
     {
-      CmpItemAbbr = { foreground = 'fg', background = 'NONE', italic = false, bold = false },
+      CmpItemAbbr = {
+        foreground = 'fg',
+        background = 'NONE',
+        italic = false,
+        bold = false,
+      },
       CmpItemMenu = { foreground = faded, italic = true, bold = false },
       CmpItemAbbrMatch = { foreground = { from = 'Keyword' } },
       CmpItemAbbrDeprecated = { strikethrough = true, inherit = 'Comment' },
-      CmpItemAbbrMatchFuzzy = { italic = true, foreground = { from = 'Keyword' } },
+      CmpItemAbbrMatchFuzzy = {
+        italic = true,
+        foreground = { from = 'Keyword' },
+      },
     }
   )
   h.plugin('Cmp', kind_hls)
@@ -90,9 +98,14 @@ return function()
       fields = { 'abbr', 'kind', 'menu' },
       format = function(entry, vim_item)
         local MAX = math.floor(vim.o.columns * 0.5)
-        vim_item.abbr = #vim_item.abbr >= MAX and string.sub(vim_item.abbr, 1, MAX) .. ellipsis
+        vim_item.abbr = #vim_item.abbr >= MAX
+            and string.sub(vim_item.abbr, 1, MAX) .. ellipsis
           or vim_item.abbr
-        vim_item.kind = fmt('%s %s', fss.style.current.lsp_icons[vim_item.kind], vim_item.kind)
+        vim_item.kind = fmt(
+          '%s %s',
+          fss.style.current.lsp_icons[vim_item.kind],
+          vim_item.kind
+        )
         vim_item.menu = ({
           nvim_lsp = '[LSP]',
           nvim_lua = '[Lua]',

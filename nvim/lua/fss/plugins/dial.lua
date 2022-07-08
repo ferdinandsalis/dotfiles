@@ -23,7 +23,12 @@ return function()
         cyclic = true,
       }),
       augend.case.new({
-        types = { 'camelCase', 'snake_case', 'PascalCase', 'SCREAMING_SNAKE_CASE' },
+        types = {
+          'camelCase',
+          'snake_case',
+          'PascalCase',
+          'SCREAMING_SNAKE_CASE',
+        },
         cyclic = true,
       }),
     },
@@ -37,7 +42,12 @@ return function()
       event = 'FileType',
       pattern = { 'yaml', 'toml' },
       command = function()
-        map('n', '<C-a>', require('dial.map').inc_normal('dep_files'), { remap = true })
+        map(
+          'n',
+          '<C-a>',
+          require('dial.map').inc_normal('dep_files'),
+          { remap = true }
+        )
       end,
     },
   })

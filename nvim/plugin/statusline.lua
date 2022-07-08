@@ -131,8 +131,17 @@ function fss.ui.statusline()
   end
   local file_component = component(file.item, file.hl, file.opts)
 
-  local readonly_hl = H.adopt_winhighlight(curwin, 'StatusLine', 'StCustomError', 'StError')
-  local readonly_component = component(utils.readonly(ctx), readonly_hl, { priority = 1 })
+  local readonly_hl = H.adopt_winhighlight(
+    curwin,
+    'StatusLine',
+    'StCustomError',
+    'StError'
+  )
+  local readonly_component = component(
+    utils.readonly(ctx),
+    readonly_hl,
+    { priority = 1 }
+  )
 
   -- Mode
 
@@ -170,23 +179,38 @@ function fss.ui.statusline()
 
     component(mode, mode_hl, { priority = 0 }),
 
-    component_if(utils.search_count(), vim.v.hlsearch > 0, 'StCount', { priority = 1 }),
+    component_if(
+      utils.search_count(),
+      vim.v.hlsearch > 0,
+      'StCount',
+      { priority = 1 }
+    ),
 
     dir_component,
     parent_component,
     file_component,
 
-    component_if('Saving…', vim.g.is_saving, 'StComment', { before = ' ', priority = 1 }),
+    component_if(
+      'Saving…',
+      vim.g.is_saving,
+      'StComment',
+      { before = ' ', priority = 1 }
+    ),
 
     -- Local plugin dev indicator
-    component_if(available_space > 100 and 'local dev' or '', vim.env.DEVELOPING ~= nil, 'StComment', {
-      prefix = icons.misc.tools,
-      padding = 'none',
-      before = '  ',
-      prefix_color = 'StWarn',
-      small = 1,
-      priority = 2,
-    }),
+    component_if(
+      available_space > 100 and 'local dev' or '',
+      vim.env.DEVELOPING ~= nil,
+      'StComment',
+      {
+        prefix = icons.misc.tools,
+        padding = 'none',
+        before = '  ',
+        prefix_color = 'StWarn',
+        small = 1,
+        priority = 2,
+      }
+    ),
     separator(),
 
     -- Middle section
@@ -204,7 +228,11 @@ function fss.ui.statusline()
 
     -- Right section
     component(flutter.app_version, 'StMetadata', { priority = 4 }),
-    component(flutter.device and flutter.device.name or '', 'StMetadata', { priority = 4 })
+    component(
+      flutter.device and flutter.device.name or '',
+      'StMetadata',
+      { priority = 4 }
+    )
   )
 
   -- LSP Clients
@@ -221,7 +249,11 @@ function fss.ui.statusline()
   add(unpack(lsp_clients))
 
   add(
-    component(utils.debugger(), 'StMetadata', { prefix = icons.misc.bug, priority = 4 }),
+    component(
+      utils.debugger(),
+      'StMetadata',
+      { prefix = icons.misc.bug, priority = 4 }
+    ),
 
     component_if(diagnostics.error.count, diagnostics.error, 'StError', {
       prefix = diagnostics.error.icon,
@@ -305,11 +337,16 @@ function fss.ui.statusline()
     }),
 
     -- (Unexpected) Indentation
-    component_if(ctx.shiftwidth, ctx.shiftwidth > 2 or not ctx.expandtab, 'StTitle', {
-      prefix = ctx.expandtab and icons.misc.indent or icons.misc.tab,
-      prefix_color = 'StatusLine',
-      priority = 6,
-    }),
+    component_if(
+      ctx.shiftwidth,
+      ctx.shiftwidth > 2 or not ctx.expandtab,
+      'StTitle',
+      {
+        prefix = ctx.expandtab and icons.misc.indent or icons.misc.tab,
+        prefix_color = 'StatusLine',
+        priority = 6,
+      }
+    ),
 
     end_marker()
   )

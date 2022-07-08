@@ -19,11 +19,22 @@ function fss.telescope.dropdown(opts)
 end
 
 function fss.telescope.ivy(opts)
-  return require('telescope.themes').get_ivy(vim.tbl_deep_extend('keep', opts or {}, {
-    borderchars = {
-      preview = { '▔', '▕', '▁', '▏', '🭽', '🭾', '🭿', '🭼' },
-    },
-  }))
+  return require('telescope.themes').get_ivy(
+    vim.tbl_deep_extend('keep', opts or {}, {
+      borderchars = {
+        preview = {
+          '▔',
+          '▕',
+          '▁',
+          '▏',
+          '🭽',
+          '🭾',
+          '🭿',
+          '🭼',
+        },
+      },
+    })
+  )
 end
 
 function M.config()
@@ -78,13 +89,37 @@ function M.config()
       set_env = { ['TERM'] = vim.env.TERM },
       borderchars = {
         prompt = { ' ', '▕', '▁', '▏', '▏', '▕', '🭿', '🭼' },
-        results = { '▔', '▕', '▁', '▏', '🭽', '🭾', '🭿', '🭼' },
-        preview = { '▔', '▕', '▁', '▏', '🭽', '🭾', '🭿', '🭼' },
+        results = {
+          '▔',
+          '▕',
+          '▁',
+          '▏',
+          '🭽',
+          '🭾',
+          '🭿',
+          '🭼',
+        },
+        preview = {
+          '▔',
+          '▕',
+          '▁',
+          '▏',
+          '🭽',
+          '🭾',
+          '🭿',
+          '🭼',
+        },
       },
       dynamic_preview_title = true,
       prompt_prefix = icons.misc.telescope .. ' ',
       selection_caret = icons.misc.chevron_right .. ' ',
-      cycle_layout_list = { 'flex', 'horizontal', 'vertical', 'bottom_pane', 'center' },
+      cycle_layout_list = {
+        'flex',
+        'horizontal',
+        'vertical',
+        'bottom_pane',
+        'center',
+      },
       mappings = {
         i = {
           ['<C-w>'] = actions.send_selected_to_qflist,
@@ -319,9 +354,15 @@ function M.config()
       },
       l = {
         name = '+lsp',
-        e = { builtins.lsp_workspace_diagnostics, 'telescope: workspace diagnostics' },
+        e = {
+          builtins.lsp_workspace_diagnostics,
+          'telescope: workspace diagnostics',
+        },
         d = { builtins.lsp_document_symbols, 'telescope: document symbols' },
-        s = { builtins.lsp_dynamic_workspace_symbols, 'telescope: workspace symbols' },
+        s = {
+          builtins.lsp_dynamic_workspace_symbols,
+          'telescope: workspace symbols',
+        },
       },
       p = { installed_plugins, 'plugins' },
       R = { builtins.resume, 'resume last picker' },

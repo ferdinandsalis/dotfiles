@@ -6,7 +6,11 @@ return function()
     script = true,
   })
 
-  fss.imap('<Plug>(as-copilot-accept)', "copilot#Accept('<Tab>')", { expr = true })
+  fss.imap(
+    '<Plug>(as-copilot-accept)',
+    "copilot#Accept('<Tab>')",
+    { expr = true }
+  )
   fss.inoremap('<M-]>', '<Plug>(copilot-next)')
   fss.inoremap('<M-[>', '<Plug>(copilot-previous)')
   fss.inoremap('<C-\\>', '<Cmd>vertical Copilot panel<CR>')

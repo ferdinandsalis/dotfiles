@@ -22,7 +22,11 @@ M.constants = constants
 
 local function get_toggleterm_name(_, buf)
   local shell = fnamemodify(vim.env.SHELL, ':t')
-  return fmt('Terminal(%s)[%s]', shell, api.nvim_buf_get_var(buf, 'toggle_number'))
+  return fmt(
+    'Terminal(%s)[%s]',
+    shell,
+    api.nvim_buf_get_var(buf, 'toggle_number')
+  )
 end
 
 -- Capture the type of the neo tree buffer opened
@@ -240,9 +244,14 @@ local function filename(ctx, modifier)
     return '', '', 'No Name'
   end
 
-  local path = (ctx.buftype == '' and not ctx.preview) and buf_expand(ctx.bufnum, ':~:.:h') or nil
+  local path = (ctx.buftype == '' and not ctx.preview)
+      and buf_expand(ctx.bufnum, ':~:.:h')
+    or nil
   local is_root = path and #path == 1 -- "~" or "."
-  local dir = path and not is_root and fn.pathshorten(fnamemodify(path, ':h')) .. '/' or ''
+  local dir = path
+      and not is_root
+      and fn.pathshorten(fnamemodify(path, ':h')) .. '/'
+    or ''
   local parent = path and (is_root and path or fnamemodify(path, ':t')) or ''
   parent = parent ~= '' and parent .. '/' or ''
 
@@ -264,7 +273,11 @@ local function highlight_ft_icon(hl, bg_hl)
       {
         event = 'ColorScheme',
         command = function()
-          api.nvim_set_hl(0, name, { foreground = fg_color, background = bg_color })
+          api.nvim_set_hl(
+            0,
+            name,
+            { foreground = fg_color, background = bg_color }
+          )
         end,
       },
     })
@@ -307,12 +320,30 @@ function M.file(ctx, minimal)
   local parent_hl = minimal and directory_hl or 'StParentDirectory'
 
   if H.winhighlight_exists(curwin, 'Normal', 'StatusLine') then
-    directory_hl = H.adopt_winhighlight(curwin, 'StatusLine', 'StCustomDirectory', 'StTitle')
-    filename_hl = H.adopt_winhighlight(curwin, 'StatusLine', 'StCustomFilename', 'StTitle')
-    parent_hl = H.adopt_winhighlight(curwin, 'StatusLine', 'StCustomParentDir', 'StTitle')
+    directory_hl = H.adopt_winhighlight(
+      curwin,
+      'StatusLine',
+      'StCustomDirectory',
+      'StTitle'
+    )
+    filename_hl = H.adopt_winhighlight(
+      curwin,
+      'StatusLine',
+      'StCustomFilename',
+      'StTitle'
+    )
+    parent_hl = H.adopt_winhighlight(
+      curwin,
+      'StatusLine',
+      'StCustomParentDir',
+      'StTitle'
+    )
   end
 
-  local ft_icon, icon_highlight = filetype(ctx, { icon_bg = 'StatusLine', default = 'StComment' })
+  local ft_icon, icon_highlight = filetype(
+    ctx,
+    { icon_bg = 'StatusLine', default = 'StComment' }
+  )
 
   local file_opts = { before = '', after = '', priority = 0 }
   local parent_opts = { before = '', after = '', priority = 2 }
@@ -488,7 +519,8 @@ function M.lsp_clients(ctx)
   -- the mathematical symbol denoting an empty set i.e. sort of kinda null, is used to represent null-ls
   local names = vim.tbl_map(function(client)
     local is_null = client.name:match('null')
-    return is_null and { name = 'ﳠ', priority = 7 } or { name = client.name, priority = 4 }
+    return is_null and { name = 'ﳠ', priority = 7 }
+      or { name = client.name, priority = 4 }
   end, clients)
 
   table.sort(names, function(a, b)
@@ -597,7 +629,11 @@ function M.spacer(size, opts)
   local priority = opts.priority or 0
   if size and size >= 1 then
     local spacer = string.rep(filler, size)
-    return { component = spacer, length = strwidth(spacer), priority = priority }
+    return {
+      component = spacer,
+      length = strwidth(spacer),
+      priority = priority,
+    }
   end
   return { component = '', length = 0, priority = priority }
 end
@@ -623,13 +659,21 @@ function M.component(item, hl, opts)
   if empty(item) then
     return M.spacer()
   end
-  assert(opts and opts.priority, fmt("each item's priority is required: %s is missing one", item))
+  assert(
+    opts and opts.priority,
+    fmt("each item's priority is required: %s is missing one", item)
+  )
   opts.padding = opts.padding or { suffix = true, prefix = true }
   local padding = ' '
   local before, after = opts.before or '', opts.after or padding
-  local prefix = opts.prefix and opts.prefix .. (opts.padding.prefix and padding or '') or ''
-  local suffix = opts.suffix and (opts.padding.suffix and padding or '') .. opts.suffix or ''
-  local prefix_color, suffix_color = opts.prefix_color or hl, opts.suffix_color or hl
+  local prefix = opts.prefix
+      and opts.prefix .. (opts.padding.prefix and padding or '')
+    or ''
+  local suffix = opts.suffix
+      and (opts.padding.suffix and padding or '') .. opts.suffix
+    or ''
+  local prefix_color, suffix_color =
+    opts.prefix_color or hl, opts.suffix_color or hl
   local prefix_hl = not empty(prefix_color) and wrap(prefix_color) or ''
   local suffix_hl = not empty(suffix_color) and wrap(suffix_color) or ''
   local prefix_item = not empty(prefix) and prefix_hl .. prefix or ''

@@ -191,8 +191,8 @@ local lsp = {
       Object = '?',
       Key = '?',
       Null = '?',
-    }
-  }
+    },
+  },
 }
 
 fss.style = {

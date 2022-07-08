@@ -3,7 +3,12 @@ return function()
   local lsp = fss.style.icons.lsp
 
   local function diagnostics_indicator(_, _, diagnostics)
-    local symbols = { error = lsp.error, warning = lsp.warn, hint = lsp.hint, info = lsp.info }
+    local symbols = {
+      error = lsp.error,
+      warning = lsp.warn,
+      hint = lsp.hint,
+      info = lsp.info,
+    }
     local result = fss.fold(function(accum, count, name)
       if symbols[name] and count > 0 then
         table.insert(accum, symbols[name] .. ' ' .. count)
@@ -130,7 +135,10 @@ return function()
     ['<S-tab>'] = { '<Cmd>BufferLineCyclePrev<CR>', 'bufferline: prev' },
     ['[b'] = { '<Cmd>BufferLineMoveNext<CR>', 'bufferline: move next' },
     [']b'] = { '<Cmd>BufferLineMovePrev<CR>', 'bufferline: move prev' },
-    ['<leader>bp'] = { '<Cmd>BufferLineTogglePin<CR>', 'bufferline: toggle pin' },
+    ['<leader>bp'] = {
+      '<Cmd>BufferLineTogglePin<CR>',
+      'bufferline: toggle pin',
+    },
     ['<leader>1'] = { '<Cmd>BufferLineGoToBuffer 1<CR>', 'which_key_ignore' },
     ['<leader>2'] = { '<Cmd>BufferLineGoToBuffer 2<CR>', 'which_key_ignore' },
     ['<leader>3'] = { '<Cmd>BufferLineGoToBuffer 3<CR>', 'which_key_ignore' },
@@ -198,16 +206,36 @@ return function()
     BufferLineModifiedVisible = { background = bg_color },
     BufferLineModifiedSelected = { background = 'background' },
     -- Duplicate
-    BufferLineDuplicate = { background = bg_color, bold = false, italic = false },
-    BufferLineDuplicateVisible = { background = bg_color, bold = false, italic = false },
+    BufferLineDuplicate = {
+      background = bg_color,
+      bold = false,
+      italic = false,
+    },
+    BufferLineDuplicateVisible = {
+      background = bg_color,
+      bold = false,
+      italic = false,
+    },
     BufferLineDuplicateSelected = { background = 'background' },
     -- Separator
     BufferLineSeparator = { foreground = sep_color, background = bg_color },
-    BufferLineSeparatorVisible = { foreground = sep_color, background = bg_color },
-    BufferLineSeparatorSelected = { foreground = sep_color, background = bg_color },
+    BufferLineSeparatorVisible = {
+      foreground = sep_color,
+      background = bg_color,
+    },
+    BufferLineSeparatorSelected = {
+      foreground = sep_color,
+      background = bg_color,
+    },
     -- Indicator
-    BufferLineIndicatorSelected = { background = 'background', foreground = 'background' },
-    BufferLineIndicatorVisible = { background = bg_color, foreground = bg_color },
+    BufferLineIndicatorSelected = {
+      background = 'background',
+      foreground = 'background',
+    },
+    BufferLineIndicatorVisible = {
+      background = bg_color,
+      foreground = bg_color,
+    },
     -- Pick
     BufferLinePick = { background = bg_color },
     BufferLinePickVisible = { background = bg_color },

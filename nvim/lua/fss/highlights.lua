@@ -12,7 +12,9 @@ local M = {}
 ---@return number
 local function hex_to_rgb(color)
   local hex = color:gsub('#', '')
-  return tonumber(hex:sub(1, 2), 16), tonumber(hex:sub(3, 4), 16), tonumber(hex:sub(5), 16)
+  return tonumber(hex:sub(1, 2), 16),
+    tonumber(hex:sub(3, 4), 16),
+    tonumber(hex:sub(5), 16)
 end
 
 local function alter(attr, percent)
@@ -113,7 +115,12 @@ function M.set_hl(name, opts)
   local hl = get_hl(opts.inherit or name)
   convert_hl_to_val(opts)
   opts.inherit = nil
-  local ok, msg = pcall(api.nvim_set_hl, 0, name, vim.tbl_deep_extend('force', hl, opts))
+  local ok, msg = pcall(
+    api.nvim_set_hl,
+    0,
+    name,
+    vim.tbl_deep_extend('force', hl, opts)
+  )
   if not ok then
     vim.notify(fmt('Failed to set %s because: %s', name, msg))
   end
@@ -128,7 +135,10 @@ end
 ---@return string
 function M.get(group, attribute, fallback)
   if not group then
-    vim.notify('Cannot get a highlight without specifying a group', levels.ERROR)
+    vim.notify(
+      'Cannot get a highlight without specifying a group',
+      levels.ERROR
+    )
     return 'NONE'
   end
   local hl = get_hl(group)
@@ -193,12 +203,19 @@ local function general_overrides()
 
     -- Floats
     NormalFloat = { inherit = 'Pmenu' },
-    FloatBorder = { inherit = 'NormalFloat', foreground = { from = 'NonText' } },
+    FloatBorder = {
+      inherit = 'NormalFloat',
+      foreground = { from = 'NonText' },
+    },
 
     Comment = { italic = true },
     Type = { italic = true, bold = true },
     Include = { italic = true, bold = false },
-    QuickFixLine = { inherit = 'PmenuSbar', foreground = 'NONE', italic = true },
+    QuickFixLine = {
+      inherit = 'PmenuSbar',
+      foreground = 'NONE',
+      italic = true,
+    },
     SignColumn = { background = 'NONE' },
     EndOfBuffer = { background = 'NONE' },
   })

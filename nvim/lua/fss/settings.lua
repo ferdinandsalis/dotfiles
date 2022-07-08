@@ -183,7 +183,8 @@ function fss.modified_icon()
   return vim.bo.modified and fss.style.icons.misc.circle or ''
 end
 
-vim.opt.titlestring = '%{fnamemodify(getcwd(), ":t")} %{v:lua.fss.modified_icon()}'
+vim.opt.titlestring =
+  '%{fnamemodify(getcwd(), ":t")} %{v:lua.fss.modified_icon()}'
 vim.opt.titleold = fn.fnamemodify(vim.loop.os_getenv('SHELL'), ':t')
 vim.opt.title = true
 vim.opt.titlelen = 70

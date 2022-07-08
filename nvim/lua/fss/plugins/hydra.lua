@@ -10,14 +10,26 @@ return function()
     config = {
       invoke_on_body = true,
       hint = { border = border },
-      on_enter = function() vim.cmd('BeaconOff') end,
-      on_exit = function() vim.cmd('BeaconOn') end,
+      on_enter = function()
+        vim.cmd('BeaconOff')
+      end,
+      on_exit = function()
+        vim.cmd('BeaconOn')
+      end,
     },
     heads = {
       { 'j', 'zj', { desc = 'next fold' } },
       { 'k', 'zk', { desc = 'previous fold' } },
-      { 'l', require('fold-cycle').open_all, { desc = 'open folds underneath' } },
-      { 'h', require('fold-cycle').close_all, { desc = 'close folds underneath' } },
+      {
+        'l',
+        require('fold-cycle').open_all,
+        { desc = 'open folds underneath' },
+      },
+      {
+        'h',
+        require('fold-cycle').close_all,
+        { desc = 'close folds underneath' },
+      },
       { '<Esc>', nil, { exit = true, desc = 'Quit' } },
     },
   })
@@ -30,8 +42,12 @@ return function()
     config = {
       hint = { border = border },
       invoke_on_body = true,
-      on_enter = function() vim.cmd('BeaconOff') end,
-      on_exit = function() vim.cmd('BeaconOn') end,
+      on_enter = function()
+        vim.cmd('BeaconOff')
+      end,
+      on_exit = function()
+        vim.cmd('BeaconOn')
+      end,
     },
     heads = {
       { 'l', '<Cmd>BufferLineCycleNext<CR>', { desc = 'Next buffer' } },
@@ -39,7 +55,11 @@ return function()
       { 'p', '<Cmd>BufferLineTogglePin<CR>', { desc = 'Pin buffer' } },
       { 'c', '<Cmd>BufferLinePick<CR>', { desc = 'Pin buffer' } },
       { 'd', '<Cmd>Bwipeout<CR>', { desc = 'delete buffer' } },
-      { 'D', '<Cmd>BufferLinePickClose<CR>', { desc = 'Pick buffer to close', exit = true } },
+      {
+        'D',
+        '<Cmd>BufferLinePickClose<CR>',
+        { desc = 'Pick buffer to close', exit = true },
+      },
       { '<Esc>', nil, { exit = true, desc = 'Quit' } },
     },
   })
@@ -117,8 +137,12 @@ return function()
         {
           'J',
           function()
-            if vim.wo.diff then return ']c' end
-            vim.schedule(function() gitsigns.next_hunk() end)
+            if vim.wo.diff then
+              return ']c'
+            end
+            vim.schedule(function()
+              gitsigns.next_hunk()
+            end)
             return '<Ignore>'
           end,
           { expr = true },
@@ -126,8 +150,12 @@ return function()
         {
           'K',
           function()
-            if vim.wo.diff then return '[c' end
-            vim.schedule(function() gitsigns.prev_hunk() end)
+            if vim.wo.diff then
+              return '[c'
+            end
+            vim.schedule(function()
+              gitsigns.prev_hunk()
+            end)
             return '<Ignore>'
           end,
           { expr = true },
@@ -140,7 +168,9 @@ return function()
         { 'b', gitsigns.blame_line },
         {
           'B',
-          function() gitsigns.blame_line({ full = true }) end,
+          function()
+            gitsigns.blame_line({ full = true })
+          end,
         },
         { '/', gitsigns.show, { exit = true } }, -- show the base of the file
         { '<Enter>', '<cmd>Neogit<CR>', { exit = true } },
@@ -152,7 +182,9 @@ return function()
   local function run(method, args)
     return function()
       local dap = require('dap')
-      if dap[method] then dap[method](args) end
+      if dap[method] then
+        dap[method](args)
+      end
     end
   end
 
@@ -184,7 +216,11 @@ return function()
       { 'o', run('step_out'), { silent = true } },
       { 'c', run('run_to_cursor'), { silent = true } },
       { 's', run('continue'), { silent = true } },
-      { 'x', run('disconnect', { terminateDebuggee = false }), { exit = true, silent = true } },
+      {
+        'x',
+        run('disconnect', { terminateDebuggee = false }),
+        { exit = true, silent = true },
+      },
       { 'X', run('close'), { silent = true } },
       {
         'C',
@@ -192,7 +228,11 @@ return function()
         { silent = true },
       },
       { 'b', run('toggle_breakpoint'), { silent = true } },
-      { 'K', ":lua require('dap.ui.widgets').hover()<CR>", { silent = true } },
+      {
+        'K',
+        ":lua require('dap.ui.widgets').hover()<CR>",
+        { silent = true },
+      },
       { 'q', nil, { exit = true, nowait = true } },
     },
   })
@@ -201,7 +241,9 @@ return function()
     event = 'User',
     user = 'DapStarted',
     command = function()
-      vim.schedule(function() dap_hydra:activate() end)
+      vim.schedule(function()
+        dap_hydra:activate()
+      end)
     end,
   })
 end

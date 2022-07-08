@@ -43,7 +43,10 @@ return function()
             l = { gs.blame_line, 'gitsigns: blame current line' },
           },
         },
-        ['<leader>lm'] = { qf_list_modified, 'gitsigns: list modified in quickfix' },
+        ['<leader>lm'] = {
+          qf_list_modified,
+          'gitsigns: list modified in quickfix',
+        },
       })
 
       -- Navigation

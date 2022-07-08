@@ -55,7 +55,9 @@ local function breadcrumbs()
     return empty_state
   end
   local win = api.nvim_get_current_win()
-  return { component_raw(location, { priority = 1, win_id = win, type = 'winbar' }) }
+  return {
+    component_raw(location, { priority = 1, win_id = win, type = 'winbar' }),
+  }
 end
 
 ---@return string
@@ -80,7 +82,10 @@ function fss.ui.winbar()
     local sep = is_last and separator or dir_separator
     local hl = is_last and 'Winbar' or 'NonText'
     local suffix_hl = is_last and 'WinbarDirectory' or 'NonText'
-    fss.winbar_state[priority] = table.concat(vim.list_slice(parts, 1, index), '/')
+    fss.winbar_state[priority] = table.concat(
+      vim.list_slice(parts, 1, index),
+      '/'
+    )
     add(component(part, hl, {
       id = priority,
       priority = priority,
@@ -92,7 +97,10 @@ function fss.ui.winbar()
     }))
   end, parts)
   add(unpack(breadcrumbs()))
-  return utils.display(winbar, api.nvim_win_get_width(api.nvim_get_current_win()))
+  return utils.display(
+    winbar,
+    api.nvim_win_get_width(api.nvim_get_current_win())
+  )
 end
 
 local blocked = {

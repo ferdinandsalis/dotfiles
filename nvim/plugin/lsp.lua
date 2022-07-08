@@ -52,7 +52,10 @@ end
 local function setup_autocommands(client, bufnr)
   local cmds = {}
   if not client then
-    local msg = fmt('Unable to setup LSP autocommands, client for %d is missing', bufnr)
+    local msg = fmt(
+      'Unable to setup LSP autocommands, client for %d is missing',
+      bufnr
+    )
     return vim.notify(msg, 'error', { title = 'LSP Setup' })
   end
   if client and client.server_capabilities.documentFormattingProvider then
@@ -116,18 +119,50 @@ local function setup_mappings(_)
     return { buffer = 0, desc = desc }
   end
 
-  fss.nnoremap(']c', vim.diagnostic.goto_prev, with_desc('lsp: go to prev diagnostic'))
-  fss.nnoremap('[c', vim.diagnostic.goto_next, with_desc('lsp: go to next diagnostic'))
+  fss.nnoremap(
+    ']c',
+    vim.diagnostic.goto_prev,
+    with_desc('lsp: go to prev diagnostic')
+  )
+  fss.nnoremap(
+    '[c',
+    vim.diagnostic.goto_next,
+    with_desc('lsp: go to next diagnostic')
+  )
   fss.nnoremap('<leader>rf', format, with_desc('lsp: format buffer'))
-  fss.nnoremap('<leader>ca', vim.lsp.buf.code_action, with_desc('lsp: code action'))
-  fss.xnoremap('<leader>ca', vim.lsp.buf.range_code_action, with_desc('lsp: code action'))
+  fss.nnoremap(
+    '<leader>ca',
+    vim.lsp.buf.code_action,
+    with_desc('lsp: code action')
+  )
+  fss.xnoremap(
+    '<leader>ca',
+    vim.lsp.buf.range_code_action,
+    with_desc('lsp: code action')
+  )
   fss.nnoremap('gd', vim.lsp.buf.definition, with_desc('lsp: definition'))
   fss.nnoremap('gr', vim.lsp.buf.references, with_desc('lsp: references'))
   fss.nnoremap('K', vim.lsp.buf.hover, with_desc('lsp: hover'))
-  fss.nnoremap('gI', vim.lsp.buf.incoming_calls, with_desc('lsp: incoming calls'))
-  fss.nnoremap('gi', vim.lsp.buf.implementation, with_desc('lsp: implementation'))
-  fss.nnoremap('<leader>gd', vim.lsp.buf.type_definition, with_desc('lsp: go to type definition'))
-  fss.nnoremap('<leader>cl', vim.lsp.codelens.run, with_desc('lsp: run code lens'))
+  fss.nnoremap(
+    'gI',
+    vim.lsp.buf.incoming_calls,
+    with_desc('lsp: incoming calls')
+  )
+  fss.nnoremap(
+    'gi',
+    vim.lsp.buf.implementation,
+    with_desc('lsp: implementation')
+  )
+  fss.nnoremap(
+    '<leader>gd',
+    vim.lsp.buf.type_definition,
+    with_desc('lsp: go to type definition')
+  )
+  fss.nnoremap(
+    '<leader>cl',
+    vim.lsp.codelens.run,
+    with_desc('lsp: run code lens')
+  )
   fss.nnoremap('<leader>rn', vim.lsp.buf.rename, with_desc('lsp: rename'))
 end
 
@@ -182,7 +217,7 @@ fss.augroup('LspSetupCommands', {
       end
     end,
   },
-    {
+  {
     event = 'LspDetach',
     desc = 'Clean up after detached LSP',
     command = function(args)
@@ -232,7 +267,11 @@ local function make_diagnostic_qf_updater()
 end
 
 command('LspDiagnostics', make_diagnostic_qf_updater())
-fss.nnoremap('<leader>ll', '<Cmd>LspDiagnostics<CR>', 'toggle quickfix diagnostics')
+fss.nnoremap(
+  '<leader>ll',
+  '<Cmd>LspDiagnostics<CR>',
+  'toggle quickfix diagnostics'
+)
 
 -- Signs
 
@@ -280,20 +319,20 @@ local function max_diagnostic(callback)
 end
 
 local signs_handler = diagnostic.handlers.signs
-diagnostic.handlers.signs = {
+diagnostic.handlers.signs = vim.tbl_extend('force', signs_handler, {
   show = max_diagnostic(signs_handler.show),
   hide = function(_, bufnr)
     signs_handler.hide(ns, bufnr)
   end,
-}
+})
 
 local virt_text_handler = diagnostic.handlers.virtual_text
-diagnostic.handlers.virtual_text = {
+diagnostic.handlers.virtual_text = vim.tbl_extend('force', virt_text_handler, {
   show = max_diagnostic(virt_text_handler.show),
   hide = function(_, bufnr)
     virt_text_handler.hide(ns, bufnr)
   end,
-}
+})
 
 -- Diagnostic Configuration {{{1
 
@@ -333,11 +372,14 @@ lsp.handlers['textDocument/hover'] = lsp.with(
   { border = border, max_width = max_width, max_height = max_height }
 )
 
-lsp.handlers['textDocument/signatureHelp'] = lsp.with(lsp.handlers.signature_help, {
-  border = border,
-  max_width = max_width,
-  max_height = max_height,
-})
+lsp.handlers['textDocument/signatureHelp'] = lsp.with(
+  lsp.handlers.signature_help,
+  {
+    border = border,
+    max_width = max_width,
+    max_height = max_height,
+  }
+)
 
 lsp.handlers['window/showMessage'] = function(_, result, ctx)
   local client = vim.lsp.get_client_by_id(ctx.client_id)

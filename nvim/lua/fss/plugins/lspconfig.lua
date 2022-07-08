@@ -47,9 +47,27 @@ return function()
           ts_utils.setup_client(client)
           -- keymappings
           local opts = { silent = true }
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gS', ':TSLspOrganize<CR>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gR', ':TSLspRenameFile<CR>', opts)
-          vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gA', ':TSLspImportAll<CR>', opts)
+          vim.api.nvim_buf_set_keymap(
+            bufnr,
+            'n',
+            'gS',
+            ':TSLspOrganize<CR>',
+            opts
+          )
+          vim.api.nvim_buf_set_keymap(
+            bufnr,
+            'n',
+            'gR',
+            ':TSLspRenameFile<CR>',
+            opts
+          )
+          vim.api.nvim_buf_set_keymap(
+            bufnr,
+            'n',
+            'gA',
+            ':TSLspImportAll<CR>',
+            opts
+          )
         end,
       }
     end,
@@ -80,9 +98,19 @@ return function()
           Lua = {
             format = { enable = false },
             diagnostics = {
-              globals = { 'vim', 'describe', 'it', 'before_each', 'after_each', 'packer_plugins' },
+              globals = {
+                'vim',
+                'describe',
+                'it',
+                'before_each',
+                'after_each',
+                'packer_plugins',
+              },
             },
-            completion = { keywordSnippet = 'Replace', callSnippet = 'Replace' },
+            completion = {
+              keywordSnippet = 'Replace',
+              callSnippet = 'Replace',
+            },
           },
         },
       }
@@ -104,7 +132,8 @@ return function()
       config = config()
     end
     if config then
-      config.capabilities = config.capabilities or vim.lsp.protocol.make_client_capabilities()
+      config.capabilities = config.capabilities
+        or vim.lsp.protocol.make_client_capabilities()
       config.capabilities.textDocument.foldingRange = {
         dynamicRegistration = false,
         lineFoldingOnly = true,

@@ -155,19 +155,17 @@ packer.startup({
     use({
       'rmagatti/auto-session',
       config = function()
-        local fn = vim.fn
-        local fmt = string.format
-        local data = fn.stdpath('data')
+        local data = vim.fn.stdpath('data')
         require('auto-session').setup({
           log_level = 'error',
-          auto_session_root_dir = fmt('%s/session/auto/', data),
+          auto_session_root_dir = string.format('%s/session/auto/', data),
           auto_restore_enabled = not vim.startswith(
-            fn.getcwd(),
+            vim.fn.getcwd(),
             vim.env.PROJECTS_DIR
           ),
           auto_session_suppress_dirs = {
-            fn.expand('~'),
-            fn.expand('~/Desktop/'),
+            vim.fn.expand('~'),
+            vim.fn.expand('~/Desktop/'),
           },
           auto_session_use_git_branch = false, -- This cause inconsistent results
         })
