@@ -73,8 +73,10 @@ local function setup_autocommands(client, bufnr)
       {
         event = { 'BufEnter', 'CursorHold', 'InsertLeave' },
         buffer = bufnr,
-        command = function()
-          vim.lsp.codelens.refresh()
+        command = function(args)
+          if api.nvim_buf_is_valid(args.buf) then
+            vim.lsp.codelens.refresh()
+          end
         end,
       },
     })
