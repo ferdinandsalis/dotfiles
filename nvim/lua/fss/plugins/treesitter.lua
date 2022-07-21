@@ -101,6 +101,7 @@ return function()
       },
     },
     autopairs = { enable = true },
+    autotag = { enable = true },
     playground = {
       persist_queries = true,
     },

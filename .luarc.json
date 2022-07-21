@@ -10,5 +10,10 @@
         "teardown",
         "packer_plugins",
         "c"
+    ],
+    "Lua.diagnostics.disable": [
+        "missing-parameter",
+        "return-type-mismatch",
+        "param-type-mismatch"
     ]
 }

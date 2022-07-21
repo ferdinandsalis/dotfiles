@@ -1,13 +1,13 @@
----@diagnostic disable: missing-parameter
-
 local utils = require('fss.utils.plugins')
 local conf = utils.conf
 local packer_notify = utils.packer_notify
 local fn = vim.fn
 local fmt = string.format
 
-local PACKER_COMPILED_PATH = fn.stdpath('cache')
-  .. '/packer/packer_compiled.lua'
+local PACKER_COMPILED_PATH = fmt(
+  '%s/packer/packer_compiled.lua',
+  fn.stdpath('cache')
+)
 
 ---Some plugins are not safe to be reloaded because their setup functions
 ---and are not idempotent. This wraps the setup calls of such plugins
@@ -23,7 +23,7 @@ end
 utils.bootstrap_packer()
 
 -- cfilter plugin allows filtering down an existing quickfix list
-vim.cmd('packadd! cfilter')
+vim.cmd.packadd({ 'cfilter', bang = true })
 
 fss.safe_require('impatient')
 
@@ -54,7 +54,7 @@ packer.startup({
     use({
       'rcarriga/nvim-notify',
       cond = utils.not_headless,
-      config = fss.block_reload(conf('notify')),
+      config = conf('notify'),
     })
 
     -- Shows undo steps in a tree
@@ -78,6 +78,14 @@ packer.startup({
       module = 'luasnip',
       requires = 'rafamadriz/friendly-snippets',
       config = conf('luasnip'),
+    })
+
+    use({
+      'glepnir/template.nvim',
+      config = function()
+        local temp = require('template')
+        temp.temp_dir = ('%s/templates/'):format(vim.g.vim_dir)
+      end,
     })
 
     -- A toggable terminal
@@ -141,6 +149,9 @@ packer.startup({
       end,
     })
 
+    -- Close and update tags (e.g. HTML and React)
+    use('windwp/nvim-ts-autotag')
+
     -- prevent select and visual mode from overwriting the clipboard
     use({
       'kevinhwang91/nvim-hclipboard',
@@ -151,6 +162,13 @@ packer.startup({
     })
 
     use({ 'chentoast/marks.nvim', config = conf('marks') })
+
+    use({
+      'itchyny/vim-highlighturl',
+      config = function()
+        vim.g.highlighturl_guifg = require('fss.highlights').get('URL', 'fg')
+      end,
+    })
 
     use({
       'rmagatti/auto-session',
@@ -172,9 +190,27 @@ packer.startup({
       end,
     })
 
+    -- readline shortcuts
+    use({
+      'linty-org/readline.nvim',
+      event = 'CmdlineEnter',
+      config = function()
+        local readline = require('readline')
+        local map = vim.keymap.set
+        map('!', '<M-f>', readline.forward_word)
+        map('!', '<M-b>', readline.backward_word)
+        map('!', '<C-a>', readline.beginning_of_line)
+        map('!', '<C-e>', readline.end_of_line)
+        map('!', '<M-d>', readline.kill_word)
+        map('!', '<M-BS>', readline.backward_kill_word)
+        map('!', '<C-w>', readline.unix_word_rubout)
+        map('!', '<C-k>', readline.kill_line)
+        map('!', '<C-u>', readline.backward_kill_line)
+      end,
+    })
+
     use({
       'anuvyklack/hydra.nvim',
-      requires = 'anuvyklack/keymap-layer.nvim',
       config = fss.block_reload(conf('hydra')),
     })
 
@@ -262,8 +298,10 @@ packer.startup({
       end,
     })
 
+    -- highlight arguments in function bodies
     use({
       'm-demare/hlargs.nvim',
+      branch = 'expected_lua_number',
       config = function()
         require('fss.highlights').plugin('hlargs', {
           Hlargs = { italic = true, bold = false, foreground = '#7fbbb3' },
@@ -293,24 +331,26 @@ packer.startup({
 
     -- Install Lsp's
     use({
-      {
-        'williamboman/mason.nvim',
-        event = 'BufRead',
-        branch = 'alpha',
-        config = function()
-          require('mason').setup({ ui = { border = fss.style.current.border } })
-          require('mason-lspconfig').setup({
-            automatic_installation = true,
-          })
-        end,
-      },
-      -- lspconfig is abominably slow to load and if loaded on BufReadPre seems to interact with nvim-treesitter
-      {
-        'neovim/nvim-lspconfig',
-        after = 'mason.nvim',
-        config = conf('lspconfig'),
-      },
+      'williamboman/mason.nvim',
+      event = 'BufRead',
+      branch = 'alpha',
+      requires = { 'nvim-lspconfig' },
+      config = function()
+        local get_config = require('fss.servers')
+        require('mason').setup({ ui = { border = fss.style.current.border } })
+        require('mason-lspconfig').setup({ automatic_installation = true })
+        require('mason-lspconfig').setup_handlers({
+          function(name)
+            local config = get_config(name)
+            if config then
+              require('lspconfig')[name].setup(config)
+            end
+          end,
+        })
+      end,
     })
+
+    use({ 'neovim/nvim-lspconfig', module = 'lspconfig' })
 
     use({
       'smjonas/inc-rename.nvim',
@@ -328,9 +368,17 @@ packer.startup({
       end,
     })
 
+    use({
+      'andrewferrier/textobj-diagnostic.nvim',
+      config = function()
+        require('textobj-diagnostic').setup()
+      end,
+    })
+
     -- Dim unused variables
     use({
       'zbirenbaum/neodim',
+      opt = true,
       config = function()
         require('neodim').setup({
           alpha = 0.45,
@@ -347,11 +395,32 @@ packer.startup({
       config = conf('null'),
     })
 
-    use('jose-elias-alvarez/nvim-lsp-ts-utils')
+    use({
+      'jose-elias-alvarez/typescript.nvim',
+      config = function()
+        fss.nnoremap(
+          'gS',
+          '<Cmd>TypeScriptOrganizeImports<CR>',
+          'TypeScript: Sort imports'
+        )
+        fss.nnoremap(
+          'gA',
+          '<Cmd>TypeScriptAddMissingImports<CR>',
+          'TypeScript: Add missing import'
+        )
+        fss.nnoremap(
+          'gR',
+          '<Cmd>TypeScriptRenameFile<CR>',
+          'TypeScript: Rename file'
+        )
+        fss.nnoremap('gF', '<Cmd>TypeScriptFixAll<CR>', 'TypeScript: Fix all')
+      end,
+    })
 
     -- Shows function signature
     use({
       'ray-x/lsp_signature.nvim',
+      opt = true,
       config = function()
         require('lsp_signature').setup({
           bind = true,
@@ -369,7 +438,6 @@ packer.startup({
     use({
       'hrsh7th/nvim-cmp',
       module = 'cmp',
-      event = 'InsertEnter',
       config = conf('cmp'),
       requires = {
         { 'hrsh7th/cmp-nvim-lsp', after = 'nvim-lspconfig' },
@@ -416,7 +484,9 @@ packer.startup({
     -- Testing & Debugging {{{1
     use({
       'nvim-neotest/neotest',
-      config = conf('neotest'),
+      module = 'neotest',
+      config = conf('neotest').config,
+      setup = conf('neotest').setup,
       requires = {
         'rcarriga/neotest-plenary',
         'haydenmeade/neotest-jest',
@@ -442,6 +512,7 @@ packer.startup({
       'kylechui/nvim-surround',
       config = function()
         require('nvim-surround').setup({
+          move_cursor = false,
           keymaps = {
             visual = 's',
           },
@@ -466,7 +537,7 @@ packer.startup({
     -- Explore the filesystem
     use({
       'nvim-neo-tree/neo-tree.nvim',
-      branch = 'v2.x',
+      branch = 'main', -- 'v2.x',
       requires = {
         'nvim-lua/plenary.nvim',
         'kyazdani42/nvim-web-devicons',
@@ -500,15 +571,16 @@ packer.startup({
           hide_cursor = true,
           always_scroll = true,
         })
-        vim.keymap.set(
+        local map = vim.keymap.set
+        map(
           { 'n', 'x' },
           '<ScrollWheelUp>',
-          "<Cmd>lua Scroll('3k', 0, 0, 15)<CR>"
+          "<Cmd>lua Scroll('<ScrollWheelUp>')<CR>"
         )
-        vim.keymap.set(
+        map(
           { 'n', 'x' },
           '<ScrollWheelDown>',
-          "<Cmd>lua Scroll('3j', 0, 0, 15)<CR>"
+          "<Cmd>lua Scroll('<ScrollWheelDown>')<CR>"
         )
       end,
     })
@@ -516,6 +588,8 @@ packer.startup({
     -- Scrollbars
     use({
       'lewis6991/satellite.nvim',
+      enable = false,
+      opt = true,
       config = function()
         require('satellite').setup({
           handlers = {
@@ -656,16 +730,16 @@ packer.startup({
     -- Search & Discovery {{{1
     use({
       'nvim-telescope/telescope.nvim',
+      branch = 'master',
       module_pattern = 'telescope.*',
       config = conf('telescope').config,
       event = 'CursorHold',
       requires = {
         {
-          'nvim-telescope/telescope-fzf-native.nvim',
-          run = 'make',
+          'natecraddock/telescope-zf-native.nvim',
           after = 'telescope.nvim',
           config = function()
-            require('telescope').load_extension('fzf')
+            require('telescope').load_extension('zf-native')
           end,
         },
         {
@@ -710,7 +784,7 @@ packer.startup({
 })
 
 fss.command('PackerCompiledEdit', function()
-  vim.cmd(fmt('edit %s', PACKER_COMPILED_PATH))
+  vim.cmd.edit(PACKER_COMPILED_PATH)
 end)
 
 fss.command('PackerCompiledDelete', function()
@@ -721,7 +795,7 @@ end)
 if
   not vim.g.packer_compiled_loaded and vim.loop.fs_stat(PACKER_COMPILED_PATH)
 then
-  fss.source(PACKER_COMPILED_PATH)
+  vim.cmd.source(PACKER_COMPILED_PATH)
   vim.g.packer_compiled_loaded = true
 end
 

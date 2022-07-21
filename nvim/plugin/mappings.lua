@@ -14,15 +14,16 @@ local inoremap = fss.inoremap
 -- Switch between the last two files
 nnoremap('<leader><leader>', [[<c-^>]])
 
-command('BufferCurrentOnly', function()
-  vim.cmd([[execute '%bdelete|edit#|bdelete#']])
-end)
-nnoremap('<leader>on', '<cmd>BufferCurrentOnly<CR>')
-
 command('BufferCloseAll', function()
   vim.cmd(':bufdo :Bdelete')
 end)
 
+-- }}}
+-- Pasting {{{
+-- Paste in visual mode multiple times
+xnoremap('p', 'pgvy')
+nnoremap('p', 'P')
+nnoremap('P', 'p')
 -- }}}
 -- Moving lines {{{
 -- -----------------------------------------------------------------------------

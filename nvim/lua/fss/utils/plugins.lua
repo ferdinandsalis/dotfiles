@@ -22,20 +22,16 @@ function M.bootstrap_packer()
   )
   if fn.empty(fn.glob(install_path)) > 0 then
     M.packer_notify('Downloading packer.nvim...')
-    M.packer_notify(
-      fn.system({
-        'git',
-        'clone',
-        'https://github.com/wbthomason/packer.nvim',
-        install_path,
-      })
-    )
-    vim.cmd('packadd! packer.nvim')
+    M.packer_notify(fn.system({
+      'git',
+      'clone',
+      'https://github.com/wbthomason/packer.nvim',
+      install_path,
+    }))
+    vim.cmd.packadd({ 'packer.nvim', bang = true })
     require('packer').sync()
   else
-    -- FIXME: currently development versions of packer do not work
-    -- local name = vim.env.DEVELOPING and 'local-packer.nvim' or 'packer.nvim'
-    vim.cmd(fmt('packadd! %s', 'packer.nvim'))
+    vim.cmd.packadd({ 'packer.nvim', bang = true })
   end
 end
 

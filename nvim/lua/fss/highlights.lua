@@ -252,6 +252,7 @@ local function colorscheme_overrides()
     local cursor_line = M.alter_color(normal_bg, 8)
 
     M.all({
+      URL = { foreground = palette.blue },
       StatusLine = { background = M.alter_color(normal_bg, 16) },
       CursorLine = { background = cursor_line },
       CursorLineNr = { foreground = palette.white },
@@ -265,15 +266,16 @@ end
 local function set_sidebar_highlight()
   local normal_bg = M.get('Normal', 'bg')
   local split_color = M.get('VertSplit', 'fg')
-  local bg_color = M.alter_color(normal_bg, -8)
-  local st_color = M.alter_color(M.get('Visual', 'bg'), -20)
+  local bg_color = M.alter_color(normal_bg, -10)
+  -- local dark_bg_color = M.alter_color(normal_bg, -14)
+  -- local st_color = M.alter_color(M.get('Visual', 'bg'), -30)
   M.all({
     PanelBackground = { background = bg_color },
     PanelHeading = { background = M.get('StatusLine', 'bg'), bold = true },
     PanelVertSplit = { foreground = split_color, background = bg_color },
     PanelWinSeparator = { foreground = split_color, background = bg_color },
     PanelStNC = { background = normal_bg, foreground = split_color },
-    PanelSt = { background = st_color },
+    PanelSt = { background = M.get('StatusLine', 'bg') },
   })
 end
 
@@ -324,7 +326,7 @@ fss.augroup('UserHighlights', {
 
 -- Color Scheme {{{1
 
--- Tokyonight
+-- -- Tokyonight
 -- if fss.plugin_installed('tokyonight.nvim') then
 --   vim.g.tokyonight_transparent = false
 --   vim.g.tokyonight_style = 'night' -- "storm" | "day"
@@ -337,14 +339,10 @@ fss.augroup('UserHighlights', {
 if fss.plugin_installed('everforest') then
   vim.g.everforest_background = 'hard' -- "hard" | "medium" | "soft"
   vim.g.everforest_better_performance = true
-  -- vim.g.everforest_sign_column_background = 'grey' -- "none"
-  vim.g.everforest_diagnostic_text_highlight = true
-  -- vim.g.everforest_diagnostic_line_highlight = true
-  -- vim.g.everforest_diagnostic_virtual_text = 'colored' -- 'grey'
-  vim.g.everforest_cursor = 'auto' -- `'auto'`, `'red'`, `'orange'`, `'yellow'`, `'green'`, `'aqua'`, `'blue'`, `'purple'`
+  vim.g.everforest_cursor = 'auto'
   vim.g.everforest_enable_italic = true
   vim.g.everforest_transparent_background = false
-  vim.cmd('colorscheme everforest')
+  vim.cmd.colorscheme('everforest')
 end
 
 -- Nightfox
@@ -356,4 +354,4 @@ end
 
 return M
 
--- vim:foldmethod=marker:foldlevel=0
+-- vim:foldmethod=marker

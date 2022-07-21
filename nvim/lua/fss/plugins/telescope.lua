@@ -150,7 +150,7 @@ function M.config()
         '^node_modules/',
         '^site-packages/',
       },
-      path_display = { 'smart', 'absolute', 'truncate' },
+      path_display = { 'truncate' },
       winblend = 5,
       history = {
         path = vim.fn.stdpath('data') .. '/telescope_history.sqlite3',
@@ -196,14 +196,14 @@ function M.config()
         },
       }),
       oldfiles = fss.telescope.dropdown(),
-      live_grep = {
+      live_grep = fss.telescope.ivy({
         file_ignore_patterns = { '.git/', '%.svg', '%.lock' },
         max_results = 2000,
         on_input_filter_cb = function(prompt)
           -- AND operator for live_grep like how fzf handles spaces with wildcards in rg
           return { prompt = prompt:gsub('%s', '.*') }
         end,
-      },
+      }),
       current_buffer_fuzzy_find = fss.telescope.dropdown({
         previewer = false,
         shorten_path = false,
@@ -269,36 +269,36 @@ function M.config()
   end
 
   local function delta_git_commits(opts)
-    require('telescope.builtin').git_commits(delta_opts(opts))
+    builtins.git_commits(delta_opts(opts))
   end
 
   local function delta_git_bcommits(opts)
-    require('telescope.builtin').git_bcommits(delta_opts(opts, true))
+    builtins.git_bcommits(delta_opts(opts, true))
   end
 
   local function dotfiles()
-    require('telescope.builtin').find_files({
+    builtins.find_files({
       prompt_title = 'dotfiles',
       cwd = vim.g.dotfiles,
     })
   end
 
   local function pickers()
-    require('telescope.builtin').builtin({ include_extensions = true })
+    builtins.builtin({ include_extensions = true })
   end
 
   local function find_files()
-    require('telescope.builtin').find_files(fss.telescope.dropdown({
+    builtins.find_files(fss.telescope.dropdown({
       previewer = false,
     }))
   end
 
   local function buffers()
-    require('telescope.builtin').buffers()
+    builtins.buffers()
   end
 
   local function live_grep()
-    require('telescope.builtin').live_grep()
+    builtins.live_grep()
   end
 
   local function MRU()
@@ -326,16 +326,15 @@ function M.config()
   end
 
   local function installed_plugins()
-    require('telescope.builtin').find_files({
+    builtins.find_files({
       prompt_title = 'Installed plugins',
       cwd = vim.fn.stdpath('data') .. '/site/pack/packer',
     })
   end
 
   local function project_files(opts)
-    local builtin = require('telescope.builtin')
-    if not pcall(builtin.git_files, opts) then
-      builtin.find_files(opts)
+    if not pcall(builtins.git_files, opts) then
+      builtins.find_files(opts)
     end
   end
 
@@ -366,9 +365,10 @@ function M.config()
       },
       p = { installed_plugins, 'plugins' },
       R = { builtins.resume, 'resume last picker' },
+      r = { builtins.resume, 'resume last picker' },
       ['?'] = { builtins.help_tags, 'help' },
       f = { project_files, 'find files' },
-      r = { MRU, 'Most recently used files' },
+      u = { MRU, 'Most recently used files' },
       h = { MFU, 'Most frequently used files' },
       g = {
         name = '+git',
