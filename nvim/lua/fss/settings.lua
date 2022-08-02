@@ -83,7 +83,7 @@ elseif fss.executable('ag') then
 end
 
 -- Wild and file globbing stuff in command mode {{{1
-opt.wildcharm = fn.char2nr(fss.replace_termcodes([[<Tab>]]))
+opt.wildcharm = ('\t'):byte()
 opt.wildmode = 'longest:full,full' -- Shows a menu bar as opposed to an enormous list
 opt.wildignorecase = true -- Ignore case when completing file names and directories
 -- Binary
@@ -123,7 +123,7 @@ opt.linebreak = true -- lines wrap at words rather than random characters
 opt.synmaxcol = 1024 -- don't syntax highlight long lines
 opt.signcolumn = 'auto:2-4'
 opt.ruler = false
-opt.cmdheight = 1 -- Set command line height to two lines
+opt.cmdheight = 1
 opt.showbreak = [[↪ ]] -- Options include -> '…', '↳ ', '→','↪ '
 --- This is used to handle markdown code blocks where the language might
 --- be set to a value that isn't equivalent to a vim filetype
@@ -202,7 +202,7 @@ opt.sessionoptions = {
 opt.viewoptions = { 'cursor', 'folds' } -- save/restore just these (with `:{mk,load}view`)
 opt.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode
 -- Jumplist {{{1
---opt.jumpoptions = { 'stack', 'view' } -- make the jumplist behave like a browser stack
+opt.jumpoptions = { 'stack' } -- make the jumplist behave like a browser stack
 -- }}}
 -- Backup and Swaps {{{1
 opt.backup = false

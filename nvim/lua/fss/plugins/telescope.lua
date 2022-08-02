@@ -54,33 +54,43 @@ function M.config()
   })
 
   H.plugin('telescope', {
-    TelescopePromptTitle = {
-      bg = { from = 'PMenu' },
-      fg = { from = 'Directory' },
-      bold = true,
+    {
+      TelescopePromptTitle = {
+        bg = { from = 'PMenu' },
+        fg = { from = 'Directory' },
+        bold = true,
+      },
     },
-    TelescopeResultsTitle = {
-      bg = { from = 'PMenu' },
-      fg = { from = 'Normal' },
-      bold = true,
+    {
+      TelescopeResultsTitle = {
+        bg = { from = 'PMenu' },
+        fg = { from = 'Normal' },
+        bold = true,
+      },
     },
-    TelescopePreviewTitle = {
-      bg = { from = 'PMenu' },
-      fg = { from = 'Normal' },
-      bold = true,
+    {
+      TelescopePreviewTitle = {
+        bg = { from = 'PMenu' },
+        fg = { from = 'Normal' },
+        bold = true,
+      },
     },
-    TelescopePreviewBorder = {
-      fg = { from = 'FloatBorder' },
-      bg = { from = 'PanelBackground' },
+    {
+      TelescopePreviewBorder = {
+        fg = { from = 'FloatBorder' },
+        bg = { from = 'PanelBackground' },
+      },
     },
-    TelescopePreviewNormal = { link = 'PanelBackground' },
-    TelescopePromptPrefix = { link = 'Statement' },
+    { TelescopePreviewNormal = { link = 'PanelBackground' } },
+    { TelescopePromptPrefix = { link = 'Statement' } },
     -- TelescopeBorder = { foreground = fss.style.palette.grey },
-    TelescopeMatching = { link = 'Title' },
-    TelescopeTitle = { inherit = 'Normal', bold = true },
-    TelescopeSelectionCaret = {
-      fg = { from = 'Identifier' },
-      bg = { from = 'TelescopeSelection' },
+    { TelescopeMatching = { link = 'Title' } },
+    { TelescopeTitle = { inherit = 'Normal', bold = true } },
+    {
+      TelescopeSelectionCaret = {
+        fg = { from = 'Identifier' },
+        bg = { from = 'TelescopeSelection' },
+      },
     },
   })
 
@@ -240,6 +250,8 @@ function M.config()
   })
 
   local builtins = require('telescope.builtin')
+
+  require('telescope').load_extension('projects')
 
   local function delta_opts(opts, is_buf)
     local previewers = require('telescope.previewers')

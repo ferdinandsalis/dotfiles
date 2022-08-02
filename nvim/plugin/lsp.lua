@@ -12,9 +12,8 @@ if vim.env.DEVELOPING then
   vim.lsp.set_log_level(L.DEBUG)
 end
 
------------------------------------------------------------------------------//
--- Autocommands
------------------------------------------------------------------------------//
+-- Autocommands {{{
+
 local get_augroup = function(bufnr)
   assert(bufnr, 'A bufnr is required to create an lsp augroup')
   return fmt('LspCommands_%d', bufnr)
@@ -110,6 +109,8 @@ local function setup_autocommands(client, bufnr)
   end
   fss.augroup(group, cmds)
 end
+--
+-- }}}
 
 -----------------------------------------------------------------------------//
 -- Mappings
@@ -123,6 +124,13 @@ local function setup_mappings(_, bufnr)
     return { buffer = bufnr, desc = desc }
   end
 
+  vim.keymap.set(
+    { 'n', 'x' },
+    '<leader>ca',
+    vim.lsp.buf.code_action,
+    with_desc('lsp: code action')
+  )
+
   fss.nnoremap(']c', function()
     vim.diagnostic.goto_prev({ float = false })
   end, with_desc('lsp: go to prev diagnostic'))
@@ -131,16 +139,6 @@ local function setup_mappings(_, bufnr)
   end, with_desc('lsp: go to next diagnostic'))
 
   fss.nnoremap('<leader>rf', format, with_desc('lsp: format buffer'))
-  fss.nnoremap(
-    '<leader>ca',
-    vim.lsp.buf.code_action,
-    with_desc('lsp: code action')
-  )
-  fss.xnoremap(
-    '<leader>ca',
-    vim.lsp.buf.range_code_action,
-    with_desc('lsp: code action')
-  )
   fss.nnoremap('gd', vim.lsp.buf.definition, with_desc('lsp: definition'))
   fss.nnoremap('gr', vim.lsp.buf.references, with_desc('lsp: references'))
   fss.nnoremap('K', vim.lsp.buf.hover, with_desc('lsp: hover'))

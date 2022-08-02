@@ -21,9 +21,7 @@ vim.g.loaded_gzip = 1
 -- Ensure all autocommands are cleared
 vim.api.nvim_create_augroup('vimrc', {})
 
-----------------------------------------------------------------------------------------------------
 -- Leader bindings
-----------------------------------------------------------------------------------------------------
 vim.g.mapleader = ',' -- Remap leader key
 vim.g.maplocalleader = ' ' -- Local leader is <Space>
 
@@ -36,9 +34,16 @@ function R(name)
   return require(name)
 end
 
-----------------------------------------------------------------------------------------------------
+-- Global namespace
+_G.fss = fss
+  or {
+    mappings = {},
+    ui = {
+      winbar = { enable = false },
+    },
+  }
+
 -- Plugin Configurations
-----------------------------------------------------------------------------------------------------
 R('fss.globals')
 R('fss.styles')
 R('fss.settings')

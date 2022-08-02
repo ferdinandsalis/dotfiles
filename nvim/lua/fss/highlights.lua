@@ -5,6 +5,10 @@ local levels = vim.log.levels
 
 local M = {}
 
+---@class HLAttrs
+---@field from string
+---@field attr 'foreground' | 'fg' | 'background' | 'bg'
+
 ---Convert a hex color to RGB
 ---@param color string
 ---@return number
@@ -86,35 +90,44 @@ function M.adopt_winhighlight(win_id, target, name, fallback)
   end
   local hl_group = vim.split(found, ':')[2]
   local bg = M.get(hl_group, 'bg')
-  M.set_hl(win_hl_name, { background = bg, inherit = fallback })
+  M.set(win_hl_name, { background = bg, inherit = fallback })
   return win_hl_name
 end
 
----This helper takes a table of highlights and converts any highlights
----specified as `highlight_prop = { from = 'group'}` into the underlying colour
----by querying the highlight property of the from group so it can be used when specifying highlights
----as a shorthand to derive the right color.
----For example:
----```lua
----  M.set_hl({ MatchParen = {foreground = {from = 'ErrorMsg'}}})
----```
----This will take the foreground colour from ErrorMsg and set it to the foreground of MatchParen.
----@param opts table<string, string|boolean|table<string,string>>
-local function convert_hl_to_val(opts)
-  for name, value in pairs(opts) do
+--- Sets a neovim highlight with some syntactic sugar. It takes a highlight table and converts
+--- any highlights specified as `GroupName = { from = 'group'}` into the underlying colour
+--- by querying the highlight property of the from group so it can be used when specifying highlights
+--- as a shorthand to derive the right color.
+--- For example:
+--- ```lua
+---   M.set({ MatchParen = {foreground = {from = 'ErrorMsg'}}})
+--- ```
+--- This will take the foreground colour from ErrorMsg and set it to the foreground of MatchParen.
+---@param name string
+---@param opts table<string, string|boolean|HLAttrs>
+function M.set(name, opts)
+  assert(name and opts, "Both 'name' and 'opts' must be specified")
+  assert(
+    type(name) == 'string',
+    fmt("Name must be a string but got '%s'", name)
+  )
+  assert(
+    type(opts) == 'table',
+    fmt("Opts must be a table but got '%s'", vim.inspect(opts))
+  )
+
+  local hl = get_hl(opts.inherit or name)
+  opts.inherit = nil
+
+  for attr, value in pairs(opts) do
     if type(value) == 'table' and value.from then
-      opts[name] = M.get(value.from, vim.F.if_nil(value.attr, name))
+      opts[attr] = M.get(value.from, vim.F.if_nil(value.attr, attr))
+      if value.alter then
+        opts[attr] = M.alter_color(opts[attr], value.alter)
+      end
     end
   end
-end
 
----@param name string
----@param opts table
-function M.set_hl(name, opts)
-  assert(name and opts, "Both 'name' and 'opts' must be specified")
-  local hl = get_hl(opts.inherit or name)
-  convert_hl_to_val(opts)
-  opts.inherit = nil
   local ok, msg = pcall(
     api.nvim_set_hl,
     0,
@@ -122,7 +135,7 @@ function M.set_hl(name, opts)
     vim.tbl_deep_extend('force', hl, opts)
   )
   if not ok then
-    vim.notify(fmt('Failed to set %s because: %s', name, msg))
+    vim.notify(fmt('Failed to set %s because - %s', name, msg))
   end
 end
 
@@ -165,9 +178,9 @@ end
 ---Apply a list of highlights
 ---@param hls table<string, table<string, boolean|string>>
 function M.all(hls)
-  for name, hl in pairs(hls) do
-    M.set_hl(name, hl)
-  end
+  fss.foreach(function(hl)
+    M.set(next(hl))
+  end, hls)
 end
 
 -- Plugin highlights
@@ -182,7 +195,10 @@ function M.plugin(name, hls)
     {
       event = 'ColorScheme',
       command = function()
-        M.all(hls)
+        -- Defer resetting these highlights to ensure they apply after other overrides
+        vim.defer_fn(function()
+          M.all(hls)
+        end, 1)
       end,
     },
   })
@@ -192,73 +208,56 @@ end
 
 local function general_overrides()
   local normal_bg = M.get('Normal', 'bg')
-  local dim = M.alter_color(normal_bg, 25)
+  local dim = M.alter_color(normal_bg, 20)
 
   M.all({
-    Dim = { foreground = dim },
-    VertSplit = { background = 'NONE', foreground = dim },
-    WinSeparator = { background = 'NONE', foreground = dim },
-    CursorLineNr = { bold = true },
-    FoldColumn = { background = 'background' },
+    { Dim = { foreground = dim } },
+    { VertSplit = { background = 'NONE', foreground = dim } },
+    { WinSeparator = { background = 'NONE', foreground = dim } },
+    { CursorLineNr = { inherit = 'CursorLine', bold = true } },
+    { FoldColumn = { background = 'background' } },
+    { LspCodeLens = { inherit = 'Comment', bold = true, italic = false } },
 
     -- Floats
-    NormalFloat = { inherit = 'Pmenu' },
-    FloatBorder = {
-      inherit = 'NormalFloat',
-      foreground = { from = 'NonText' },
+    { NormalFloat = {
+      bg = { from = 'Normal', alter = -8 },
+    } },
+    {
+      FloatBorder = {
+        bg = { from = 'Normal', alter = -8 },
+        fg = { from = 'Comment', alter = 8 },
+      },
     },
 
-    Comment = { italic = true },
-    Type = { italic = true, bold = true },
-    Include = { italic = true, bold = false },
-    QuickFixLine = {
-      inherit = 'PmenuSbar',
-      foreground = 'NONE',
-      italic = true,
+    { Comment = { italic = true } },
+    { Type = { italic = true, bold = true } },
+    { Include = { italic = true, bold = false } },
+    {
+      QuickFixLine = {
+        inherit = 'PmenuSbar',
+        foreground = 'NONE',
+        italic = true,
+      },
     },
-    SignColumn = { background = 'NONE' },
-    EndOfBuffer = { background = 'NONE' },
+    { SignColumn = { background = 'NONE' } },
+    { EndOfBuffer = { background = 'NONE' } },
   })
 end
 
 local function colorscheme_overrides()
   if vim.g.colors_name == 'everforest' then
-    local palette = {
-      fg = '#d3c6aa',
-      red = '#e67e80',
-      orange = '#e69875',
-      yellow = '#dbbc7f',
-      green = '#a7c080',
-      aqua = '#83c092',
-      blue = '#7fbbb3',
-      purple = '#d699b6',
-      grey0 = '#7a8478',
-      grey1 = '#859289',
-      grey2 = '#9da9a0',
-      white = '#d3c6aa',
-      bg0 = '#2b3339',
-      bg1 = '#323c41',
-      bg2 = '#3a454a',
-      bg3 = '#445055',
-      bg4 = '#4c555b',
-      bg5 = '#53605c',
-      bg_visual = '#503946',
-      bg_red = '#4e3e43',
-      bg_green = '#404d44',
-      bg_blue = '#394f5a',
-      bg_yellow = '#4a4940',
-    }
-    local normal_bg = M.get('Normal', 'bg')
-    local cursor_line = M.alter_color(normal_bg, 8)
+    local palette = fss.style.palette
 
     M.all({
-      URL = { foreground = palette.blue },
-      StatusLine = { background = M.alter_color(normal_bg, 16) },
-      CursorLine = { background = cursor_line },
-      CursorLineNr = { foreground = palette.white },
-      WhichkeyFloat = { link = 'NormalFloat' },
-      ScrollView = { link = 'PMenu' },
-      ColorColumn = { link = 'CursorLine' },
+      { URL = { foreground = palette.blue } },
+      { MsgArea = { background = { from = 'Normal', alter = -10 } } },
+      { MsgSeparator = { link = 'MsgArea' } },
+      { StatusLine = { background = { from = 'Normal', alter = 16 } } },
+      { CursorLine = { background = { from = 'Normal', alter = 8 } } },
+      { CursorLineNr = { foreground = palette.white } },
+      { WhichkeyFloat = { link = 'NormalFloat' } },
+      { ScrollView = { link = 'PMenu' } },
+      { ColorColumn = { link = 'CursorLine' } },
     })
   end
 end
@@ -267,15 +266,19 @@ local function set_sidebar_highlight()
   local normal_bg = M.get('Normal', 'bg')
   local split_color = M.get('VertSplit', 'fg')
   local bg_color = M.alter_color(normal_bg, -10)
-  -- local dark_bg_color = M.alter_color(normal_bg, -14)
-  -- local st_color = M.alter_color(M.get('Visual', 'bg'), -30)
+  local dark_bg_color = M.alter_color(normal_bg, -14)
   M.all({
-    PanelBackground = { background = bg_color },
-    PanelHeading = { background = M.get('StatusLine', 'bg'), bold = true },
-    PanelVertSplit = { foreground = split_color, background = bg_color },
-    PanelWinSeparator = { foreground = split_color, background = bg_color },
-    PanelStNC = { background = normal_bg, foreground = split_color },
-    PanelSt = { background = M.get('StatusLine', 'bg') },
+    { PanelBackground = { background = bg_color } },
+    { PanelDarkBackground = { background = dark_bg_color } },
+    {
+      PanelHeading = { background = M.get('StatusLine', 'bg'), bold = true },
+    },
+    { PanelVertSplit = { foreground = split_color, background = bg_color } },
+    {
+      PanelWinSeparator = { foreground = split_color, background = bg_color },
+    },
+    { PanelStNC = { background = normal_bg, foreground = split_color } },
+    { PanelSt = { background = M.get('StatusLine', 'bg') } },
   })
 end
 
@@ -283,7 +286,6 @@ local sidebar_fts = {
   'packer',
   'flutterToolsOutline',
   'undotree',
-  'neo-tree',
   'Outline',
   'dbui',
   'neotest-summary',
@@ -304,8 +306,8 @@ end
 
 local function user_highlights()
   general_overrides()
-  colorscheme_overrides()
   set_sidebar_highlight()
+  colorscheme_overrides()
 end
 
 fss.augroup('UserHighlights', {
@@ -332,7 +334,10 @@ fss.augroup('UserHighlights', {
 --   vim.g.tokyonight_style = 'night' -- "storm" | "day"
 --   vim.g.tokyonight_sidebars = { 'neo-tree', 'qf', 'terminal', 'packer' }
 --   vim.g.tokyonight_dark_sidebar = true
---   vim.cmd('colorscheme tokyonight')
+--   local ok, msg = pcall(vim.cmd.colorscheme, 'tokyonight')
+--   if not ok then
+--     vim.notify(fmt('Theme failed to load because: %s', msg), 'error')
+--   end
 -- end
 
 -- Everforest
@@ -342,12 +347,18 @@ if fss.plugin_installed('everforest') then
   vim.g.everforest_cursor = 'auto'
   vim.g.everforest_enable_italic = true
   vim.g.everforest_transparent_background = false
-  vim.cmd.colorscheme('everforest')
+  local ok, msg = pcall(vim.cmd.colorscheme, 'everforest')
+  if not ok then
+    vim.notify(fmt('Theme failed to load because: %s', msg), 'error')
+  end
 end
 
 -- Nightfox
 -- if fss.plugin_installed('nightfox.nvim') then
---   vim.cmd('colorscheme nightfox')
+--   local ok, msg = pcall(vim.cmd.colorscheme, 'nightfox')
+--   if not ok then
+--     vim.notify(fmt('Theme failed to load because: %s', msg), 'error')
+--   end
 -- end
 
 -- }}}

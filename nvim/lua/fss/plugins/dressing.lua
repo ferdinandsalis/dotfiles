@@ -11,7 +11,7 @@ return function()
 
   require('fss.highlights').plugin(
     'dressing',
-    { FloatTitle = { inherit = 'Visual', bold = true } }
+    { { FloatTitle = { inherit = 'Visual', bold = true } } }
   )
   require('dressing').setup({
     input = {

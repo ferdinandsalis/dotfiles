@@ -1,13 +1,14 @@
 ---@diagnostic disable: duplicate-doc-param
 
+if not fss.ui.winbar.enable then return end
+
 local highlights = require('fss.highlights')
 local utils = require('fss.utils.statusline')
+
+local fn, api = vim.fn, vim.api
 local component = utils.component
 local component_raw = utils.component_raw
 local empty = fss.empty
-
-local fn = vim.fn
-local api = vim.api
 local icons = fss.style.icons.misc
 
 local dir_separator = '/'
@@ -16,22 +17,22 @@ local ellipsis = icons.ellipsis
 
 --- A mapping of each winbar items ID to its path
 --- @type table<string, string>
-fss.winbar_state = {}
+fss.ui.winbar.state = {}
 
 ---@param id number
 ---@param _ number number of clicks
 ---@param _ "l"|"r"|"m" the button clicked
 ---@param _ string modifiers
-function fss.winbar_click(id, _, _, _)
-  if id then vim.cmd('edit ' .. fss.winbar_state[id]) end
+function fss.ui.winbar.click(id, _, _, _)
+  if id then vim.cmd.edit(fss.ui.winbar.state[id]) end
 end
 
 highlights.plugin('winbar', {
-  Winbar = { bold = false },
-  WinbarNC = { bold = false },
-  WinbarCrumb = { bold = true },
-  WinbarIcon = { inherit = 'Function' },
-  WinbarDirectory = { inherit = 'Directory' },
+  { Winbar = { bold = false } },
+  { WinbarNC = { bold = false } },
+  { WinbarCrumb = { bold = true } },
+  { WinbarIcon = { inherit = 'Function' } },
+  { WinbarDirectory = { inherit = 'Directory' } },
 })
 
 local function breadcrumbs()
@@ -45,7 +46,7 @@ local function breadcrumbs()
 end
 
 ---@return string
-function fss.ui.winbar()
+function fss.ui.winbar.get()
   local winbar = {}
   local add = utils.winline(winbar)
 
@@ -62,11 +63,11 @@ function fss.ui.winbar()
     local sep = is_last and separator or dir_separator
     local hl = is_last and 'Winbar' or 'NonText'
     local suffix_hl = is_last and 'WinbarDirectory' or 'NonText'
-    fss.winbar_state[priority] = table.concat(vim.list_slice(parts, 1, index), '/')
+    fss.ui.winbar.state[priority] = table.concat(vim.list_slice(parts, 1, index), '/')
     add(component(part, hl, {
       id = priority,
       priority = priority,
-      click = 'v:lua.fss.winbar_click',
+      click = 'v:lua.fss.ui.winbar.click',
       suffix = sep,
       suffix_color = suffix_hl,
     }))
@@ -98,7 +99,7 @@ fss.augroup('AttachWinbar', {
           and empty(vim.bo[buf].buftype)
           and not empty(vim.bo[buf].filetype)
         then
-          vim.wo[win].winbar = '%{%v:lua.fss.ui.winbar()%}'
+          vim.wo[win].winbar = '%{%v:lua.fss.ui.winbar.get()%}'
         elseif not vim.tbl_contains(allowed, vim.bo[buf].filetype) then
           vim.wo[win].winbar = nil
         end

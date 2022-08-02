@@ -13,30 +13,38 @@ return function()
   local faded = h.alter_color(h.get('Pmenu', 'bg'), 30)
   local kind_hls = fss.fold(
     function(accum, value, key)
-      accum['CmpItemKind' .. key] = { foreground = { from = value } }
+      accum[#accum + 1] = {
+        ['CmpItemKind' .. key] = { foreground = { from = value } },
+      }
       return accum
     end,
     lsp_hls,
     {
-      CmpItemAbbr = {
-        foreground = 'fg',
-        background = 'NONE',
-        italic = false,
-        bold = false,
+      {
+        CmpItemAbbr = {
+          foreground = 'fg',
+          background = 'NONE',
+          italic = false,
+          bold = false,
+        },
       },
-      CmpItemMenu = { foreground = faded, italic = true, bold = false },
-      CmpItemAbbrMatch = { foreground = { from = 'Keyword' } },
-      CmpItemAbbrDeprecated = { strikethrough = true, inherit = 'Comment' },
-      CmpItemAbbrMatchFuzzy = {
-        italic = true,
-        foreground = { from = 'Keyword' },
+      { CmpItemMenu = { foreground = faded, italic = true, bold = false } },
+      { CmpItemAbbrMatch = { foreground = { from = 'Keyword' } } },
+      {
+        CmpItemAbbrDeprecated = { strikethrough = true, inherit = 'Comment' },
+      },
+      {
+        CmpItemAbbrMatchFuzzy = {
+          italic = true,
+          foreground = { from = 'Keyword' },
+        },
       },
     }
   )
   h.plugin('Cmp', kind_hls)
 
   local function tab(fallback)
-    local ok, luasnip = fss.safe_require('luasnip', { silent = true })
+    local ok, luasnip = fss.require('luasnip', { silent = true })
     if cmp.visible() then
       cmp.select_next_item()
     elseif ok and luasnip.expand_or_locally_jumpable() then
@@ -47,7 +55,7 @@ return function()
   end
 
   local function shift_tab(fallback)
-    local ok, luasnip = fss.safe_require('luasnip', { silent = true })
+    local ok, luasnip = fss.require('luasnip', { silent = true })
     if cmp.visible() then
       cmp.select_prev_item()
     elseif ok and luasnip.jumpable(-1) then

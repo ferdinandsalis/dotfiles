@@ -248,10 +248,7 @@ local function filename(ctx, modifier)
       and buf_expand(ctx.bufnum, ':~:.:h')
     or nil
   local is_root = path and #path == 1 -- "~" or "."
-  local dir = path
-      and not is_root
-      and fn.pathshorten(fnamemodify(path, ':h')) .. '/'
-    or ''
+  local dir = path and not is_root and fn.fnamemodify(path, ':h') .. '/' or ''
   local parent = path and (is_root and path or fnamemodify(path, ':t')) or ''
   parent = parent ~= '' and parent .. '/' or ''
 
@@ -300,7 +297,7 @@ local function filetype(ctx, opts)
   end
   local icon, hl
   local extension = fnamemodify(ctx.bufname, ':e')
-  local icons_loaded, devicons = fss.safe_require('nvim-web-devicons')
+  local icons_loaded, devicons = fss.require('nvim-web-devicons')
   if icons_loaded then
     icon, hl = devicons.get_icon(ctx.bufname, extension, { default = true })
     hl = highlight_ft_icon(hl, opts.icon_bg)

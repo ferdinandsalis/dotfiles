@@ -9,23 +9,13 @@ local PACKER_COMPILED_PATH = fmt(
   fn.stdpath('cache')
 )
 
----Some plugins are not safe to be reloaded because their setup functions
----and are not idempotent. This wraps the setup calls of such plugins
----@param func fun()
-function fss.block_reload(func)
-  if vim.g.packer_compiled_loaded then
-    return
-  end
-  func()
-end
-
 -- Bootstrap packer
 utils.bootstrap_packer()
 
 -- cfilter plugin allows filtering down an existing quickfix list
 vim.cmd.packadd({ 'cfilter', bang = true })
 
-fss.safe_require('impatient')
+fss.require('impatient')
 
 local packer = require('packer')
 packer.startup({
@@ -43,6 +33,18 @@ packer.startup({
     use('nvim-lua/plenary.nvim')
 
     use('kyazdani42/nvim-web-devicons')
+
+    use({
+      'ahmedkhalf/project.nvim',
+      config = function()
+        require('project_nvim').setup({
+          silent_chdir = false,
+          detection_methods = { 'pattern', 'lsp' },
+          ignore_lsp = { 'null-ls' },
+          patterns = { 'package.json', '.git' },
+        })
+      end,
+    })
 
     -- Shows key infos
     use({
@@ -211,7 +213,7 @@ packer.startup({
 
     use({
       'anuvyklack/hydra.nvim',
-      config = fss.block_reload(conf('hydra')),
+      config = conf('hydra'),
     })
 
     -- Navigate between vim windows and kitty windows
@@ -286,9 +288,9 @@ packer.startup({
       config = function()
         local hl = require('fss.highlights')
         hl.plugin('treesitter-context', {
-          ContextBorder = { link = 'Dim' },
-          TreesitterContext = { inherit = 'Normal' },
-          TreesitterContextLineNumber = { inherit = 'LineNr' },
+          { ContextBorder = { link = 'Dim' }, },
+          { TreesitterContext = { inherit = 'Normal' }, },
+          { TreesitterContextLineNumber = { inherit = 'LineNr' }, },
         })
         require('treesitter-context').setup({
           multiline_threshold = 4,
@@ -301,10 +303,9 @@ packer.startup({
     -- highlight arguments in function bodies
     use({
       'm-demare/hlargs.nvim',
-      branch = 'expected_lua_number',
       config = function()
         require('fss.highlights').plugin('hlargs', {
-          Hlargs = { italic = true, bold = false, foreground = '#7fbbb3' },
+          { Hlargs = { italic = true, bold = false, foreground = '#7fbbb3' }, },
         })
         require('hlargs').setup({
           excluded_argnames = {
@@ -326,6 +327,16 @@ packer.startup({
       'lukas-reineke/indent-blankline.nvim',
       config = conf('indentline'),
     })
+    -- Virtual Column
+    use({
+      'lukas-reineke/virt-column.nvim',
+      config = function()
+        require('fss.highlights').plugin('virt_column', {
+          { VirtColumn = { bg = 'None', inherit = 'Dim' }, },
+        })
+        require('virt-column').setup({ char = '▕' })
+      end,
+    })
     -- }}}
     -- Lsp & Completion {{{1
 
@@ -333,8 +344,8 @@ packer.startup({
     use({
       'williamboman/mason.nvim',
       event = 'BufRead',
-      branch = 'alpha',
-      requires = { 'nvim-lspconfig' },
+      branch = 'main',
+      requires = { 'nvim-lspconfig', 'williamboman/mason-lspconfig.nvim' },
       config = function()
         local get_config = require('fss.servers')
         require('mason').setup({ ui = { border = fss.style.current.border } })
@@ -350,7 +361,14 @@ packer.startup({
       end,
     })
 
-    use({ 'neovim/nvim-lspconfig', module = 'lspconfig' })
+    use({
+      'neovim/nvim-lspconfig',
+      module_pattern = 'lspconfig.*',
+      -- config = function()
+      --   local get_config = require('fss.servers')
+      --   require('lspconfig').ccls.setup(get_config('ccls'))
+      -- end,
+    })
 
     use({
       'smjonas/inc-rename.nvim',
@@ -369,6 +387,17 @@ packer.startup({
     })
 
     use({
+      'lvimuser/lsp-inlayhints.nvim',
+      config = function()
+        require('lsp-inlayhints').setup({
+          inlay_hints = {
+            highlight = 'Comment',
+          },
+        })
+      end,
+    })
+
+    use({
       'andrewferrier/textobj-diagnostic.nvim',
       config = function()
         require('textobj-diagnostic').setup()
@@ -378,7 +407,6 @@ packer.startup({
     -- Dim unused variables
     use({
       'zbirenbaum/neodim',
-      opt = true,
       config = function()
         require('neodim').setup({
           alpha = 0.45,
@@ -423,13 +451,8 @@ packer.startup({
       opt = true,
       config = function()
         require('lsp_signature').setup({
-          bind = true,
-          fix_pos = false,
-          auto_close_after = 15, -- close after 15 seconds
           hint_enable = false,
           handler_opts = { border = fss.style.current.border },
-          toggle_key = '<C-K>',
-          select_signature_key = '<M-N>',
         })
       end,
     })
@@ -440,7 +463,7 @@ packer.startup({
       module = 'cmp',
       config = conf('cmp'),
       requires = {
-        { 'hrsh7th/cmp-nvim-lsp', after = 'nvim-lspconfig' },
+        { 'hrsh7th/cmp-nvim-lsp', module = 'cmp_nvim_lsp' },
         { 'hrsh7th/cmp-nvim-lsp-document-symbol', after = 'nvim-cmp' },
         { 'hrsh7th/cmp-cmdline', after = 'nvim-cmp' },
         { 'f3fora/cmp-spell', after = 'nvim-cmp' },
@@ -537,11 +560,15 @@ packer.startup({
     -- Explore the filesystem
     use({
       'nvim-neo-tree/neo-tree.nvim',
-      branch = 'main', -- 'v2.x',
+      branch = 'v2.x',
       requires = {
         'nvim-lua/plenary.nvim',
         'kyazdani42/nvim-web-devicons',
         'MunifTanjim/nui.nvim',
+        {
+          'mrbjarksen/neo-tree-diagnostics.nvim',
+          module = 'neo-tree.sources.diagnostics',
+        },
       },
       config = conf('neotree'),
     })
@@ -674,6 +701,9 @@ packer.startup({
       end,
       config = function()
         require('diffview').setup({
+          default_args = {
+            DiffviewFileHistory = { '%' },
+          },
           hooks = {
             diff_buf_read = function()
               vim.opt_local.wrap = false
@@ -699,7 +729,7 @@ packer.startup({
       config = function()
         require('fss.highlights').plugin(
           'pqf',
-          { qfPosition = { link = 'Tag' } }
+          { { qfPosition = { link = 'Tag' } } }
         )
         require('pqf').setup({})
       end,
@@ -720,6 +750,7 @@ packer.startup({
     use('lewis6991/impatient.nvim')
     use({
       'dstein64/vim-startuptime',
+      tag = '*',
       cmd = 'StartupTime',
       config = function()
         vim.g.startuptime_tries = 15
@@ -806,9 +837,10 @@ fss.nnoremap('<leader>pC', '<Cmd>PackerClean<CR>', 'packer: clean')
 fss.augroup('PackerSetupInit', {
   {
     event = 'BufWritePost',
-    pattern = { '*/as/plugins/*.lua' },
+    pattern = { '*/fss/plugins/*.lua' },
     desc = 'Packer setup and reload',
     command = function()
+      vim.cmd.doautocmd('LspDetach')
       fss.invalidate('fss.plugins', true)
       packer.compile()
     end,

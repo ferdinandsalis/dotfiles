@@ -1,51 +1,30 @@
 -- Styles
 
-local palette = {
-  none = 'NONE',
-  bg = '#24283b',
-  bg_dark = '#1f2335',
-  bg_popup = '#1f2335',
-  bg_float = '#1f2335',
-  bg_highlight = '#292e42',
-  bg_statusline = '#292e42',
-  terminal_black = '#414868',
-  fg = '#c0caf5',
-  fg_dark = '#a9b1d6',
-  fg_sidebar = '#a9b1d6',
-  fg_gutter = '#3b4261',
-  comment = '#565f89',
-  git = {
-    change = '#6183bb',
-    add = '#449dab',
-    delete = '#914c54',
-    conflict = '#bb7a61',
-  },
-  gitSigns = {
-    add = '#164846',
-    change = '#394b70',
-    delete = '#823c41',
-  },
-  dark3 = '#545c7e',
-  dark5 = '#737aa2',
-  blue0 = '#3d59a1',
-  blue = '#7aa2f7',
-  cyan = '#7dcfff',
-  blue1 = '#2ac3de',
-  blue2 = '#0db9d7',
-  blue5 = '#89ddff',
-  blue6 = '#B4F9F8',
-  blue7 = '#394b70',
-  magenta = '#bb9af7',
-  magenta2 = '#ff007c',
-  purple = '#9d7cd8',
-  orange = '#ff9e64',
-  yellow = '#e0af68',
-  green = '#9ece6a',
-  green1 = '#73daca',
-  green2 = '#41a6b5',
-  teal = '#1abc9c',
-  red = '#f7768e',
-  red1 = '#db4b4b',
+local everforest = {
+  fg = '#d3c6aa',
+  red = '#e67e80',
+  orange = '#e69875',
+  yellow = '#dbbc7f',
+  green = '#a7c080',
+  aqua = '#83c092',
+  blue = '#7fbbb3',
+  purple = '#d699b6',
+  grey0 = '#7a8478',
+  grey1 = '#859289',
+  grey2 = '#9da9a0',
+  white = '#d3c6aa',
+  bg = '#2b3339',
+  bg0 = '#2b3339',
+  bg1 = '#323c41',
+  bg2 = '#3a454a',
+  bg3 = '#445055',
+  bg4 = '#4c555b',
+  bg5 = '#53605c',
+  bg_visual = '#503946',
+  bg_red = '#4e3e43',
+  bg_green = '#404d44',
+  bg_blue = '#394f5a',
+  bg_yellow = '#4a4940',
 }
 
 local icons = {
@@ -116,10 +95,10 @@ local icons = {
 
 local lsp = {
   colors = {
-    error = palette.red1,
-    warn = palette.orange,
-    hint = palette.yellow,
-    info = palette.teal,
+    error = everforest.red,
+    warn = everforest.orange,
+    hint = everforest.yellow,
+    info = everforest.teal,
   },
   highlights = {
     Text = 'String',
@@ -196,7 +175,7 @@ local lsp = {
 }
 
 fss.style = {
-  palette = palette,
+  palette = everforest,
   icons = icons,
   lsp = lsp,
   float = {
@@ -225,4 +204,5 @@ fss.style = {
 fss.style.current = {
   border = fss.style.border.line,
   lsp_icons = fss.style.lsp.kinds.nerdfonts,
+  palette = everforest,
 }

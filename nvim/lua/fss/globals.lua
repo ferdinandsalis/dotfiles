@@ -2,13 +2,6 @@ local fn = vim.fn
 local api = vim.api
 local fmt = string.format
 
--- Global namespace
-
-_G.fss = fss or {
-  mappings = {},
-  ui = {},
-}
-
 -- Utils
 
 --- Convert a list or map of items into a value by iterating all it's fields and transforming
@@ -21,7 +14,7 @@ _G.fss = fss or {
 function fss.fold(callback, list, accum)
   for k, v in pairs(list) do
     accum = callback(accum, v, k)
-    assert(accum, 'The accumulator must be returned on each iteration')
+    assert(accum ~= nil, 'The accumulator must be returned on each iteration')
   end
   return accum
 end
@@ -44,6 +37,22 @@ function fss.foreach(callback, list)
   for k, v in pairs(list) do
     callback(v, k)
   end
+end
+
+--- Check if the target matches  any item in the list.
+---@param target string
+---@param list string[]
+---@return boolean
+function fss.any(target, list)
+  return fss.fold(function(accum, item)
+    if accum then
+      return accum
+    end
+    if target:match(item) then
+      return true
+    end
+    return accum
+  end, list, false)
 end
 
 ---Find an item in a list
@@ -130,9 +139,11 @@ function fss.empty(item)
   local item_type = type(item)
   if item_type == 'string' then
     return item == ''
-  elseif item_type == 'number' then
+  end
+  if item_type == 'number' then
     return item <= 0
-  elseif item_type == 'table' then
+  end
+  if item_type == 'table' then
     return vim.tbl_isempty(item)
   end
 end
@@ -141,7 +152,7 @@ end
 ---@param module string
 ---@param opts table?
 ---@return boolean, any
-function fss.safe_require(module, opts)
+function fss.require(module, opts)
   opts = opts or { silent = false }
   local ok, result = pcall(require, module)
   if not ok and not opts.silent then
@@ -173,7 +184,7 @@ function fss.ftplugin_conf(name, callback)
 
   local module = type(name) == 'table' and name[1] or name
   local info = debug.getinfo(1, 'S')
-  local ok, plugin = fss.safe_require(
+  local ok, plugin = fss.require(
     module,
     { message = fmt('In file: %s', info.source) }
   )

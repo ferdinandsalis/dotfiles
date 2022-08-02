@@ -34,7 +34,7 @@ return function()
       end_text[1][1] = end_text[1][1]:gsub('[%s\t]+', '')
     end
 
-    table.insert(result, { ' ⋯ ', 'NonText' })
+    table.insert(result, { ' ⋯ ', 'UfoFoldedEllipsis' })
     vim.list_extend(result, end_text)
     table.insert(result, { padding, '' })
     return result
@@ -44,10 +44,12 @@ return function()
   opt.sessionoptions:append('folds')
 
   hl.plugin('ufo', {
-    Folded = {
-      bold = false,
-      italic = false,
-      bg = hl.alter_color(hl.get('Normal', 'bg'), -7),
+    {
+      Folded = {
+        bold = false,
+        italic = false,
+        bg = hl.alter_color(hl.get('Normal', 'bg'), -7),
+      },
     },
   })
 

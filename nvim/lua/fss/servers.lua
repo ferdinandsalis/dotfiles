@@ -54,9 +54,22 @@ local servers = {
     }
   end,
   sumneko_lua = function()
-    local settings = {
+    local path = vim.split(package.path, ';')
+    table.insert(path, 'lua/?.lua')
+    table.insert(path, 'lua/?/init.lua')
+
+    local plugins = ('%s/site/pack/packer'):format(fn.stdpath('data'))
+    local emmy = ('%s/start/emmylua-nvim'):format(plugins)
+    local plenary = ('%s/start/plenary.nvim'):format(plugins)
+    local packer = ('%s/opt/packer.nvim'):format(plugins)
+
+    return {
       settings = {
         Lua = {
+          runtime = {
+            path = path,
+            version = 'LuaJIT',
+          },
           format = { enable = false },
           diagnostics = {
             globals = {
@@ -69,17 +82,15 @@ local servers = {
             },
           },
           completion = { keywordSnippet = 'Replace', callSnippet = 'Replace' },
+          workspace = {
+            library = { vim.env.VIMRUNTIME, emmy, packer, plenary },
+          },
+          telemetry = {
+            enable = false,
+          },
         },
       },
     }
-    local ok, lua_dev = fss.safe_require('lua-dev')
-    if not ok then
-      return settings
-    end
-    return lua_dev.setup({
-      library = { plugins = { 'plenary.nvim', 'neotest' } },
-      lspconfig = settings,
-    })
   end,
 }
 
@@ -105,7 +116,7 @@ return function(name)
     dynamicRegistration = false,
     lineFoldingOnly = true,
   }
-  local ok, cmp_nvim_lsp = fss.safe_require('cmp_nvim_lsp')
+  local ok, cmp_nvim_lsp = fss.require('cmp_nvim_lsp')
   if ok then
     cmp_nvim_lsp.update_capabilities(config.capabilities)
   end

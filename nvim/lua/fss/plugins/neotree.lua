@@ -2,23 +2,24 @@ return function()
   local icons = fss.style.icons
   local highlights = require('fss.highlights')
 
+  local panel_dark_bg = highlights.get('PanelDarkBackground', 'bg')
+  local tab_bg = highlights.alter_color(panel_dark_bg, 15)
+
   highlights.plugin('NeoTree', {
-    NeoTreeIndentMarker = { link = 'Comment' },
-    NeoTreeNormal = { link = 'PanelBackground' },
-    NeoTreeNormalNC = { link = 'PanelBackground' },
-    NeoTreeRootName = { bold = true, italic = true },
-    NeoTreeCursorLine = { link = 'Visual' },
-    NeoTreeStatusLine = { link = 'PanelSt' },
-    NeoTreeTabBackground = { link = 'PanelBackground' },
-    NeoTreeTab = {
-      bg = { from = 'PanelBackground' },
-      fg = { from = 'Comment' },
-    },
-    NeoTreeSeparator = { link = 'PanelBackground' },
-    NeoTreeActiveTab = {
-      bg = { from = 'PanelBackground' },
-      fg = 'fg',
-      bold = true,
+    { NeoTreeIndentMarker = { link = 'Comment' } },
+    { NeoTreeNormal = { link = 'PanelBackground' } },
+    { NeoTreeNormalNC = { link = 'PanelBackground' } },
+    { NeoTreeRootName = { bold = true, italic = true } },
+    { NeoTreeCursorLine = { link = 'Visual' } },
+    { NeoTreeStatusLine = { link = 'PanelSt' } },
+    { NeoTreeTabActive = { bg = { from = 'PanelBackground' }, bold = true } },
+    { NeoTreeTabInactive = { bg = tab_bg, fg = { from = 'Comment' } } },
+    { NeoTreeTabSeparatorInactive = { bg = tab_bg, fg = panel_dark_bg } },
+    {
+      NeoTreeTabSeparatorActive = {
+        bg = { from = 'PanelBackground' },
+        fg = { from = panel_dark_bg },
+      },
     },
   })
 
@@ -28,40 +29,19 @@ return function()
   fss.nnoremap('-', '<Cmd>Neotree current %:p:h:h %:p<CR>')
 
   require('neo-tree').setup({
-    reveal = true,
+    sources = {
+      'filesystem',
+      'buffers',
+      'git_status',
+      'diagnostics',
+    },
     source_selector = {
       winbar = true, -- toggle to show selector on winbar
-      statusline = false, -- toggle to show selector on statusline
-      tabs_layout = 'start',
-      tab_labels = { -- falls back to source_name if nil
-        filesystem = ' Files',
-        buffers = ' Buffers',
-        git_status = ' Git',
-      },
-      tabs_min_width = 11,
-      separator = ' ',
-      highlight_tab = 'NeoTreeTab',
-      highlight_tab_active = 'NeoTreeActiveTab',
-      highlight_separator = 'NeoTreeSeparator',
-      highlight_separator_active = 'NeoTreeSeparator',
-      highlight_background = 'NeoTreeTabBackground',
+      separator_active = ' ',
     },
     enable_git_status = true,
     git_status_async = true,
     event_handlers = {
-      -- {
-      --   event = 'neo_tree_buffer_enter',
-      --   handler = function()
-      --     highlights.set_hl('Cursor', { blend = 100 })
-      --   end,
-      -- },
-      -- {
-      --   event = 'neo_tree_buffer_leave',
-      --   handler = function()
-      --     highlights.set_hl('Cursor', { blend = 0 })
-      --     -- require('neo-tree').close_all()
-      --   end,
-      -- },
       {
         event = 'file_opened',
         handler = function()
@@ -73,21 +53,23 @@ return function()
     filesystem = {
       use_libuv_file_watcher = true,
       hijack_netrw_behavior = 'open_current',
-      follow_current_file = false,
-      find_command = 'fd',
-      find_args = {
-        fd = {
-          '--exclude',
-          '.git',
-        },
-      },
+      follow_current_file = true,
       filtered_items = {
         visible = true,
         hide_dotfiles = false,
         hide_gitignored = true,
+        never_show = {
+          '.DS_Store',
+        },
       },
     },
     default_component_configs = {
+      icon = {
+        folder_empty = '',
+      },
+      modified = {
+        symbol = icons.misc.circle .. ' ',
+      },
       indent = {
         indent_size = 2,
         indent_marker = '┊', --"│",
@@ -114,7 +96,7 @@ return function()
         noremap = true,
         nowait = true,
       },
-      width = 40,
+      width = 45,
       mappings = {
         ['o'] = 'toggle_node',
         ['-'] = 'navigate_up',

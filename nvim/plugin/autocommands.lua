@@ -219,7 +219,7 @@ fss.augroup('TextYankHighlight', {
 
 local column_exclude = { 'gitcommit' }
 local column_block_list = {
-  'DiffViewFileHistory',
+  'DiffviewFileHistory',
   'help',
   'mail',
   'org',
@@ -274,14 +274,16 @@ fss.augroup('UpdateVim', {
         vim.cmd,
         'source $MYVIMRC | redraw | silent doautocmd ColorScheme'
       )
-      msg = ok
+      local m = ok
           and fmt(
             'sourced %s and %s',
             path,
             fn.fnamemodify(vim.env.MYVIMRC, ':t')
           )
         or msg
-      vim.notify(msg)
+      if m then
+        vim.notify(m)
+      end
     end,
   },
   {

@@ -1,5 +1,7 @@
 local fn = vim.fn
+local api = vim.api
 local command = fss.command
+
 local nmap = fss.nmap
 local imap = fss.imap
 local nnoremap = fss.nnoremap
@@ -95,22 +97,22 @@ cnoremap('::', "<C-r>=fnameescape(expand('%:p:h'))<cr>/")
 ---@return nil
 function fss.toggle_list(list_type)
   local is_location_target = list_type == 'location'
-  local prefix = is_location_target and 'l' or 'c'
-  local L = vim.log.levels
+  local cmd = is_location_target and { 'lclose', 'lopen' }
+    or { 'cclose', 'copen' }
   local is_open = fss.is_vim_list_open()
   if is_open then
-    return fn.execute(prefix .. 'close')
+    return vim.cmd[cmd[1]]()
   end
   local list = is_location_target and fn.getloclist(0) or fn.getqflist()
   if vim.tbl_isempty(list) then
     local msg_prefix = (is_location_target and 'Location' or 'QuickFix')
-    return vim.notify(msg_prefix .. ' List is Empty.', L.WARN)
+    return vim.notify(msg_prefix .. ' List is Empty.', vim.log.levels.WARN)
   end
 
   local winnr = fn.winnr()
-  fn.execute(prefix .. 'open')
+  vim.cmd[cmd[2]]()
   if fn.winnr() ~= winnr then
-    vim.cmd('wincmd p')
+    vim.cmd.wincmd('p')
   end
 end
 
@@ -190,18 +192,51 @@ fss.augroup('AddTerminalMappings', {
         local opts = { silent = false, buffer = 0 }
         tnoremap('<esc>', [[<C-\><C-n>]], opts)
         tnoremap('jk', [[<C-\><C-n>]], opts)
-        tnoremap('<C-h>', [[<C-\><C-n><C-W>h]], opts)
-        tnoremap('<C-j>', [[<C-\><C-n><C-W>j]], opts)
-        tnoremap('<C-k>', [[<C-\><C-n><C-W>k]], opts)
-        tnoremap('<C-l>', [[<C-\><C-n><C-W>l]], opts)
-        tnoremap(']t', [[<C-\><C-n>:tablast<CR>]])
-        tnoremap('[t', [[<C-\><C-n>:tabnext<CR>]])
-        tnoremap('<S-Tab>', [[<C-\><C-n>:bprev<CR>]])
-        tnoremap('<leader><Tab>', [[<C-\><C-n>:close \| :bnext<cr>]])
+        tnoremap('<C-h>', '<Cmd>wincmd h<CR>', opts)
+        tnoremap('<C-j>', '<Cmd>wincmd j<CR>', opts)
+        tnoremap('<C-k>', '<Cmd>wincmd k<CR>', opts)
+        tnoremap('<C-l>', '<Cmd>wincmd l<CR>', opts)
+        tnoremap(']t', '<Cmd>tablast<CR>')
+        tnoremap('[t', '<Cmd>tabnext<CR>')
+        tnoremap('<S-Tab>', '<Cmd>bprev<CR>')
+        tnoremap('<leader><Tab>', '<Cmd>close \\| :bnext<cr>')
       end
     end,
   },
 })
+-- }}}
+-- Grep Operator {{{
+-- http://travisjeffery.com/b/2011/10/m-x-occur-for-vim/
+
+---@param type string
+---@return nil
+function fss.mappings.grep_operator(type)
+  local saved_unnamed_register = fn.getreg('@@')
+  if type:match('v') then
+    vim.cmd([[normal! `<v`>y]])
+  elseif type:match('char') then
+    vim.cmd([[normal! `[v`]y']])
+  else
+    return
+  end
+  -- Store the current window so if it changes we can restore it
+  local win = api.nvim_get_current_win()
+  vim.cmd.grep({
+    fn.shellescape(fn.getreg('@@')) .. ' .',
+    bang = true,
+    mods = { silent = true },
+  })
+  fn.setreg('@@', saved_unnamed_register)
+  if api.nvim_get_current_win() ~= win then
+    vim.cmd.wincmd('p')
+  end
+end
+
+nnoremap('<leader>g', function()
+  vim.opt.operatorfunc = 'v:lua.as.mappings.grep_operator'
+  return 'g@'
+end, { expr = true, desc = 'grep operator' })
+xnoremap('<leader>g', ':call v:lua.as.mappings.grep_operator(visualmode())<CR>')
 -- }}}
 
 -- vim:foldmethod=marker

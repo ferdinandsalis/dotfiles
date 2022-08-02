@@ -31,7 +31,7 @@ local function toggle_trailing(mode)
   end
 end
 
-H.set_hl('ExtraWhitespace', { foreground = 'red' })
+H.set('ExtraWhitespace', { foreground = 'red' })
 
 fss.augroup('WhitespaceMatch', {
   {
@@ -39,7 +39,7 @@ fss.augroup('WhitespaceMatch', {
     desc = 'Add extra whitespace highlight',
     pattern = { '*' },
     command = function()
-      H.set_hl('ExtraWhitespace', { foreground = 'red' })
+      H.set('ExtraWhitespace', { foreground = 'red' })
     end,
   },
   {
