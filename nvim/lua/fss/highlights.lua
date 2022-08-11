@@ -1,13 +1,26 @@
 local fmt = string.format
 local fn = vim.fn
 local api = vim.api
-local levels = vim.log.levels
 
 local M = {}
 
----@class HLAttrs
+---@class HighlightAttributes
 ---@field from string
 ---@field attr 'foreground' | 'fg' | 'background' | 'bg'
+---@field alter integer
+
+---@class HighlightKeys
+---@field blend integer
+---@field foreground string | HighlightAttributes
+---@field background string | HighlightAttributes
+---@field fg string | HighlightAttributes
+---@field bg string | HighlightAttributes
+---@field sp string | HighlightAttributes
+---@field bold boolean
+---@field italic boolean
+---@field undercurl boolean
+---@field underline boolean
+---@field underdot boolean
 
 ---Convert a hex color to RGB
 ---@param color string
@@ -27,9 +40,8 @@ end
 
 ---@source https://stackoverflow.com/q/5560248
 ---@see: https://stackoverflow.com/a/37797380
----Darken a specified hex color
----@param color string
----@param percent number
+---@param color string A hex color
+---@param percent integer a negative number darkens and a positive one brightens
 ---@return string
 function M.alter_color(color, percent)
   local r, g, b = hex_to_rgb(color)
@@ -41,12 +53,95 @@ function M.alter_color(color, percent)
   return fmt('#%02x%02x%02x', r, g, b)
 end
 
+---@param group_name string A highlight group name
+local function get_highlight(group_name)
+  local ok, hl = pcall(api.nvim_get_hl_by_name, group_name, true)
+  if not ok then
+    return {}
+  end
+  hl.foreground = hl.foreground and '#' .. bit.tohex(hl.foreground, 6)
+  hl.background = hl.background and '#' .. bit.tohex(hl.background, 6)
+  hl[true] = nil -- BUG: API returns a true key which errors during the merge
+  return hl
+end
+
+---Get the value a highlight group whilst handling errors, fallbacks as well as returning a gui value
+---If no attribute is specified return the entire highlight table
+---in the right format
+---@param group string
+---@param attribute string?
+---@param fallback string?
+---@return string
+function M.get(group, attribute, fallback)
+  assert(group, 'cannot get a highlight without specifying a group name')
+  local data = get_highlight(group)
+  if not attribute then
+    return data
+  end
+  local attr = ({ fg = 'foreground', bg = 'background' })[attribute]
+    or attribute
+  local color = data[attr] or fallback
+  if color then
+    return color
+  end
+  local msg = fmt("%s's %s does not exist", group, attr)
+  vim.schedule(function()
+    vim.notify(msg, 'error')
+  end)
+  return 'NONE'
+end
+
+--- Sets a neovim highlight with some syntactic sugar. It takes a highlight table and converts
+--- any highlights specified as `GroupName = { from = 'group'}` into the underlying colour
+--- by querying the highlight property of the from group so it can be used when specifying highlights
+--- as a shorthand to derive the right color.
+--- For example:
+--- ```lua
+---   M.set({ MatchParen = {foreground = {from = 'ErrorMsg'}}})
+--- ```
+--- This will take the foreground colour from ErrorMsg and set it to the foreground of MatchParen.
+---@param name string
+---@param opts HighlightKeys
+function M.set(name, opts)
+  assert(name and opts, "Both 'name' and 'opts' must be specified")
+  assert(
+    type(name) == 'string',
+    fmt("Name must be a string but got '%s'", name)
+  )
+  assert(
+    type(opts) == 'table',
+    fmt("Opts must be a table but got '%s'", vim.inspect(opts))
+  )
+
+  local hl = get_highlight(opts.inherit or name)
+  opts.inherit = nil
+
+  for attr, value in pairs(opts) do
+    if type(value) == 'table' and value.from then
+      opts[attr] = M.get(value.from, value.attr or attr)
+      if value.alter then
+        opts[attr] = M.alter_color(opts[attr], value.alter)
+      end
+    end
+  end
+
+  local ok, msg = pcall(
+    api.nvim_set_hl,
+    0,
+    name,
+    vim.tbl_extend('force', hl, opts)
+  )
+  if not ok then
+    vim.notify(fmt('Failed to set %s because - %s', name, msg))
+  end
+end
+
 --- Check if the current window has a winhighlight
 --- which includes the specific target highlight
 --- @param win_id integer
 --- @vararg string
 --- @return boolean, string
-function M.winhighlight_exists(win_id, ...)
+function M.has_win_highlight(win_id, ...)
   local win_hl = vim.wo[win_id].winhighlight
   for _, target in ipairs({ ... }) do
     if win_hl:match(target) ~= nil then
@@ -56,27 +151,15 @@ function M.winhighlight_exists(win_id, ...)
   return false, win_hl
 end
 
----@param group_name string A highlight group name
-local function get_hl(group_name)
-  local ok, hl = pcall(api.nvim_get_hl_by_name, group_name, true)
-  if ok then
-    hl.foreground = hl.foreground and '#' .. bit.tohex(hl.foreground, 6)
-    hl.background = hl.background and '#' .. bit.tohex(hl.background, 6)
-    hl[true] = nil -- BUG: API returns a true key which errors during the merge
-    return hl
-  end
-  return {}
-end
-
 ---A mechanism to allow inheritance of the winhighlight of a specific
 ---group in a window
----@param win_id number
+---@param win_id integer
 ---@param target string
 ---@param name string
 ---@param fallback string
-function M.adopt_winhighlight(win_id, target, name, fallback)
+function M.adopt_win_highlight(win_id, target, name, fallback)
   local win_hl_name = name .. win_id
-  local _, win_hl = M.winhighlight_exists(win_id, target)
+  local _, win_hl = M.has_win_highlight(win_id, target)
   local hl_exists = fn.hlexists(win_hl_name) > 0
   if hl_exists then
     return win_hl_name
@@ -94,89 +177,13 @@ function M.adopt_winhighlight(win_id, target, name, fallback)
   return win_hl_name
 end
 
---- Sets a neovim highlight with some syntactic sugar. It takes a highlight table and converts
---- any highlights specified as `GroupName = { from = 'group'}` into the underlying colour
---- by querying the highlight property of the from group so it can be used when specifying highlights
---- as a shorthand to derive the right color.
---- For example:
---- ```lua
----   M.set({ MatchParen = {foreground = {from = 'ErrorMsg'}}})
---- ```
---- This will take the foreground colour from ErrorMsg and set it to the foreground of MatchParen.
----@param name string
----@param opts table<string, string|boolean|HLAttrs>
-function M.set(name, opts)
-  assert(name and opts, "Both 'name' and 'opts' must be specified")
-  assert(
-    type(name) == 'string',
-    fmt("Name must be a string but got '%s'", name)
-  )
-  assert(
-    type(opts) == 'table',
-    fmt("Opts must be a table but got '%s'", vim.inspect(opts))
-  )
-
-  local hl = get_hl(opts.inherit or name)
-  opts.inherit = nil
-
-  for attr, value in pairs(opts) do
-    if type(value) == 'table' and value.from then
-      opts[attr] = M.get(value.from, vim.F.if_nil(value.attr, attr))
-      if value.alter then
-        opts[attr] = M.alter_color(opts[attr], value.alter)
-      end
-    end
-  end
-
-  local ok, msg = pcall(
-    api.nvim_set_hl,
-    0,
-    name,
-    vim.tbl_deep_extend('force', hl, opts)
-  )
-  if not ok then
-    vim.notify(fmt('Failed to set %s because - %s', name, msg))
-  end
-end
-
----Get the value a highlight group whilst handling errors, fallbacks as well as returning a gui value
----If no attribute is specified return the entire highlight table
----in the right format
----@param group string
----@param attribute string?
----@param fallback string?
----@return string
-function M.get(group, attribute, fallback)
-  if not group then
-    vim.notify(
-      'Cannot get a highlight without specifying a group',
-      levels.ERROR
-    )
-    return 'NONE'
-  end
-  local hl = get_hl(group)
-  if not attribute then
-    return hl
-  end
-  attribute = ({ fg = 'foreground', bg = 'background' })[attribute] or attribute
-  local color = hl[attribute] or fallback
-  if not color then
-    vim.schedule(function()
-      vim.notify(fmt('%s %s does not exist', group, attribute), levels.INFO)
-    end)
-    return 'NONE'
-  end
-  -- convert the decimal RGBA value from the hl by name to a 6 character hex + padding if needed
-  return color
-end
-
-function M.clear_hl(name)
+function M.clear(name)
   assert(name, 'name is required to clear a highlight')
   api.nvim_set_hl(0, name, {})
 end
 
 ---Apply a list of highlights
----@param hls table<string, table<string, boolean|string>>
+---@param hls table<string, HighlightKeys>
 function M.all(hls)
   fss.foreach(function(hl)
     M.set(next(hl))
@@ -184,20 +191,39 @@ function M.all(hls)
 end
 
 -- Plugin highlights
-
 ---Apply highlights for a plugin and refresh on colorscheme change
 ---@param name string plugin name
----@param hls table<string, table> map of highlights
-function M.plugin(name, hls)
-  name = name:gsub('^%l', string.upper) -- capitalise the name for autocommand convention sake
-  M.all(hls)
+---@param opts table<string, table> map of highlights
+function M.plugin(name, opts)
+  -- Options can be specified by theme name so check if they have been or there is a general
+  -- definition otherwise use the opts as is
+  local theme = opts.theme
+  if theme then
+    local res, seen = {}, {}
+    for _, hl in
+      ipairs(vim.list_extend(theme[vim.g.colors_name] or {}, theme['*'] or {}))
+    do
+      local n = next(hl)
+      if not seen[n] then
+        res[#res + 1] = hl
+      end
+      seen[n] = true
+    end
+    opts = res
+    if not next(opts) then
+      return
+    end
+  end
+  -- capitalise the name for autocommand convention sake
+  name = name:gsub('^%l', string.upper)
+  M.all(opts)
   fss.augroup(fmt('%sHighlightOverrides', name), {
     {
       event = 'ColorScheme',
       command = function()
         -- Defer resetting these highlights to ensure they apply after other overrides
         vim.defer_fn(function()
-          M.all(hls)
+          M.all(opts)
         end, 1)
       end,
     },
@@ -215,7 +241,7 @@ local function general_overrides()
     { VertSplit = { background = 'NONE', foreground = dim } },
     { WinSeparator = { background = 'NONE', foreground = dim } },
     { CursorLineNr = { inherit = 'CursorLine', bold = true } },
-    { FoldColumn = { background = 'background' } },
+    { FoldColumn = { background = 'bg' } },
     { LspCodeLens = { inherit = 'Comment', bold = true, italic = false } },
 
     -- Floats
@@ -250,6 +276,7 @@ local function colorscheme_overrides()
 
     M.all({
       { URL = { foreground = palette.blue } },
+      { Constant = { bold = true } },
       { MsgArea = { background = { from = 'Normal', alter = -10 } } },
       { MsgSeparator = { link = 'MsgArea' } },
       { StatusLine = { background = { from = 'Normal', alter = 16 } } },
@@ -342,7 +369,7 @@ fss.augroup('UserHighlights', {
 
 -- Everforest
 if fss.plugin_installed('everforest') then
-  vim.g.everforest_background = 'hard' -- "hard" | "medium" | "soft"
+  vim.g.everforest_background = 'medium' -- "hard" | "medium" | "soft"
   vim.g.everforest_better_performance = true
   vim.g.everforest_cursor = 'auto'
   vim.g.everforest_enable_italic = true

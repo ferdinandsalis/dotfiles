@@ -1,6 +1,11 @@
 return function()
   local parsers = require('nvim-treesitter.parsers')
-  local rainbow_enabled = { 'dart' }
+  local rainbow_enabled = {
+    'dart',
+    'typescriptreact',
+    'javascriptreact',
+    'elixir',
+  }
 
   require('nvim-treesitter.configs').setup({
     ensure_installed = {
@@ -36,6 +41,7 @@ return function()
       lookahead = true,
       select = {
         enable = true,
+        include_surrounding_whitespace = true,
         keymaps = {
           ['af'] = '@function.outer',
           ['if'] = '@function.inner',
@@ -83,6 +89,7 @@ return function()
     },
     rainbow = {
       enable = true,
+      extended_mode = false,
       disable = vim.tbl_filter(function(p)
         local disable = true
         for _, lang in pairs(rainbow_enabled) do
@@ -92,13 +99,6 @@ return function()
         end
         return disable
       end, parsers.available_parsers()),
-      colors = {
-        'royalblue3',
-        'darkorange3',
-        'seagreen3',
-        'firebrick',
-        'darkorchid3',
-      },
     },
     autopairs = { enable = true },
     autotag = { enable = true },

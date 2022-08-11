@@ -84,6 +84,7 @@ local servers = {
           completion = { keywordSnippet = 'Replace', callSnippet = 'Replace' },
           workspace = {
             library = { vim.env.VIMRUNTIME, emmy, packer, plenary },
+            checkThirdParty = false,
           },
           telemetry = {
             enable = false,

@@ -152,92 +152,118 @@ return function()
   local sep_color = H.alter_color(bg_color, -36)
 
   H.plugin('bufferline', {
-    { BufferLineFill = { background = bg_color } },
-    { BufferLineBackground = { background = bg_color } },
-    -- Tab
-    { BufferLineTab = { background = bg_color } },
-    { BufferLineTabSelected = { background = 'background' } },
-    { BufferLineTabClose = { background = bg_color } },
-    -- Close Button
-    { BufferLineCloseButton = { background = bg_color } },
-    { BufferLineCloseButtonVisible = { background = bg_color } },
-    { BufferLineCloseButtonSelected = { background = 'background' } },
-    -- Buffer
-    { BufferLineBuffer = { background = bg_color } },
-    { BufferLineBufferVisible = { background = bg_color, bold = true } },
-    { BufferLineBufferSelected = { background = 'background', bold = true } },
-    -- Diagnostic
-    { BufferLineDiagnostic = { background = bg_color } },
-    { BufferLineDiagnosticVisible = { background = bg_color } },
-    { BufferLineDiagnosticSelected = { background = 'background' } },
-    -- Info
-    { BufferLineInfo = { background = bg_color } },
-    { BufferLineInfoVisible = { background = bg_color } },
-    { BufferLineInfoSelected = { background = 'background' } },
-    { BufferLineInfoDiagnostic = { background = bg_color } },
-    { BufferLineInfoDiagnosticVisible = { background = bg_color } },
-    { BufferLineInfoDiagnosticSelected = { background = 'background' } },
-    -- Warning
-    { BufferLineWarning = { background = bg_color } },
-    { BufferLineWarningVisible = { background = bg_color } },
-    { BufferLineWarningSelected = { background = 'background' } },
-    { BufferLineWarningDiagnostic = { background = bg_color } },
-    { BufferLineWarningDiagnosticVisible = { background = bg_color } },
-    { BufferLineWarningDiagnosticSelected = { background = 'background' } },
-    -- Error
-    { BufferLineError = { background = bg_color } },
-    { BufferLineErrorVisible = { background = bg_color } },
-    { BufferLineErrorSelected = { background = 'background' } },
-    { BufferLineErrorDiagnostic = { background = bg_color } },
-    { BufferLineErrorDiagnosticVisible = { background = bg_color } },
-    { BufferLineErrorDiagnosticSelected = { background = 'background' } },
-    -- Hint
-    { BufferLineHint = { background = bg_color } },
-    { BufferLineHintVisible = { background = bg_color } },
-    { BufferLineHintSelected = { background = 'background' } },
-    { BufferLineHintDiagnostic = { background = bg_color } },
-    { BufferLineHintDiagnosticVisible = { background = bg_color } },
-    { BufferLineHintDiagnosticSelected = { background = 'background' } },
-    -- Modified
-    { BufferLineModified = { background = bg_color } },
-    { BufferLineModifiedVisible = { background = bg_color } },
-    { BufferLineModifiedSelected = { background = 'background' } },
-    -- Duplicate
-    { BufferLineDuplicate = { background = bg_color, bold = false, italic = false, }, },
-    { BufferLineDuplicateVisible = { background = bg_color, bold = false, italic = false, }, },
-    { BufferLineDuplicateSelected = { background = 'background' } },
-    -- Separator
-    {
-      BufferLineSeparator = { foreground = sep_color, background = bg_color },
-    },
-    {
-      BufferLineSeparatorVisible = {
-        foreground = sep_color,
-        background = bg_color,
+    theme = {
+      ['*'] = {
+        { BufferLineFill = { background = bg_color } },
+        { BufferLineBackground = { background = bg_color } },
+        -- Tab
+        { BufferLineTab = { background = bg_color } },
+        { BufferLineTabSelected = { background = 'background' } },
+        { BufferLineTabClose = { background = bg_color } },
+        -- Close Button
+        { BufferLineCloseButton = { background = bg_color } },
+        { BufferLineCloseButtonVisible = { background = bg_color } },
+        { BufferLineCloseButtonSelected = { background = 'background' } },
+        -- Buffer
+        { BufferLineBuffer = { background = bg_color } },
+        { BufferLineBufferVisible = { background = bg_color, bold = true } },
+        {
+          BufferLineBufferSelected = {
+            background = 'background',
+            bold = true,
+          },
+        },
+        -- Diagnostic
+        { BufferLineDiagnostic = { background = bg_color } },
+        { BufferLineDiagnosticVisible = { background = bg_color } },
+        { BufferLineDiagnosticSelected = { background = 'background' } },
+        -- Info
+        { BufferLineInfo = { background = bg_color } },
+        { BufferLineInfoVisible = { background = bg_color } },
+        { BufferLineInfoSelected = { background = 'background' } },
+        { BufferLineInfoDiagnostic = { background = bg_color } },
+        { BufferLineInfoDiagnosticVisible = { background = bg_color } },
+        { BufferLineInfoDiagnosticSelected = { background = 'background' } },
+        -- Warning
+        { BufferLineWarning = { background = bg_color } },
+        { BufferLineWarningVisible = { background = bg_color } },
+        { BufferLineWarningSelected = { background = 'background' } },
+        { BufferLineWarningDiagnostic = { background = bg_color } },
+        { BufferLineWarningDiagnosticVisible = { background = bg_color } },
+        {
+          BufferLineWarningDiagnosticSelected = { background = 'background' },
+        },
+        -- Error
+        { BufferLineError = { background = bg_color } },
+        { BufferLineErrorVisible = { background = bg_color } },
+        { BufferLineErrorSelected = { background = 'background' } },
+        { BufferLineErrorDiagnostic = { background = bg_color } },
+        { BufferLineErrorDiagnosticVisible = { background = bg_color } },
+        { BufferLineErrorDiagnosticSelected = { background = 'background' } },
+        -- Hint
+        { BufferLineHint = { background = bg_color } },
+        { BufferLineHintVisible = { background = bg_color } },
+        { BufferLineHintSelected = { background = 'background' } },
+        { BufferLineHintDiagnostic = { background = bg_color } },
+        { BufferLineHintDiagnosticVisible = { background = bg_color } },
+        { BufferLineHintDiagnosticSelected = { background = 'background' } },
+        -- Modified
+        { BufferLineModified = { background = bg_color } },
+        { BufferLineModifiedVisible = { background = bg_color } },
+        { BufferLineModifiedSelected = { background = 'background' } },
+        -- Duplicate
+        {
+          BufferLineDuplicate = {
+            background = bg_color,
+            bold = false,
+            italic = false,
+          },
+        },
+        {
+          BufferLineDuplicateVisible = {
+            background = bg_color,
+            bold = false,
+            italic = false,
+          },
+        },
+        { BufferLineDuplicateSelected = { background = 'background' } },
+        -- Separator
+        {
+          BufferLineSeparator = {
+            foreground = sep_color,
+            background = bg_color,
+          },
+        },
+        {
+          BufferLineSeparatorVisible = {
+            foreground = sep_color,
+            background = bg_color,
+          },
+        },
+        {
+          BufferLineSeparatorSelected = {
+            foreground = sep_color,
+            background = bg_color,
+          },
+        },
+        -- Indicator
+        {
+          BufferLineIndicatorSelected = {
+            background = 'background',
+            foreground = 'background',
+          },
+        },
+        {
+          BufferLineIndicatorVisible = {
+            background = bg_color,
+            foreground = bg_color,
+          },
+        },
+        -- Pick
+        { BufferLinePick = { background = bg_color } },
+        { BufferLinePickVisible = { background = bg_color } },
+        { BufferLinePickSelected = { background = 'background' } },
       },
     },
-    {
-      BufferLineSeparatorSelected = {
-        foreground = sep_color,
-        background = bg_color,
-      },
-    },
-    -- Indicator
-    {
-      BufferLineIndicatorSelected = {
-        background = 'background',
-        foreground = 'background',
-      },
-    },
-    {
-      BufferLineIndicatorVisible = {
-        background = bg_color,
-        foreground = bg_color,
-      },
-    },
-    -- Pick
-    { BufferLinePick = { background = bg_color } },
-    { BufferLinePickVisible = { background = bg_color } },
-    { BufferLinePickSelected = { background = 'background' } },
   })
 end

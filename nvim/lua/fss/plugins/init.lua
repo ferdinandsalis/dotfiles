@@ -168,7 +168,8 @@ packer.startup({
     use({
       'itchyny/vim-highlighturl',
       config = function()
-        vim.g.highlighturl_guifg = require('fss.highlights').get('URL', 'fg')
+        local H = require('fss.highlights')
+        vim.g.highlighturl_guifg = H.get('URL', 'fg')
       end,
     })
 
@@ -288,9 +289,9 @@ packer.startup({
       config = function()
         local hl = require('fss.highlights')
         hl.plugin('treesitter-context', {
-          { ContextBorder = { link = 'Dim' }, },
-          { TreesitterContext = { inherit = 'Normal' }, },
-          { TreesitterContextLineNumber = { inherit = 'LineNr' }, },
+          { ContextBorder = { link = 'Dim' } },
+          { TreesitterContext = { inherit = 'Normal' } },
+          { TreesitterContextLineNumber = { inherit = 'LineNr' } },
         })
         require('treesitter-context').setup({
           multiline_threshold = 4,
@@ -304,8 +305,15 @@ packer.startup({
     use({
       'm-demare/hlargs.nvim',
       config = function()
-        require('fss.highlights').plugin('hlargs', {
-          { Hlargs = { italic = true, bold = false, foreground = '#7fbbb3' }, },
+        local H = require('fss.highlights')
+        H.plugin('hlargs', {
+          {
+            Hlargs = {
+              italic = true,
+              bold = false,
+              foreground = fss.style.palette.blue,
+            },
+          },
         })
         require('hlargs').setup({
           excluded_argnames = {
@@ -332,7 +340,7 @@ packer.startup({
       'lukas-reineke/virt-column.nvim',
       config = function()
         require('fss.highlights').plugin('virt_column', {
-          { VirtColumn = { bg = 'None', inherit = 'Dim' }, },
+          { VirtColumn = { bg = 'None', inherit = 'Dim' } },
         })
         require('virt-column').setup({ char = '▕' })
       end,
@@ -469,7 +477,6 @@ packer.startup({
         { 'f3fora/cmp-spell', after = 'nvim-cmp' },
         { 'hrsh7th/cmp-path', after = 'nvim-cmp' },
         { 'hrsh7th/cmp-buffer', after = 'nvim-cmp' },
-        { 'uga-rosa/cmp-dictionary', after = 'nvim-cmp' },
         { 'hrsh7th/cmp-emoji', after = 'nvim-cmp' },
         { 'dmitmel/cmp-cmdline-history', after = 'nvim-cmp' },
         {
@@ -669,7 +676,7 @@ packer.startup({
 
     use({
       'lewis6991/gitsigns.nvim',
-      event = 'CursorHold',
+      event = 'BufRead',
       config = conf('gitsigns'),
     })
 

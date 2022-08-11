@@ -131,7 +131,7 @@ function fss.ui.statusline()
   end
   local file_component = component(file.item, file.hl, file.opts)
 
-  local readonly_hl = H.adopt_winhighlight(
+  local readonly_hl = H.adopt_win_highlight(
     curwin,
     'StatusLine',
     'StCustomError',

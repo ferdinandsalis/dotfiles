@@ -9,7 +9,7 @@ return function()
     { NeoTreeIndentMarker = { link = 'Comment' } },
     { NeoTreeNormal = { link = 'PanelBackground' } },
     { NeoTreeNormalNC = { link = 'PanelBackground' } },
-    { NeoTreeRootName = { bold = true, italic = true } },
+    { NeoTreeRootName = { underline = true } },
     { NeoTreeCursorLine = { link = 'Visual' } },
     { NeoTreeStatusLine = { link = 'PanelSt' } },
     { NeoTreeTabActive = { bg = { from = 'PanelBackground' }, bold = true } },
@@ -17,7 +17,7 @@ return function()
     { NeoTreeTabSeparatorInactive = { bg = tab_bg, fg = panel_dark_bg } },
     {
       NeoTreeTabSeparatorActive = {
-        bg = { from = 'PanelBackground' },
+        inherit = 'PanelBackground',
         fg = { from = panel_dark_bg },
       },
     },

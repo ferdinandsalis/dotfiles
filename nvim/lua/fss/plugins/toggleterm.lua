@@ -3,6 +3,7 @@ return function()
     open_mapping = [[<c-\>]],
     shade_terminals = false,
     direction = 'horizontal',
+    persist_mode = true,
     insert_mappings = false,
     start_in_insert = true,
     winbar = {
