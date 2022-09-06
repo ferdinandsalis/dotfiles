@@ -9,7 +9,7 @@ return function()
     { NeoTreeIndentMarker = { link = 'Comment' } },
     { NeoTreeNormal = { link = 'PanelBackground' } },
     { NeoTreeNormalNC = { link = 'PanelBackground' } },
-    { NeoTreeRootName = { underline = true } },
+    { NeoTreeRootName = { underline = false } },
     { NeoTreeCursorLine = { link = 'Visual' } },
     { NeoTreeStatusLine = { link = 'PanelSt' } },
     { NeoTreeTabActive = { bg = { from = 'PanelBackground' }, bold = true } },
@@ -100,9 +100,13 @@ return function()
       mappings = {
         ['o'] = 'toggle_node',
         ['-'] = 'navigate_up',
+        ['/'] = 'noop',
+        ['g/'] = 'fuzzy_finder',
         ['<bs>'] = 'close_node',
         ['<c-s>'] = 'open_split',
         ['<c-v>'] = 'open_vsplit',
+        ['<esc>'] = 'revert_preview',
+        ['P'] = { 'toggle_preview', config = { use_float = true } },
       },
     },
   })

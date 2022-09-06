@@ -1,9 +1,16 @@
-vim.opt_local.list = false
-vim.opt_local.number = false
-vim.opt_local.relativenumber = false
-vim.opt_local.spell = true
-vim.opt_local.spelllang = 'en_gb'
-vim.opt_local.colorcolumn = '50,72'
+vim.wo.list = false
+vim.wo.number = false
+vim.wo.relativenumber = false
+vim.wo.spell = true
+vim.wo.colorcolumn = '50,72'
+vim.bo.spelllang = 'en_gb'
+
+-- Schedule this call as highlights are not set correctly if there is not a delay
+vim.schedule(function()
+  require('fss.highlights').win_hl.set('gitcommit', 0, {
+    { VirtColumn = { fg = { from = 'Variable' } } },
+  })
+end)
 
 fss.ftplugin_conf('cmp', function(cmp)
   cmp.setup.filetype('NeogitCommitMessage', {

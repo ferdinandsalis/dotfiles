@@ -1,3 +1,7 @@
+if not fss then
+  return
+end
+
 -- Inspiration
 -- 1. vim-relativity
 -- 2. numbers.vim - https://github.com/myusuf3/numbers.vim/blob/master/plugin/numbers.vim
@@ -5,7 +9,7 @@
 local api = vim.api
 local M = {}
 
-vim.g.number_filetype_exclusions = {
+local number_filetype_exclusions = {
   'netrw',
   'undotree',
   'log',
@@ -20,7 +24,7 @@ vim.g.number_filetype_exclusions = {
   'NeogitCommitMessage',
 }
 
-vim.g.number_buftype_exclusions = {
+local number_buftype_exclusions = {
   'prompt',
   'terminal',
   'help',
@@ -29,7 +33,7 @@ vim.g.number_buftype_exclusions = {
   'quickfix',
 }
 
-vim.g.number_buftype_ignored = { 'quickfix' }
+local number_buftype_ignored = { 'quickfix' }
 
 local function is_floating_win()
   return vim.fn.win_gettype() == 'popup'
@@ -40,7 +44,7 @@ local is_enabled = true
 ---Determines whether or not a window should be ignored by this plugin
 ---@return boolean
 local function is_ignored()
-  return vim.tbl_contains(vim.g.number_buftype_ignored, vim.bo.buftype)
+  return vim.tbl_contains(number_buftype_ignored, vim.bo.buftype)
     or is_floating_win()
 end
 
@@ -64,13 +68,13 @@ local function is_blocked()
     return true
   end
 
-  for _, ft in ipairs(vim.g.number_filetype_exclusions) do
+  for _, ft in ipairs(number_filetype_exclusions) do
     if vim.bo.ft == ft or string.match(vim.bo.ft, ft) then
       return true
     end
   end
 
-  if vim.tbl_contains(vim.g.number_buftype_exclusions, vim.bo.buftype) then
+  if vim.tbl_contains(number_buftype_exclusions, vim.bo.buftype) then
     return true
   end
   return false

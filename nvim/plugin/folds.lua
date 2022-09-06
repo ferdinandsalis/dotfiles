@@ -1,5 +1,9 @@
 -- Fold Text
 
+if not fss or not fss.ui.foldtext.enable then
+  return
+end
+
 local fn = vim.fn
 local api = vim.api
 

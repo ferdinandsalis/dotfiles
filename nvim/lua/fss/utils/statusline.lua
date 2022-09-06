@@ -310,37 +310,23 @@ end
 ---@param minimal boolean
 ---@return table
 function M.file(ctx, minimal)
-  local wiin = ctx.winid
+  local win = ctx.winid
   -- highlight the filename components separately
   local filename_hl = minimal and 'StFilenameInactive' or 'StFilename'
   local directory_hl = minimal and 'StDirectoryInactive' or 'StDirectory'
   local parent_hl = minimal and directory_hl or 'StParentDirectory'
 
-  if highlights.has_win_highlight(wiin, 'Normal', 'StatusLine') then
-    directory_hl = highlights.adopt_win_highlight(
-      wiin,
-      'StatusLine',
-      'StCustomDirectory',
-      'StTitle'
-    )
-    filename_hl = highlights.adopt_win_highlight(
-      wiin,
-      'StatusLine',
-      'StCustomFilename',
-      'StTitle'
-    )
-    parent_hl = highlights.adopt_win_highlight(
-      wiin,
-      'StatusLine',
-      'StCustomParentDir',
-      'StTitle'
-    )
+  if highlights.win_hl.exists(win, 'Normal', 'StatusLine') then
+    directory_hl =
+      highlights.win_hl.adopt(win, 'StatusLine', 'StCustomDirectory', 'StTitle')
+    filename_hl =
+      highlights.win_hl.adopt(win, 'StatusLine', 'StCustomFilename', 'StTitle')
+    parent_hl =
+      highlights.win_hl.adopt(win, 'StatusLine', 'StCustomParentDir', 'StTitle')
   end
 
-  local ft_icon, icon_highlight = filetype(
-    ctx,
-    { icon_bg = 'StatusLine', default = 'StComment' }
-  )
+  local ft_icon, icon_highlight =
+    filetype(ctx, { icon_bg = 'StatusLine', default = 'StComment' })
 
   local file_opts = { before = '', after = '', priority = 0 }
   local parent_opts = { before = '', after = '', priority = 2 }
@@ -638,10 +624,10 @@ end
 --- @class ComponentOpts
 --- @field priority number
 --- @field click string
---- @field suffix string
---- @field suffix_color string
---- @field prefix string
---- @field prefix_color string
+--- @field suffix string|nil
+--- @field suffix_color string|nil
+--- @field prefix string|nil
+--- @field prefix_color string|nil
 --- @field before string
 --- @field after string
 --- @field id number

@@ -2,7 +2,6 @@
   name = Ferdinand Salis-Samaden
   email = mail@ferdinandsalis.com
 [core]
-  editor = "nvr --remote-wait-silent" # or nvim
   excludesfile = ~/.dotfiles/git/gitignore
   pager = delta
 [commit]
@@ -38,8 +37,6 @@
 [delta "decorations"]
   commit-decoration-style = bold yellow box ul
   file-style = bold yellow ul
-[merge]
-  conflictstyle = diff3
 [diff]
   colorMoved = default
 [push]

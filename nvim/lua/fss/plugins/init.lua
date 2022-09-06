@@ -4,10 +4,8 @@ local packer_notify = utils.packer_notify
 local fn = vim.fn
 local fmt = string.format
 
-local PACKER_COMPILED_PATH = fmt(
-  '%s/packer/packer_compiled.lua',
-  fn.stdpath('cache')
-)
+local PACKER_COMPILED_PATH =
+  fmt('%s/packer/packer_compiled.lua', fn.stdpath('cache'))
 
 -- Bootstrap packer
 utils.bootstrap_packer()
@@ -22,11 +20,6 @@ packer.startup({
   function(use)
     use({ 'wbthomason/packer.nvim', opt = true })
 
-    -- TODO: this fixes a bug in neovim core that prevents "CursorHold" from working
-    -- hopefully one day when this issue is fixed this can be removed
-    -- @see: https://github.com/neovim/neovim/issues/12587
-    use('antoinemadec/FixCursorHold.nvim')
-
     -- Utilities {{{1
 
     -- The library
@@ -38,7 +31,7 @@ packer.startup({
       'ahmedkhalf/project.nvim',
       config = function()
         require('project_nvim').setup({
-          silent_chdir = false,
+          silent_chdir = true,
           detection_methods = { 'pattern', 'lsp' },
           ignore_lsp = { 'null-ls' },
           patterns = { 'package.json', '.git' },
@@ -49,15 +42,14 @@ packer.startup({
     -- Shows key infos
     use({
       'folke/which-key.nvim',
+      opt = true,
       config = conf('whichkey'),
     })
 
     -- Display notifications
-    use({
-      'rcarriga/nvim-notify',
-      cond = utils.not_headless,
-      config = conf('notify'),
-    })
+    use('rcarriga/nvim-notify')
+    -- cond = utils.not_headless,
+    -- config = conf('notify'),
 
     -- Shows undo steps in a tree
     use({
@@ -106,11 +98,14 @@ packer.startup({
 
     -- Show colors inline
     use({
-      'norcalli/nvim-colorizer.lua',
+      'uga-rosa/ccc.nvim',
+      opt = false,
       config = function()
-        require('colorizer').setup({ 'lua', 'vim', 'kitty', 'conf' }, {
-          RGB = false,
-          mode = 'background',
+        require('ccc').setup({
+          win_opts = { border = fss.style.current.border },
+          highlighter = {
+            auto_enable = false,
+          },
         })
       end,
     })
@@ -136,7 +131,10 @@ packer.startup({
     use({
       'windwp/nvim-autopairs',
       after = 'nvim-cmp',
+      requires = 'nvim-cmp',
       config = function()
+        local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+        require('cmp').event:on('confirm_done', cmp_autopairs.on_confirm_done())
         require('nvim-autopairs').setup({
           close_triple_quotes = true,
           check_ts = true,
@@ -161,6 +159,13 @@ packer.startup({
       config = function()
         require('hclipboard').start()
       end,
+    })
+
+    use({
+      'gbprod/yanky.nvim',
+      keys = { 'p', 'P', '<localleader>p' },
+      requires = { { 'kkharji/sqlite.lua', module = 'sqlite' } },
+      config = conf('yanky'),
     })
 
     use({ 'chentoast/marks.nvim', config = conf('marks') })
@@ -335,6 +340,14 @@ packer.startup({
       'lukas-reineke/indent-blankline.nvim',
       config = conf('indentline'),
     })
+
+    use({
+      'folke/todo-comments.nvim',
+      config = function()
+        require('todo-comments').setup()
+      end,
+    })
+
     -- Virtual Column
     use({
       'lukas-reineke/virt-column.nvim',
@@ -345,37 +358,59 @@ packer.startup({
         require('virt-column').setup({ char = '▕' })
       end,
     })
+
+    use({ 'levouh/tint.nvim', event = 'BufRead', config = conf('tint') })
     -- }}}
     -- Lsp & Completion {{{1
 
     -- Install Lsp's
     use({
-      'williamboman/mason.nvim',
-      event = 'BufRead',
-      branch = 'main',
-      requires = { 'nvim-lspconfig', 'williamboman/mason-lspconfig.nvim' },
-      config = function()
-        local get_config = require('fss.servers')
-        require('mason').setup({ ui = { border = fss.style.current.border } })
-        require('mason-lspconfig').setup({ automatic_installation = true })
-        require('mason-lspconfig').setup_handlers({
-          function(name)
-            local config = get_config(name)
-            if config then
-              require('lspconfig')[name].setup(config)
-            end
-          end,
-        })
-      end,
+      {
+        'williamboman/mason.nvim',
+        event = 'BufRead',
+        requires = {
+          'nvim-lspconfig',
+          'williamboman/mason-lspconfig.nvim',
+        },
+        config = function()
+          local get_config = require('fss.servers')
+          require('mason').setup({ ui = { border = fss.style.current.border } })
+          require('mason-lspconfig').setup({ automatic_installation = true })
+          require('mason-lspconfig').setup_handlers({
+            function(name)
+              local config = get_config(name)
+              if config then
+                require('lspconfig')[name].setup(config)
+              end
+            end,
+          })
+        end,
+      },
+      {
+        'jayp0521/mason-null-ls.nvim',
+        requires = {
+          'williamboman/mason.nvim',
+          'jose-elias-alvarez/null-ls.nvim',
+        },
+        after = 'mason.nvim',
+        config = function()
+          require('mason-null-ls').setup({
+            automatic_installation = true,
+          })
+        end,
+      },
     })
 
     use({
       'neovim/nvim-lspconfig',
       module_pattern = 'lspconfig.*',
-      -- config = function()
-      --   local get_config = require('fss.servers')
-      --   require('lspconfig').ccls.setup(get_config('ccls'))
-      -- end,
+      config = function()
+        require('fss.highlights').plugin('lspconfig', {
+          { LspInfoBorder = { link = 'FloatBorder' } },
+        })
+        require('lspconfig.ui.windows').default_options.border =
+          fss.style.current.border
+      end,
     })
 
     use({
@@ -426,37 +461,39 @@ packer.startup({
     })
 
     use({
+      'j-hui/fidget.nvim',
+      config = function()
+        require('fidget').setup({
+          align = {
+            bottom = true,
+            right = true,
+          },
+          fmt = {
+            stack_upwards = false,
+          },
+        })
+        fss.augroup('CloseFidget', {
+          {
+            event = { 'VimLeavePre', 'LspDetach' },
+            command = 'silent! FidgetClose',
+          },
+        })
+      end,
+    })
+
+    use({
       'jose-elias-alvarez/null-ls.nvim',
       requires = { 'nvim-lua/plenary.nvim' },
       config = conf('null'),
     })
 
-    use({
-      'jose-elias-alvarez/typescript.nvim',
-      config = function()
-        fss.nnoremap(
-          'gS',
-          '<Cmd>TypeScriptOrganizeImports<CR>',
-          'TypeScript: Sort imports'
-        )
-        fss.nnoremap(
-          'gA',
-          '<Cmd>TypeScriptAddMissingImports<CR>',
-          'TypeScript: Add missing import'
-        )
-        fss.nnoremap(
-          'gR',
-          '<Cmd>TypeScriptRenameFile<CR>',
-          'TypeScript: Rename file'
-        )
-        fss.nnoremap('gF', '<Cmd>TypeScriptFixAll<CR>', 'TypeScript: Fix all')
-      end,
-    })
+    use('benknoble/vim-racket')
+
+    use('jose-elias-alvarez/typescript.nvim')
 
     -- Shows function signature
     use({
       'ray-x/lsp_signature.nvim',
-      opt = true,
       config = function()
         require('lsp_signature').setup({
           hint_enable = false,
@@ -469,6 +506,7 @@ packer.startup({
     use({
       'hrsh7th/nvim-cmp',
       module = 'cmp',
+      event = 'InsertEnter',
       config = conf('cmp'),
       requires = {
         { 'hrsh7th/cmp-nvim-lsp', module = 'cmp_nvim_lsp' },
@@ -479,6 +517,7 @@ packer.startup({
         { 'hrsh7th/cmp-buffer', after = 'nvim-cmp' },
         { 'hrsh7th/cmp-emoji', after = 'nvim-cmp' },
         { 'dmitmel/cmp-cmdline-history', after = 'nvim-cmp' },
+        { 'lukas-reineke/cmp-rg', tag = '*', after = 'nvim-cmp' },
         {
           'petertriho/cmp-git',
           after = 'nvim-cmp',
@@ -514,16 +553,15 @@ packer.startup({
     -- Testing & Debugging {{{1
     use({
       'nvim-neotest/neotest',
-      module = 'neotest',
-      config = conf('neotest').config,
       setup = conf('neotest').setup,
+      config = conf('neotest').config,
+      module = 'neotest',
       requires = {
         'rcarriga/neotest-plenary',
         'haydenmeade/neotest-jest',
         'rcarriga/neotest-vim-test',
         'nvim-lua/plenary.nvim',
         'nvim-treesitter/nvim-treesitter',
-        'antoinemadec/FixCursorHold.nvim',
       },
     })
 
@@ -553,15 +591,45 @@ packer.startup({
     use('chaoren/vim-wordmotion')
     -- }}}
     -- Themes & UI {{{1
+    use({
+      'folke/noice.nvim',
+      event = { 'CursorHold', 'CmdlineEnter' },
+      config = conf('noice'),
+    })
 
     use('sainnhe/everforest')
     use('EdenEast/nightfox.nvim')
     use('folke/tokyonight.nvim')
+    use({ 'LunarVim/horizon.nvim' })
 
     use({
       'stevearc/dressing.nvim',
       after = 'telescope.nvim',
       config = conf('dressing'),
+    })
+
+    use({
+      'Pocco81/true-zen.nvim',
+      setup = function()
+        fss.nnoremap(
+          '<localleader>am',
+          '<Cmd>TZMinimalist<CR>',
+          'zen: minimalist mode'
+        )
+        fss.nnoremap(
+          '<localleader>af',
+          '<Cmd>TZFocus<CR>',
+          'zen: focus on one window'
+        )
+        fss.nnoremap(
+          '<localleader>aa',
+          '<Cmd>TZAtaraxis<CR>',
+          'zen: narrow and now distractions'
+        )
+      end,
+      config = function()
+        require('true-zen').setup()
+      end,
     })
 
     -- Explore the filesystem
@@ -575,6 +643,11 @@ packer.startup({
         {
           'mrbjarksen/neo-tree-diagnostics.nvim',
           module = 'neo-tree.sources.diagnostics',
+        },
+        {
+          's1n7ax/nvim-window-picker',
+          tag = 'v1.*',
+          config = conf('window-picker'),
         },
       },
       config = conf('neotree'),
@@ -596,34 +669,38 @@ packer.startup({
     })
 
     -- Smooth scrolling
+    -- use({
+    --   'declancm/cinnamon.nvim',
+    --   config = function()
+    --     require('cinnamon').setup({
+    --       extra_keymaps = true,
+    --       scroll_limit = 50,
+    --       hide_cursor = true,
+    --       always_scroll = true,
+    --     })
+    --     local map = vim.keymap.set
+    --     map(
+    --       { 'n', 'x' },
+    --       '<ScrollWheelUp>',
+    --       "<Cmd>lua Scroll('<ScrollWheelUp>')<CR>"
+    --     )
+    --     map(
+    --       { 'n', 'x' },
+    --       '<ScrollWheelDown>',
+    --       "<Cmd>lua Scroll('<ScrollWheelDown>')<CR>"
+    --     )
+    --   end,
+    -- })
     use({
-      'declancm/cinnamon.nvim',
+      'karb94/neoscroll.nvim',
       config = function()
-        require('cinnamon').setup({
-          extra_keymaps = true,
-          scroll_limit = 50,
-          hide_cursor = true,
-          always_scroll = true,
-        })
-        local map = vim.keymap.set
-        map(
-          { 'n', 'x' },
-          '<ScrollWheelUp>',
-          "<Cmd>lua Scroll('<ScrollWheelUp>')<CR>"
-        )
-        map(
-          { 'n', 'x' },
-          '<ScrollWheelDown>',
-          "<Cmd>lua Scroll('<ScrollWheelDown>')<CR>"
-        )
+        require('neoscroll').setup({ hide_cursor = true })
       end,
     })
 
     -- Scrollbars
     use({
       'lewis6991/satellite.nvim',
-      enable = false,
-      opt = true,
       config = function()
         require('satellite').setup({
           handlers = {
@@ -634,7 +711,6 @@ packer.startup({
           excluded_filetypes = {
             'packer',
             'neo-tree',
-            'norg',
             'neo-tree-popup',
             'dapui_scopes',
             'dapui_stacks',
@@ -646,27 +722,12 @@ packer.startup({
     use({
       'SmiteshP/nvim-navic',
       requires = 'neovim/nvim-lspconfig',
-      config = function()
-        local s = fss.style
-        local misc = s.icons.misc
-
-        local icons = fss.map(function(icon)
-          return icon
-        end, s.current.lsp_icons)
-
-        -- Note: this options makes it so that it silences error messages
-        vim.g.navic_silence = true
-        require('nvim-navic').setup({
-          icons = icons,
-          highlight = true,
-          depth_limit_indicator = misc.ellipsis,
-          separator = (' %s '):format(misc.arrow_right),
-        })
-      end,
+      config = conf('navic'),
     })
 
     use({
       'kevinhwang91/nvim-ufo',
+      opt = true,
       requires = 'kevinhwang91/promise-async',
       config = conf('ufo'),
     })
@@ -685,8 +746,7 @@ packer.startup({
       cmd = 'Neogit',
       keys = { '<localleader>gs', '<localleader>gl', '<localleader>gp' },
       requires = 'plenary.nvim',
-      setup = conf('neogit').setup,
-      config = conf('neogit').config,
+      config = conf('neogit'),
     })
 
     use({
@@ -750,8 +810,9 @@ packer.startup({
     -- Knowledge and task management {{{1
     use({
       'lukas-reineke/headlines.nvim',
-      ft = { 'org', 'norg', 'markdown', 'yaml' },
+      ft = { 'markdown', 'yaml' },
     })
+
     -- }}}
     -- Profiling & Startup {{{1
     use('lewis6991/impatient.nvim')
@@ -789,15 +850,45 @@ packer.startup({
           end,
         },
         { 'Zane-/howdoi.nvim' },
-        { 'ilAYAli/scMRU.nvim', module = 'mru' },
+        {
+          'nvim-telescope/telescope-frecency.nvim',
+          after = 'telescope.nvim',
+          requires = { { 'kkharji/sqlite.lua', module = 'sqlite' } },
+          config = function()
+            require('telescope').load_extension('frecency')
+          end,
+        },
       },
     })
 
     use({
-      'phaazon/hop.nvim',
-      tag = 'v2.*',
-      keys = { { 'n', 's' }, 'f', 'F' },
-      config = conf('hop'),
+      'ggandor/leap.nvim',
+      keys = { { 'n', 's' } },
+      config = function()
+        require('leap').setup({
+          equivalence_classes = { ' \t\r\n', '([{', ')]}', '`"\'' },
+        })
+        fss.nnoremap('s', function()
+          require('leap').leap({
+            target_windows = vim.tbl_filter(function(win)
+              return fss.empty(vim.fn.win_gettype(win))
+            end, vim.api.nvim_tabpage_list_wins(0)),
+          })
+        end)
+      end,
+    })
+
+    use({
+      'ggandor/flit.nvim',
+      keys = { { 'n', 'f' } },
+      wants = { 'leap.nvim' },
+      after = 'leap.nvim',
+      config = function()
+        require('flit').setup({
+          labeled_modes = 'nvo',
+          multiline = false,
+        })
+      end,
     })
     -- }}}
   end,
@@ -805,8 +896,8 @@ packer.startup({
   log = { level = 'info' },
 
   config = {
-    max_jobs = 30,
     compile_path = PACKER_COMPILED_PATH,
+    preview_updates = true,
     display = {
       prompt_border = fss.style.current.border,
       open_cmd = 'silent topleft 65vnew',
@@ -841,16 +932,23 @@ fss.nnoremap('<leader>ps', '<Cmd>PackerSync<CR>', 'packer: sync')
 fss.nnoremap('<leader>pc', '<Cmd>PackerCompile<CR>', 'packer: compile')
 fss.nnoremap('<leader>pC', '<Cmd>PackerClean<CR>', 'packer: clean')
 
+local function reload()
+  fss.invalidate('fss.plugins', true)
+  packer.compile()
+end
+
 fss.augroup('PackerSetupInit', {
   {
     event = 'BufWritePost',
     pattern = { '*/fss/plugins/*.lua' },
     desc = 'Packer setup and reload',
-    command = function()
-      vim.cmd.doautocmd('LspDetach')
-      fss.invalidate('fss.plugins', true)
-      packer.compile()
-    end,
+    command = reload,
+  },
+  {
+    event = 'User',
+    pattern = { 'VimrcReloaded' },
+    desc = 'Packer setup and reload',
+    command = reload,
   },
   {
     event = 'User',

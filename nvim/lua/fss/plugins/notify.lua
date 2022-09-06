@@ -1,10 +1,29 @@
 return function()
   local api = vim.api
 
+  require('fss.highlights').plugin('notify', {
+    theme = {
+      everforest = {
+        { NotifyERRORBorder = { bg = { from = 'NormalFloat' } } },
+        { NotifyWARNBorder = { bg = { from = 'NormalFloat' } } },
+        { NotifyINFOBorder = { bg = { from = 'NormalFloat' } } },
+        { NotifyDEBUGBorder = { bg = { from = 'NormalFloat' } } },
+        { NotifyTRACEBorder = { bg = { from = 'NormalFloat' } } },
+        { NotifyERRORBody = { link = 'NormalFloat' } },
+        { NotifyWARNBody = { link = 'NormalFloat' } },
+        { NotifyINFOBody = { link = 'NormalFloat' } },
+        { NotifyDEBUGBody = { link = 'NormalFloat' } },
+        { NotifyTRACEBody = { link = 'NormalFloat' } },
+      },
+    },
+  })
+
   local notify = require('notify')
+
   notify.setup({
     timeout = 3000,
     stages = 'fade_in_slide_out',
+    top_down = false,
     background_colour = 'NormalFloat',
     max_width = function()
       return math.floor(vim.o.columns * 0.8)
@@ -14,7 +33,7 @@ return function()
     end,
     on_open = function(win)
       if api.nvim_win_is_valid(win) then
-        vim.api.nvim_win_set_config(win, { border = fss.style.current.border })
+        api.nvim_win_set_config(win, { border = fss.style.current.border })
       end
     end,
     render = function(...)
@@ -25,17 +44,4 @@ return function()
   })
   vim.notify = notify
   fss.nnoremap('<leader>nd', notify.dismiss, { desc = 'dismiss notifications' })
-
-  require('fss.highlights').plugin('notify', {
-    { NotifyERRORBorder = { bg = { from = 'NormalFloat' } } },
-    { NotifyWARNBorder = { bg = { from = 'NormalFloat' } } },
-    { NotifyINFOBorder = { bg = { from = 'NormalFloat' } } },
-    { NotifyDEBUGBorder = { bg = { from = 'NormalFloat' } } },
-    { NotifyTRACEBorder = { bg = { from = 'NormalFloat' } } },
-    { NotifyERRORBody = { link = 'NormalFloat' } },
-    { NotifyWARNBody = { link = 'NormalFloat' } },
-    { NotifyINFOBody = { link = 'NormalFloat' } },
-    { NotifyDEBUGBody = { link = 'NormalFloat' } },
-    { NotifyTRACEBody = { link = 'NormalFloat' } },
-  })
 end

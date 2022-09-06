@@ -2,9 +2,10 @@ return function()
   local parsers = require('nvim-treesitter.parsers')
   local rainbow_enabled = {
     'dart',
+    'racket',
+    'scheme',
     'typescriptreact',
     'javascriptreact',
-    'elixir',
   }
 
   require('nvim-treesitter.configs').setup({
@@ -12,6 +13,7 @@ return function()
       'lua',
       'go',
       'dart',
+      'diff',
       'rust',
       'typescript',
       'javascript',
@@ -43,15 +45,18 @@ return function()
         enable = true,
         include_surrounding_whitespace = true,
         keymaps = {
-          ['af'] = '@function.outer',
-          ['if'] = '@function.inner',
-          ['ac'] = '@class.outer',
-          ['ic'] = '@class.inner',
-          ['aC'] = '@conditional.outer',
-          ['iC'] = '@conditional.inner',
-          -- FIXME: this is unusable
-          -- https://github.com/nvim-treesitter/nvim-treesitter-textobjects/issues/133 is resolved
-          -- ['ax'] = '@comment.outer',
+          ['af'] = { query = '@function.outer', desc = 'ts: all function' },
+          ['if'] = { query = '@function.inner', desc = 'ts: inner function' },
+          ['ac'] = { query = '@class.outer', desc = 'ts: all class' },
+          ['ic'] = { query = '@class.inner', desc = 'ts: inner class' },
+          ['aC'] = {
+            query = '@conditional.outer',
+            desc = 'ts: all conditional',
+          },
+          ['iC'] = {
+            query = '@conditional.inner',
+            desc = 'ts: inner conditional',
+          },
         },
       },
       swap = {

@@ -75,7 +75,7 @@ return function()
     }, ','),
   }
   cmp.setup({
-    experimental = { ghost_text = true },
+    experimental = { ghost_text = false },
     preselect = cmp.PreselectMode.None,
     window = {
       completion = cmp.config.window.bordered(cmp_window),
@@ -89,7 +89,7 @@ return function()
     mapping = {
       ['<Tab>'] = cmp.mapping(tab, { 'i', 's', 'c' }),
       ['<S-Tab>'] = cmp.mapping(shift_tab, { 'i', 's', 'c' }),
-      ['<c-h>'] = cmp.mapping(function()
+      ['<C-h>'] = cmp.mapping(function(_)
         api.nvim_feedkeys(fn['copilot#Accept'](t('<Tab>')), 'n', true)
       end),
       ['<C-q>'] = cmp.mapping({
@@ -138,6 +138,12 @@ return function()
       { name = 'nvim_lsp' },
       { name = 'luasnip' },
       { name = 'path' },
+      {
+        name = 'rg',
+        keyword_length = 4,
+        max_item_count = 10,
+        option = { additional_arguments = '--max-depth 8' },
+      },
     }, {
       {
         name = 'buffer',
@@ -155,21 +161,23 @@ return function()
     }),
   })
 
-  local search_sources = {
-    sources = cmp.config.sources({
-      { name = 'nvim_lsp_document_symbol' },
-    }, {
-      { name = 'buffer' },
-    }),
-  }
+  cmp.setup.cmdline({ '/', '?' }, {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+      sources = cmp.config.sources(
+        { { name = 'nvim_lsp_document_symbol' } },
+        { { name = 'buffer' } }
+      ),
+    },
+  })
 
-  cmp.setup.cmdline('/', search_sources)
-  cmp.setup.cmdline('?', search_sources)
   cmp.setup.cmdline(':', {
     sources = cmp.config.sources({
       { name = 'cmdline', keyword_pattern = [=[[^[:blank:]\!]*]=] },
-      { name = 'path' },
-      { name = 'cmdline_history', priority = 10, max_item_count = 5 },
     }),
+  })
+
+  require('cmp').setup.filetype({ 'dap-repl', 'dapui_watches' }, {
+    sources = { { name = 'dap' } },
   })
 end

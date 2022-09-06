@@ -1,3 +1,7 @@
+if not fss then
+  return
+end
+
 --  Whitespace highlighting
 --@source: https://vim.fandom.com/wiki/Highlight_unwanted_spaces (comment at the bottom)
 --@implementation: https://github.com/inkarkat/vim-ShowTrailingWhitespace

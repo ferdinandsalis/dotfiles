@@ -1,27 +1,34 @@
------------------------------------------------------------------------------//
 -- Language servers
------------------------------------------------------------------------------//
-local fn = vim.fn
+
+local fn, fmt = vim.fn, string.format
 
 -- This function allows reading a per project "settings.json" file in the `.vim` directory of the project.
 ---@param client table<string, any>
 ---@return boolean
 local function on_init(client)
-  local path = client.workspace_folders[1].name
-  local config_path = path .. '/.vim/settings.json'
-  if fn.filereadable(config_path) == 0 then
+  local settings = client.workspace_folders[1].name .. '/.vim/settings.json'
+
+  if fn.filereadable(settings) == 0 then
     return true
   end
-  local ok, json = pcall(fn.readfile, config_path)
+  local ok, json = pcall(fn.readfile, settings)
   if not ok then
     return true
   end
+
   local overrides = vim.json.decode(table.concat(json, '\n'))
+
   for name, config in pairs(overrides) do
     if name == client.name then
-      local original = client.config
-      client.config = vim.tbl_deep_extend('force', original, config)
+      client.config = vim.tbl_deep_extend('force', client.config, config)
       client.notify('workspace/didChangeConfiguration')
+
+      vim.schedule(function()
+        local path = fn.fnamemodify(settings, ':~:.')
+        local msg =
+          fmt('loaded local settings for %s from %s', client.name, path)
+        vim.notify_once(msg, 'info', { title = 'LSP Settings' })
+      end)
     end
   end
   return true
@@ -33,16 +40,30 @@ require('typescript').setup({
 })
 
 local servers = {
-  tailwindcss = true,
+  -- graphql = true,
+  -- tsserver = true,
   elixirls = true,
-  graphql = true,
   jsonls = true,
   dockerls = true,
   terraformls = true,
+  tailwindcss = true,
   bashls = true,
   vimls = true,
-  cssls = true,
+  cssls = function()
+    return {
+      settings = {
+        css = {
+          validate = true,
+          lint = {
+            unknownAtRules = 'ignore',
+          },
+        },
+      },
+    }
+  end,
+  eslint = true,
   yamlls = true,
+  racket_langserver = true,
   sqls = function()
     return {
       root_dir = require('lspconfig').util.root_pattern('.git'),
@@ -113,13 +134,11 @@ return function(name)
   config.on_init = on_init
   config.capabilities = config.capabilities
     or vim.lsp.protocol.make_client_capabilities()
-  config.capabilities.textDocument.foldingRange = {
-    dynamicRegistration = false,
-    lineFoldingOnly = true,
-  }
+  config.capabilities.textDocument.foldingRange =
+    { dynamicRegistration = false, lineFoldingOnly = true }
   local ok, cmp_nvim_lsp = fss.require('cmp_nvim_lsp')
   if ok then
-    cmp_nvim_lsp.update_capabilities(config.capabilities)
+    cmp_nvim_lsp.default_capabilities(config.capabilities)
   end
   return config
 end

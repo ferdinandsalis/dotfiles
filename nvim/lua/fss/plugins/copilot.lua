@@ -1,11 +1,5 @@
 return function()
   vim.g.copilot_no_tab_map = true
-
-  fss.imap('<c-h>', [[copilot#Accept("\<CR>")]], {
-    expr = true,
-    script = true,
-  })
-
   fss.imap(
     '<Plug>(as-copilot-accept)',
     "copilot#Accept('<Tab>')",

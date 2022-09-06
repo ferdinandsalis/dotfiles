@@ -37,7 +37,7 @@ local function hl_search()
   local curr_line = api.nvim_get_current_line()
   local ok, match = pcall(fn.matchstrpos, curr_line, fn.getreg('/'), 0)
   if not ok then
-    return vim.notify(match, 'error', { title = 'HL SEARCH' })
+    return
   end
   local _, p_start, p_end = unpack(match)
   -- if the cursor is in a search result, leave highlighting on
@@ -64,8 +64,20 @@ fss.augroup('VimrcIncSearchHighlight', {
     pattern = { 'hlsearch' },
     command = function()
       vim.schedule(function()
-        vim.cmd('redrawstatus')
+        vim.cmd.redrawstatus()
       end)
+    end,
+  },
+  {
+    event = 'RecordingEnter',
+    command = function()
+      vim.o.hlsearch = false
+    end,
+  },
+  {
+    event = 'RecordingLeave',
+    command = function()
+      vim.o.hlsearch = true
     end,
   },
 })
@@ -111,10 +123,7 @@ fss.augroup('SmartClose', {
 
       local is_eligible = is_unmapped
         or vim.wo.previewwindow
-        or vim.tbl_contains(
-          smart_close_buftypes,
-          vim.bo.buftype
-        )
+        or vim.tbl_contains(smart_close_buftypes, vim.bo.buftype)
         or vim.tbl_contains(smart_close_filetypes, vim.bo.filetype)
 
       if is_eligible then
@@ -139,7 +148,7 @@ fss.augroup('SmartClose', {
     nested = true,
     command = function()
       if vim.bo.filetype ~= 'qf' then
-        vim.cmd('silent! lclose')
+        vim.cmd.lclose({ mods = { silent = true } })
       end
     end,
   },
@@ -188,7 +197,7 @@ local function clear_commandline()
     end
     timer = vim.defer_fn(function()
       if fn.mode() == 'n' then
-        vim.cmd([[echon '']])
+        vim.cmd.echon("''")
       end
     end, 10000)
   end
@@ -219,8 +228,17 @@ fss.augroup('TextYankHighlight', {
 
 local column_exclude = { 'gitcommit' }
 local column_block_list = {
+  'NeogitCommitSelectView',
   'DiffviewFileHistory',
+  'log',
+  'norg',
+  'startify',
+  'vimwiki',
+  'vim-plug',
+  'alpha',
+  'dap-repl',
   'help',
+  'fugitive',
   'mail',
   'org',
   'orgagenda',
@@ -239,6 +257,7 @@ local function check_color_column()
       and not vim.tbl_contains(column_exclude, buffer.filetype)
     then
       local too_small = api.nvim_win_get_width(win) <= buffer.textwidth + 1
+      -- TODO: This should do a pattern match against a string rather than direct comparison
       local is_excluded = vim.tbl_contains(column_block_list, buffer.filetype)
       if is_excluded or too_small then
         window.colorcolumn = ''
@@ -262,28 +281,21 @@ fss.augroup('UpdateVim', {
     -- it correctly sources $MYVIMRC but all the other files that it
     -- requires will need to be resourced or reloaded themselves
     event = 'BufWritePost',
-    pattern = {
-      '$DOTFILES/**/nvim/plugin/*.{lua,vim}',
-      fn.expand('$MYVIMRC'),
-    },
+    pattern = { vim.g.vim_dir .. '/plugin/*.{lua,vim}', vim.env.MYVIMRC },
     nested = true,
     command = function(args)
       local path = api.nvim_buf_get_name(args.buf)
-      vim.cmd('source ' .. path)
-      local ok, msg = pcall(
-        vim.cmd,
-        'source $MYVIMRC | redraw | silent doautocmd ColorScheme'
+      vim.cmd.source(fn.expand('$MYVIMRC'))
+      vim.cmd.source(path)
+      vim.cmd.redraw()
+      api.nvim_exec_autocmds('ColorScheme', {})
+      api.nvim_exec_autocmds('User', { pattern = 'VimrcReloaded' })
+      local msg = fmt(
+        'sourced %s and %s',
+        vim.fs.basename(path),
+        vim.fs.basename(vim.env.MYVIMRC)
       )
-      local m = ok
-          and fmt(
-            'sourced %s and %s',
-            path,
-            fn.fnamemodify(vim.env.MYVIMRC, ':t')
-          )
-        or msg
-      if m then
-        vim.notify(m)
-      end
+      vim.notify(msg, 'info', { title = 'Sourcing init.lua' })
     end,
   },
   {
@@ -337,22 +349,24 @@ fss.augroup('WindowBehaviours', {
   },
 })
 
-local cursorline_exclude = { 'alpha' }
+local cursorline_exclude = { 'alpha', 'toggleterm' }
 
-local function should_show_cursorline()
-  return vim.bo.buftype ~= 'terminal'
+---@param buf number
+---@return boolean
+local function should_show_cursorline(buf)
+  return vim.bo[buf].buftype ~= 'terminal'
     and not vim.wo.previewwindow
     and vim.wo.winhighlight == ''
-    and vim.bo.filetype ~= ''
-    and not vim.tbl_contains(cursorline_exclude, vim.bo.filetype)
+    and vim.bo[buf].filetype ~= ''
+    and not vim.tbl_contains(cursorline_exclude, vim.bo[buf].filetype)
 end
 
 fss.augroup('Cursorline', {
   {
     event = { 'BufEnter' },
     pattern = { '*' },
-    command = function()
-      vim.wo.cursorline = should_show_cursorline()
+    command = function(args)
+      vim.wo.cursorline = should_show_cursorline(args.buf)
     end,
   },
   {
@@ -386,29 +400,25 @@ fss.augroup('Utilities', {
     pattern = { 'file:///*' },
     nested = true,
     command = function(args)
-      vim.cmd(fmt('bd!|edit %s', vim.uri_to_fname(args.file)))
-    end,
-  },
-  {
-    -- When editing a file, always jump to the last known cursor position.
-    -- Don't do it for commit messages, when the position is invalid.
-    event = { 'BufReadPost' },
-    command = function()
-      if vim.bo.ft ~= 'gitcommit' and vim.fn.win_gettype() ~= 'popup' then
-        local last_place_mark = vim.api.nvim_buf_get_mark(0, '"')
-        local line_nr = last_place_mark[1]
-        local last_line = vim.api.nvim_buf_line_count(0)
-
-        if line_nr > 0 and line_nr <= last_line then
-          vim.api.nvim_win_set_cursor(0, last_place_mark)
-        end
-      end
+      vim.cmd.bdelete({ bang = true })
+      vim.cmd.edit(vim.uri_to_fname(args.file))
     end,
   },
   {
     event = { 'FileType' },
     pattern = { 'gitcommit', 'gitrebase' },
     command = 'set bufhidden=delete',
+  },
+  {
+    event = { 'FileType' },
+    pattern = {
+      'org',
+      'NeogitCommitMessage',
+      'markdown',
+    },
+    command = function()
+      vim.opt_local.spell = true
+    end,
   },
   {
     event = { 'BufWritePre', 'FileWritePre' },
@@ -420,7 +430,7 @@ fss.augroup('Utilities', {
     pattern = { '*' },
     command = function()
       if can_save() then
-        vim.cmd('silent! update')
+        vim.cmd.update({ mods = { silent = true } })
       end
     end,
   },
@@ -447,7 +457,7 @@ fss.augroup('TerminalAutocommands', {
     command = function()
       --- automatically close a terminal if the job was successful
       if not vim.v.event.status == 0 then
-        vim.cmd('bdelete! ' .. fn.expand('<abuf>'))
+        vim.cmd.bdelete({ fn.expand('<abuf>'), bang = true })
       end
     end,
   },

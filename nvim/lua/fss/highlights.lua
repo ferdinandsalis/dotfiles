@@ -1,8 +1,7 @@
 local fmt = string.format
-local fn = vim.fn
 local api = vim.api
 
-local M = {}
+local M = { win_hl = {} }
 
 ---@class HighlightAttributes
 ---@field from string
@@ -16,6 +15,15 @@ local M = {}
 ---@field fg string | HighlightAttributes
 ---@field bg string | HighlightAttributes
 ---@field sp string | HighlightAttributes
+---@field bold boolean
+---@field italic boolean
+---@field undercurl boolean
+---@field underline boolean
+---@field underdot boolean
+
+---@class NvimHighlightData
+---@field foreground string
+---@field background string
 ---@field bold boolean
 ---@field italic boolean
 ---@field undercurl boolean
@@ -72,6 +80,7 @@ end
 ---@param attribute string?
 ---@param fallback string?
 ---@return string
+---@overload fun(group: string): NvimHighlightData
 function M.get(group, attribute, fallback)
   assert(group, 'cannot get a highlight without specifying a group name')
   local data = get_highlight(group)
@@ -84,10 +93,9 @@ function M.get(group, attribute, fallback)
   if color then
     return color
   end
-  local msg = fmt("%s's %s does not exist", group, attr)
-  vim.schedule(function()
-    vim.notify(msg, 'error')
-  end)
+  -- vim.schedule(function()
+  --   vim.notify(fmt("%s's %s does not exist", group, attr), 'error')
+  -- end)
   return 'NONE'
 end
 
@@ -102,18 +110,19 @@ end
 --- This will take the foreground colour from ErrorMsg and set it to the foreground of MatchParen.
 ---@param name string
 ---@param opts HighlightKeys
-function M.set(name, opts)
-  assert(name and opts, "Both 'name' and 'opts' must be specified")
-  assert(
-    type(name) == 'string',
-    fmt("Name must be a string but got '%s'", name)
-  )
-  assert(
-    type(opts) == 'table',
-    fmt("Opts must be a table but got '%s'", vim.inspect(opts))
-  )
+---@overload fun(namespace: integer, name: string, opts: HighlightKeys)
+function M.set(namespace, name, opts)
+  if type(namespace) == 'string' and type(name) == 'table' then
+    opts, name, namespace = name, namespace, 0
+  end
 
-  local hl = get_highlight(opts.inherit or name)
+  vim.validate({
+    opts = { opts, 'table' },
+    name = { name, 'string' },
+    namespace = { namespace, 'number' },
+  })
+
+  local parent_hl = get_highlight(opts.inherit or name)
   opts.inherit = nil
 
   for attr, value in pairs(opts) do
@@ -125,26 +134,37 @@ function M.set(name, opts)
     end
   end
 
-  local ok, msg = pcall(
+  local hl = vim.tbl_extend('force', parent_hl, opts)
+  fss.wrap_err(
+    fmt('failed to set %s because', name),
     api.nvim_set_hl,
-    0,
+    namespace,
     name,
-    vim.tbl_extend('force', hl, opts)
+    hl
   )
-  if not ok then
-    vim.notify(fmt('Failed to set %s because - %s', name, msg))
-  end
+end
+
+--- Set window local highlights
+---@param name string
+---@param win_id number
+---@param hls HighlightKeys[]
+function M.win_hl.set(name, win_id, hls)
+  local namespace = api.nvim_create_namespace(name)
+  M.all(hls, namespace)
+  api.nvim_win_set_hl_ns(win_id, namespace)
 end
 
 --- Check if the current window has a winhighlight
 --- which includes the specific target highlight
+--- FIXME: setting a window highlight with `nvim_win_set_hl_ns` will cause this check to fail as
+--- a winhighlight is not set and the win namespace cannot be detected
 --- @param win_id integer
 --- @vararg string
 --- @return boolean, string
-function M.has_win_highlight(win_id, ...)
+function M.win_hl.exists(win_id, ...)
   local win_hl = vim.wo[win_id].winhighlight
   for _, target in ipairs({ ... }) do
-    if win_hl:match(target) ~= nil then
+    if win_hl:match(target) then
       return true, win_hl
     end
   end
@@ -157,23 +177,26 @@ end
 ---@param target string
 ---@param name string
 ---@param fallback string
-function M.adopt_win_highlight(win_id, target, name, fallback)
+function M.win_hl.adopt(win_id, target, name, fallback)
   local win_hl_name = name .. win_id
-  local _, win_hl = M.has_win_highlight(win_id, target)
-  local hl_exists = fn.hlexists(win_hl_name) > 0
-  if hl_exists then
+  local _, win_hl = M.win_hl.exists(win_id, target)
+
+  if pcall(api.nvim_get_hl_by_name, win_hl_name, true) then
     return win_hl_name
   end
-  local parts = vim.split(win_hl, ',')
-  local found = fss.find(parts, function(part)
+
+  local hl = fss.find(function(part)
     return part:match(target)
-  end)
-  if not found then
+  end, vim.split(win_hl, ','))
+  if not hl then
     return fallback
   end
-  local hl_group = vim.split(found, ':')[2]
-  local bg = M.get(hl_group, 'bg')
-  M.set(win_hl_name, { background = bg, inherit = fallback })
+
+  local hl_group = vim.split(hl, ':')[2]
+  M.set(
+    win_hl_name,
+    { inherit = fallback, background = { from = hl_group, attr = 'bg' } }
+  )
   return win_hl_name
 end
 
@@ -184,32 +207,40 @@ end
 
 ---Apply a list of highlights
 ---@param hls table<string, HighlightKeys>
-function M.all(hls)
+---@param namespace integer?
+function M.all(hls, namespace)
   fss.foreach(function(hl)
-    M.set(next(hl))
+    M.set(namespace or 0, next(hl))
   end, hls)
 end
 
 -- Plugin highlights
+
+--- Takes the overrides for each theme and merges the lists, avoiding duplicates and ensuring
+--- priority is given to specific themes rather than the fallback
+---@param theme table<string, table<string, string>>
+---@return table<string, string>
+local function add_theme_overrides(theme)
+  local res, seen = {}, {}
+  local list = vim.list_extend(theme[vim.g.colors_name] or {}, theme['*'] or {})
+  for _, hl in ipairs(list) do
+    local n = next(hl)
+    if not seen[n] then
+      res[#res + 1] = hl
+    end
+    seen[n] = true
+  end
+  return res
+end
+
 ---Apply highlights for a plugin and refresh on colorscheme change
 ---@param name string plugin name
 ---@param opts table<string, table> map of highlights
 function M.plugin(name, opts)
   -- Options can be specified by theme name so check if they have been or there is a general
   -- definition otherwise use the opts as is
-  local theme = opts.theme
-  if theme then
-    local res, seen = {}, {}
-    for _, hl in
-      ipairs(vim.list_extend(theme[vim.g.colors_name] or {}, theme['*'] or {}))
-    do
-      local n = next(hl)
-      if not seen[n] then
-        res[#res + 1] = hl
-      end
-      seen[n] = true
-    end
-    opts = res
+  if opts.theme then
+    opts = add_theme_overrides(opts.theme)
     if not next(opts) then
       return
     end
@@ -233,28 +264,14 @@ end
 -- Highlights
 
 local function general_overrides()
-  local normal_bg = M.get('Normal', 'bg')
-  local dim = M.alter_color(normal_bg, 20)
-
   M.all({
-    { Dim = { foreground = dim } },
-    { VertSplit = { background = 'NONE', foreground = dim } },
-    { WinSeparator = { background = 'NONE', foreground = dim } },
-    { CursorLineNr = { inherit = 'CursorLine', bold = true } },
+    { Dim = { foreground = { from = 'Normal', attr = 'bg', alter = -25 } } },
+    { URL = { foreground = { from = 'Identifier' } } },
+    { VertSplit = { background = 'NONE', foreground = { from = 'Dim' } } },
+    { WinSeparator = { background = 'NONE', foreground = { from = 'Dim' } } },
+    { CursorLineNr = { bold = true } },
     { FoldColumn = { background = 'bg' } },
     { LspCodeLens = { inherit = 'Comment', bold = true, italic = false } },
-
-    -- Floats
-    { NormalFloat = {
-      bg = { from = 'Normal', alter = -8 },
-    } },
-    {
-      FloatBorder = {
-        bg = { from = 'Normal', alter = -8 },
-        fg = { from = 'Comment', alter = 8 },
-      },
-    },
-
     { Comment = { italic = true } },
     { Type = { italic = true, bold = true } },
     { Include = { italic = true, bold = false } },
@@ -265,8 +282,6 @@ local function general_overrides()
         italic = true,
       },
     },
-    { SignColumn = { background = 'NONE' } },
-    { EndOfBuffer = { background = 'NONE' } },
   })
 end
 
@@ -275,7 +290,7 @@ local function colorscheme_overrides()
     local palette = fss.style.palette
 
     M.all({
-      { URL = { foreground = palette.blue } },
+      { Dim = { foreground = { from = 'Normal', attr = 'bg', alter = 20 } } },
       { Constant = { bold = true } },
       { MsgArea = { background = { from = 'Normal', alter = -10 } } },
       { MsgSeparator = { link = 'MsgArea' } },
@@ -285,27 +300,68 @@ local function colorscheme_overrides()
       { WhichkeyFloat = { link = 'NormalFloat' } },
       { ScrollView = { link = 'PMenu' } },
       { ColorColumn = { link = 'CursorLine' } },
+      { NormalFloat = { bg = { from = 'Normal', alter = 10 } } },
+      { Constant = { bold = true } },
+      { MsgArea = { background = { from = 'Normal', alter = -10 } } },
+      { MsgSeparator = { link = 'MsgArea' } },
+      { StatusLine = { background = { from = 'Normal', alter = 16 } } },
+      { CursorLine = { background = { from = 'Normal', alter = 8 } } },
+      { ColorColumn = { link = 'CursorLine' } },
+      { SignColumn = { background = 'NONE' } },
+      { EndOfBuffer = { background = 'NONE' } },
+      { ['@Error'] = { foreground = 'NONE', background = 'NONE' } },
+      {
+        FloatBorder = {
+          bg = { from = 'Normal', alter = 10 },
+          fg = { from = 'StatusLine', attr = 'bg' },
+        },
+      },
+      {
+        IndentBlanklineContextStart = {
+          underline = true,
+          sp = palette.bg5,
+        },
+      },
     })
   end
 end
 
 local function set_sidebar_highlight()
-  local normal_bg = M.get('Normal', 'bg')
-  local split_color = M.get('VertSplit', 'fg')
-  local bg_color = M.alter_color(normal_bg, -10)
-  local dark_bg_color = M.alter_color(normal_bg, -14)
   M.all({
-    { PanelBackground = { background = bg_color } },
-    { PanelDarkBackground = { background = dark_bg_color } },
     {
-      PanelHeading = { background = M.get('StatusLine', 'bg'), bold = true },
+      PanelBackground = {
+        background = { from = 'Normal', alter = -7 },
+      },
     },
-    { PanelVertSplit = { foreground = split_color, background = bg_color } },
     {
-      PanelWinSeparator = { foreground = split_color, background = bg_color },
+      PanelDarkBackground = {
+        background = { from = 'Normal', alter = -14 },
+      },
     },
-    { PanelStNC = { background = normal_bg, foreground = split_color } },
-    { PanelSt = { background = M.get('StatusLine', 'bg') } },
+    {
+      PanelHeading = {
+        background = { from = 'StatusLine', bold = true },
+      },
+    },
+    {
+      PanelVertSplit = {
+        foreground = { from = 'VertSplit' },
+        background = { from = 'PanelBackground' },
+      },
+    },
+    {
+      PanelWinSeparator = {
+        foreground = { from = 'VertSplit' },
+        background = { from = 'PanelBackground' },
+      },
+    },
+    {
+      PanelStNC = {
+        background = { from = 'Normal' },
+        foreground = { from = 'VertSplit' },
+      },
+    },
+    { PanelSt = { background = { from = 'StatusLine' } } },
   })
 end
 
@@ -356,29 +412,29 @@ fss.augroup('UserHighlights', {
 -- Color Scheme {{{1
 
 -- -- Tokyonight
--- if fss.plugin_installed('tokyonight.nvim') then
---   vim.g.tokyonight_transparent = false
---   vim.g.tokyonight_style = 'night' -- "storm" | "day"
---   vim.g.tokyonight_sidebars = { 'neo-tree', 'qf', 'terminal', 'packer' }
---   vim.g.tokyonight_dark_sidebar = true
---   local ok, msg = pcall(vim.cmd.colorscheme, 'tokyonight')
---   if not ok then
---     vim.notify(fmt('Theme failed to load because: %s', msg), 'error')
---   end
--- end
-
--- Everforest
-if fss.plugin_installed('everforest') then
-  vim.g.everforest_background = 'medium' -- "hard" | "medium" | "soft"
-  vim.g.everforest_better_performance = true
-  vim.g.everforest_cursor = 'auto'
-  vim.g.everforest_enable_italic = true
-  vim.g.everforest_transparent_background = false
-  local ok, msg = pcall(vim.cmd.colorscheme, 'everforest')
+if fss.plugin_installed('tokyonight.nvim') then
+  vim.g.tokyonight_transparent = false
+  vim.g.tokyonight_style = 'night' -- "storm" | "day"
+  vim.g.tokyonight_sidebars = { 'neo-tree', 'qf', 'terminal', 'packer' }
+  vim.g.tokyonight_dark_sidebar = true
+  local ok, msg = pcall(vim.cmd.colorscheme, 'tokyonight-moon')
   if not ok then
     vim.notify(fmt('Theme failed to load because: %s', msg), 'error')
   end
 end
+
+-- Everforest
+-- if fss.plugin_installed('everforest') then
+--   vim.g.everforest_background = 'medium' -- "hard" | "medium" | "soft"
+--   vim.g.everforest_better_performance = true
+--   vim.g.everforest_cursor = 'auto'
+--   vim.g.everforest_enable_italic = true
+--   vim.g.everforest_transparent_background = false
+--   local ok, msg = pcall(vim.cmd.colorscheme, 'everforest')
+--   if not ok then
+--     vim.notify(fmt('Theme failed to load because: %s', msg), 'error')
+--   end
+-- end
 
 -- Nightfox
 -- if fss.plugin_installed('nightfox.nvim') then

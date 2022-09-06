@@ -4,6 +4,7 @@ return function()
     shade_terminals = false,
     direction = 'horizontal',
     persist_mode = true,
+    autochdir = true,
     insert_mappings = false,
     start_in_insert = true,
     winbar = {

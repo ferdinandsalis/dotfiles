@@ -1,5 +1,8 @@
 return function()
+  local cwd = vim.fn.getcwd()
   require('gitsigns').setup({
+    _threaded_diff = true,
+    _extmark_signs = true,
     signs = {
       add = { hl = 'GitSignsAdd', text = '▌' },
       change = { hl = 'GitSignsChange', text = '▌' },
@@ -7,8 +10,10 @@ return function()
       topdelete = { hl = 'GitSignsDelete', text = '▌' },
       changedelete = { hl = 'GitSignsChange', text = '▌' },
     },
-    _threaded_diff = true, -- NOTE: experimental but I'm curious
     word_diff = false,
+    current_line_blame = not cwd:match('personal') and not cwd:match(
+      'dotfiles'
+    ),
     numhl = false,
     preview_config = {
       border = fss.style.current.border,
@@ -20,34 +25,41 @@ return function()
         gs.setqflist('all')
       end
 
-      require('which-key').register({
-        ['<leader>h'] = {
-          name = '+gitsigns hunk',
-          u = { gs.undo_stage_hunk, 'undo stage' },
-          p = { gs.preview_hunk, 'preview current hunk' },
-          s = { gs.stage_hunk, 'stage current hunk' },
-          r = { gs.reset_hunk, 'reset current hunk' },
-          b = { gs.toggle_current_line_blame, 'toggle current line blame' },
-          d = { gs.toggle_deleted, 'show deleted lines' },
-          w = { gs.toggle_word_diff, 'gitsigns: toggle word diff' },
-        },
-        ['<localleader>g'] = {
-          name = '+git',
-          w = { gs.stage_buffer, 'gitsigns: stage entire buffer' },
-          r = {
-            name = '+reset',
-            e = { gs.reset_buffer, 'gitsigns: reset entire buffer' },
-          },
-          b = {
-            name = '+blame',
-            l = { gs.blame_line, 'gitsigns: blame current line' },
-          },
-        },
-        ['<leader>lm'] = {
-          qf_list_modified,
-          'gitsigns: list modified in quickfix',
-        },
-      })
+      fss.nnoremap('<leader>hu', gs.undo_stage_hunk, 'undo stage')
+      fss.nnoremap('<leader>hp', gs.preview_hunk, 'preview current hunk')
+      fss.nnoremap('<leader>hs', gs.stage_hunk, 'stage current hunk')
+      fss.nnoremap('<leader>hr', gs.reset_hunk, 'reset current hunk')
+      fss.nnoremap(
+        '<leader>hb',
+        gs.toggle_current_line_blame,
+        'toggle current line blame'
+      )
+      fss.nnoremap('<leader>hd', gs.toggle_deleted, 'show deleted lines')
+      fss.nnoremap(
+        '<leader>hw',
+        gs.toggle_word_diff,
+        'gitsigns: toggle word diff'
+      )
+      fss.nnoremap(
+        '<localleader>gw',
+        gs.stage_buffer,
+        'gitsigns: stage entire buffer'
+      )
+      fss.nnoremap(
+        '<localleader>gre',
+        gs.reset_buffer,
+        'gitsigns: reset entire buffer'
+      )
+      fss.nnoremap(
+        '<localleader>gbl',
+        gs.blame_line,
+        'gitsigns: blame current line'
+      )
+      fss.nnoremap(
+        '<leader>lm',
+        qf_list_modified,
+        'gitsigns: list modified in quickfix'
+      )
 
       -- Navigation
       fss.nnoremap('[h', function()

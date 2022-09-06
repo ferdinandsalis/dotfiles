@@ -2,22 +2,31 @@ return function()
   local fn = vim.fn
   local groups = require('bufferline.groups')
 
+  local function offset(name, ft)
+    return {
+      filetype = ft,
+      text = name,
+      text_align = 'left',
+      seperator = true,
+      highlight = 'PanelDarkHeading',
+    }
+  end
+
   require('bufferline').setup({
     highlights = {
-      info = { gui = 'undercurl' },
-      info_selected = { gui = 'undercurl' },
-      info_visible = { gui = 'undercurl' },
-      warning = { gui = 'undercurl' },
-      warning_selected = { gui = 'undercurl' },
-      warning_visible = { gui = 'undercurl' },
-      error = { gui = 'undercurl' },
-      error_selected = { gui = 'undercurl' },
-      error_visible = { gui = 'undercurl' },
+      info = { undercurl = false },
+      info_selected = { undercurl = false },
+      info_visible = { undercurl = false },
+      warning = { undercurl = false },
+      warning_selected = { undercurl = false },
+      warning_visible = { undercurl = false },
+      error = { undercurl = false },
+      error_selected = { undercurl = false },
+      error_visible = { undercurl = false },
     },
     options = {
-      debug = {
-        logging = true,
-      },
+      debug = { logging = true },
+      hover = { enabled = true, reveal = { 'close' } },
       themable = true,
       navigation = { mode = 'uncentered' },
       mode = 'buffers', -- tabs
@@ -26,54 +35,15 @@ return function()
       show_buffer_icons = false,
       show_close_icon = false,
       show_buffer_close_icons = true,
-      diagnostics = 'nvim_lsp',
+      -- diagnostics = 'nvim_lsp',
       diagnostics_indicator = false,
       diagnostics_update_in_insert = false,
       offsets = {
-        {
-          filetype = 'pr',
-          highlight = 'PanelHeading',
-        },
-        {
-          filetype = 'dbui',
-          highlight = 'PanelHeading',
-        },
-        {
-          filetype = 'undotree',
-          text = 'Undotree',
-          highlight = 'PanelHeading',
-          text_align = 'left',
-        },
-        {
-          filetype = 'neo-tree',
-          text = 'Explorer',
-          highlight = 'PanelHeading',
-          text_align = 'left',
-        },
-        {
-          filetype = 'DiffviewFiles',
-          text = 'Diff',
-          highlight = 'PanelHeading',
-          text_align = 'left',
-        },
-        {
-          filetype = 'flutterToolsOutline',
-          text = 'Flutter Outline',
-          highlight = 'PanelHeading',
-          text_align = 'left',
-        },
-        {
-          filetype = 'Outline',
-          text = 'Symbols',
-          highlight = 'PanelHeading',
-          text_align = 'left',
-        },
-        {
-          filetype = 'packer',
-          text = 'Packer',
-          highlight = 'PanelHeading',
-          text_align = 'left',
-        },
+        offset('DATABASE VIEWER', 'dbui'),
+        offset('UNDOTREE', 'undotree'),
+        offset('EXPLORER', 'neo-tree'),
+        offset('DIFF VIEW', 'DiffviewFiles'),
+        offset('PACKER', 'packer'),
       },
       groups = {
         options = {
@@ -121,31 +91,30 @@ return function()
     },
   })
 
-  require('which-key').register({
-    ['gD'] = { '<Cmd>BufferLinePickClose<CR>', 'bufferline: delete buffer' },
-    ['gb'] = { '<Cmd>BufferLinePick<CR>', 'bufferline: pick buffer' },
-    ['<tab>'] = { '<Cmd>BufferLineCycleNext<CR>', 'bufferline: next' },
-    ['<S-tab>'] = { '<Cmd>BufferLineCyclePrev<CR>', 'bufferline: prev' },
-    ['[b'] = { '<Cmd>BufferLineMoveNext<CR>', 'bufferline: move next' },
-    [']b'] = { '<Cmd>BufferLineMovePrev<CR>', 'bufferline: move prev' },
-    ['<leader>on'] = {
-      '<ESC>:execute "BufferLineCloseLeft" <bar> :execute "BufferLineCloseRight"<CR>',
-      'bufferline: current only',
-    },
-    ['<leader>bp'] = {
-      '<Cmd>BufferLineTogglePin<CR>',
-      'bufferline: toggle pin',
-    },
-    ['<leader>1'] = { '<Cmd>BufferLineGoToBuffer 1<CR>', 'which_key_ignore' },
-    ['<leader>2'] = { '<Cmd>BufferLineGoToBuffer 2<CR>', 'which_key_ignore' },
-    ['<leader>3'] = { '<Cmd>BufferLineGoToBuffer 3<CR>', 'which_key_ignore' },
-    ['<leader>4'] = { '<Cmd>BufferLineGoToBuffer 4<CR>', 'which_key_ignore' },
-    ['<leader>5'] = { '<Cmd>BufferLineGoToBuffer 5<CR>', 'which_key_ignore' },
-    ['<leader>6'] = { '<Cmd>BufferLineGoToBuffer 6<CR>', 'which_key_ignore' },
-    ['<leader>7'] = { '<Cmd>BufferLineGoToBuffer 7<CR>', 'which_key_ignore' },
-    ['<leader>8'] = { '<Cmd>BufferLineGoToBuffer 8<CR>', 'which_key_ignore' },
-    ['<leader>9'] = { '<Cmd>BufferLineGoToBuffer 9<CR>', 'which_key_ignore' },
-  })
+  fss.nnoremap(
+    'gD',
+    '<Cmd>BufferLinePickClose<CR>',
+    'bufferline: delete buffer'
+  )
+  fss.nnoremap('gb', '<Cmd>BufferLinePick<CR>', 'bufferline: pick buffer')
+  fss.nnoremap('<tab>', '<Cmd>BufferLineCycleNext<CR>', 'bufferline: next')
+  fss.nnoremap('<S-tab>', '<Cmd>BufferLineCyclePrev<CR>', 'bufferline: prev')
+  fss.nnoremap('[b', '<Cmd>BufferLineMoveNext<CR>', 'bufferline: move next')
+  fss.nnoremap(']b', '<Cmd>BufferLineMovePrev<CR>', 'bufferline: move prev')
+  fss.nnoremap(
+    '<leader>on',
+    '<ESC>:execute "BufferLineCloseLeft" <bar> :execute "BufferLineCloseRight"<CR>',
+    'bufferline: current only'
+  )
+  fss.nnoremap('<leader>1', '<Cmd>BufferLineGoToBuffer 1<CR>')
+  fss.nnoremap('<leader>2', '<Cmd>BufferLineGoToBuffer 2<CR>')
+  fss.nnoremap('<leader>3', '<Cmd>BufferLineGoToBuffer 3<CR>')
+  fss.nnoremap('<leader>4', '<Cmd>BufferLineGoToBuffer 4<CR>')
+  fss.nnoremap('<leader>5', '<Cmd>BufferLineGoToBuffer 5<CR>')
+  fss.nnoremap('<leader>6', '<Cmd>BufferLineGoToBuffer 6<CR>')
+  fss.nnoremap('<leader>7', '<Cmd>BufferLineGoToBuffer 7<CR>')
+  fss.nnoremap('<leader>8', '<Cmd>BufferLineGoToBuffer 8<CR>')
+  fss.nnoremap('<leader>9', '<Cmd>BufferLineGoToBuffer 9<CR>')
 
   local H = require('fss.highlights')
   local bg_color = H.get('StatusLine', 'bg')
@@ -156,6 +125,7 @@ return function()
       ['*'] = {
         { BufferLineFill = { background = bg_color } },
         { BufferLineBackground = { background = bg_color } },
+        { BufferLineNumbers = { background = bg_color } },
         -- Tab
         { BufferLineTab = { background = bg_color } },
         { BufferLineTabSelected = { background = 'background' } },
@@ -171,23 +141,39 @@ return function()
           BufferLineBufferSelected = {
             background = 'background',
             bold = true,
+            -- underline = true,
           },
         },
         -- Diagnostic
         { BufferLineDiagnostic = { background = bg_color } },
         { BufferLineDiagnosticVisible = { background = bg_color } },
-        { BufferLineDiagnosticSelected = { background = 'background' } },
+        {
+          BufferLineDiagnosticSelected = {
+            background = 'background',
+            -- underline = true,
+          },
+        },
         -- Info
         { BufferLineInfo = { background = bg_color } },
         { BufferLineInfoVisible = { background = bg_color } },
-        { BufferLineInfoSelected = { background = 'background' } },
+        {
+          BufferLineInfoSelected = {
+            background = 'background',
+            -- underline = true,
+          },
+        },
         { BufferLineInfoDiagnostic = { background = bg_color } },
         { BufferLineInfoDiagnosticVisible = { background = bg_color } },
         { BufferLineInfoDiagnosticSelected = { background = 'background' } },
         -- Warning
         { BufferLineWarning = { background = bg_color } },
         { BufferLineWarningVisible = { background = bg_color } },
-        { BufferLineWarningSelected = { background = 'background' } },
+        {
+          BufferLineWarningSelected = {
+            background = 'background',
+            -- underline = true,
+          },
+        },
         { BufferLineWarningDiagnostic = { background = bg_color } },
         { BufferLineWarningDiagnosticVisible = { background = bg_color } },
         {
@@ -196,14 +182,24 @@ return function()
         -- Error
         { BufferLineError = { background = bg_color } },
         { BufferLineErrorVisible = { background = bg_color } },
-        { BufferLineErrorSelected = { background = 'background' } },
+        {
+          BufferLineErrorSelected = {
+            background = 'background',
+            -- underline = true,
+          },
+        },
         { BufferLineErrorDiagnostic = { background = bg_color } },
         { BufferLineErrorDiagnosticVisible = { background = bg_color } },
         { BufferLineErrorDiagnosticSelected = { background = 'background' } },
         -- Hint
         { BufferLineHint = { background = bg_color } },
         { BufferLineHintVisible = { background = bg_color } },
-        { BufferLineHintSelected = { background = 'background' } },
+        {
+          BufferLineHintSelected = {
+            background = 'background',
+            -- underline = true,
+          },
+        },
         { BufferLineHintDiagnostic = { background = bg_color } },
         { BufferLineHintDiagnosticVisible = { background = bg_color } },
         { BufferLineHintDiagnosticSelected = { background = 'background' } },
@@ -226,7 +222,12 @@ return function()
             italic = false,
           },
         },
-        { BufferLineDuplicateSelected = { background = 'background' } },
+        {
+          BufferLineDuplicateSelected = {
+            background = 'background',
+            -- underline = true,
+          },
+        },
         -- Separator
         {
           BufferLineSeparator = {
@@ -243,10 +244,16 @@ return function()
         {
           BufferLineSeparatorSelected = {
             foreground = sep_color,
-            background = bg_color,
+            background = 'background',
           },
         },
         -- Indicator
+        {
+          BufferLineIndicator = {
+            background = bg_color,
+            foreground = sep_color,
+          },
+        },
         {
           BufferLineIndicatorSelected = {
             background = 'background',
@@ -256,11 +263,11 @@ return function()
         {
           BufferLineIndicatorVisible = {
             background = bg_color,
-            foreground = bg_color,
+            foreground = sep_color,
           },
         },
         -- Pick
-        { BufferLinePick = { background = bg_color } },
+        { BufferLinePick = { background = bg_color, foreground = bg_color } },
         { BufferLinePickVisible = { background = bg_color } },
         { BufferLinePickSelected = { background = 'background' } },
       },

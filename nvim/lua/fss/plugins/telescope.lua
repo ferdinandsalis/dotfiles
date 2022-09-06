@@ -41,9 +41,9 @@ function M.config()
   local telescope = require('telescope')
   local actions = require('telescope.actions')
   local layout_actions = require('telescope.actions.layout')
-  local which_key = require('which-key')
   local H = require('fss.highlights')
   local icons = fss.style.icons
+  local fmt, fn = string.format, vim.fn
 
   fss.augroup('TelescopePreviews', {
     {
@@ -182,15 +182,23 @@ function M.config()
       },
     },
     extensions = {
+      fzf = {
+        override_generic_sorter = true,
+        override_file_sorter = true,
+      },
       frecency = {
+        default_workspace = 'LSP',
+        show_unindexed = false, -- Show all files or only those that have been indexed
+        ignore_patterns = {
+          '*.git/*',
+          '*/tmp/*',
+          '*node_modules/*',
+          '*vendor/*',
+        },
         workspaces = {
           conf = vim.env.DOTFILES,
           project = vim.env.PROJECTS_DIR,
         },
-      },
-      fzf = {
-        override_generic_sorter = true,
-        override_file_sorter = true,
       },
     },
     pickers = {
@@ -313,28 +321,23 @@ function M.config()
     builtins.live_grep()
   end
 
-  local function MRU()
-    require('mru').display_cache(fss.telescope.dropdown({
+  local function frecency()
+    require('telescope').extensions.frecency.frecency(fss.telescope.dropdown({
       previewer = false,
     }))
   end
 
-  local function MFU()
-    require('mru').display_cache(vim.tbl_extend(
-      'keep',
-      { algorithm = 'mfu' },
-      fss.telescope.dropdown({
-        previewer = false,
-      })
-    ))
+  local function find_near_files()
+    -- TODO: find files from closest package.json
+    local cwd = require('telescope.utils').buffer_dir()
+    builtins.find_files({
+      prompt_title = fmt('Searching %s', fn.fnamemodify(cwd, ':~:.')),
+      cwd = cwd,
+    })
   end
 
   local function notifications()
     telescope.extensions.notify.notify(fss.telescope.dropdown())
-  end
-
-  local function gh_notifications()
-    telescope.extensions.ghn.ghn(fss.telescope.dropdown())
   end
 
   local function installed_plugins()
@@ -350,50 +353,45 @@ function M.config()
     end
   end
 
-  which_key.register({
-    ['<c-p>'] = { find_files, 'telescope: find files' },
-    ['<leader>f'] = {
-      name = '+telescope',
-      a = { pickers, 'builtins' },
-      b = { builtins.current_buffer_fuzzy_find, 'current buffer fuzzy find' },
-      n = { notifications, 'notifications' },
-      v = {
-        name = '+vim',
-        h = { builtins.highlights, 'highlights' },
-        a = { builtins.autocommands, 'autocommands' },
-        o = { builtins.vim_options, 'options' },
-      },
-      l = {
-        name = '+lsp',
-        e = {
-          builtins.lsp_workspace_diagnostics,
-          'telescope: workspace diagnostics',
-        },
-        d = { builtins.lsp_document_symbols, 'telescope: document symbols' },
-        s = {
-          builtins.lsp_dynamic_workspace_symbols,
-          'telescope: workspace symbols',
-        },
-      },
-      p = { installed_plugins, 'plugins' },
-      R = { builtins.resume, 'resume last picker' },
-      r = { builtins.resume, 'resume last picker' },
-      ['?'] = { builtins.help_tags, 'help' },
-      f = { project_files, 'find files' },
-      u = { MRU, 'Most recently used files' },
-      h = { MFU, 'Most frequently used files' },
-      g = {
-        name = '+git',
-        b = { builtins.git_branches, 'branches' },
-        n = { gh_notifications, 'notifications' },
-        c = { delta_git_commits, 'commits' },
-        B = { delta_git_bcommits, 'buffer commits' },
-      },
-      o = { buffers, 'buffers' },
-      s = { live_grep, 'live grep' },
-      d = { dotfiles, 'dotfiles' },
-    },
-  })
+  fss.nnoremap('<c-p>', project_files, 'telescope: find files')
+  fss.nnoremap('<leader>fa', pickers, 'builtins')
+  fss.nnoremap(
+    '<leader>fb',
+    builtins.current_buffer_fuzzy_find,
+    'current buffer fuzzy find'
+  )
+  fss.nnoremap('<leader>fN', notifications, 'notifications')
+  fss.nnoremap('<leader>fvh', builtins.highlights, 'highlights')
+  fss.nnoremap('<leader>fva', builtins.autocommands, 'autocommands')
+  fss.nnoremap('<leader>fvo', builtins.vim_options, 'options')
+  fss.nnoremap('<leader>fvk', builtins.keymaps, 'autocommands')
+  fss.nnoremap(
+    '<leader>fle',
+    builtins.diagnostics,
+    'telescope: workspace diagnostics'
+  )
+  fss.nnoremap(
+    '<leader>fld',
+    builtins.lsp_document_symbols,
+    'telescope: document symbols'
+  )
+  fss.nnoremap(
+    '<leader>fls',
+    builtins.lsp_dynamic_workspace_symbols,
+    'telescope: workspace symbols'
+  )
+  fss.nnoremap('<leader>fp', installed_plugins, 'plugins')
+  fss.nnoremap('<leader>fr', builtins.resume, 'resume last picker')
+  fss.nnoremap('<leader>f?', builtins.help_tags, 'help')
+  fss.nnoremap('<leader>ff', find_files, 'find files')
+  fss.nnoremap('<leader>fn', find_near_files, 'find near files')
+  fss.nnoremap('<leader>fh', frecency, 'Most (f)recently used files')
+  fss.nnoremap('<leader>fgb', builtins.git_branches, 'branches')
+  fss.nnoremap('<leader>fgc', delta_git_commits, 'commits')
+  fss.nnoremap('<leader>fgB', delta_git_bcommits, 'buffer commits')
+  fss.nnoremap('<leader>fo', buffers, 'buffers')
+  fss.nnoremap('<leader>fs', live_grep, 'live grep')
+  fss.nnoremap('<leader>fd', dotfiles, 'dotfiles')
 end
 
 return M

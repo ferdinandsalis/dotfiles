@@ -12,6 +12,7 @@ return function()
           return fss.executable('stylua')
         end,
       }),
+      null_ls.builtins.formatting.raco_fmt,
       null_ls.builtins.formatting.prettier_d_slim.with({
         filetypes = {
           'html',

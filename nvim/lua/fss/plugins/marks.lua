@@ -3,14 +3,10 @@ return function()
     { MarkSignHL = { link = 'Directory' } },
     { MarkSignNumHL = { link = 'Directory' } },
   })
-  require('which-key').register({
-    m = {
-      name = '+marks',
-      b = { '<cmd>markslistbuf<cr>', 'list buffer' },
-      g = { '<Cmd>MarksQFListGlobal<CR>', 'list global' },
-      ['0'] = { '<Cmd>BookmarksQFList 0<CR>', 'list bookmark' },
-    },
-  }, { prefix = '<leader>' })
+
+  fss.nnoremap('<leader>mb', '<Cmd>MarksListBuf<CR>', 'list buffer')
+  fss.nnoremap('<leader>mg', '<Cmd>MarksQFListGlobal<CR>', 'list global')
+  fss.nnoremap('<leader>m0', '<Cmd>BookmarksQFList 0<CR>', 'list bookmark')
 
   require('marks').setup({
     force_write_shada = false, -- This can cause data loss

@@ -1,5 +1,4 @@
-local fn = vim.fn
-local opt = vim.opt
+local o, opt, fn = vim.o, vim.opt, vim.fn
 
 -- Message output on vim actions {{{1
 opt.shortmess = {
@@ -121,9 +120,10 @@ opt.conceallevel = 2
 opt.breakindentopt = 'sbr'
 opt.linebreak = true -- lines wrap at words rather than random characters
 opt.synmaxcol = 1024 -- don't syntax highlight long lines
-opt.signcolumn = 'auto:2-4'
+opt.signcolumn = 'auto:2-3'
+-- opt.signcolumn = 'yes:1'
 opt.ruler = false
-opt.cmdheight = 1
+opt.cmdheight = 0
 opt.showbreak = [[↪ ]] -- Options include -> '…', '↳ ', '→','↪ '
 --- This is used to handle markdown code blocks where the language might
 --- be set to a value that isn't equivalent to a vim filetype
@@ -140,13 +140,13 @@ opt.list = true -- invisible chars
 opt.listchars = {
   eol = nil,
   tab = '│ ',
-  extends = '›', -- Alternatives: … »
-  precedes = '‹', -- Alternatives: … «
+  extends = '»', -- Alternatives: … ›
+  precedes = '«', -- Alternatives: … ‹
   trail = '•', -- BULLET (U+2022, UTF-8: E2 80 A2)
 }
 
 -- Indentation {{{1
-opt.wrap = true
+opt.wrap = false
 opt.wrapmargin = 2
 opt.textwidth = 80
 opt.autoindent = true
@@ -185,13 +185,12 @@ opt.cursorlineopt = 'screenline,number'
 function fss.modified_icon()
   return vim.bo.modified and fss.style.icons.misc.circle or ''
 end
-
 opt.titlestring = '%{fnamemodify(getcwd(), ":t")} %{v:lua.fss.modified_icon()}'
 opt.titleold = fn.fnamemodify(vim.loop.os_getenv('SHELL'), ':t')
 opt.title = true
 opt.titlelen = 70
 -- Utilities {{{1
-opt.showmode = false
+o.showmode = false
 opt.sessionoptions = {
   'globals',
   'buffers',
@@ -200,7 +199,7 @@ opt.sessionoptions = {
   'tabpages',
 }
 opt.viewoptions = { 'cursor', 'folds' } -- save/restore just these (with `:{mk,load}view`)
-opt.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode
+o.virtualedit = 'block' -- allow cursor to move where there is no text in visual block mode
 -- Jumplist {{{1
 opt.jumpoptions = { 'stack' } -- make the jumplist behave like a browser stack
 -- }}}
@@ -221,9 +220,10 @@ opt.spellsuggest:prepend({ 12 })
 opt.spelloptions = 'camel'
 opt.spellcapcheck = '' -- don't check for capital letters at start of sentence
 opt.fileformats = { 'unix', 'mac', 'dos' }
-opt.spelllang:append('programming')
+-- opt.spelllang:append('programming')
 -- Mouse {{{1
-opt.mousefocus = true
+o.mousefocus = true
+o.mousemoveevent = true
 opt.mousescroll = { 'ver:1', 'hor:6' }
 -- Git editor {{{1
 if fss.executable('nvr') then

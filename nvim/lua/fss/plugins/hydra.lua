@@ -238,12 +238,14 @@ return function()
   })
 
   fss.augroup('HydraDap', {
-    event = 'User',
-    user = 'DapStarted',
-    command = function()
-      vim.schedule(function()
-        dap_hydra:activate()
-      end)
-    end,
+    {
+      event = 'User',
+      pattern = 'DapStarted',
+      command = function()
+        vim.schedule(function()
+          dap_hydra:activate()
+        end)
+      end,
+    },
   })
 end

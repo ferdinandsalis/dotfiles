@@ -1,3 +1,7 @@
+if not fss then
+  return
+end
+
 -- Resources:
 --- 1. https://gabri.me/blog/diy-vim-statusline
 --- 2. https://github.com/elenapan/dotfiles/blob/master/config/nvim/statusline.vim
@@ -27,47 +31,87 @@ local function colors()
   -- local normal_fg = H.get('Normal', 'fg')
   -- local string_fg = H.get('String', 'fg')
   -- local number_fg = H.get('Number', 'fg')
-  -- local normal_bg = H.get('Normal', 'bg')
+  local statusline_bg = H.get('StatusLine', 'bg')
   -- local dim_color = H.alter_color(normal_bg, 40)
   -- local bg_color = H.get('PanelBackground', 'bg')
 
-  -- H.all({
-  --   StMetadata = { background = bg_color, inherit = 'Comment' },
-  --   StMetadataPrefix = { background = bg_color, foreground = { from = 'Comment' } },
-  --   StIndicator = { background = bg_color, foreground = indicator_color },
-  --   StModified = { foreground = string_fg, background = bg_color },
-  --   StGit = { foreground = P.whitesmoke, background = bg_color },
-  --   StGreen = { foreground = string_fg, background = bg_color },
-  --   StBlue = { foreground = P.dark_blue, background = bg_color, bold = true },
-  --   StNumber = { foreground = number_fg, background = bg_color },
-  --   StCount = { foreground = 'bg', background = indicator_color, bold = true },
-  --   StClient = { background = bg_color, foreground = normal_fg, bold = true },
-  --   StDirectory = { background = bg_color, foreground = 'Gray', italic = true },
-  --   StDirectoryInactive = { background = bg_color, foreground = dim_color, italic = true },
-  --   StParentDirectory = { background = bg_color, foreground = string_fg, bold = true },
-  --   StTitle = { background = bg_color, foreground = 'LightGray', bold = true },
-  --   StComment = { background = bg_color, inherit = 'Comment' },
-  --   StatusLine = { background = bg_color },
-  --   StatusLineNC = { link = 'VertSplit' },
-  --   StInfo = { foreground = info_color, background = bg_color, bold = true },
-  --   StWarn = { foreground = warning_fg, background = bg_color },
-  --   StError = { foreground = error_color, background = bg_color },
-  --   StFilename = { background = bg_color, foreground = 'LightGray', bold = true },
-  --   StFilenameInactive = { inherit = 'Comment', background = bg_color, bold = true },
-  --   StModeNormal = { background = bg_color, foreground = P.whitesmoke, bold = true },
-  --   StModeInsert = { background = bg_color, foreground = P.dark_blue, bold = true },
-  --   StModeVisual = { background = bg_color, foreground = P.magenta, bold = true },
-  --   StModeReplace = { background = bg_color, foreground = P.dark_red, bold = true },
-  --   StModeCommand = { background = bg_color, foreground = P.light_yellow, bold = true },
-  --   StModeSelect = { background = bg_color, foreground = P.teal, bold = true },
+  H.all({
+    --   StMetadata = { background = bg_color, inherit = 'Comment' },
+    --   StMetadataPrefix = { background = bg_color, foreground = { from = 'Comment' } },
+    --   StIndicator = { background = bg_color, foreground = indicator_color },
+    --   StModified = { foreground = string_fg, background = bg_color },
+    --   Git
+    { StGit = { foreground = { from = 'Normal' }, bold = true } },
 
-  -- Hydra
-  -- HydraRedSt = { inherit = 'HydraRed', reverse = false },
-  -- HydraBlueSt = { inherit = 'HydraBlue', reverse = false },
-  -- HydraAmaranthSt = { inherit = 'HydraAmaranth', reverse = false },
-  -- HydraTealSt = { inherit = 'HydraTeal', reverse = false },
-  -- HydraPinkSt = { inherit = 'HydraPink', reverse = false },
-  -- })
+    --   StGreen = { foreground = string_fg, background = bg_color },
+    --   StBlue = { foreground = P.dark_blue, background = bg_color, bold = true },
+    --   StNumber = { foreground = number_fg, background = bg_color },
+    --   StCount = { foreground = 'bg', background = indicator_color, bold = true },
+    --   StClient = { background = bg_color, foreground = normal_fg, bold = true },
+    --   StDirectory = { background = bg_color, foreground = 'Gray', italic = true },
+    --   StDirectoryInactive = { background = bg_color, foreground = dim_color, italic = true },
+    --   StParentDirectory = { background = bg_color, foreground = string_fg, bold = true },
+    --   StTitle = { background = bg_color, foreground = 'LightGray', bold = true },
+    --   StComment = { background = bg_color, inherit = 'Comment' },
+    --   StatusLine = { background = bg_color },
+    --   StatusLineNC = { link = 'VertSplit' },
+    --   StInfo = { foreground = info_color, background = bg_color, bold = true },
+    --   StWarn = { foreground = warning_fg, background = bg_color },
+    --   StError = { foreground = error_color, background = bg_color },
+    --   StFilename = { background = bg_color, foreground = 'LightGray', bold = true },
+    --   StFilenameInactive = { inherit = 'Comment', background = bg_color, bold = true },
+
+    -- Modes
+    {
+      StModeNormal = {
+        background = statusline_bg,
+        foreground = { from = 'Function' },
+        bold = true,
+      },
+    },
+    {
+      StModeInsert = {
+        background = statusline_bg,
+        foreground = { from = 'String' },
+        bold = true,
+      },
+    },
+    {
+      StModeVisual = {
+        background = statusline_bg,
+        foreground = { from = 'Statement' },
+        bold = true,
+      },
+    },
+    {
+      StModeReplace = {
+        background = statusline_bg,
+        foreground = { from = 'Substitute' },
+        bold = true,
+      },
+    },
+    {
+      StModeCommand = {
+        background = statusline_bg,
+        foreground = { from = 'Constant' },
+        bold = true,
+      },
+    },
+    {
+      StModeSelect = {
+        background = statusline_bg,
+        foreground = { from = '@keyword' },
+        bold = true,
+      },
+    },
+
+    -- Hydra
+    -- HydraRedSt = { inherit = 'HydraRed', reverse = false },
+    -- HydraBlueSt = { inherit = 'HydraBlue', reverse = false },
+    -- HydraAmaranthSt = { inherit = 'HydraAmaranth', reverse = false },
+    -- HydraTealSt = { inherit = 'HydraTeal', reverse = false },
+    -- HydraPinkSt = { inherit = 'HydraPink', reverse = false },
+  })
 end
 
 local separator = function()
@@ -78,20 +122,20 @@ local end_marker = function()
   return { component = C.END, length = 0, priority = 0 }
 end
 
--- A very over-engineered statusline, heavily inspired by doom-modeline
+-- A very over-engineered statusline
 -- @return string
 function fss.ui.statusline()
-  local curwin = api.nvim_get_current_win()
-  local curbuf = api.nvim_win_get_buf(curwin)
+  local win = api.nvim_get_current_win()
+  local curbuf = api.nvim_win_get_buf(win)
   local component = utils.component
   local component_if = utils.component_if
   local available_space = vim.o.columns
 
   local ctx = {
     bufnum = curbuf,
-    winid = curwin,
+    winid = win,
     bufname = api.nvim_buf_get_name(curbuf),
-    preview = vim.wo[curwin].previewwindow,
+    preview = vim.wo[win].previewwindow,
     readonly = vim.bo[curbuf].readonly,
     filetype = vim.bo[curbuf].ft,
     buftype = vim.bo[curbuf].bt,
@@ -103,18 +147,18 @@ function fss.ui.statusline()
 
   -- Modifiers
   local plain = utils.is_plain(ctx)
-  local file_modified = utils.modified(ctx, icons.misc.circle)
+  -- local file_modified = utils.modified(ctx, icons.misc.circle)
   local focused = vim.g.vim_in_focus or true
 
   -- Setup
 
   local statusline = {
-    component_if(icons.misc.block, not plain, 'StIndicator', {
-      before = '',
-      after = '',
-      priority = 0,
-    }),
-    utils.spacer(1),
+    -- component_if(icons.misc.block, not plain, 'StIndicator', {
+    --   before = '',
+    --   after = '',
+    --   priority = 0,
+    -- }),
+    utils.spacer(2),
   }
   local add = utils.winline(statusline)
 
@@ -125,23 +169,16 @@ function fss.ui.statusline()
   local dir_component = component(dir.item, dir.hl, dir.opts)
   local parent_component = component(parent.item, parent.hl, parent.opts)
 
-  local is_git_repo = fn.isdirectory(fn.getcwd(curwin) .. '/.git') == 1
+  local is_git_repo = fn.isdirectory(fn.getcwd(win) .. '/.git') == 1
   if is_git_repo then
     file.opts.after = ' ' .. icons.git.repo
   end
   local file_component = component(file.item, file.hl, file.opts)
 
-  local readonly_hl = H.adopt_win_highlight(
-    curwin,
-    'StatusLine',
-    'StCustomError',
-    'StError'
-  )
-  local readonly_component = component(
-    utils.readonly(ctx),
-    readonly_hl,
-    { priority = 1 }
-  )
+  local readonly_hl =
+    H.win_hl.adopt(win, 'StatusLine', 'StCustomError', 'StError')
+  local readonly_component =
+    component(utils.readonly(ctx), readonly_hl, { priority = 1 })
 
   -- Mode
 
@@ -154,7 +191,7 @@ function fss.ui.statusline()
   -- Variables
 
   local mode, mode_hl = utils.mode()
-  local lnum, col = unpack(api.nvim_win_get_cursor(curwin))
+  local lnum, col = unpack(api.nvim_win_get_cursor(win))
   local line_count = api.nvim_buf_line_count(ctx.bufnum)
 
   -- Git state
@@ -165,7 +202,6 @@ function fss.ui.statusline()
 
   -- LSP Diagnostics
   local diagnostics = utils.diagnostic_info(ctx)
-  local flutter = vim.g.flutter_tools_decorations or {}
 
   -- HYDRA
   local hydra_active, hydra = utils.hydra()
@@ -173,111 +209,32 @@ function fss.ui.statusline()
   -- Left section
 
   add(
-    component_if(file_modified, ctx.modified, 'StModified', { priority = 1 }),
-
     readonly_component,
 
-    component(mode, mode_hl, { priority = 0 }),
-
-    component_if(
-      utils.search_count(),
-      vim.v.hlsearch > 0,
-      'StCount',
-      { priority = 1 }
-    ),
-
-    dir_component,
-    parent_component,
-    file_component,
-
-    component_if(
-      'Saving…',
-      vim.g.is_saving,
-      'StComment',
-      { before = ' ', priority = 1 }
-    ),
-
-    -- Local plugin dev indicator
-    component_if(
-      available_space > 100 and 'local dev' or '',
-      vim.env.DEVELOPING ~= nil,
-      'StComment',
-      {
-        prefix = icons.misc.tools,
-        padding = 'none',
-        before = '  ',
-        prefix_color = 'StWarn',
-        small = 1,
-        priority = 2,
-      }
-    ),
-    separator(),
-
-    -- Middle section
-    -- Neovim allows unlimited alignment sections so we can put things in the
-    -- middle of our statusline - https://neovim.io/doc/user/vim_diff.html#vim-differences
-
-    component_if(hydra.name:upper(), hydra_active, hydra.color, {
-      prefix = string.rep(' ', 5) .. '🐙',
-      suffix = string.rep(' ', 5),
-      priority = 5,
-    }),
-
-    -- Start of the right side layout
-    separator(),
-
-    -- Right section
-    component(flutter.app_version, 'StMetadata', { priority = 4 }),
-    component(
-      flutter.device and flutter.device.name or '',
-      'StMetadata',
-      { priority = 4 }
-    )
-  )
-
-  -- LSP Clients
-
-  local lsp_clients = fss.map(function(client, index)
-    return component(client.name, 'StClient', {
-      prefix = index == 1 and ' LSP(s):' or nil,
-      prefix_color = index == 1 and 'StMetadata' or nil,
+    component(mode, mode_hl, {
+      priority = 0,
       suffix = '', -- │
-      suffix_color = 'StMetadataPrefix',
-      priority = client.priority,
-    })
-  end, utils.lsp_clients(ctx))
-  add(unpack(lsp_clients))
-
-  add(
-    component(
-      utils.debugger(),
-      'StMetadata',
-      { prefix = icons.misc.bug, priority = 4 }
-    ),
-
-    component_if(diagnostics.error.count, diagnostics.error, 'StError', {
-      prefix = diagnostics.error.icon,
-      prefix_color = 'StError',
-      priority = 1,
     }),
 
-    component_if(diagnostics.warn.count, diagnostics.warn, 'StWarn', {
-      prefix = diagnostics.warn.icon,
-      prefix_color = 'StWarn',
-      priority = 3,
-    }),
+    -- component_if(
+    --   utils.search_count(),
+    --   vim.v.hlsearch > 0,
+    --   'StCount',
+    --   { priority = 1 }
+    -- ),
 
-    component_if(diagnostics.info.count, diagnostics.info, 'StInfo', {
-      prefix = diagnostics.info.icon,
-      prefix_color = 'StInfo',
-      priority = 4,
-    }),
+    -- dir_component,
+    -- parent_component,
+    -- file_component,
+
+    -- component_if(file_modified, ctx.modified, 'StModified', { priority = 1, before = ' ' }),
 
     -- Git Status
     component(status.head, 'StBlue', {
       prefix = icons.git.branch,
       prefix_color = 'StGit',
       priority = 1,
+      suffix = '', -- │
     }),
 
     component(status.changed, 'StTitle', {
@@ -312,6 +269,93 @@ function fss.ui.statusline()
       priority = 5,
     }),
 
+    component_if(diagnostics.error.count, diagnostics.error, 'StError', {
+      prefix = diagnostics.error.icon,
+      prefix_color = 'StError',
+      priority = 1,
+    }),
+
+    component_if(diagnostics.warn.count, diagnostics.warn, 'StWarn', {
+      prefix = diagnostics.warn.icon,
+      prefix_color = 'StWarn',
+      priority = 3,
+    }),
+
+    component_if(diagnostics.info.count, diagnostics.info, 'StInfo', {
+      prefix = diagnostics.info.icon,
+      prefix_color = 'StInfo',
+      priority = 4,
+    }),
+
+    -- Local plugin dev indicator
+    component_if(
+      available_space > 100 and 'local dev' or '',
+      vim.env.DEVELOPING ~= nil,
+      'StComment',
+      {
+        prefix = icons.misc.tools,
+        padding = 'none',
+        before = '  ',
+        prefix_color = 'StWarn',
+        small = 1,
+        priority = 2,
+      }
+    ),
+    separator(),
+
+    -- Middle section
+    -- Neovim allows unlimited alignment sections so we can put things in the
+    -- middle of our statusline - https://neovim.io/doc/user/vim_diff.html#vim-differences
+
+    component_if(
+      'Saving…',
+      vim.g.is_saving,
+      'StComment',
+      { before = ' ', priority = 1 }
+    ),
+
+    component_if(hydra.name, hydra_active, hydra.color, {
+      prefix = string.rep(' ', 5) .. '🐙',
+      suffix = string.rep(' ', 5),
+      priority = 5,
+    }),
+
+    -- Start of the right side layout
+    separator()
+  )
+
+  -- LSP Clients
+
+  local lsp_clients = fss.map(function(client, index)
+    return component(client.name, 'StClient', {
+      prefix = index == 1 and ' LSP' or nil,
+      prefix_color = index == 1 and 'StMetadata' or nil,
+      suffix = '', -- │
+      suffix_color = 'StMetadataPrefix',
+      priority = client.priority,
+    })
+  end, utils.lsp_clients(ctx))
+  -- add(unpack(lsp_clients))
+
+  add(
+    component(
+      utils.debugger(),
+      'StMetadata',
+      { prefix = icons.misc.bug, priority = 4 }
+    ),
+
+    -- (Unexpected) Indentation
+    -- component_if(
+    --   ctx.shiftwidth,
+    --   ctx.shiftwidth > 2 or not ctx.expandtab,
+    --   'StTitle',
+    --   {
+    --     prefix = ctx.expandtab and icons.misc.indent or icons.misc.tab,
+    --     prefix_color = 'StatusLine',
+    --     priority = 6,
+    --   }
+    -- ),
+
     -- Current line number/total line number
     component(lnum, 'StTitle', {
       after = '',
@@ -335,18 +379,6 @@ function fss.ui.statusline()
       prefix_color = 'StMetadataPrefix',
       priority = 7,
     }),
-
-    -- (Unexpected) Indentation
-    component_if(
-      ctx.shiftwidth,
-      ctx.shiftwidth > 2 or not ctx.expandtab,
-      'StTitle',
-      {
-        prefix = ctx.expandtab and icons.misc.indent or icons.misc.tab,
-        prefix_color = 'StatusLine',
-        priority = 6,
-      }
-    ),
 
     end_marker()
   )

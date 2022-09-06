@@ -18,9 +18,8 @@
     ~/.zprofile: zsh/zprofile
     ~/.gitconfig: git/gitconfig
     ~/.gitmessage: git/gitmessage
-    ~/.config/yabai: yabai
+    ~/.config/btop: btop
     ~/.config/qutebrowser: qutebrowser
-    ~/.skhdrc: skhd/skhdrc
     ~/.config/nvim: nvim
     ~/.Brewfile: homebrew/Brewfile
     ~/Library/Application Support/lazygit/config.yml: lazygit/config.yml

@@ -1,17 +1,21 @@
 local fn = vim.fn
 local api = vim.api
 local fmt = string.format
+local l = vim.log.levels
 
+----------------------------------------------------------------------------------------------------
 -- Utils
+----------------------------------------------------------------------------------------------------
 
 --- Convert a list or map of items into a value by iterating all it's fields and transforming
 --- them with a callback
 ---@generic T : table
 ---@param callback fun(T, T, key: string | number): T
 ---@param list T[]
----@param accum T
+---@param accum T?
 ---@return T
 function fss.fold(callback, list, accum)
+  accum = accum or {}
   for k, v in pairs(list) do
     accum = callback(accum, v, k)
     assert(accum ~= nil, 'The accumulator must be returned on each iteration')
@@ -44,23 +48,20 @@ end
 ---@param list string[]
 ---@return boolean
 function fss.any(target, list)
-  return fss.fold(function(accum, item)
-    if accum then
-      return accum
-    end
+  for _, item in ipairs(list) do
     if target:match(item) then
       return true
     end
-    return accum
-  end, list, false)
+  end
+  return false
 end
 
 ---Find an item in a list
 ---@generic T
----@param haystack T[]
 ---@param matcher fun(arg: T):boolean
+---@param haystack T[]
 ---@return T
-function fss.find(haystack, matcher)
+function fss.find(matcher, haystack)
   local found
   for _, needle in ipairs(haystack) do
     if matcher(needle) then
@@ -71,28 +72,30 @@ function fss.find(haystack, matcher)
   return found
 end
 
-local installed
-
-function fss.list_installed_plugins()
-  if installed then
-    return installed
+fss.list_installed_plugins = (function()
+  local plugins
+  return function()
+    if plugins then
+      return plugins
+    end
+    local data_dir = fn.stdpath('data')
+    local start = fn.expand(data_dir .. '/site/pack/packer/start/*', true, true)
+    local opt = fn.expand(data_dir .. '/site/pack/packer/opt/*', true, true)
+    plugins = vim.list_extend(start, opt)
+    return plugins
   end
-  local data_dir = fn.stdpath('data')
-  local start = fn.expand(data_dir .. '/site/pack/packer/start/*', true, true)
-  local opt = fn.expand(data_dir .. '/site/pack/packer/opt/*', true, true)
-  vim.list_extend(start, opt)
-  installed = vim.tbl_map(function(path)
-    return fn.fnamemodify(path, ':t')
-  end, start)
-  return installed
-end
+end)()
 
 ---Check if a plugin is on the system not whether or not it is loaded
 ---@param plugin_name string
 ---@return boolean
 function fss.plugin_installed(plugin_name)
-  local list = installed or fss.list_installed_plugins()
-  return vim.tbl_contains(list, plugin_name)
+  for _, path in ipairs(fss.list_installed_plugins()) do
+    if vim.endswith(path, plugin_name) then
+      return true
+    end
+  end
+  return false
 end
 
 ---NOTE: this plugin returns the currently loaded state of a plugin given
@@ -119,6 +122,38 @@ function fss.is_vim_list_open()
   return false
 end
 
+-- Toggle list
+--- Utility function to toggle the location or the quickfix list
+---@param list_type '"quickfix"' | '"location"'
+---@return string?
+local function toggle_list(list_type)
+  local is_location_target = list_type == 'location'
+  local cmd = is_location_target and { 'lclose', 'lopen' }
+    or { 'cclose', 'copen' }
+  local is_open = fss.is_vim_list_open()
+  if is_open then
+    return vim.cmd[cmd[1]]()
+  end
+  local list = is_location_target and fn.getloclist(0) or fn.getqflist()
+  if vim.tbl_isempty(list) then
+    local msg_prefix = (is_location_target and 'Location' or 'QuickFix')
+    return vim.notify(msg_prefix .. ' List is Empty.', vim.log.levels.WARN)
+  end
+
+  local winnr = fn.winnr()
+  vim.cmd[cmd[2]]()
+  if fn.winnr() ~= winnr then
+    vim.cmd.wincmd('p')
+  end
+end
+
+function fss.toggle_qf_list()
+  toggle_list('quickfix')
+end
+function fss.toggle_loc_list()
+  toggle_list('location')
+end
+
 ---@param str string
 ---@param max_len integer
 ---@return string
@@ -131,7 +166,7 @@ end
 
 ---Determine if a value of any type is empty
 ---@param item any
----@return boolean
+---@return boolean?
 function fss.empty(item)
   if not item then
     return true
@@ -146,9 +181,31 @@ function fss.empty(item)
   if item_type == 'table' then
     return vim.tbl_isempty(item)
   end
+  return item ~= nil
 end
 
----Require a module using [pcall] and report any errors
+--- Call the given function and use `vim.notify` to notify of any errors
+--- this function is a wrapper around `xpcall` which allows having a single
+--- error handler for all errors
+---@param msg string
+---@param func function
+---@vararg any
+---@return boolean, any
+---@overload fun(fun: function, ...): boolean, any
+function fss.wrap_err(msg, func, ...)
+  local args = { ... }
+  if type(msg) == 'function' then
+    args, func, msg = { func, unpack(args) }, msg, nil
+  end
+  return xpcall(func, function(err)
+    msg = msg and fmt('%s:\n%s', msg, err) or err
+    vim.schedule(function()
+      vim.notify(msg, l.ERROR, { title = 'ERROR' })
+    end)
+  end, unpack(args))
+end
+
+---Require a module using `pcall` and report any errors
 ---@param module string
 ---@param opts table?
 ---@return boolean, any
@@ -168,13 +225,12 @@ function fss.require(module, opts)
   return ok, result
 end
 
----@class PluginTable
----@field plugin string
+---@alias Plug table<(string | number), string>
 
 --- A convenience wrapper that calls the ftplugin config for a plugin if it exists
 --- and warns me if the plugin is not installed
 --- TODO: find out if it's possible to annotate the plugin as a module
----@param name string | PluginTable
+---@param name string | Plug
 ---@param callback fun(module: table)
 function fss.ftplugin_conf(name, callback)
   local plugin_name = type(name) == 'table' and name.plugin or nil
@@ -208,28 +264,6 @@ function fss.invalidate(path, recursive)
   else
     package.loaded[path] = nil
     require(path)
-  end
-end
-
---- Usage:
---- 1. Call `local stop = utils.profile('my-log')` at the top of the file
---- 2. At the bottom of the file call `stop()`
---- 3. Restart neovim, the newly created log file should open
-function fss.profile(filename)
-  local base = '/tmp/config/profile/'
-  fn.mkdir(base, 'p')
-  local success, profile = pcall(require, 'plenary.profile.lua_profiler')
-  if not success then
-    vim.api.nvim_echo({ 'Plenary is not installed.', 'Title' }, true, {})
-  end
-  profile.start()
-  return function()
-    profile.stop()
-    local logfile = base .. filename .. '.log'
-    profile.report(logfile)
-    vim.defer_fn(function()
-      vim.cmd('tabedit ' .. logfile)
-    end, 1000)
   end
 end
 
@@ -281,11 +315,20 @@ local function validate_autocmd(name, cmd)
   end)
 end
 
+---@class AutocmdArgs
+---@field id number
+---@field event string
+---@field group string?
+---@field buf number
+---@field file string
+---@field match string | number
+---@field data any
+
 ---@class Autocommand
 ---@field desc string
----@field event  string[] list of autocommand events
----@field pattern string[] list of autocommand patterns
----@field command string | function
+---@field event  string | string[] list of autocommand events
+---@field pattern string | string[] list of autocommand patterns
+---@field command string | fun(args: AutocmdArgs): boolean?
 ---@field nested  boolean
 ---@field once    boolean
 ---@field buffer  number
@@ -296,6 +339,11 @@ end
 ---@param commands Autocommand[]
 ---@return number
 function fss.augroup(name, commands)
+  assert(name ~= 'User', 'The name of an augroup CANNOT be User')
+  assert(
+    #commands > 0,
+    fmt('You must specify at least one autocommand for %s', name)
+  )
   local id = api.nvim_create_augroup(name, { clear = true })
   for _, autocmd in ipairs(commands) do
     validate_autocmd(name, autocmd)
