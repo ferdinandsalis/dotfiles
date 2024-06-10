@@ -17,6 +17,7 @@
     ~/.gitmessage: git/gitmessage
     ~/.config/btop: btop
     ~/.config/helix: helix
+    ~/.config/fish: fish
     ~/.config/qutebrowser: qutebrowser
     ~/.config/direnv: direnv
     ~/.config/bat: bat
