@@ -1,0 +1,148 @@
+# Tokyonight Custom
+# Author: Ferdinand Salis
+# based on Tokyonight by Folke
+# License: MIT License
+
+"attribute" = "teal"
+"comment" = { fg = "comment", modifiers = ["italic"] }
+"constant" = { fg = "orange" }
+"constant.character.escape" = { fg = "magenta" }
+"constructor" = "blue"
+"function" = { fg = "blue" }
+"function.macro" = { fg = "cyan" }
+"keyword" = { fg = "purple" }
+"keyword.control" = { fg = "purple" }
+"keyword.control.import" = { fg = "purple" }
+"keyword.operator" = { fg = "turquoise" }
+"keyword.function" = { fg = "blue", modifiers = ["italic"] }
+"module" = "blue"
+"operator" = { fg = "turquoise" }
+"punctuation" = "blue5"
+"punctuation.delimiter" = "blue5"
+"punctuation.bracket" = "fg_dark"
+"string" = { fg = "light-green" }
+"string.regexp" = { fg = "magenta" }
+"string.special" = { fg = "cyan" }
+"tag" = { fg = "magenta" }
+"type" = { fg = "blue1" }
+"namespace" = { fg = "blue" }
+"variable" = { fg = "white" }
+"variable.builtin" = { fg = "red" }
+"variable.parameter" = { fg = "yellow", modifiers = ["italic"] }
+"variable.other.member" = { fg = "green1" }
+
+"diff.plus" = { fg = "green" }
+"diff.delta" = { fg = "orange" }
+"diff.minus" = { fg = "red" }
+
+"ui.background" = { fg = "fg_dark", bg = "bg" }
+"ui.background.separator" = "bg2d"
+# bufferline
+"ui.bufferline" = { fg = "comment", bg = "bg_dark" }
+"ui.bufferline.active" = { fg = "fg", bg = "bg", modifiers = ["bold"] }
+# cursor
+"ui.cursor" = { bg = "bg5l" }
+"ui.cursor.match" = { fg = "orange", modifiers = ["bold"] }
+"ui.cursor.primary" = { bg = "blue", fg = "bg" }
+"ui.cursorline.primary" = { bg = "bg2l" }
+"ui.cursorline.secondary" = { bg = "bg2l" }
+"ui.help" = { fg = "fg", bg = "bg_menu" }
+"ui.linenr" = { fg = "fg_dark" }
+"ui.linenr.selected" = { fg = "fg", modifiers = ["bold"] }
+"ui.menu" = { fg = "fg", bg = "bg_menu" }
+"ui.menu.selected" = { bg = "bg_highlight" }
+"ui.popup" = { fg = "fg_dark", bg = "bg_menu" }
+"ui.popup.info" = { fg = "fg_dark", bg = "bg_menu" }
+
+"ui.virtual.inlay-hint.type" = { fg = "comment" }
+"ui.virtual.inlay-hint.parameter" = { fg = "comment", modifiers = ["italic"] }
+"ui.virtual.jump-label" = { fg = "orange", modifiers = ["italic"] }
+
+"ui.selection" = { bg = "bg_highlight" }
+"ui.selection.primary" = { bg = "bg_highlight" }
+"ui.statusline" = { fg = "fg", bg = "bg2l" }
+"ui.statusline.separator" = { fg = "bg1l" }
+
+"ui.statusline.inactive" = { fg = "fg1l", bg = "bg2l" }
+"ui.statusline.normal" = { fg = "black", bg = "blue" }
+"ui.statusline.insert" = { fg = "black", bg = "green" }
+"ui.statusline.select" = { fg = "black", bg = "magenta" }
+# popup, commands text
+"ui.text" = { fg = "fg" }
+"ui.text.info" = { fg = "fg" }
+"ui.text.focus" = { fg = "cyan" }
+"ui.virtual.ruler" = { bg = "bg1l" }
+"ui.virtual.whitespace" = { fg = "fg_gutter" }
+"ui.window" = { fg = "bg_dark", bg = "bg_dark" }
+
+"error" = { fg = "red" }
+"warning" = { fg = "yellow" }
+"info" = { fg = "blue" }
+"hint" = { fg = "teal" }
+"diagnostic" = { modifiers = ["underlined"] }
+"special" = { fg = "orange" }
+
+"markup.heading" = { fg = "cyan", modifiers = ["bold"] }
+"markup.list" = { fg = "cyan" }
+"markup.bold" = { fg = "orange", modifiers = ["bold"] }
+"markup.italic" = { fg = "yellow", modifiers = ["italic"] }
+"markup.link.url" = { fg = "green" }
+"markup.link.text" = { fg = "light-gray" }
+"markup.quote" = { fg = "yellow", modifiers = ["italic"] }
+"markup.raw" = { fg = "cyan" }
+
+[palette]
+red = "#f7768e"
+orange = "#ff9e64"
+yellow = "#e0af68"
+green = "#73daca"
+light-green = "#9ECE6A"
+green1 = "#73DACA"
+green2 = "#41a6b5"
+turquoise = "#89ddff"
+light-cyan = "#b4f9f8"
+teal = "#2ac3de"
+magenta = "#bb9af7"
+magenta2 = "#ff007c"
+white = "#c0caf5"
+light-gray = "#9aa5ce"
+purple = "#9d7cd8"
+
+parameters = "#cfc9c2"
+comment = "#565f89"
+black = "#414868"
+
+fg = "#c0caf5"
+fg_dark = "#565D7B" #a9b1d6
+fg_highlight = "#c0caf5"
+fg_gutter = "#363b54"
+
+fg1l = "#565D7B"
+
+bg = "#24283b"
+bg_highlight = "#373d5a"
+bg_menu = "#2A2E45"
+bg_dark = "#1F2335"
+
+bg1l = "#25293D"
+bg2l = "#2A2E45"
+bg3l = "#2D314A"
+bg4l = "#30344F"
+bg5l = "#343855"
+bg6l = "#373B59"
+
+bg1d = "#212536"
+bg2d = "#1D2030"
+bg3d = "#1A1D2B"
+bg4d = "#181A27"
+bg5d = "#151722"
+
+blue = "#7aa2f7"
+blue0 = "#3d59a1"
+blue1 = "#2ac3de"
+blue2 = "#0db9d7"
+blue5 = "#89ddff"
+blue6 = "#b4f9f8"
+blue7 = "#394b70"
+
+cyan = "#7dcfff"

@@ -1,0 +1,120 @@
+# Everforest (Dark Hard)
+# Author: CptPotato
+
+# Original Author:
+# URL: https://github.com/sainnhe/everforest
+# Filename: autoload/everforest.vim
+# Author: sainnhe
+# Email: sainnhe@gmail.com
+# License: MIT License
+
+"constant" = "purple"
+"constant.numeric" = "purple"
+"constant.character.escape" = "orange"
+"string" = "green"
+"string.regexp" = "blue"
+"comment" = { fg = "grey0", modifiers = ["italic"] }
+"variable" = "fg"
+"variable.builtin" = "blue"
+"variable.parameter" = "fg"
+"variable.other.member" = "fg"
+"label" = "aqua"
+"punctuation" = "grey2"
+"punctuation.delimiter" = "grey2"
+"punctuation.bracket" = "fg"
+"keyword" = "red"
+"keyword.directive" = "aqua"
+"operator" = "orange"
+"function" = "green"
+"function.builtin" = "blue"
+"function.macro" = "aqua"
+"tag" = "yellow"
+"type" = "yellow"
+"namespace" = "aqua"
+"attribute" = "aqua"
+"constructor" = "yellow"
+"module" = "blue"
+"special" = "orange"
+
+"markup.heading.marker" = "grey2"
+"markup.heading.1" = { fg = "red", modifiers = ["bold"] }
+"markup.heading.2" = { fg = "orange", modifiers = ["bold"] }
+"markup.heading.3" = { fg = "yellow", modifiers = ["bold"] }
+"markup.heading.4" = { fg = "green", modifiers = ["bold"] }
+"markup.heading.5" = { fg = "blue", modifiers = ["bold"] }
+"markup.heading.6" = { fg = "fg", modifiers = ["bold"] }
+"markup.list" = "red"
+"markup.bold" = { modifiers = ["bold"] }
+"markup.italic" = { modifiers = ["italic"] }
+"markup.link.url" = { fg = "blue", underline = { style = "curl" } }
+"markup.link.text" = "purple"
+"markup.quote" = "grey2"
+"markup.raw" = "green"
+
+"diff.plus" = "green"
+"diff.delta" = "orange"
+"diff.minus" = "red"
+
+"ui.background" = { bg = "bg0" }
+"ui.background.separator" = "bg1"
+"ui.cursor" = { bg = "bg5"} 
+"ui.cursor.match" = { underline = { style = "line"} }
+"ui.cursor.insert" = { bg = "bg5" }
+"ui.cursor.primary" = { fg = "bg0", bg = "blue"} 
+"ui.cursor.select" = { bg = "bg5" }
+"ui.cursorline.primary" = { bg = "bg1" }
+"ui.cursorline.secondary" = { bg = "bg1" }
+"ui.selection" = { bg = "bg3" }
+"ui.selection.primary" = { bg = "bg_blue" }
+"ui.linenr" = "bg4"
+"ui.linenr.selected" = { fg = "fg", modifiers = ["bold"] }
+"ui.statusline" = { fg = "grey2", bg = "bg2" }
+"ui.statusline.inactive" = { fg = "grey0", bg = "bg1" }
+"ui.statusline.normal" = { fg = "bg0", bg = "grey2", modifiers = ["bold"] }
+"ui.statusline.insert" = { fg = "bg0", bg = "yellow", modifiers = ["bold"] }
+"ui.statusline.select" = { fg = "bg0", bg = "blue", modifiers = ["bold"] }
+"ui.bufferline" = { fg = "grey0", bg = "bg_dark" }
+"ui.bufferline.active" = { fg = "fg", bg = "bg0", modifiers = ["bold"] }
+"ui.popup" = { fg = "bg4", bg = "bg1" }
+"ui.window" = { fg = "bg_dark", bg = "bg0" }
+"ui.help" = { fg = "fg", bg = "bg2" }
+"ui.text" = "fg"
+"ui.text.focus" = "fg"
+"ui.menu" = { fg = "grey2", bg = "bg3" }
+"ui.menu.selected" = { fg = "bg0", bg = "green" }
+"ui.virtual.whitespace" = { fg = "bg4" }
+"ui.virtual.indent-guide" = { fg = "bg4" }
+"ui.virtual.ruler" = { bg = "bg1" }
+
+"hint" = "blue"
+"info" = "aqua"
+"warning" = "yellow"
+"error" = "red"
+"diagnostic" = { underline = { style = "curl" } }
+
+[palette]
+
+bg0 = "#2b3339"
+bg1 = "#323c41"
+bg2 = "#3a454a"
+bg3 = "#445055"
+bg4 = "#4c555b"
+bg5 = "#53605c"
+bg_visual = "#503946"
+bg_red = "#4e3e43"
+bg_green = "#404d44"
+bg_blue = "#394f5a"
+bg_yellow = "#4a4940"
+bg_dark = "#262D33"
+
+fg = "#d3c6aa"
+red = "#e67e80"
+orange = "#e69875"
+yellow = "#dbbc7f"
+green = "#a7c080"
+aqua = "#83c092"
+blue = "#7fbbb3"
+purple = "#d699b6"
+grey0 = "#7a8478"
+grey1 = "#859289"
+grey2 = "#9da9a0"
