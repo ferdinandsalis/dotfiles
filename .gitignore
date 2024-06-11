@@ -9,5 +9,4 @@ node
 session/
 packer_compiled.vim
 automatic_backups/
-.zsh_history
-.zcompdump
+fish/fish_variables
