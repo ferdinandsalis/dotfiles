@@ -5,3 +5,4 @@ if status is-interactive
 end
 
 alias br=broot
+alias la=llaai

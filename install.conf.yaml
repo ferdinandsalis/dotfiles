@@ -13,17 +13,18 @@
 - clean: ["~"]
 
 - link:
-    ~/.gitconfig: git/gitconfig
-    ~/.gitmessage: git/gitmessage
     ~/.config/btop: btop
     ~/.config/helix: helix
     ~/.config/fish: fish
+    ~/.config/wezterm: wezterm
     ~/.config/qutebrowser: qutebrowser
     ~/.config/direnv: direnv
     ~/.config/bat: bat
     ~/.config/karabiner:
       force: true
       path: karabiner
+    ~/.gitconfig: git/gitconfig
+    ~/.gitmessage: git/gitmessage
     ~/.Brewfile: homebrew/Brewfile
     ~/Library/Application Support/lazygit/config.yml: lazygit/config.yml
 
