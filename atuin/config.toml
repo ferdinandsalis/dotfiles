@@ -1,4 +1,4 @@
-# Atuin configuration with Catppuccin theme
+# Atuin configuration
 
 ## Database configuration
 db_path = "~/.local/share/atuin/history.db"
@@ -29,8 +29,3 @@ update_check = true
 
 ## Shell integration
 enter_accept = true
-
-## Theme Configuration - Catppuccin Mocha
-# Note: Atuin uses environment variables for theming
-# Set these in your shell config or use the built-in themes
-# For now, using the compact style which works well with terminal themes
