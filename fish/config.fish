@@ -25,6 +25,8 @@ end
 
 # Atuin (shell history)
 if command -v atuin >/dev/null
+    # Catppuccin Mocha theme for Atuin
+    set -gx ATUIN_THEME "catppuccin-mocha"
     atuin init fish --disable-up-arrow | source
 end
 

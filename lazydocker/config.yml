@@ -1,0 +1,114 @@
+# LazyDocker Configuration with Catppuccin Mocha Theme
+
+gui:
+  # stuff relating to the UI
+  scrollHeight: 2
+  scrollPastBottom: false
+  mouseEvents: true
+  theme:
+    # Catppuccin Mocha theme colors
+    activeBorderColor:
+      - "#a6e3a1"  # Green
+      - bold
+    inactiveBorderColor:
+      - "#6c7086"  # Overlay0
+    optionsTextColor:
+      - "#89b4fa"  # Blue
+    selectedLineBgColor:
+      - "#313244"  # Surface0
+    selectedRangeBgColor:
+      - "#313244"  # Surface0
+    cherryPickedCommitBgColor:
+      - "#45475a"  # Surface1
+    cherryPickedCommitFgColor:
+      - "#a6e3a1"  # Green
+    unstagedChangesColor:
+      - "#f38ba8"  # Red
+    defaultFgColor:
+      - "#cdd6f4"  # Text
+  returnImmediately: false
+  wrapMainPanel: true
+
+# Keybindings
+keybinding:
+  universal:
+    quit: 'q'
+    quit-alt1: '<c-c>'
+    return: '<esc>'
+    quitWithoutChangingDirectory: 'Q'
+    togglePanel: '<tab>'
+    prevItem: '<up>'
+    nextItem: '<down>'
+    prevItem-alt: 'k'
+    nextItem-alt: 'j'
+    prevPage: ','
+    nextPage: '.'
+    scrollLeft: 'H'
+    scrollRight: 'L'
+    gotoTop: '<'
+    gotoBottom: '>'
+    prevBlock: '<left>'
+    nextBlock: '<right>'
+    prevBlock-alt: 'h'
+    nextBlock-alt: 'l'
+    nextMatch: 'n'
+    prevMatch: 'N'
+    startSearch: '/'
+    optionMenu: 'x'
+    optionMenu-alt1: '?'
+    select: '<space>'
+    goInto: '<enter>'
+    remove: 'd'
+    new: 'n'
+    edit: 'e'
+    openFile: 'o'
+    scrollUpMain: '<pgup>'
+    scrollDownMain: '<pgdown>'
+    scrollUpMain-alt1: 'K'
+    scrollDownMain-alt1: 'J'
+    scrollUpMain-alt2: '<c-u>'
+    scrollDownMain-alt2: '<c-d>'
+    executeCustomCommand: ':'
+    createRebaseOptionsMenu: 'm'
+    refresh: 'R'
+    createPatchOptionsMenu: '<c-p>'
+    nextTab: ']'
+    prevTab: '['
+    nextScreenMode: '+'
+    prevScreenMode: '_'
+    undo: 'z'
+    redo: '<c-z>'
+    filteringMenu: '<c-s>'
+    diffingMenu: 'W'
+    diffingMenu-alt: '<c-e>'
+    copyToClipboard: '<c-o>'
+    openRecentRepos: '<c-r>'
+    submitEditorText: '<enter>'
+    appendNewline: '<a-enter>'
+    extrasMenu: '@'
+    toggleWhitespaceInDiffView: '<c-w>'
+    increaseContextInDiffView: '}'
+    decreaseContextInDiffView: '{'
+
+logging:
+  reporting: 'off'
+  
+# How often to refresh the container list (in milliseconds)
+refreshInterval: 1000
+
+# Whether to show all containers or just running ones
+showAllContainers: false
+
+# Docker daemon config
+dockerCompose:
+  # if you want to use a custom docker-compose config file
+  # configPaths:
+  #   - docker-compose.yml
+  
+# Custom commands to run
+customCommands:
+  containers:
+    - name: 'bash'
+      attach: true
+      command: 'docker exec -it {{ .Container.ID }} /bin/bash'
+      serviceNames: []
