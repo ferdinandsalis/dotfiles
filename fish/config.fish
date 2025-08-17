@@ -25,7 +25,10 @@ end
 
 # Atuin (shell history)
 if command -v atuin >/dev/null
-    atuin init fish --disable-up-arrow | source
+    atuin init fish --disable-up-arrow --disable-ctrl-r | source
+    # Use Ctrl+E for Atuin search (alternative to Ctrl+R which remains for fzf)
+    bind \ce _atuin_search
+    bind --mode insert \ce _atuin_search
 end
 
 # FZF Configuration
