@@ -11,16 +11,27 @@ gui:
     theme:
         lightTheme: false
         activeBorderColor:
-            - green
+            - "#a6e3a1"
             - bold
         inactiveBorderColor:
-            - white
+            - "#6c7086"
+        searchingActiveBorderColor:
+            - "#f9e2af"
+            - bold
         optionsTextColor:
-            - blue
+            - "#89b4fa"
         selectedLineBgColor:
-            - black
+            - "#313244"
         selectedRangeBgColor:
-            - blue
+            - "#313244"
+        cherryPickedCommitBgColor:
+            - "#45475a"
+        cherryPickedCommitFgColor:
+            - "#a6e3a1"
+        unstagedChangesColor:
+            - "#f38ba8"
+        defaultFgColor:
+            - "#cdd6f4"
     commitLength:
         show: true
 git:
@@ -75,7 +86,7 @@ keybinding:
         scrollDownMain-alt1: "J"
         scrollUpMain-alt2: "<c-u>"
         scrollDownMain-alt2: "<c-d>"
-        executeCustomCommand: ":"
+        executeShellCommand: ":"
         createRebaseOptionsMenu: "m"
         pushFiles: "P"
         pullFiles: "p"

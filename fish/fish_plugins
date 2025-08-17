@@ -1,7 +1,9 @@
 jorgebucaran/fisher
-rstacruz/fish-asdf
-halostatue/fish-direnv
 ilancosman/tide@v6
 gazorby/fish-exa
 halostatue/fish-brew
 kidonng/zoxide.fish
+jethrokuan/z
+patrickf1/fzf.fish
+franciscolourenco/done
+jorgebucaran/autopair.fish

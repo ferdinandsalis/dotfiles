@@ -1,0 +1,31 @@
+# fd ignore file
+# See: https://github.com/sharkdp/fd
+
+.git/
+.svn/
+node_modules/
+target/
+dist/
+build/
+.next/
+.nuxt/
+coverage/
+*.pyc
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.cache/
+.parcel-cache/
+.turbo/
+.vercel/
+*.log
+.env.local
+.env.*.local

@@ -62,3 +62,6 @@ backups
 # Editor and terminal configurations
 .vscode
 .workspace.conf
+.idea
+.claude
+CLAUDE.local.md

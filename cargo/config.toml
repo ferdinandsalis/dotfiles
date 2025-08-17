@@ -1,0 +1,15 @@
+[build]
+jobs = 8
+rustc-wrapper = "/opt/homebrew/bin/sccache"
+
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]
+
+[net]
+git-fetch-with-cli = true
+
+[install]
+root = "/Users/ferdinand/.cargo"
+
+[registry]
+default = "crates-io"

@@ -1,0 +1,26 @@
+Host *
+    AddKeysToAgent yes
+    UseKeychain yes
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    TCPKeepAlive yes
+    Compression yes
+    ControlMaster auto
+    ControlPath ~/.ssh/sockets/%r@%h-%p
+    ControlPersist 600
+
+Host github.com
+    Hostname github.com
+    User git
+    IdentityFile ~/.ssh/github_rsa
+    PreferredAuthentications publickey
+
+Host gitlab.com
+    Hostname gitlab.com
+    User git
+    PreferredAuthentications publickey
+
+Host bitbucket.org
+    Hostname bitbucket.org
+    User git
+    PreferredAuthentications publickey

@@ -29,6 +29,23 @@ mode = "fixAll"
 [language-server.eslint.config.workingDirectory]
 mode = "location" # do we need to override this?
 
+## TypeScript/JavaScript Language Server
+[language-server.typescript-language-server]
+command = "typescript-language-server"
+args = ["--stdio"]
+config = { hostInfo = "helix", typescript = { inlayHints = { includeInlayParameterNameHints = "all", includeInlayParameterNameHintsWhenArgumentMatchesName = false, includeInlayFunctionParameterTypeHints = true, includeInlayVariableTypeHints = false, includeInlayPropertyDeclarationTypeHints = true, includeInlayFunctionLikeReturnTypeHints = true, includeInlayEnumMemberValueHints = true } } }
+
+## CSS Language Server  
+[language-server.vscode-css-language-server]
+command = "vscode-css-language-server"
+args = ["--stdio"]
+
+## Tailwind CSS Language Server
+[language-server.tailwindcss-ls]
+command = "tailwindcss-language-server"
+args = ["--stdio"]
+config = { tailwindCSS = { experimental = { classRegex = [["clsx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"], ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"], ["cn\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]] }, validate = true, lint = { cssConflict = "warning", invalidApply = "error", invalidScreen = "error", invalidVariant = "error", invalidConfigPath = "error", invalidTailwindDirective = "error", recommendedVariantOrder = "warning" } } }
+
 # Languages
 
 ## Web
@@ -36,45 +53,66 @@ mode = "location" # do we need to override this?
 [[language]]
 name = "html"
 formatter = { command = 'prettier', args = ["--parser", "html"] }
-language-servers = ["vscode-css-language-server"]
+language-servers = ["vscode-html-language-server", "tailwindcss-ls"]
+auto-format = true
 
 [[language]]
 name = "json"
 formatter = { command = 'prettier', args = ["--parser", "json"] }
+auto-format = true
 
 [[language]]
 name = "css"
 formatter = { command = 'prettier', args = ["--parser", "css"] }
-language-servers = ["vscode-css-language-server", "tailwindcss-ls" ]
+language-servers = ["vscode-css-language-server", "tailwindcss-ls"]
+auto-format = true
 
 ### JavaScript
 
 [[language]]
 name = "javascript"
 formatter = { command = 'prettier', args = ["--parser", "typescript"] }
-language-servers = [
-  { name = "typescript-language-server", except-features = [ "format" ] },
-  "tailwindcss-ls",
-  "eslint"
-]
+language-servers = ["typescript-language-server", "eslint", "tailwindcss-ls"]
+auto-format = true
+
+[[language]]
+name = "jsx"
+formatter = { command = 'prettier', args = ["--parser", "typescript"] }
+language-servers = ["typescript-language-server", "eslint", "tailwindcss-ls"]
 auto-format = true
 
 [[language]]
 name = "typescript"
 formatter = { command = 'prettier', args = ["--parser", "typescript"] }
-language-servers = [
-  { name = "typescript-language-server", except-features = [ "format" ] },
-  "tailwindcss-ls",
-  "eslint"
-]
+language-servers = ["typescript-language-server", "eslint", "tailwindcss-ls"]
 auto-format = true
 
 [[language]]
 name = "tsx"
 formatter = { command = 'prettier', args = ["--parser", "typescript"] }
-language-servers = [
-  { name = "typescript-language-server", except-features = [ "format" ] },
-  "tailwindcss-ls",
-  "eslint"
-]
+language-servers = ["typescript-language-server", "eslint", "tailwindcss-ls"]
 auto-format = true
+
+## Elixir
+
+[language-server.elixir-ls]
+command = "elixir-ls"
+config = { elixirLS = { dialyzerEnabled = true, fetchDeps = false } }
+
+[[language]]
+name = "elixir"
+scope = "source.elixir"
+file-types = ["ex", "exs"]
+roots = ["mix.exs", "mix.lock"]
+formatter = { command = "mix", args = ["format", "-"] }
+auto-format = true
+language-servers = ["elixir-ls"]
+
+[[language]]
+name = "heex"
+scope = "source.heex"
+file-types = ["heex"]
+roots = ["mix.exs", "mix.lock"]
+formatter = { command = "mix", args = ["format", "-"] }
+auto-format = true
+language-servers = ["elixir-ls"]

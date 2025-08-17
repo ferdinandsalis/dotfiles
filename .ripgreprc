@@ -1,0 +1,43 @@
+# Ripgrep configuration file
+# See: https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md#configuration-file
+
+# Search hidden files and directories
+--hidden
+
+# Follow symlinks
+--follow
+
+# Don't search git ignored files
+--no-ignore-vcs
+
+# Set color scheme
+--colors=line:fg:yellow
+--colors=line:style:bold
+--colors=path:fg:green
+--colors=path:style:bold
+--colors=match:fg:red
+--colors=match:style:bold
+
+# Smart case searching
+--smart-case
+
+# Add common file type definitions
+--type-add=web:*.{html,css,js,jsx,ts,tsx,vue,svelte}
+--type-add=config:*.{json,yaml,yml,toml,ini,conf,config}
+--type-add=doc:*.{md,markdown,rst,txt,adoc}
+
+# Exclude directories
+--glob=!.git/
+--glob=!node_modules/
+--glob=!target/
+--glob=!dist/
+--glob=!build/
+--glob=!.next/
+--glob=!.nuxt/
+--glob=!coverage/
+--glob=!*.min.js
+--glob=!*.map
+--glob=!package-lock.json
+--glob=!yarn.lock
+--glob=!pnpm-lock.yaml
+--glob=!Cargo.lock

@@ -1,5 +1,4 @@
 - defaults:
-    ~/.tmux.conf: tmux/.tmux.conf
     link:
       create: true
       relink: true
@@ -14,18 +13,32 @@
 
 - link:
     ~/.config/btop: btop
+    ~/.config/bottom: bottom
     ~/.config/helix: helix
     ~/.config/fish: fish
-    ~/.config/wezterm: wezterm
-    ~/.config/qutebrowser: qutebrowser
-    ~/.config/direnv: direnv
+    ~/.config/ghostty: ghostty
+    ~/.config/svim: svim
     ~/.config/bat: bat
     ~/.config/karabiner:
       force: true
       path: karabiner
+    ~/.config/lazygit:
+      force: true
+      path: lazygit
     ~/.gitconfig: git/gitconfig
     ~/.gitmessage: git/gitmessage
+    ~/.gitignore_global: git/gitignore
     ~/.Brewfile: homebrew/Brewfile
+    ~/.npmrc:
+      force: true
+      path: .npmrc
+    ~/.cargo/config.toml: cargo/config.toml
+    ~/.editorconfig: .editorconfig
+    ~/.ssh/config:
+      force: true
+      path: ssh/config
+    ~/.ripgreprc: .ripgreprc
+    ~/.fdignore: .fdignore
     ~/Library/Application Support/lazygit/config.yml: lazygit/config.yml
 
 - shell:
