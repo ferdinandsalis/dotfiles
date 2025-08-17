@@ -19,12 +19,16 @@
     ~/.config/ghostty: ghostty
     ~/.config/svim: svim
     ~/.config/bat: bat
+    ~/.config/atuin: atuin
     ~/.config/karabiner:
       force: true
       path: karabiner
     ~/.config/lazygit:
       force: true
       path: lazygit
+    ~/.config/jesseduffield/lazydocker:
+      force: true
+      path: lazydocker
     ~/.gitconfig: git/gitconfig
     ~/.gitmessage: git/gitmessage
     ~/.gitignore_global: git/gitignore

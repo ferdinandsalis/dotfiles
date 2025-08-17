@@ -23,6 +23,11 @@ if command -v zoxide >/dev/null
     zoxide init fish | source
 end
 
+# Atuin (shell history)
+if command -v atuin >/dev/null
+    atuin init fish --disable-up-arrow | source
+end
+
 # FZF Configuration
 if command -v fzf >/dev/null
     set -gx FZF_DEFAULT_COMMAND 'fd --type f --hidden --follow --exclude .git'

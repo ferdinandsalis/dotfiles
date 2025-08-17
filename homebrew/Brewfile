@@ -14,6 +14,7 @@ tap "khanhas/tap"
 #: Brews
 # brew "koekeishiya/formulae/yabai"
 # brew "koekeishiya/formulae/skhd"
+brew "atuin"
 brew "automake"
 brew "aws/tap/aws-sam-cli"
 brew "awscli"

@@ -1,0 +1,61 @@
+# Atuin configuration with Catppuccin theme
+
+## Sync configuration
+# sync_address = "https://api.atuin.sh"
+# sync_frequency = "10m"
+# sync.records = true
+
+## Database configuration
+db_path = "~/.local/share/atuin/history.db"
+key_path = "~/.local/share/atuin/key"
+session_path = "~/.local/share/atuin/session"
+
+## Search configuration
+search_mode = "fuzzy"
+filter_mode = "global"
+filter_mode_shell_up_key_binding = "session"
+style = "compact"
+show_preview = true
+show_help = true
+exit_mode = "return-original"
+inline_height = 20
+invert = false
+secrets_filter = true
+workspaces = false
+
+## History configuration
+history_filter = []
+max_preview_height = 4
+sync_address = "https://api.atuin.sh"
+sync_frequency = "10m"
+update_check = true
+
+## UI Configuration with Catppuccin Mocha theme
+# Base colors from Catppuccin Mocha
+[style]
+# Background and foreground
+bg = "#1e1e2e"          # Base
+fg = "#cdd6f4"          # Text
+
+# UI elements
+header_bg = "#313244"   # Surface0
+header_fg = "#cdd6f4"   # Text
+selected_bg = "#45475a" # Surface1
+selected_fg = "#cdd6f4" # Text
+border = "#585b70"      # Surface2
+
+# Syntax highlighting
+command = "#89b4fa"     # Blue
+time = "#a6adc8"        # Subtext0
+directory = "#f9e2af"   # Yellow
+duration = "#94e2d5"    # Teal
+user = "#cba6f7"        # Mauve
+host = "#f38ba8"        # Red
+exit_code = "#a6e3a1"   # Green
+
+# Search colors
+search_match = "#fab387" # Peach
+search_query = "#89dceb" # Sky
+
+## Shell integration
+enter_accept = true
