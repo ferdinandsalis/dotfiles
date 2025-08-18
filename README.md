@@ -13,58 +13,79 @@ Personal dotfiles managed with [Dotbot](https://github.com/anishathalye/dotbot).
 
 ## Installation
 
-### Prerequisites
+### Quick Start (New Machine)
 
-1. Install Homebrew:
+```bash
+# Clone and run setup
+git clone https://github.com/ferdinandsalis/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+./setup.sh
+```
+
+The setup script will:
+- ✅ Install Xcode Command Line Tools
+- ✅ Install Homebrew (with architecture detection)
+- ✅ Create symlinks via Dotbot
+- ✅ Install all packages from Brewfile
+- ✅ Configure Mise for development tools
+- ✅ Set up Fish shell with plugins
+- ✅ Create necessary directories
+- ✅ Optionally apply macOS preferences
+
+### Post-Installation
+
+After the main setup, run these helper scripts as needed:
+
+```bash
+# Configure Git
+./scripts/setup-git.sh
+
+# Generate SSH keys
+./scripts/setup-ssh.sh
+
+# Verify installation
+./scripts/health-check.sh
+```
+
+### Manual Installation
+
+If you prefer to run steps individually:
+
+1. **Install Homebrew:**
 ```bash
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-2. Install Git:
-```bash
-brew install git
-```
-
-### Setup
-
-1. Clone this repository:
+2. **Clone dotfiles:**
 ```bash
 git clone https://github.com/ferdinandsalis/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ```
 
-2. Run the installation script:
+3. **Create symlinks:**
 ```bash
-./install
+./install  # This runs Dotbot
 ```
 
-3. Install Homebrew packages:
+4. **Install packages:**
 ```bash
 brew bundle --file=~/.Brewfile
 ```
 
-4. Set Fish as default shell:
+5. **Configure shell:**
 ```bash
+# Add Fish to shells
 echo /opt/homebrew/bin/fish | sudo tee -a /etc/shells
 chsh -s /opt/homebrew/bin/fish
-```
 
-5. Install Fisher package manager and plugins (run in Fish shell):
-```fish
+# Install Fisher plugins (in Fish)
 fisher_install
 ```
 
-6. Configure Mise for runtime management:
+6. **Set up development tools:**
 ```bash
-# Mise is automatically configured in bootstrap.sh
-# To manually install global tools:
 mise use --global node@lts
 mise use --global python@latest
-mise use --global yarn@latest
-
-# For project-specific versions, use in project directory:
-mise use node@20
-mise use python@3.12
 ```
 
 ## Structure

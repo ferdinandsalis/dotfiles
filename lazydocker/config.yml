@@ -1,31 +1,25 @@
-# LazyDocker Configuration with Catppuccin Mocha Theme
+# LazyDocker Configuration with Catppuccin-inspired Theme
+# yaml-language-server: $schema=https://json.schemastore.org/lazydocker.json
 
 gui:
   # stuff relating to the UI
   scrollHeight: 2
   scrollPastBottom: false
   mouseEvents: true
+  sidePanelWidth: 0.333
+  border: 'rounded'
   theme:
-    # Catppuccin Mocha theme colors
+    # Catppuccin-inspired colors (using named colors as hex isn't supported yet)
+    # Using closest named colors to Catppuccin Mocha palette
     activeBorderColor:
-      - "#a6e3a1"  # Green
+      - green      # Catppuccin green
       - bold
     inactiveBorderColor:
-      - "#6c7086"  # Overlay0
+      - white      # Catppuccin overlay (appears gray in most terminals)
     optionsTextColor:
-      - "#89b4fa"  # Blue
+      - cyan       # Catppuccin blue
     selectedLineBgColor:
-      - "#313244"  # Surface0
-    selectedRangeBgColor:
-      - "#313244"  # Surface0
-    cherryPickedCommitBgColor:
-      - "#45475a"  # Surface1
-    cherryPickedCommitFgColor:
-      - "#a6e3a1"  # Green
-    unstagedChangesColor:
-      - "#f38ba8"  # Red
-    defaultFgColor:
-      - "#cdd6f4"  # Text
+      - default    # Use terminal's selection color
   returnImmediately: false
   wrapMainPanel: true
 
