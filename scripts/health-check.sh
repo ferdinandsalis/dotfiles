@@ -159,8 +159,7 @@ main() {
     log_section "CLI Tools:"
     check_command eza false
     check_command bat false
-    check_command ripgrep false
-    check_command rg false
+    check_command rg false  # ripgrep command
     check_command fd false
     check_command fzf false
     check_command zoxide false
@@ -169,8 +168,7 @@ main() {
     check_command lazygit false
     check_command lazydocker false
     check_command btop false
-    check_command helix false
-    check_command hx false
+    check_command hx false  # helix command
     
     # Dotfiles symlinks
     log_section "Dotfiles Symlinks:"

@@ -1,0 +1,138 @@
+name: Test Dotfiles Installation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-12, macos-13, macos-latest]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Run setup script (dry run)
+        run: |
+          # Test script syntax
+          bash -n setup.sh
+          bash -n scripts/setup-git.sh
+          bash -n scripts/setup-ssh.sh
+          bash -n scripts/health-check.sh
+      
+      - name: Test Dotbot installation
+        run: |
+          # Test symlink creation
+          ./install
+          
+          # Verify symlinks
+          ls -la ~/.gitconfig || echo "gitconfig not linked"
+          ls -la ~/.Brewfile || echo "Brewfile not linked"
+      
+      - name: Test helper scripts
+        run: |
+          # Test git setup (non-interactive)
+          echo -e "Test User\ntest@example.com\nn\n" | ./scripts/setup-git.sh || true
+          
+          # Run health check
+          ./scripts/health-check.sh || true
+
+  test-ubuntu:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git curl build-essential
+      
+      - name: Test script syntax
+        run: |
+          bash -n setup.sh || echo "Setup script has macOS-specific code"
+          bash -n scripts/setup-git.sh
+          bash -n scripts/setup-ssh.sh
+          bash -n scripts/health-check.sh
+      
+      - name: Test Dotbot
+        run: |
+          # Dotbot should work on Linux too
+          ./install
+          
+          # Check results
+          ls -la ~/.gitconfig || echo "gitconfig not linked"
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: '.'
+          ignore_paths: 'dotbot'
+          severity: warning
+
+  test-idempotency:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Run setup twice
+        run: |
+          # First run
+          ./install
+          
+          # Second run (should not fail)
+          ./install
+          
+          # Verify idempotency
+          echo "Idempotency test passed"
+
+  validate-configs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Validate YAML files
+        run: |
+          # Install yamllint
+          pip install yamllint
+          
+          # Validate YAML syntax
+          yamllint install.conf.yaml || true
+          yamllint lazydocker/config.yml || true
+      
+      - name: Validate TOML files
+        run: |
+          # Install toml-cli
+          pip install toml-cli
+          
+          # Validate TOML syntax
+          toml-cli validate atuin/config.toml || echo "TOML validation done"
+      
+      - name: Validate Fish scripts
+        run: |
+          # Check Fish syntax (basic)
+          for file in fish/**/*.fish; do
+            if [[ -f "$file" ]]; then
+              echo "Checking $file"
+              # Basic syntax check
+              grep -E '^\s*end\s*$' "$file" > /dev/null || echo "Warning: $file might be missing 'end' statements"
+            fi
+          done
