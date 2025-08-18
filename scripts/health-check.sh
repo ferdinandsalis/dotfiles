@@ -163,7 +163,6 @@ main() {
     check_command fd false
     check_command fzf false
     check_command zoxide false
-    check_command atuin false
     check_command gh false
     check_command lazygit false
     check_command lazydocker false
@@ -177,7 +176,6 @@ main() {
     check_symlink ~/.config/helix
     check_symlink ~/.config/btop
     check_symlink ~/.config/bat
-    check_symlink ~/.config/atuin
     check_symlink ~/.config/lazygit
     check_symlink ~/.Brewfile
     

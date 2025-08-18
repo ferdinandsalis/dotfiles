@@ -18,7 +18,6 @@
     ~/.config/fish: fish
     ~/.config/ghostty: ghostty
     ~/.config/bat: bat
-    ~/.config/atuin: atuin
     ~/.config/karabiner:
       force: true
       path: karabiner

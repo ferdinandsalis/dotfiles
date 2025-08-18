@@ -12,7 +12,6 @@ tap "homebrew/services"
 tap "khanhas/tap"
 
 #: Brews
-brew "atuin"
 brew "automake"
 brew "fish"
 brew "mise"
