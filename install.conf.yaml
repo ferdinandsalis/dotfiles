@@ -17,7 +17,6 @@
     ~/.config/helix: helix
     ~/.config/fish: fish
     ~/.config/ghostty: ghostty
-    ~/.config/svim: svim
     ~/.config/bat: bat
     ~/.config/atuin: atuin
     ~/.config/karabiner:
