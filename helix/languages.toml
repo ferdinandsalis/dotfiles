@@ -116,3 +116,19 @@ roots = ["mix.exs", "mix.lock"]
 formatter = { command = "mix", args = ["format", "-"] }
 auto-format = true
 language-servers = ["elixir-ls"]
+
+## TOML with taplo configuration
+[language-server.taplo]
+command = "taplo"
+args = ["lsp", "stdio"]
+timeout = 3 # Increase timeout to prevent shutdown errors
+
+[language-server.taplo.config]
+schema = { enabled = true, cache_schemas = true }
+formatter = { align_entries = false, indent_string = "  " }
+
+[[language]]
+name = "toml"
+language-servers = ["taplo"]
+formatter = { command = "taplo", args = ["fmt", "-"] }
+auto-format = true

@@ -53,6 +53,10 @@ tab = "→"
 newline = "⏎"
 tabpad = "·"
 
+[editor.lsp]
+display-messages = true
+display-inlay-hints = true
+
 [keys.normal]
 # Key mappings
 'space'.c.o = ":config-open"

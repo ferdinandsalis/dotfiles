@@ -6,6 +6,7 @@ set -gx VISUAL hx
 set -gx PAGER less
 set -gx LESS -R
 set -gx RIPGREP_CONFIG_PATH ~/.ripgreprc
+set -gx MISE_OVERRIDE_TOOL_VERSIONS_FILENAMES none
 
 # Path Management
 fish_add_path /opt/homebrew/bin
