@@ -17,6 +17,7 @@
     ~/.config/helix: helix
     ~/.config/fish: fish
     ~/.config/ghostty: ghostty
+    ~/.zshrc: zsh/zshrc
     ~/.config/bat: bat
     ~/.config/karabiner:
       force: true

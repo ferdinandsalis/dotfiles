@@ -1,0 +1,356 @@
+# Zsh configuration with Fish-like features
+
+# Enable colors and prompt expansion
+autoload -U colors && colors
+setopt PROMPT_SUBST
+
+# History configuration
+HISTSIZE=10000
+SAVEHIST=10000
+HISTFILE=~/.zsh_history
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_REDUCE_BLANKS
+
+# Basic auto/tab complete
+autoload -U compinit
+zstyle ':completion:*' menu select
+zmodload zsh/complist
+compinit
+_comp_options+=(globdots)
+
+# Vi mode
+bindkey -v
+export KEYTIMEOUT=1
+
+# Initialize Mise
+eval "$(mise activate zsh)"
+
+# Set up Mise shims
+export PATH="$HOME/.local/share/mise/shims:$PATH"
+
+# Initialize zoxide (z command)
+eval "$(zoxide init zsh)"
+
+# Load local configuration if it exists
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
+# Environment Variables (Fish-like)
+export EDITOR='hx'
+export VISUAL='hx'
+export PAGER='less'
+export LESS='-R'
+export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
+export MISE_OVERRIDE_TOOL_VERSIONS_FILENAMES='none'
+export BAT_CONFIG_PATH="$HOME/.config/bat/config"
+
+# Path additions
+export PATH="/opt/homebrew/bin:$PATH"
+export PATH="/opt/homebrew/sbin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$PATH"
+
+# FZF Configuration
+if command -v fzf >/dev/null; then
+    export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+    
+    # Catppuccin Latte theme for FZF
+    export FZF_DEFAULT_OPTS="
+    --height 40% --layout=reverse --border rounded
+    --preview 'bat --style=numbers --color=always --line-range :500 {}'
+    --preview-window=right:60%:wrap
+    --color=bg+:#ccd0da,bg:#eff1f5,spinner:#dc8a78,hl:#d20f39
+    --color=fg:#4c4f69,header:#d20f39,info:#8839ef,pointer:#dc8a78
+    --color=marker:#dc8a78,fg+:#4c4f69,prompt:#8839ef,hl+:#d20f39"
+fi
+
+# Aliases - using eza (modern ls replacement)
+alias ls='eza --icons --group-directories-first'
+alias ll='eza -la --icons --group-directories-first'
+alias la='eza -a --icons --group-directories-first'
+alias l='eza -l --icons --group-directories-first'
+alias lt='eza --tree --icons --group-directories-first'
+alias tree='eza --tree --icons --group-directories-first'
+
+# Modern tool replacements (Fish-like)
+alias cat='bat'
+alias grep='rg'
+alias find='fd'
+alias ps='procs'
+alias du='dust'
+alias top='btop'
+alias lzd='lazydocker'
+alias vim='hx'
+alias vi='hx'
+
+# Better command defaults
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -i'
+
+# Git aliases (Fish-like)
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git pull'
+alias gd='git diff'
+alias gco='git checkout'
+alias gb='git branch'
+alias glog='git log --oneline --graph --decorate'
+
+# Directory navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Git abbreviations (using global aliases in zsh)
+alias gcm='git commit -m'
+alias gca='git commit --amend'
+alias gcan='git commit --amend --no-edit'
+alias gcb='git checkout -b'
+alias grhh='git reset --hard HEAD'
+alias grsh='git reset --soft HEAD~1'
+alias gst='git stash'
+alias gstp='git stash pop'
+alias gpr='git pull --rebase'
+alias gfo='git fetch origin'
+
+# Functions (Fish-like)
+
+# mkcd - Make directory and cd into it
+mkcd() {
+    mkdir -p "$1" && cd "$1"
+}
+
+# backup - Create a backup of a file
+backup() {
+    if [ -f "$1" ]; then
+        cp "$1" "$1.backup.$(date +%Y%m%d-%H%M%S)"
+        echo "Backup created: $1.backup.$(date +%Y%m%d-%H%M%S)"
+    else
+        echo "File not found: $1"
+    fi
+}
+
+# extract - Universal archive extractor
+extract() {
+    if [ -f "$1" ]; then
+        case $1 in
+            *.tar.bz2)   tar xjf "$1"     ;;
+            *.tar.gz)    tar xzf "$1"     ;;
+            *.bz2)       bunzip2 "$1"     ;;
+            *.rar)       unrar e "$1"     ;;
+            *.gz)        gunzip "$1"      ;;
+            *.tar)       tar xf "$1"      ;;
+            *.tbz2)      tar xjf "$1"     ;;
+            *.tgz)       tar xzf "$1"     ;;
+            *.zip)       unzip "$1"       ;;
+            *.Z)         uncompress "$1"  ;;
+            *.7z)        7z x "$1"        ;;
+            *)           echo "'$1' cannot be extracted" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# ports - Show what's running on which ports
+ports() {
+    lsof -iTCP -sTCP:LISTEN -n -P
+}
+
+# update - Update system packages (Fish-like)
+update() {
+    echo "Updating Homebrew..."
+    brew update && brew upgrade && brew cleanup
+    
+    echo "Updating Mise tools..."
+    mise upgrade
+    
+    echo "Updating npm packages..."
+    npm update -g
+    
+    echo "Update complete!"
+}
+
+# p - Smart project switcher with zoxide integration (simplified version)
+p() {
+    local project_dirs=(~/projects ~/work ~/Work ~/.dotfiles ~/Documents)
+    local all_dirs=""
+    
+    # Get zoxide directories if available
+    if command -v zoxide >/dev/null; then
+        all_dirs=$(zoxide query -l | head -20)
+    fi
+    
+    # Find git projects
+    for dir in "${project_dirs[@]}"; do
+        if [ -d "$dir" ]; then
+            # Find git directories
+            local git_dirs=$(find "$dir" -maxdepth 3 -type d -name ".git" 2>/dev/null | sed 's/\/.git$//')
+            all_dirs="$all_dirs\n$git_dirs"
+        fi
+    done
+    
+    # Use FZF to select
+    local selected=$(echo -e "$all_dirs" | sort -u | grep -v '^$' | fzf \
+        --prompt="🚀 Project> " \
+        --height=50% \
+        --layout=reverse \
+        --border=rounded \
+        --preview='if [ -d "{}/.git" ]; then git -C {} status -sb 2>/dev/null | head -5; else ls -la {} | head -20; fi' \
+        --preview-window=right:60%:wrap)
+    
+    if [ -n "$selected" ]; then
+        # Update zoxide database
+        if command -v zoxide >/dev/null; then
+            zoxide add "$selected"
+        fi
+        
+        cd "$selected"
+        clear
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "📂 Switched to: $(basename $selected)"
+        echo "📍 Path: $selected"
+        
+        # Show git info if available
+        if [ -d .git ]; then
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "🌿 Branch: $(git branch --show-current 2>/dev/null)"
+            if git status -s 2>/dev/null | head -3 | grep -q .; then
+                echo "📝 Changes:"
+                git status -s 2>/dev/null | head -3
+            else
+                echo "✨ Working tree clean"
+            fi
+        fi
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    fi
+}
+
+# Prompt configuration (simple and clean)
+PROMPT='%F{cyan}%~%f %F{yellow}❯%f '
+
+# FZF integration and keybindings
+if [ -f ~/.fzf.zsh ]; then
+    source ~/.fzf.zsh
+    
+    # Custom FZF key bindings (like Fish config)
+    # Ctrl-O: Search projects (same as Fish)
+    fzf-projects-widget() {
+        local project_dirs=(~/projects ~/work ~/Work ~/.dotfiles ~/Documents)
+        local all_dirs=""
+        
+        # Get zoxide directories if available
+        if command -v zoxide >/dev/null; then
+            all_dirs=$(zoxide query -l | head -20)
+        fi
+        
+        # Find git projects
+        for dir in "${project_dirs[@]}"; do
+            if [ -d "$dir" ]; then
+                local git_dirs=$(find "$dir" -maxdepth 3 -type d -name ".git" 2>/dev/null | sed 's/\/.git$//')
+                all_dirs="$all_dirs\n$git_dirs"
+            fi
+        done
+        
+        local selected=$(echo -e "$all_dirs" | sort -u | grep -v '^$' | fzf \
+            --prompt="🚀 Projects> " \
+            --height=50% \
+            --layout=reverse \
+            --border=rounded \
+            --preview='if [ -d "{}/.git" ]; then git -C {} status -sb 2>/dev/null | head -5; else ls -la {} | head -20; fi' \
+            --preview-window=right:50%:wrap \
+            --header="Select a project to navigate to")
+        
+        if [ -n "$selected" ]; then
+            if command -v zoxide >/dev/null; then
+                zoxide add "$selected"
+            fi
+            cd "$selected"
+            zle reset-prompt
+        fi
+    }
+    zle -N fzf-projects-widget
+    bindkey '^o' fzf-projects-widget
+    
+    # Additional FZF functions
+    # Kill process interactively
+    fkill() {
+        local pid
+        pid=$(ps -ef | sed 1d | fzf -m --header="Select process to kill" | awk '{print $2}')
+        if [ "x$pid" != "x" ]; then
+            echo $pid | xargs kill -${1:-9}
+        fi
+    }
+    
+    # Git branch selector
+    fbr() {
+        local branches branch
+        branches=$(git branch --all | grep -v HEAD) &&
+        branch=$(echo "$branches" |
+                fzf-tmux -d $(( 2 + $(wc -l <<< "$branches") )) +m) &&
+        git checkout $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
+    }
+    
+    # Git commit browser
+    fco() {
+        local commits commit
+        commits=$(git log --pretty=oneline --abbrev-commit --reverse) &&
+        commit=$(echo "$commits" | fzf --tac +s +m -e) &&
+        git checkout $(echo "$commit" | sed "s/ .*//")
+    }
+    
+    # npm scripts runner
+    fnpm() {
+        local script
+        script=$(cat package.json | jq -r '.scripts | keys[]' | fzf --height=40% --reverse --header="Select npm script") &&
+        npm run "$script"
+    }
+    
+    # Interactive ripgrep
+    frg() {
+        local initial_query="${*:-}"
+        local selected
+        
+        selected=$(
+            rg --color=always --line-number --no-heading --smart-case "${initial_query}" |
+            fzf --ansi \
+                --color "hl:-1:underline,hl+:-1:underline:reverse" \
+                --delimiter : \
+                --preview 'bat --color=always {1} --highlight-line {2}' \
+                --preview-window 'up,60%,border-bottom,+{2}+3/3,~3'
+        )
+        
+        [ -n "$selected" ] && ${EDITOR:-vim} $(echo "$selected" | cut -d: -f1) +$(echo "$selected" | cut -d: -f2)
+    }
+    
+    # Aliases for FZF functions
+    alias fp="fzf-projects-widget"
+    alias fdocker="docker ps -a | fzf --header='Select container' | awk '{print \$1}'"
+fi
+
+# Homebrew
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# SSH Agent auto-start (Fish-like)
+if [ -z "$SSH_AUTH_SOCK" ]; then
+    eval $(ssh-agent) >/dev/null
+fi
+
+# Keybindings
+# Edit command in editor (Ctrl+X Ctrl+E is default in zsh)
+autoload -z edit-command-line
+zle -N edit-command-line
+bindkey "^X^E" edit-command-line
+
+# Better history search
+bindkey '^R' history-incremental-search-backward
+bindkey '^S' history-incremental-search-forward
+
+# Disable greeting (zsh doesn't have one by default, but we'll clear for cleanliness)
+clear
