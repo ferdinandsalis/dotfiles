@@ -1,0 +1,9 @@
+# Mise configuration for dotfiles repository
+# This enables automatic .env loading when in the dotfiles directory
+
+[env]
+# Load .env file if it exists (useful for development)
+_.file = [".env"]
+
+# You can also set defaults here that can be overridden by .env
+# DOTFILES_THEME = "dark"

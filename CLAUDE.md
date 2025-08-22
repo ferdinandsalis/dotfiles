@@ -46,6 +46,7 @@ update
 - Keep commits atomic - one logical change per commit
 - Write descriptive commit messages explaining why, not just what
 - Do not mention AI assistance in commit messages
+- Never add Claude as co-author or mention Claude in commits
 
 #### Security Checks
 When committing changes to dotfiles, ensure no secrets are exposed. Check for:

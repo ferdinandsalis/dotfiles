@@ -18,6 +18,45 @@ log_step() { echo -e "${BLUE}→${NC} $1"; }
 echo "🚀 Starting dotfiles setup..."
 echo ""
 
+# Setup environment configuration
+setup_env() {
+    if [[ ! -f "$HOME/.dotfiles/.env" ]]; then
+        if [[ -f "$HOME/.dotfiles/.env.example" ]]; then
+            log_step "No .env file found. Let's create one..."
+            echo ""
+            echo "Please provide your configuration details:"
+            
+            read -p "Computer name (e.g., john-macbook): " computer_name
+            read -p "Your full name for Git: " git_name
+            read -p "Your email for Git: " git_email
+            read -p "Your GitHub username: " github_user
+            
+            # Create .env file from template
+            cp "$HOME/.dotfiles/.env.example" "$HOME/.dotfiles/.env"
+            
+            # Replace placeholders
+            sed -i '' "s/your-computer-name/${computer_name}/g" "$HOME/.dotfiles/.env"
+            sed -i '' "s/your-hostname/${computer_name}/g" "$HOME/.dotfiles/.env"
+            sed -i '' "s/Your Name/${git_name}/g" "$HOME/.dotfiles/.env"
+            sed -i '' "s/your.email@example.com/${git_email}/g" "$HOME/.dotfiles/.env"
+            sed -i '' "s/your-github-username/${github_user}/g" "$HOME/.dotfiles/.env"
+            
+            log_info "Created .env file with your configuration"
+        else
+            log_warn "No .env.example template found, using defaults"
+        fi
+    else
+        log_info "Found existing .env file"
+    fi
+    
+    # Load the environment variables
+    if [[ -f "$HOME/.dotfiles/.env" ]]; then
+        set -a
+        source "$HOME/.dotfiles/.env"
+        set +a
+    fi
+}
+
 # Detect system architecture
 detect_system() {
     OS="$(uname -s)"
@@ -201,6 +240,9 @@ setup_macos() {
 
 # Main installation flow
 main() {
+    # Environment setup (should be first)
+    setup_env
+    
     # System detection
     detect_system
     

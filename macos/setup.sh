@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
 
-# CREDIT: Mathias Byens
+# CREDIT: Mathias Bynes
 # ~/.macos — https://mths.be/macos
 
+# Load environment variables
+if [[ -f "$HOME/.dotfiles/.env" ]]; then
+    export $(grep -v '^#' "$HOME/.dotfiles/.env" | xargs)
+elif [[ -f "$HOME/.env" ]]; then
+    export $(grep -v '^#' "$HOME/.env" | xargs)
+fi
+
+# Set defaults if not provided
+DOTFILES_COMPUTER_NAME="${DOTFILES_COMPUTER_NAME:-$(hostname -s)}"
+DOTFILES_HOSTNAME="${DOTFILES_HOSTNAME:-$DOTFILES_COMPUTER_NAME}"
+
 # Close any open System Preferences panes, to prevent them from overriding
-# settings we’re about to change
+# settings we're about to change
 osascript -e 'tell application "System Preferences" to quit'
 
 # Ask for the administrator password upfront
@@ -18,10 +29,10 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 ###############################################################################
 
 # Set computer name (as done via System Preferences → Sharing)
-sudo scutil --set ComputerName "ferdi.macbook"
-sudo scutil --set HostName "ferdi.macbook"
-sudo scutil --set LocalHostName "ferdi.macbook"
-sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "ferdi.macbook"
+sudo scutil --set ComputerName "$DOTFILES_COMPUTER_NAME"
+sudo scutil --set HostName "$DOTFILES_HOSTNAME"
+sudo scutil --set LocalHostName "$DOTFILES_HOSTNAME"
+sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "$DOTFILES_COMPUTER_NAME"
 
 # Disable the sound effects on boot
 sudo nvram SystemAudioVolume=" "

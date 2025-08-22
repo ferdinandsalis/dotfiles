@@ -10,3 +10,7 @@ session/
 packer_compiled.vim
 automatic_backups/
 fish/fish_variables
+
+# Environment configuration (contains personal data)
+.env
+.env.local

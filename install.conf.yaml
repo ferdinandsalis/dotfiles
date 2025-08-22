@@ -42,6 +42,7 @@
       path: ssh/config
     ~/.ripgreprc: .ripgreprc
     ~/.fdignore: .fdignore
+    ~/.fzf.zsh: zsh/fzf.zsh
     ~/Library/Application Support/lazygit/config.yml: lazygit/config.yml
 
 - shell:

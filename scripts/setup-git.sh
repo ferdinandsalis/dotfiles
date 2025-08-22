@@ -18,6 +18,36 @@ log_step() { echo -e "${BLUE}→${NC} $1"; }
 echo "🔧 Git Configuration Setup"
 echo ""
 
+# Load environment variables if available
+if [[ -f "$HOME/.dotfiles/.env" ]]; then
+    set -a
+    source "$HOME/.dotfiles/.env"
+    set +a
+elif [[ -f "$HOME/.env" ]]; then
+    set -a
+    source "$HOME/.env"
+    set +a
+fi
+
+# Generate git config from template if available
+generate_from_template() {
+    if [[ -f "$HOME/.dotfiles/git/gitconfig.template" ]] && [[ -f "$HOME/.dotfiles/.env" ]]; then
+        log_step "Generating git config from template..."
+        
+        # Copy template
+        cp "$HOME/.dotfiles/git/gitconfig.template" "$HOME/.dotfiles/git/gitconfig"
+        
+        # Replace placeholders with environment variables
+        sed -i '' "s/{{DOTFILES_GIT_NAME}}/${DOTFILES_GIT_NAME}/g" "$HOME/.dotfiles/git/gitconfig"
+        sed -i '' "s/{{DOTFILES_GIT_EMAIL}}/${DOTFILES_GIT_EMAIL}/g" "$HOME/.dotfiles/git/gitconfig"
+        sed -i '' "s/{{DOTFILES_GITHUB_USER}}/${DOTFILES_GITHUB_USER}/g" "$HOME/.dotfiles/git/gitconfig"
+        
+        log_info "Generated git config from template"
+        return 0
+    fi
+    return 1
+}
+
 # Check if git config already exists
 check_existing() {
     local name=$(git config --global user.name 2>/dev/null || echo "")
@@ -127,7 +157,10 @@ show_config() {
 
 # Main flow
 main() {
-    if check_existing; then
+    # Try to generate from template first
+    if generate_from_template; then
+        log_info "Using configuration from .env file"
+    elif check_existing; then
         configure_user
     fi
     
