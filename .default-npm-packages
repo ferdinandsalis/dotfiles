@@ -1,1 +1,6 @@
-claude
+@anthropic-ai/claude-code
+typescript-language-server
+typescript
+eslint
+vscode-langservers-extracted
+@tailwindcss/language-server
