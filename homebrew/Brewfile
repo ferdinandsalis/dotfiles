@@ -50,6 +50,7 @@ brew "ripgrep"
 brew "rsync"
 brew "rustup-init"
 brew "sqlite"
+brew "todo-txt"
 brew "tree"
 brew "wget"
 

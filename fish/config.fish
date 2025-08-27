@@ -83,6 +83,7 @@ if status is-interactive
     alias lzd="lazydocker"  # Docker TUI management
     alias vim="hx"
     alias vi="hx"
+    alias t="todo.sh"
 
     # Git Aliases
     alias g="git"

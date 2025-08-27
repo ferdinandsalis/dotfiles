@@ -1,0 +1,32 @@
+# todo.txt configuration file
+
+# Your todo.txt directory
+export TODO_DIR="$HOME"
+
+# Your todo/done/report.txt locations
+export TODO_FILE="$TODO_DIR/todo.txt"
+export DONE_FILE="$TODO_DIR/done.txt"
+export REPORT_FILE="$TODO_DIR/report.txt"
+
+# You can customize your actions directory location
+export TODO_ACTIONS_DIR="$HOME/.todo.actions.d"
+
+# Uncomment to force plain text behavior (disable colors)
+# export PLAIN=1
+
+# Uncomment the next line to disable auto-archiving on completion
+# export TODOTXT_DISABLE_FILTER=1
+
+# Uncomment to enable verbose mode
+# export TODOTXT_VERBOSE=1
+
+# Catppuccin Mocha colors
+export PRI_A=$'\033[1;38;2;243;139;168m'  # Red (f38ba8)
+export PRI_B=$'\033[1;38;2;250;179;135m'  # Peach (fab387)
+export PRI_C=$'\033[1;38;2;137;180;250m'  # Blue (89b4fa)
+export DEFAULT=$'\033[0m'                 # Default
+
+# Colors for contexts and projects
+export COLOR_CONTEXT=$'\033[1;38;2;148;226;213m'  # Teal (94e2d5)
+export COLOR_PROJECT=$'\033[1;38;2;203;166;247m'  # Mauve (cba6f7)
+export COLOR_DATE=$'\033[1;38;2;166;227;161m'     # Green (a6e3a1)
