@@ -25,9 +25,7 @@ export KEYTIMEOUT=1
 
 # Initialize Mise
 eval "$(mise activate zsh)"
-
-# Set up Mise shims
-export PATH="$HOME/.local/share/mise/shims:$PATH"
+eval "$(mise hook-env -s zsh)"
 
 # Initialize zoxide (z command)
 eval "$(zoxide init zsh)"
