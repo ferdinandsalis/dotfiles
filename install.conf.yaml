@@ -17,6 +17,7 @@
     ~/.config/helix: helix
     ~/.config/fish: fish
     ~/.config/ghostty: ghostty
+    ~/.config/zellij: zellij
     ~/.zshrc: zsh/zshrc
     ~/.config/bat: bat
     ~/.config/karabiner:

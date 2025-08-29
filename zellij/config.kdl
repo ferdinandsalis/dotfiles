@@ -1,0 +1,16 @@
+default_shell "fish"
+
+theme "catppuccin-macchiato"
+
+pane_frames false
+simplified_ui true
+default_layout "default"
+
+// Add padding inside panes
+ui {
+    pane {
+        frames {
+            rounded_corners true
+        }
+    }
+}
