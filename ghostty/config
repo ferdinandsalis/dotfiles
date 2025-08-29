@@ -33,7 +33,7 @@ copy-on-select = "clipboard"
 clipboard-paste-protection = true
 
 keybind = cmd+ctrl+alt+shift+a>r=reload_config
-keybind = cmd+ctrl+alt+shift+a>e=open_config
+keybind = cmd+shift+comma=new_split:right
 
 keybind = cmd+ctrl+alt+shift+a>k=goto_split:top
 keybind = cmd+ctrl+alt+shift+a>j=goto_split:bottom
