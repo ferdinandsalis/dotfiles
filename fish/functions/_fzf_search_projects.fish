@@ -6,7 +6,9 @@ function _fzf_search_projects --description "Search and navigate to projects"
     set -f projects
     for dir in $project_dirs
         if test -d $dir
-            set -a projects (fd -H -t d '^\.git$' $dir 2>/dev/null | string replace '/.git' '')
+            for git_dir in (/usr/bin/find $dir -maxdepth 3 -name ".git" -type d -not -path "*/node_modules/*" -not -path "*/deps/*" 2>/dev/null)
+                set -a projects (dirname $git_dir)
+            end
         end
     end
 
