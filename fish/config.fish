@@ -45,8 +45,11 @@ end
 # Note: Fish cannot directly source bash scripts.
 # Consider converting ~/.environment.secret.sh to Fish syntax or using direnv
 
-# Disable welcome message
+# Show tasks on terminal startup
 function fish_greeting
+    if command -v todo.sh >/dev/null
+        t list
+    end
 end
 
 # Interactive Shell Configuration
