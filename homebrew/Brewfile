@@ -3,8 +3,6 @@ tap "aws/tap"
 tap "candid82/brew"
 tap "cmacrae/formulae"
 tap "craciuncezar/tap"
-tap "homebrew/bundle"
-tap "homebrew/services"
 tap "khanhas/tap"
 
 #: Core CLI Tools
