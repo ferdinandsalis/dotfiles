@@ -101,5 +101,4 @@ cask "font-hack-nerd-font"
 #: Mac App Store
 brew "mas"
 mas "Table Tool", id: 1122008420
-# mas "Vimari", id: 1480933944  # No longer available in App Store
 mas "Vimlike", id: 1584519802
