@@ -26,6 +26,7 @@ macos-auto-secure-input = true
 
 auto-update = "download"
 
+command = "/opt/homebrew/bin/fish"
 shell-integration = "fish"
 shell-integration-features = "no-cursor"
 
