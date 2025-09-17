@@ -8,6 +8,7 @@ tap "khanhas/tap"
 #: Core CLI Tools
 brew "automake"
 brew "fish"
+brew "helix"
 brew "mise"
 brew "aws/tap/aws-sam-cli"
 brew "awscli"

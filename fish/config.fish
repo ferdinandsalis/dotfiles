@@ -117,6 +117,12 @@ if status is-interactive
     abbr --add gpr "git pull --rebase"
     abbr --add gfo "git fetch origin"
 
+    # Note-taking abbreviations
+    abbr --add nn "n"          # Quick note access
+    abbr --add td "today"      # Today's daily note
+    abbr --add nt "ntag"       # Search by tags
+    abbr --add nl "nlink"      # Wiki-style links
+
     # Set Vi key bindings (optional, comment out if you prefer default)
     # fish_vi_key_bindings
 
