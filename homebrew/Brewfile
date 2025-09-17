@@ -99,4 +99,3 @@ cask "font-hack-nerd-font"
 #: Mac App Store
 brew "mas"
 mas "Table Tool", id: 1122008420
-mas "Vimlike", id: 1584519802
