@@ -4,3 +4,7 @@ typescript
 eslint
 vscode-langservers-extracted
 @tailwindcss/language-server
+npm-check-updates
+prettier_d_slim
+prettier
+tailwindcss-language-server

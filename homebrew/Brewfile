@@ -4,14 +4,10 @@ tap "candid82/brew"
 tap "cmacrae/formulae"
 tap "craciuncezar/tap"
 tap "homebrew/bundle"
-# tap "homebrew/cask" # No longer needed - included by default
-# tap "homebrew/cask-fonts" # Deprecated - fonts now in homebrew/cask
-# tap "homebrew/cask-versions" # Deprecated
-# tap "homebrew/core" # No longer needed - included by default
 tap "homebrew/services"
 tap "khanhas/tap"
 
-#: Brews
+#: Core CLI Tools
 brew "automake"
 brew "fish"
 brew "mise"
@@ -36,6 +32,7 @@ brew "go"
 brew "btop"
 brew "hub"
 brew "jq"
+brew "yq"
 brew "lazydocker"
 brew "lazygit"
 brew "bottom"
@@ -56,34 +53,39 @@ brew "todo-txt"
 brew "tree"
 brew "wget"
 
-#: Casks
-# cask "alt-tab"
-# cask "arq"
-# cask "bartender"
-# cask "betterdummy"
-# cask "brave-browser"
-# cask "discord"
-# cask "docker"
-# cask "figma"
-# cask "firefox"
-# cask "google-chrome"
-# cask "kaleidoscope"
-# cask "kap"
-# cask "karabiner-elements"
-# cask "kitty"
-# cask "mailmate"
-# cask "maccy"
-# cask "raycast"
-# cask "signal"
-# cask "sketch"
-# cask "skype"
-# cask "slack"
-# cask "spotify"
-# cask "steam"
-# cask "visual-studio-code"
-# cask "1password"
-# cask "1password-cli"
-# cask "adobe-creative-cloud"
+#: Critical System Tools
+cask "1password"
+cask "1password-cli"
+cask "karabiner-elements"
+cask "raycast"
+
+#: Development Environment
+cask "ghostty"
+cask "visual-studio-code"
+cask "postico"
+cask "insomnia"
+
+#: Work & Communication
+cask "slack"
+cask "mailmate"
+cask "figma"
+cask "discord"
+cask "signal"
+
+#: Productivity & Utilities
+cask "maccy"
+cask "ice"
+cask "spotify"
+cask "dropbox"
+cask "kap"
+cask "numi"
+
+#: Security
+cask "lulu"
+
+#: Browsers
+cask "firefox"
+cask "google-chrome"
 
 #: Fonts
 cask "font-alegreya"
@@ -94,9 +96,9 @@ cask "font-blex-mono-nerd-font"
 cask "font-hasklug-nerd-font"
 cask "font-iosevka"
 cask "font-victor-mono"
+cask "font-hack-nerd-font"
 
+#: Mac App Store
 brew "mas"
 mas "Table Tool", id: 1122008420
 mas "Vimari", id: 1480933944
-# mas "1Password 7", id: 1333542190
-# mas "Xcode", id: 497799835
