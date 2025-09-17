@@ -190,11 +190,17 @@ setup_fish() {
                 if not functions -q fisher
                     curl -sL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source
                     fisher install jorgebucaran/fisher
-                    fisher install jethrokuan/z
-                    fisher install PatrickF1/fzf.fish
-                    fisher install franciscolourenco/done
-                    fisher install jorgebucaran/autopair.fish
                 end
+
+                echo 'Installing Fish plugins...'
+                fisher install jethrokuan/z
+                fisher install PatrickF1/fzf.fish
+                fisher install franciscolourenco/done
+                fisher install jorgebucaran/autopair.fish
+                fisher install IlanCosman/tide@v6
+
+                echo 'Configuring Tide prompt...'
+                tide configure --auto --style=Lean --prompt_colors='True color' --show_time='24-hour format' --lean_prompt_height='Two lines' --prompt_connection=Disconnected --prompt_spacing=Compact --icons='Many icons' --transient=Yes
             " || log_warn "Could not install Fisher plugins automatically"
         fi
     else
