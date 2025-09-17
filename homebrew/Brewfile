@@ -74,7 +74,7 @@ cask "signal"
 
 #: Productivity & Utilities
 cask "maccy"
-cask "ice"
+cask "jordanbaird-ice"
 cask "spotify"
 cask "dropbox"
 cask "kap"
