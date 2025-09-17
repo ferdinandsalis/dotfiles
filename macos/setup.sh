@@ -5,9 +5,13 @@
 
 # Load environment variables
 if [[ -f "$HOME/.dotfiles/.env" ]]; then
-    export $(grep -v '^#' "$HOME/.dotfiles/.env" | xargs)
+    set -a
+    source "$HOME/.dotfiles/.env"
+    set +a
 elif [[ -f "$HOME/.env" ]]; then
-    export $(grep -v '^#' "$HOME/.env" | xargs)
+    set -a
+    source "$HOME/.env"
+    set +a
 fi
 
 # Set defaults if not provided
