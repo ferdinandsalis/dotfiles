@@ -52,3 +52,4 @@
 
 - shell:
     - [git submodule update --init --recursive, Installing submodules]
+    - [command -v bat >/dev/null 2>&1 && bat cache --build || true, Building bat theme cache]
