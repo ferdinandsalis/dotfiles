@@ -230,19 +230,6 @@ create_directories() {
     log_info "Directories created"
 }
 
-# Run macOS defaults (optional)
-setup_macos() {
-    if [ -f "$HOME/.dotfiles/macos/setup.sh" ]; then
-        echo ""
-        read -p "Apply macOS system preferences? (y/n) " -n 1 -r
-        echo ""
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-            log_step "Applying macOS preferences..."
-            source "$HOME/.dotfiles/macos/setup.sh"
-            log_info "macOS preferences applied"
-        fi
-    fi
-}
 
 # Main installation flow
 main() {
@@ -262,7 +249,6 @@ main() {
     setup_mise
     setup_fish
     create_directories
-    setup_macos
     
     # Success message
     echo ""
@@ -273,6 +259,8 @@ main() {
     echo "2. Configure git: ./scripts/setup-git.sh"
     echo "3. Generate SSH keys: ./scripts/setup-ssh.sh"
     echo "4. Run health check: ./scripts/health-check.sh"
+    echo "5. Optionally apply macOS settings: ./macos/setup.sh"
+    echo "6. If needed, revert macOS changes: ./scripts/revert-macos.sh"
     echo ""
     echo "For detailed setup info, see: README.md"
 }
