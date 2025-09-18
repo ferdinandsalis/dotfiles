@@ -4,13 +4,16 @@
 [core]
   excludesfile = ~/.dotfiles/git/gitignore
   pager = delta
+	editor = hx
+	autocrlf = input
+	ignorecase = false
 [commit]
   template = ~/.gitmessage
   gpgsign = false
 [alias]
-  st = status
+	st = status -sb
   ci = commit
-  co = checkout
+	co = checkout
   di = diff
   dc = diff --cached
   amend = commit --amend
@@ -33,6 +36,12 @@
   logst = log --stat
   logsf = log --stat --format=oneline --abbrev-commit
   finda = "!grepalias() { git config --global --get-regexp alias | grep -i \"$1\" | awk -v nr=2 '{sub(/^alias\\./,\"\")};{printf \"\\033[31m%_10s\\033[1;37m\", $1};{sep=FS};{for (x=nr; x<=NF; x++) {printf \"%s%s\", sep, $x; }; print \"\\033[0;39m\"}'; }; grepalias"
+	br = branch
+	cm = commit -m
+	unstage = reset HEAD --
+	last = log -1 HEAD
+	visual = !gitk
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
 [delta]
   features = line-numbers decorations catppuccin-mocha
   navigate = true
@@ -72,7 +81,7 @@
   map-styles = "bold purple => syntax #494068, bold cyan => syntax #384361, bold pink => syntax #4e3a43"
   syntax-theme = "Catppuccin-mocha"
 [diff]
-  colorMoved = default
+	colorMoved = zebra
 [color]
   branch = auto
   diff = auto
@@ -87,12 +96,13 @@
 [interactive]
   diffFilter = delta --color-only
 [push]
-  default = current
+	default = current
   followTags = true
+	autoSetupRemote = true
 [pull]
-  rebase = true
+	rebase = true
 [rebase]
-  autoStash = true
+	autoStash = true
 [fetch]
   prune = true
 [gitsh]
@@ -102,7 +112,7 @@
 [hub]
   protocol = ssh
 [init]
-  defaultBranch = main
+	defaultBranch = main
 [filter "lfs"]
   clean = git-lfs clean -- %f
   smudge = git-lfs smudge -- %f
@@ -110,3 +120,5 @@
   required = true
 [http]
 	postBuffer = 524288000
+[merge]
+	conflictstyle = diff3

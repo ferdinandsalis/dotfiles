@@ -169,7 +169,8 @@ defaults write NSGlobalDomain AppleMetricUnits -bool true
 sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bool true
 
 # Set the timezone; see `sudo systemsetup -listtimezones` for other values
-sudo systemsetup -settimezone "Europe/Brussels" > /dev/null
+# Note: This command may show warnings on newer macOS versions but still works
+sudo systemsetup -settimezone "Europe/Brussels" > /dev/null 2>&1 || true
 
 # Stop iTunes from responding to the keyboard media keys
 launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
@@ -185,7 +186,8 @@ sudo pmset -a lidwake 1
 sudo pmset -a autorestart 1
 
 # Restart automatically if the computer freezes
-sudo systemsetup -setrestartfreeze on
+# Note: This command may show warnings on newer macOS versions but still works
+sudo systemsetup -setrestartfreeze on 2>&1 || true
 
 # Sleep the display after 15 minutes
 sudo pmset -a displaysleep 15
@@ -200,7 +202,8 @@ sudo pmset -b sleep 30
 sudo pmset -a standbydelay 86400
 
 # Never go into computer sleep mode
-sudo systemsetup -setcomputersleep Off > /dev/null
+# Note: This command may show warnings on newer macOS versions but still works
+sudo systemsetup -setcomputersleep Off > /dev/null 2>&1 || true
 
 # Hibernation mode
 # 0: Disable hibernation (speeds up entering sleep mode)
@@ -415,7 +418,10 @@ defaults write com.apple.dock show-recents -bool false
 #defaults write com.apple.dock showLaunchpadGestureEnabled -int 0
 
 # Reset Launchpad, but keep the desktop wallpaper intact
-find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -delete
+# Check if directory exists before attempting to find files in it
+if [[ -d "${HOME}/Library/Application Support/Dock" ]]; then
+    find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -delete 2>/dev/null || true
+fi
 
 # Add iOS & Watch Simulator to Launchpad
 sudo ln -sf "/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app" "/Applications/Simulator.app"

@@ -25,22 +25,22 @@ setup_env() {
             log_step "No .env file found. Let's create one..."
             echo ""
             echo "Please provide your configuration details:"
-            
+
             read -p "Computer name (e.g., john-macbook): " computer_name
             read -p "Your full name for Git: " git_name
             read -p "Your email for Git: " git_email
             read -p "Your GitHub username: " github_user
-            
+
             # Create .env file from template
             cp "$HOME/.dotfiles/.env.example" "$HOME/.dotfiles/.env"
-            
+
             # Replace placeholders
             sed -i '' "s/your-computer-name/${computer_name}/g" "$HOME/.dotfiles/.env"
             sed -i '' "s/your-hostname/${computer_name}/g" "$HOME/.dotfiles/.env"
             sed -i '' "s/Your Name/${git_name}/g" "$HOME/.dotfiles/.env"
             sed -i '' "s/your.email@example.com/${git_email}/g" "$HOME/.dotfiles/.env"
             sed -i '' "s/your-github-username/${github_user}/g" "$HOME/.dotfiles/.env"
-            
+
             log_info "Created .env file with your configuration"
         else
             log_warn "No .env.example template found, using defaults"
@@ -48,7 +48,7 @@ setup_env() {
     else
         log_info "Found existing .env file"
     fi
-    
+
     # Load the environment variables
     if [[ -f "$HOME/.dotfiles/.env" ]]; then
         set -a
@@ -61,12 +61,12 @@ setup_env() {
 detect_system() {
     OS="$(uname -s)"
     ARCH="$(uname -m)"
-    
+
     if [[ "$OS" != "Darwin" ]]; then
         log_error "This script is designed for macOS only"
         exit 1
     fi
-    
+
     if [[ "$ARCH" == "arm64" ]]; then
         BREW_PREFIX="/opt/homebrew"
         log_info "Detected Apple Silicon Mac"
@@ -74,7 +74,7 @@ detect_system() {
         BREW_PREFIX="/usr/local"
         log_info "Detected Intel Mac"
     fi
-    
+
     export PATH="$BREW_PREFIX/bin:$PATH"
 }
 
@@ -95,10 +95,10 @@ install_homebrew() {
     if ! command -v brew &> /dev/null; then
         log_step "Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        
+
         # Add Homebrew to PATH for this session
         eval "$($BREW_PREFIX/bin/brew shellenv)"
-        
+
         # Add to shell profile for future sessions
         if [[ ! -f ~/.zprofile ]] || ! grep -q "$BREW_PREFIX/bin/brew shellenv" ~/.zprofile; then
             echo 'eval "$('$BREW_PREFIX'/bin/brew shellenv)"' >> ~/.zprofile
@@ -122,13 +122,13 @@ setup_dotfiles() {
         cd "$HOME/.dotfiles"
         git pull origin main || log_warn "Could not update dotfiles (local changes?)"
     fi
-    
+
     cd "$HOME/.dotfiles"
-    
+
     # Initialize submodules (Dotbot)
     log_step "Initializing Dotbot..."
     git submodule update --init --recursive
-    
+
     # Run Dotbot to create symlinks
     log_step "Creating symlinks..."
     ./install
@@ -137,7 +137,7 @@ setup_dotfiles() {
 # Install Homebrew packages
 install_packages() {
     log_step "Installing Homebrew packages..."
-    
+
     if [ -f "$HOME/.Brewfile" ]; then
         brew bundle --file="$HOME/.Brewfile" || log_warn "Some packages failed to install"
     else
@@ -152,12 +152,12 @@ setup_mise() {
     if command -v mise &> /dev/null; then
         log_step "Configuring Mise..."
         mise trust --all 2>/dev/null || true
-        
+
         log_step "Installing development tools with Mise..."
         mise use --global node@lts 2>/dev/null || log_warn "Could not install Node.js"
         mise use --global python@latest 2>/dev/null || log_warn "Could not install Python"
         mise use --global yarn@latest 2>/dev/null || log_warn "Could not install Yarn"
-        
+
         log_info "Mise setup complete!"
     else
         log_warn "Mise not found, skipping development tools setup"
@@ -167,14 +167,14 @@ setup_mise() {
 # Setup Fish shell
 setup_fish() {
     local fish_path="$BREW_PREFIX/bin/fish"
-    
+
     if [ -f "$fish_path" ]; then
         # Add Fish to available shells
         if ! grep -q "$fish_path" /etc/shells; then
             log_step "Adding Fish to available shells..."
             echo "$fish_path" | sudo tee -a /etc/shells > /dev/null
         fi
-        
+
         # Prompt to set Fish as default
         echo ""
         read -p "Set Fish as your default shell? (y/n) " -n 1 -r
@@ -183,7 +183,7 @@ setup_fish() {
             log_step "Setting Fish as default shell..."
             chsh -s "$fish_path"
             log_info "Fish is now your default shell"
-            
+
             # Auto-install Fisher and plugins
             log_step "Installing Fisher and plugins..."
             "$fish_path" -c "
@@ -198,9 +198,6 @@ setup_fish() {
                 fisher install franciscolourenco/done
                 fisher install jorgebucaran/autopair.fish
                 fisher install IlanCosman/tide@v6
-
-                echo 'Configuring Tide prompt...'
-                tide configure --auto --style=Lean --prompt_colors='True color' --show_time='24-hour format' --lean_prompt_height='Two lines' --prompt_connection=Disconnected --prompt_spacing=Compact --icons='Many icons' --transient=Yes
             " || log_warn "Could not install Fisher plugins automatically"
         fi
     else
@@ -211,22 +208,22 @@ setup_fish() {
 # Create necessary directories
 create_directories() {
     log_step "Creating necessary directories..."
-    
+
     directories=(
         "$HOME/.ssh/sockets"
         "$HOME/.local/bin"
         "$HOME/projects"
         "$HOME/work"
     )
-    
+
     for dir in "${directories[@]}"; do
         mkdir -p "$dir"
     done
-    
+
     # Set proper permissions
     chmod 700 "$HOME/.ssh" 2>/dev/null || true
     [ -f "$HOME/.ssh/config" ] && chmod 600 "$HOME/.ssh/config"
-    
+
     log_info "Directories created"
 }
 
@@ -235,21 +232,21 @@ create_directories() {
 main() {
     # Environment setup (should be first)
     setup_env
-    
+
     # System detection
     detect_system
-    
+
     # Core installation
     install_xcode_tools
     install_homebrew
     setup_dotfiles
     install_packages
-    
+
     # Configuration
     setup_mise
     setup_fish
     create_directories
-    
+
     # Success message
     echo ""
     echo "✨ Setup complete!"
