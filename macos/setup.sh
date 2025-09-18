@@ -28,9 +28,7 @@ sudo -v
 # Keep-alive: update existing `sudo` time stamp until `.macos` has finished
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
-###############################################################################
 # General UI/UX                                                               #
-###############################################################################
 
 # Set computer name (as done via System Preferences → Sharing)
 sudo scutil --set ComputerName "$DOTFILES_COMPUTER_NAME"
@@ -127,15 +125,7 @@ defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
 # Disable auto-correct
 defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
 
-# Set a custom wallpaper image. `DefaultDesktop.jpg` is already a symlink, and
-# all wallpapers are in `/Library/Desktop Pictures/`. The default is `Wave.jpg`.
-#rm -rf ~/Library/Application Support/Dock/desktoppicture.db
-#sudo rm -rf /System/Library/CoreServices/DefaultDesktop.jpg
-#sudo ln -s /path/to/your/image /System/Library/CoreServices/DefaultDesktop.jpg
-
-###############################################################################
 # Trackpad, mouse, keyboard, Bluetooth accessories, and input                 #
-###############################################################################
 
 # Trackpad: enable tap to click for this user and for the login screen
 defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
@@ -225,9 +215,7 @@ sudo touch /private/var/vm/sleepimage
 # …and make sure it can't be rewritten
 sudo chflags uchg /private/var/vm/sleepimage
 
-###############################################################################
 # Screen                                                                      #
-###############################################################################
 
 # Require password immediately after sleep or screen saver begins
 defaults write com.apple.screensaver askForPassword -int 1
@@ -249,9 +237,7 @@ defaults write NSGlobalDomain AppleFontSmoothing -int 1
 # Enable HiDPI display modes (requires restart)
 sudo defaults write /Library/Preferences/com.apple.windowserver DisplayResolutionEnabled -bool true
 
-###############################################################################
 # Finder                                                                      #
-###############################################################################
 
 # Finder: allow quitting via ⌘ + Q; doing so will also hide desktop icons
 defaults write com.apple.finder QuitMenuItem -bool true
@@ -364,9 +350,7 @@ defaults write com.apple.finder FXInfoPanesExpanded -dict \
 	OpenWith -bool true \
 	Privileges -bool true
 
-###############################################################################
 # Dock, Dashboard, and hot corners                                            #
-###############################################################################
 
 # Enable highlight hover effect for the grid view of a stack (Dock)
 defaults write com.apple.dock mouse-over-hilite-stack -bool true

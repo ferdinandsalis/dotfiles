@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 # Setup fzf
 # ---------
 if [[ ! "$PATH" == */Users/ferdinand/.fzf/bin* ]]; then

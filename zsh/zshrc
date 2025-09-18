@@ -1,3 +1,4 @@
+#!/usr/bin/env zsh
 # Zsh configuration with Fish-like features
 
 # Enable colors and prompt expansion
@@ -329,7 +330,11 @@ if [ -f ~/.fzf.zsh ]; then
     
     # Aliases for FZF functions
     alias fp="fzf-projects-widget"
-    alias fdocker="docker ps -a | fzf --header='Select container' | awk '{print \$1}'"
+
+    # Docker container selection function
+    fdocker() {
+        docker ps -a | fzf --header='Select container' | awk '{print $1}'
+    }
 fi
 
 # Homebrew
