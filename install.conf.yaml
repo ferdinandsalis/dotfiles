@@ -29,7 +29,9 @@
     ~/.config/jesseduffield/lazydocker:
       force: true
       path: lazydocker
-    ~/.gitconfig: git/gitconfig
+    ~/.gitconfig:
+      force: true
+      path: git/gitconfig
     ~/.gitmessage: git/gitmessage
     ~/.gitignore_global: git/gitignore
     ~/.Brewfile: homebrew/Brewfile
