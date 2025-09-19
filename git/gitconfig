@@ -1,6 +1,7 @@
 [user]
   name = Ferdinand Salis-Samaden
   email = mail@ferdinandsalis.com
+  signingkey = F9BAA44C37F958D90E0A92085A8192F7E2C47CA0
 [core]
   excludesfile = ~/.dotfiles/git/gitignore
   pager = delta
@@ -9,7 +10,7 @@
 	ignorecase = false
 [commit]
   template = ~/.gitmessage
-  gpgsign = false
+  gpgsign = true
 [alias]
 	st = status -sb
   ci = commit
