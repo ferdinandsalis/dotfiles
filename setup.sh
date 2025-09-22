@@ -139,6 +139,12 @@ install_packages() {
     log_step "Installing Homebrew packages..."
 
     if [ -f "$HOME/.Brewfile" ]; then
+        # Pre-create directories that some casks need with sudo
+        if grep -q "docker-desktop" "$HOME/.Brewfile"; then
+            log_step "Creating Docker CLI plugins directory..."
+            sudo mkdir -p /usr/local/cli-plugins 2>/dev/null || true
+        fi
+
         brew bundle --file="$HOME/.Brewfile" || log_warn "Some packages failed to install"
     else
         log_error "Brewfile not found at ~/.Brewfile"
@@ -151,7 +157,11 @@ install_packages() {
 setup_mise() {
     if command -v mise &> /dev/null; then
         log_step "Configuring Mise..."
-        mise trust --all 2>/dev/null || true
+
+        # Only trust the global config, not all files
+        if [ -f "$HOME/.config/mise/config.toml" ]; then
+            mise trust "$HOME/.config/mise/config.toml" 2>/dev/null || true
+        fi
 
         log_step "Installing development tools with Mise..."
         mise use --global node@lts 2>/dev/null || log_warn "Could not install Node.js"
