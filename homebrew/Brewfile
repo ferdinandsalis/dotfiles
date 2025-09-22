@@ -51,6 +51,7 @@ brew "sqlite"
 brew "todo-txt"
 brew "tree"
 brew "wget"
+brew "himalaya"
 
 #: Critical System Tools
 cask "1password"
@@ -61,22 +62,25 @@ cask "raycast"
 #: Development Environment
 cask "ghostty"
 cask "visual-studio-code"
+cask "docker-desktop"
 cask "postico"
+cask "datagrip"
 cask "insomnia"
 
 #: Work & Communication
 cask "slack"
 cask "mailmate"
+cask "missive"
 cask "figma"
 cask "discord"
 cask "signal"
+cask "asana"
+cask "notion"
+cask "chatgpt"
 
 #: Productivity & Utilities
-cask "maccy"
-cask "jordanbaird-ice"
 cask "spotify"
-cask "dropbox"
-cask "kap"
+cask "google-drive"
 cask "numi"
 
 #: Security
