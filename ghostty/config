@@ -2,9 +2,9 @@ theme = "catppuccin-mocha"
 
 font-family = "Berkeley Mono Variable"
 font-variation = wght=350
-font-variation = wdth=90
+font-variation = wdth=80
 font-thicken = true
-font-size = 14
+font-size = 15
 
 adjust-cell-height = 20
 

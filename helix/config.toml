@@ -59,7 +59,7 @@ tabpad = "·"
 
 [editor.lsp]
 display-messages = true
-display-inlay-hints = true
+display-inlay-hints = false
 
 [keys.normal]
 # Key mappings
@@ -95,3 +95,5 @@ X = ['extend_to_line_bounds', 'ensure_selections_forward', 'flip_selections']
 ']'.r = ':set rulers [81]'
 '['.w = ':toggle soft-wrap.enable'
 ']'.w = ':toggle soft-wrap.enable'
+'['.h = ':set lsp.display-inlay-hints false'
+']'.h = ':set lsp.display-inlay-hints true'
