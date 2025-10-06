@@ -47,9 +47,32 @@ end
 
 # Show tasks on terminal startup
 function fish_greeting
+    # Show todo count
     if command -v todo.sh >/dev/null
-        t list
+        set -l todo_count (todo.sh ls | tail -n 1 | string match -r '(\d+) task' | string split ' ' | head -n 1)
+        if test -n "$todo_count" -a "$todo_count" -gt 0
+            echo "📋 You have $todo_count pending task(s)"
+        end
     end
+
+    # Show today's calendar events (first 3)
+    if command -v khal >/dev/null
+        set -l events (khal list today today --format "{start-time} {title}" --notstarted 2>/dev/null | head -n 3)
+        if test -n "$events"
+            echo "📅 Today's events:"
+            for event in $events
+                echo "   $event"
+            end
+        end
+    end
+
+    # Show unread email count (disabled - too slow)
+    # if command -v himalaya >/dev/null
+    #     set -l unread_count (himalaya envelope list "not flag seen" -o json 2>/dev/null | jq 'length' 2>/dev/null)
+    #     if test -n "$unread_count" -a "$unread_count" -gt 0
+    #         echo "📧 You have $unread_count unread email(s)"
+    #     end
+    # end
 end
 
 # Interactive Shell Configuration
@@ -90,7 +113,7 @@ if status is-interactive
 
     # Git Aliases
     alias g="git"
-    alias gs="git status"
+    alias gs="git st"
     alias ga="git add"
     alias gc="git commit"
     alias gp="git push"
@@ -122,6 +145,12 @@ if status is-interactive
     abbr --add td "today"      # Today's daily note
     abbr --add nt "ntag"       # Search by tags
     abbr --add nl "nlink"      # Wiki-style links
+
+    # Calendar abbreviations
+    abbr --add tc "tcal"       # Today's calendar
+    abbr --add cals "cal-sync" # Sync all calendars
+    abbr --add cala "cal-add"  # Add calendar event
+    abbr --add calf "cal-search" # Find calendar events
 
     # Set Vi key bindings (optional, comment out if you prefer default)
     # fish_vi_key_bindings
