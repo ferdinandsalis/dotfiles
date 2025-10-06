@@ -52,6 +52,9 @@ brew "todo-txt"
 brew "tree"
 brew "wget"
 brew "himalaya"
+brew "khal"
+brew "vdirsyncer"
+brew "typst"
 
 #: Critical System Tools
 cask "1password"
@@ -89,6 +92,8 @@ cask "lulu"
 #: Browsers
 cask "firefox"
 cask "google-chrome"
+cask "vivaldi"
+cask "zen-browser"
 
 #: Fonts
 cask "font-alegreya"

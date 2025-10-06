@@ -18,6 +18,9 @@
     ~/.config/fish: fish
     ~/.config/ghostty: ghostty
     ~/.config/zellij: zellij
+    ~/.config/himalaya: himalaya
+    ~/.config/vdirsyncer: vdirsyncer
+    ~/.config/khal: khal
     ~/.zshrc: zsh/zshrc
     ~/.config/bat: bat
     ~/.config/karabiner:
