@@ -1,0 +1,45 @@
+# vdirsyncer configuration for multiple calendar accounts
+# https://vdirsyncer.pimutils.org/
+
+[general]
+status_path = "~/.vdirsyncer/status/"
+
+# ===================
+# iCloud Calendar
+# ===================
+[pair icloud_calendar]
+a = "icloud_calendar_local"
+b = "icloud_calendar_remote"
+collections = ["from a", "from b"]
+metadata = ["displayname", "color"]
+
+[storage icloud_calendar_local]
+type = "filesystem"
+path = "~/.calendars/icloud/"
+fileext = ".ics"
+
+[storage icloud_calendar_remote]
+type = "caldav"
+url = "https://caldav.icloud.com/"
+username = "ferdinand@salis.io"
+# Use app-specific password from Apple ID settings
+# Store password in 1Password and retrieve with: op read "op://Private/iCloud Calendar/password"
+password.fetch = ["command", "/Users/ferdinand/.dotfiles/scripts/get-icloud-password.sh"]
+
+# ===================
+# Alternative: Simple CalDAV for Google (if you prefer)
+# ===================
+# Uncomment below if you want to use CalDAV instead of google_calendar type
+# Note: Requires app-specific password from Google Account settings
+#
+# [storage google_workspace_remote_caldav]
+# type = "caldav"
+# url = "https://www.google.com/calendar/dav/YOUR_EMAIL@YOUR_DOMAIN.com/events/"
+# username = "YOUR_EMAIL@YOUR_DOMAIN.com"
+# password.fetch = ["command", "op", "read", "op://Private/Google Workspace Calendar/password"]
+#
+# [storage google_personal_remote_caldav]
+# type = "caldav"
+# url = "https://www.google.com/calendar/dav/YOUR_EMAIL@gmail.com/events/"
+# username = "YOUR_EMAIL@gmail.com"
+# password.fetch = ["command", "op", "read", "op://Private/Google Personal Calendar/password"]
