@@ -52,6 +52,7 @@
     ~/Library/Application Support/lazygit/config.yml: lazygit/config.yml
     ~/.default-npm-packages: .default-npm-packages
     ~/.todo/config: todo/config
+    ~/.claude/CLAUDE.md: .claude/CLAUDE.md
 
 - shell:
     - [git submodule update --init --recursive, Installing submodules]
