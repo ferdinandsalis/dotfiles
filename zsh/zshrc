@@ -357,3 +357,5 @@ bindkey '^S' history-incremental-search-forward
 
 # Disable greeting (zsh doesn't have one by default, but we'll clear for cleanliness)
 clear
+# GPG TTY for signing
+export GPG_TTY=$(tty)
