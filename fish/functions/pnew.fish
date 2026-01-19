@@ -86,21 +86,31 @@ func main() {
 
 ## Setup
 \`\`\`bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\\Scripts\\activate
-pip install -r requirements.txt
+uv sync
+uv run python main.py
 \`\`\`" > README.md
-            touch requirements.txt
+            echo '[project]
+name = "'$project_name'"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"' > pyproject.toml
             echo 'def main():
     print("Hello from '$project_name'!")
 
 if __name__ == "__main__":
     main()' > main.py
-            echo "venv/
+            echo ".venv/
 __pycache__/
 *.pyc
 .env
-.DS_Store" > .gitignore
+.DS_Store
+uv.lock" > .gitignore
             
         case ruby
             echo "💎 Creating Ruby project..."

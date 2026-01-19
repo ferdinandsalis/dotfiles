@@ -92,9 +92,15 @@ function p --description "Smart project switcher with zoxide integration"
         else if test -f go.mod
             echo "🐹 Go project detected"
             echo "   → Run: go build && go run ."
-        else if test -f requirements.txt -o -f pyproject.toml
+        else if test -f requirements.txt -o -f pyproject.toml -o -f uv.lock
             echo "🐍 Python project detected"
-            echo "   → Run: pip install -r requirements.txt"
+            if test -f uv.lock
+                echo "   → Run: uv sync && uv run python main.py"
+            else if test -f pyproject.toml
+                echo "   → Run: uv sync"
+            else
+                echo "   → Run: uv pip install -r requirements.txt"
+            end
         else if test -f Gemfile
             echo "💎 Ruby project detected"
             echo "   → Run: bundle install"
