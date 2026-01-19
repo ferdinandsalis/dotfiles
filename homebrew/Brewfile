@@ -84,6 +84,7 @@ cask "notion"
 cask "chatgpt"
 
 #: Productivity & Utilities
+cask "obsidian"
 cask "spotify"
 cask "google-drive"
 cask "numi"
