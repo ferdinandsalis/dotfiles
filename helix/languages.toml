@@ -106,6 +106,18 @@ formatter = { command = 'prettier', args = ["--parser", "typescript"] }
 language-servers = ["typescript-language-server", "eslint", "tailwindcss-ls"]
 auto-format = true
 
+## Svelte
+
+[language-server.svelteserver]
+command = "svelteserver"
+args = ["--stdio"]
+
+[[language]]
+name = "svelte"
+formatter = { command = 'prettier', args = ["--plugin", "prettier-plugin-svelte", "--parser", "svelte"] }
+language-servers = ["svelteserver", "typescript-language-server", "eslint", "tailwindcss-ls"]
+auto-format = true
+
 ## Elixir
 
 [language-server.elixir-ls]
