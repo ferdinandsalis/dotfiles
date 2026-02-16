@@ -66,13 +66,6 @@ function fish_greeting
         end
     end
 
-    # Show unread email count (disabled - too slow)
-    # if command -v himalaya >/dev/null
-    #     set -l unread_count (himalaya envelope list "not flag seen" -o json 2>/dev/null | jq 'length' 2>/dev/null)
-    #     if test -n "$unread_count" -a "$unread_count" -gt 0
-    #         echo "📧 You have $unread_count unread email(s)"
-    #     end
-    # end
 end
 
 # Interactive Shell Configuration
@@ -81,25 +74,16 @@ if status is-interactive
     bind \co _fzf_search_projects
     bind --mode insert \co _fzf_search_projects
     
-    # Project Management (primary commands)
-    # p is defined as a function in ~/.config/fish/functions/p.fish
-    # pnew is defined as a function  
-    # pl is defined as a function
+    # FZF aliases
+    alias fp="_fzf_search_projects"
+    alias fkill="_fzf_kill_process"
+    alias fbr="_fzf_git_branch"
+    alias fco="_fzf_git_checkout"
+    alias fdocker="_fzf_docker_containers"
+    alias fnpm="_fzf_npm_scripts"
+    alias frg="_fzf_ripgrep_search"
     
-    # FZF aliases and functions
-    alias fp="_fzf_search_projects"   # Find Project (legacy, use 'p' instead)
-    alias fkill="_fzf_kill_process"   # Kill process interactively
-    alias fbr="_fzf_git_branch"       # Switch git branches
-    alias fco="_fzf_git_checkout"     # Checkout git commits/tags
-    alias fdocker="_fzf_docker_containers"  # Manage Docker containers
-    alias fnpm="_fzf_npm_scripts"     # Run npm scripts
-    alias frg="_fzf_ripgrep_search"   # Interactive code search
-    
-    # Aliases
-    alias ls="eza --icons --group-directories-first"
-    alias ll="eza -l --icons --group-directories-first"
-    alias la="eza -la --icons --group-directories-first"
-    alias lt="eza --tree --icons"
+    # Tool aliases
     alias cat="bat"
     alias grep="rg"
     alias find="fd"
@@ -195,5 +179,5 @@ end
 # GPG TTY for signing
 set -x GPG_TTY (tty)
 
-# Added by Antigravity
+# Antigravity CLI
 fish_add_path /Users/ferdinand/.antigravity/antigravity/bin

@@ -7,9 +7,6 @@
 # Follow symlinks
 --follow
 
-# Don't search git ignored files
---no-ignore-vcs
-
 # Set color scheme
 --colors=line:fg:yellow
 --colors=line:style:bold
@@ -26,18 +23,5 @@
 --type-add=config:*.{json,yaml,yml,toml,ini,conf,config}
 --type-add=doc:*.{md,markdown,rst,txt,adoc}
 
-# Exclude directories
+# Exclude directories not covered by .gitignore
 --glob=!.git/
---glob=!node_modules/
---glob=!target/
---glob=!dist/
---glob=!build/
---glob=!.next/
---glob=!.nuxt/
---glob=!coverage/
---glob=!*.min.js
---glob=!*.map
---glob=!package-lock.json
---glob=!yarn.lock
---glob=!pnpm-lock.yaml
---glob=!Cargo.lock

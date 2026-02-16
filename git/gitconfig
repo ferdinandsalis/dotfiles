@@ -43,7 +43,6 @@
 	last = log -1 HEAD
 	visual = !gitk
 	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-	gs = status -sb
 [delta]
   features = line-numbers decorations catppuccin-mocha
   navigate = true

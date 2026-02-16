@@ -8,6 +8,7 @@ Host *
     ControlMaster auto
     ControlPath ~/.ssh/sockets/%r@%h-%p
     ControlPersist 600
+    IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 
 Host github.com
     Hostname github.com
@@ -24,5 +25,3 @@ Host bitbucket.org
     Hostname bitbucket.org
     User git
     PreferredAuthentications publickey
-Host *
-  IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"

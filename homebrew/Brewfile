@@ -1,9 +1,5 @@
 # Taps
 tap "aws/tap"
-tap "candid82/brew"
-tap "cmacrae/formulae"
-tap "craciuncezar/tap"
-tap "khanhas/tap"
 
 #: Core CLI Tools
 brew "aider"
@@ -26,11 +22,9 @@ brew "gcc"
 brew "gh"
 brew "git"
 brew "git-delta"
-brew "git-flow"
 brew "gnupg"
 brew "go"
 brew "btop"
-brew "hub"
 brew "jq"
 brew "yq"
 brew "lazydocker"
