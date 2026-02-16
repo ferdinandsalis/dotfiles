@@ -194,3 +194,6 @@ end
 
 # GPG TTY for signing
 set -x GPG_TTY (tty)
+
+# Added by Antigravity
+fish_add_path /Users/ferdinand/.antigravity/antigravity/bin

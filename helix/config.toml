@@ -62,6 +62,17 @@ display-messages = true
 display-inlay-hints = false
 
 [keys.normal]
+# File manager
+C-y = [
+  ':sh rm -f /tmp/yazi-helix-chooser',
+  ':insert-output yazi "%{buffer_name}" --chooser-file=/tmp/yazi-helix-chooser',
+  ':sh printf "\x1b[?1049h\x1b[?2004h" > /dev/tty',
+  ':open %sh{cat /tmp/yazi-helix-chooser}',
+  ':redraw',
+  ':set mouse false',
+  ':set mouse true',
+]
+
 # Key mappings
 'space'.c.o = ":config-open"
 'space'.c.r = ":config-reload"

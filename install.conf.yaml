@@ -15,6 +15,9 @@
     ~/.config/btop: btop
     ~/.config/bottom: bottom
     ~/.config/helix: helix
+    ~/.config/yazi:
+      force: true
+      path: yazi
     ~/.config/fish: fish
     ~/.config/ghostty: ghostty
     ~/.config/zellij: zellij
@@ -53,7 +56,9 @@
     ~/.default-npm-packages: .default-npm-packages
     ~/.todo/config: todo/config
     ~/.claude/CLAUDE.md: .claude/CLAUDE.md
+    ~/.codex/AGENTS.md: .claude/CLAUDE.md
 
 - shell:
     - [git submodule update --init --recursive, Installing submodules]
     - [command -v bat >/dev/null 2>&1 && bat cache --build || true, Building bat theme cache]
+    - [command -v ya >/dev/null 2>&1 && ya pkg install || true, Installing yazi packages]
