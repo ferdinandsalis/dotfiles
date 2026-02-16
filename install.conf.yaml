@@ -51,7 +51,6 @@
       path: ssh/config
     ~/.ripgreprc: .ripgreprc
     ~/.fdignore: .fdignore
-    ~/.fzf.zsh: zsh/fzf.zsh
     ~/Library/Application Support/lazygit/config.yml: lazygit/config.yml
     ~/.default-npm-packages: .default-npm-packages
     ~/.todo/config: todo/config
