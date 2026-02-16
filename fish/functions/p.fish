@@ -7,7 +7,7 @@ function p --description "Smart project switcher with zoxide integration"
     end
     
     # Define project directories (handle both ~/work and ~/Work)
-    set -f project_dirs ~/projects ~/work ~/Work ~/.dotfiles ~/Documents
+    set -f project_dirs ~/Base/1-projects ~/.dotfiles ~/Documents
     
     # Find all git repositories (search up to 3 levels deep)
     set -f git_projects

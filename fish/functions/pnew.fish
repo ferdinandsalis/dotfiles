@@ -15,18 +15,15 @@ function pnew --description "Create a new project with template"
     
     # Determine project location
     echo "Where should this project be created?"
-    echo "1) ~/projects (default)"
-    echo "2) ~/work"
-    echo "3) Current directory"
-    read -P "Choice [1-3]: " choice
+    echo "1) ~/Base/1-projects (default)"
+    echo "2) Current directory"
+    read -P "Choice [1-2]: " choice
     
     switch $choice
         case 2
-            set -f base_dir ~/work
-        case 3
             set -f base_dir (pwd)
         case '*'
-            set -f base_dir ~/projects
+            set -f base_dir ~/Base/1-projects
     end
     
     # Create project directory

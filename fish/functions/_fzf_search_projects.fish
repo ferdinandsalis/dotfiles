@@ -1,6 +1,6 @@
 function _fzf_search_projects --description "Search and navigate to projects"
     # Define project directories - customize these paths
-    set -f project_dirs ~/projects ~/work ~/.dotfiles
+    set -f project_dirs ~/Base/1-projects ~/.dotfiles
 
     # Find all git repositories in project directories
     set -f projects
