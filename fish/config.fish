@@ -71,22 +71,29 @@ def format_events(events, now_str=None):
     lines = []
     for e in events[:3]:
         if e['allDay']:
-            lines.append('  all-day  ' + e['summary'])
+            lines.append(f'  {ALLDAY}all-day{R}  {TITLE}{e[\"summary\"]}{R}')
         else:
-            lines.append('  ' + e['start'][11:16] + '  ' + e['summary'])
+            lines.append(f'  {TIME}{e[\"start\"][11:16]}{R}  {TITLE}{e[\"summary\"]}{R}')
     return lines
+
+DIM = '\033[38;2;108;112;134m'  # overlay0
+TIME = '\033[38;2;249;226;175m'  # yellow
+TITLE = '\033[38;2;205;214;244m'  # text
+ALLDAY = '\033[38;2;245;194;231m'  # pink
+LABEL = '\033[38;2;137;180;250m'  # blue
+R = '\033[0m'
 
 now = datetime.now().strftime('%H:%M')
 today = get_events(['cali', 'today', '--json'])
 lines = format_events(today, now)
 if lines:
-    print('📅 Today:')
+    print(f'{LABEL}📅 Today:{R}')
     print('\n'.join(lines))
 else:
     tomorrow = get_events(['cali', 'tomorrow', '--json'])
     lines = format_events(tomorrow)
     if lines:
-        print('📅 Tomorrow:')
+        print(f'{LABEL}📅 Tomorrow:{R}')
         print('\n'.join(lines))
 " 2>/dev/null)
         if test -n "$output"
