@@ -55,24 +55,43 @@ function fish_greeting
         end
     end
 
-    # Show today's calendar events (first 3)
+    # Show upcoming calendar events (today's remaining, or tomorrow's)
     if command -v cali >/dev/null
-        set -l events (cali today --json 2>/dev/null | python3 -c "
-import json, sys
+        set -l output (python3 -c "
+import json, subprocess, sys
 from datetime import datetime
-events = json.load(sys.stdin)
+
+def get_events(cmd):
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    return json.loads(r.stdout) if r.returncode == 0 and r.stdout.strip() else []
+
+def format_events(events, now_str=None):
+    if now_str:
+        events = [e for e in events if e['allDay'] or e['start'][11:16] >= now_str or e['end'][11:16] > now_str]
+    lines = []
+    for e in events[:3]:
+        if e['allDay']:
+            lines.append('  all-day  ' + e['summary'])
+        else:
+            lines.append('  ' + e['start'][11:16] + '  ' + e['summary'])
+    return lines
+
 now = datetime.now().strftime('%H:%M')
-upcoming = [e for e in events if e['allDay'] or e['start'][11:16] >= now or e['end'][11:16] > now]
-for e in upcoming[:3]:
-    if e['allDay']:
-        print('  all-day  ' + e['summary'])
-    else:
-        print('  ' + e['start'][11:16] + '  ' + e['summary'])
+today = get_events(['cali', 'today', '--json'])
+lines = format_events(today, now)
+if lines:
+    print('📅 Today:')
+    print('\n'.join(lines))
+else:
+    tomorrow = get_events(['cali', 'tomorrow', '--json'])
+    lines = format_events(tomorrow)
+    if lines:
+        print('📅 Tomorrow:')
+        print('\n'.join(lines))
 " 2>/dev/null)
-        if test -n "$events"
-            echo "📅 Today:"
-            for event in $events
-                echo "  $event"
+        if test -n "$output"
+            for line in $output
+                echo "$line"
             end
         end
     end
