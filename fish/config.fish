@@ -56,12 +56,23 @@ function fish_greeting
     end
 
     # Show today's calendar events (first 3)
-    if command -v khal >/dev/null
-        set -l events (khal list today today --format "{start-time} {title}" --notstarted 2>/dev/null | head -n 3)
+    if command -v cali >/dev/null
+        set -l events (cali today --json 2>/dev/null | python3 -c "
+import json, sys
+from datetime import datetime
+events = json.load(sys.stdin)
+now = datetime.now().strftime('%H:%M')
+upcoming = [e for e in events if e['allDay'] or e['start'][11:16] >= now or e['end'][11:16] > now]
+for e in upcoming[:3]:
+    if e['allDay']:
+        print('  all-day  ' + e['summary'])
+    else:
+        print('  ' + e['start'][11:16] + '  ' + e['summary'])
+" 2>/dev/null)
         if test -n "$events"
-            echo "📅 Today's events:"
+            echo "📅 Today:"
             for event in $events
-                echo "   $event"
+                echo "  $event"
             end
         end
     end
@@ -136,7 +147,6 @@ if status is-interactive
 
     # Calendar abbreviations
     abbr --add tc "tcal"       # Today's calendar
-    abbr --add cals "cal-sync" # Sync all calendars
     abbr --add cala "cal-add"  # Add calendar event
     abbr --add calf "cal-search" # Find calendar events
 
