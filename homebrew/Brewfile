@@ -50,8 +50,6 @@ brew "uv"
 brew "wget"
 brew "himalaya"
 brew "spotify_player"
-brew "khal"
-brew "vdirsyncer"
 brew "typst"
 
 #: Critical System Tools
