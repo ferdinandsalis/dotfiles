@@ -55,6 +55,9 @@
     ~/.todo/config: todo/config
     ~/.claude/CLAUDE.md: .claude/CLAUDE.md
     ~/.codex/AGENTS.md: .claude/CLAUDE.md
+    ~/.local/bin/cali:
+      path: ~/Base/3-resources/cli-cali/cali
+      force: true
 
 - shell:
     - [git submodule update --init --recursive, Installing submodules]
