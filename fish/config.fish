@@ -70,7 +70,7 @@ if r.returncode == 0 and r.stdout.strip():
             if item.get('dueDate'): parts.append(f'{DUE}{item[\"dueDate\"][:10]}{R}')
             tags = item.get('tags', [])
             if tags: parts.append(f'{TAG}{\" \".join(\"#\" + t for t in tags)}{R}')
-            print('  ' + '  '.join(parts))
+            print('  • ' + '  '.join(parts))
         if len(items) > 3:
             print(f'  {DIM}... and {len(items) - 3} more{R}')
 " 2>/dev/null)
@@ -161,6 +161,7 @@ if status is-interactive
     alias vim="hx"
     alias vi="hx"
     alias t="remi ls"
+    alias hi="fish_greeting"
 
     # Git Aliases
     alias g="git"
