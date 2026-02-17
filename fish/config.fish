@@ -192,12 +192,6 @@ if status is-interactive
     abbr --add gpr "git pull --rebase"
     abbr --add gfo "git fetch origin"
 
-    # Note-taking abbreviations
-    abbr --add nn "n"          # Quick note access
-    abbr --add td "today"      # Today's daily note
-    abbr --add nt "ntag"       # Search by tags
-    abbr --add nl "nlink"      # Wiki-style links
-
     # Calendar abbreviations
     abbr --add tc "tcal"       # Today's calendar
     abbr --add cala "cal-add"  # Add calendar event
