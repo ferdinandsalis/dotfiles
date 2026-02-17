@@ -84,6 +84,10 @@ if status is-interactive
     alias frg="_fzf_ripgrep_search"
     
     # Tool aliases
+    alias ls="eza --icons --group-directories-first"
+    alias ll="eza -l --icons --group-directories-first"
+    alias la="eza -la --icons --group-directories-first"
+    alias lt="eza --tree --icons"
     alias cat="bat"
     alias grep="rg"
     alias find="fd"
