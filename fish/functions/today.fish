@@ -16,13 +16,13 @@ function today --description "Open or create today's daily note"
         echo "## 📋 Today's Tasks" >> "$today_note"
         echo "" >> "$today_note"
         
-        # Pull in today's todos if todo.sh is available
-        if command -v todo.sh >/dev/null
-            set -f todos (todo.sh list | grep -v "^--")
+        # Pull in pending reminders if remi is available
+        if command -v remi >/dev/null
+            set -f todos (remi ls 2>/dev/null)
             if test -n "$todos"
-                echo "### From todo.txt:" >> "$today_note"
+                echo "### Pending reminders:" >> "$today_note"
                 echo '```' >> "$today_note"
-                todo.sh list >> "$today_note"
+                remi ls >> "$today_note"
                 echo '```' >> "$today_note"
                 echo "" >> "$today_note"
             end

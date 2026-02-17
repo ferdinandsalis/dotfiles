@@ -47,11 +47,37 @@ end
 
 # Show tasks on terminal startup
 function fish_greeting
-    # Show todo count
-    if command -v todo.sh >/dev/null
-        set -l todo_count (todo.sh ls | tail -n 1 | string match -r '(\d+) task' | string split ' ' | head -n 1)
-        if test -n "$todo_count" -a "$todo_count" -gt 0
-            echo "📋 You have $todo_count pending task(s)"
+    # Show pending reminders
+    if command -v remi >/dev/null
+        set -l remi_output (python3 -c "
+import json, subprocess
+r = subprocess.run(['remi', 'ls', '--json'], capture_output=True, text=True)
+if r.returncode == 0 and r.stdout.strip():
+    items = json.loads(r.stdout)
+    if items:
+        DIM = '\033[38;2;108;112;134m'
+        TITLE = '\033[38;2;205;214;244m'
+        TAG = '\033[38;2;137;180;250m'
+        DUE = '\033[38;2;249;226;175m'
+        LABEL = '\033[38;2;137;180;250m'
+        FLAG = '\033[38;2;243;139;168m'
+        R = '\033[0m'
+        print(f'{LABEL}📋 {len(items)} pending:{R}')
+        for item in items[:3]:
+            parts = []
+            if item.get('flagged'): parts.append(f'{FLAG}🚩{R}')
+            parts.append(f'{TITLE}{item[\"title\"]}{R}')
+            if item.get('dueDate'): parts.append(f'{DUE}{item[\"dueDate\"][:10]}{R}')
+            tags = item.get('tags', [])
+            if tags: parts.append(f'{TAG}{\" \".join(\"#\" + t for t in tags)}{R}')
+            print('  ' + '  '.join(parts))
+        if len(items) > 3:
+            print(f'  {DIM}... and {len(items) - 3} more{R}')
+" 2>/dev/null)
+        if test -n "$remi_output"
+            for line in $remi_output
+                echo "$line"
+            end
         end
     end
 
@@ -134,7 +160,7 @@ if status is-interactive
     alias lzd="lazydocker"  # Docker TUI management
     alias vim="hx"
     alias vi="hx"
-    alias t="todo.sh"
+    alias t="remi ls"
 
     # Git Aliases
     alias g="git"

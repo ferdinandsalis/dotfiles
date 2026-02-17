@@ -51,11 +51,14 @@
     ~/.fdignore: .fdignore
     ~/Library/Application Support/lazygit/config.yml: lazygit/config.yml
     ~/.default-npm-packages: .default-npm-packages
-    ~/.todo/config: todo/config
+
     ~/.claude/CLAUDE.md: .claude/CLAUDE.md
     ~/.codex/AGENTS.md: .claude/CLAUDE.md
     ~/.local/bin/cali:
       path: ~/Base/3-resources/cli-cali/cali
+      force: true
+    ~/.local/bin/remi:
+      path: ~/Base/3-resources/cli-remi/remi
       force: true
 
 - shell:
