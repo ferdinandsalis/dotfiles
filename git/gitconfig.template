@@ -2,7 +2,7 @@
   name = {{DOTFILES_GIT_NAME}}
   email = {{DOTFILES_GIT_EMAIL}}
 [core]
-  excludesfile = ~/.dotfiles/git/gitignore
+  excludesfile = ~/Base/dotfiles/git/gitignore
   pager = delta
 [commit]
   template = ~/.gitmessage

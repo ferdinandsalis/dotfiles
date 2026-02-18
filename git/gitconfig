@@ -3,7 +3,7 @@
   email = mail@ferdinandsalis.com
 	signingkey = F9BAA44C37F958D90E0A92085A8192F7E2C47CA0
 [core]
-  excludesfile = ~/.dotfiles/git/gitignore
+	excludesfile = /Users/ferdinand/Base/dotfiles/git/gitignore
   pager = delta
 	editor = hx
 	autocrlf = input
