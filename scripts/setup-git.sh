@@ -19,9 +19,9 @@ echo "🔧 Git Configuration Setup"
 echo ""
 
 # Load environment variables if available
-if [[ -f "$HOME/.dotfiles/.env" ]]; then
+if [[ -f "$HOME/Base/dotfiles/.env" ]]; then
     set -a
-    source "$HOME/.dotfiles/.env"
+    source "$HOME/Base/dotfiles/.env"
     set +a
 elif [[ -f "$HOME/.env" ]]; then
     set -a
@@ -31,16 +31,16 @@ fi
 
 # Generate git config from template if available
 generate_from_template() {
-    if [[ -f "$HOME/.dotfiles/git/gitconfig.template" ]] && [[ -f "$HOME/.dotfiles/.env" ]]; then
+    if [[ -f "$HOME/Base/dotfiles/git/gitconfig.template" ]] && [[ -f "$HOME/Base/dotfiles/.env" ]]; then
         log_step "Generating git config from template..."
         
         # Copy template
-        cp "$HOME/.dotfiles/git/gitconfig.template" "$HOME/.dotfiles/git/gitconfig"
+        cp "$HOME/Base/dotfiles/git/gitconfig.template" "$HOME/Base/dotfiles/git/gitconfig"
         
         # Replace placeholders with environment variables
-        sed -i '' "s/{{DOTFILES_GIT_NAME}}/${DOTFILES_GIT_NAME}/g" "$HOME/.dotfiles/git/gitconfig"
-        sed -i '' "s/{{DOTFILES_GIT_EMAIL}}/${DOTFILES_GIT_EMAIL}/g" "$HOME/.dotfiles/git/gitconfig"
-        sed -i '' "s/{{DOTFILES_GITHUB_USER}}/${DOTFILES_GITHUB_USER}/g" "$HOME/.dotfiles/git/gitconfig"
+        sed -i '' "s/{{DOTFILES_GIT_NAME}}/${DOTFILES_GIT_NAME}/g" "$HOME/Base/dotfiles/git/gitconfig"
+        sed -i '' "s/{{DOTFILES_GIT_EMAIL}}/${DOTFILES_GIT_EMAIL}/g" "$HOME/Base/dotfiles/git/gitconfig"
+        sed -i '' "s/{{DOTFILES_GITHUB_USER}}/${DOTFILES_GITHUB_USER}/g" "$HOME/Base/dotfiles/git/gitconfig"
         
         log_info "Generated git config from template"
         return 0

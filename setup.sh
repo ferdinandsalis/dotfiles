@@ -20,8 +20,8 @@ echo ""
 
 # Setup environment configuration
 setup_env() {
-    if [[ ! -f "$HOME/.dotfiles/.env" ]]; then
-        if [[ -f "$HOME/.dotfiles/.env.example" ]]; then
+    if [[ ! -f "$HOME/Base/dotfiles/.env" ]]; then
+        if [[ -f "$HOME/Base/dotfiles/.env.example" ]]; then
             log_step "No .env file found. Let's create one..."
             echo ""
             echo "Please provide your configuration details:"
@@ -32,14 +32,14 @@ setup_env() {
             read -p "Your GitHub username: " github_user
 
             # Create .env file from template
-            cp "$HOME/.dotfiles/.env.example" "$HOME/.dotfiles/.env"
+            cp "$HOME/Base/dotfiles/.env.example" "$HOME/Base/dotfiles/.env"
 
             # Replace placeholders
-            sed -i '' "s/your-computer-name/${computer_name}/g" "$HOME/.dotfiles/.env"
-            sed -i '' "s/your-hostname/${computer_name}/g" "$HOME/.dotfiles/.env"
-            sed -i '' "s/Your Name/${git_name}/g" "$HOME/.dotfiles/.env"
-            sed -i '' "s/your.email@example.com/${git_email}/g" "$HOME/.dotfiles/.env"
-            sed -i '' "s/your-github-username/${github_user}/g" "$HOME/.dotfiles/.env"
+            sed -i '' "s/your-computer-name/${computer_name}/g" "$HOME/Base/dotfiles/.env"
+            sed -i '' "s/your-hostname/${computer_name}/g" "$HOME/Base/dotfiles/.env"
+            sed -i '' "s/Your Name/${git_name}/g" "$HOME/Base/dotfiles/.env"
+            sed -i '' "s/your.email@example.com/${git_email}/g" "$HOME/Base/dotfiles/.env"
+            sed -i '' "s/your-github-username/${github_user}/g" "$HOME/Base/dotfiles/.env"
 
             log_info "Created .env file with your configuration"
         else
@@ -50,9 +50,9 @@ setup_env() {
     fi
 
     # Load the environment variables
-    if [[ -f "$HOME/.dotfiles/.env" ]]; then
+    if [[ -f "$HOME/Base/dotfiles/.env" ]]; then
         set -a
-        source "$HOME/.dotfiles/.env"
+        source "$HOME/Base/dotfiles/.env"
         set +a
     fi
 }
@@ -110,20 +110,20 @@ install_homebrew() {
 
 # Clone or update dotfiles
 setup_dotfiles() {
-    if [ ! -d "$HOME/.dotfiles" ]; then
+    if [ ! -d "$HOME/Base/dotfiles" ]; then
         log_step "Cloning dotfiles repository..."
-        git clone https://github.com/ferdinandsalis/dotfiles.git "$HOME/.dotfiles" || {
+        git clone https://github.com/ferdinandsalis/dotfiles.git "$HOME/Base/dotfiles" || {
             log_error "Failed to clone dotfiles repository"
             exit 1
         }
     else
         log_info "Dotfiles already present"
         log_step "Updating dotfiles..."
-        cd "$HOME/.dotfiles"
+        cd "$HOME/Base/dotfiles"
         git pull origin main || log_warn "Could not update dotfiles (local changes?)"
     fi
 
-    cd "$HOME/.dotfiles"
+    cd "$HOME/Base/dotfiles"
 
     # Initialize submodules (Dotbot)
     log_step "Initializing Dotbot..."

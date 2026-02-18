@@ -3,7 +3,7 @@ function theme --description "Toggle or set Catppuccin theme"
 
     if test -z "$arg"
         # No argument - toggle theme
-        bash ~/.dotfiles/scripts/toggle-theme.sh
+        bash ~/Base/dotfiles/scripts/toggle-theme.sh
 
         # Reload fish config to apply FZF changes
         source ~/.config/fish/config.fish
@@ -11,13 +11,13 @@ function theme --description "Toggle or set Catppuccin theme"
     else if test "$arg" = "light" -o "$arg" = "latte"
         # Set light theme
         echo "latte" > ~/.config/catppuccin-theme
-        bash ~/.dotfiles/scripts/toggle-theme.sh
+        bash ~/Base/dotfiles/scripts/toggle-theme.sh
         source ~/.config/fish/config.fish
 
     else if test "$arg" = "dark" -o "$arg" = "mocha"
         # Set dark theme
         echo "mocha" > ~/.config/catppuccin-theme
-        bash ~/.dotfiles/scripts/toggle-theme.sh
+        bash ~/Base/dotfiles/scripts/toggle-theme.sh
         source ~/.config/fish/config.fish
 
     else if test "$arg" = "status"

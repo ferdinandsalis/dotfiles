@@ -4,9 +4,9 @@
 # ~/.macos — https://mths.be/macos
 
 # Load environment variables
-if [[ -f "$HOME/.dotfiles/.env" ]]; then
+if [[ -f "$HOME/Base/dotfiles/.env" ]]; then
     set -a
-    source "$HOME/.dotfiles/.env"
+    source "$HOME/Base/dotfiles/.env"
     set +a
 elif [[ -f "$HOME/.env" ]]; then
     set -a

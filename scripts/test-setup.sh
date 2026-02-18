@@ -20,7 +20,7 @@ log_section() { echo -e "\n${BLUE}==${NC} $1"; }
 
 # Test configuration
 TEST_ROOT="${HOME}/.dotfiles-test"
-DOTFILES_DIR="${HOME}/.dotfiles"
+DOTFILES_DIR="${HOME}/Base/dotfiles"
 
 # Safety check - ensure we're in a dotfiles directory
 if [[ ! -f "$DOTFILES_DIR/install.conf.yaml" ]]; then

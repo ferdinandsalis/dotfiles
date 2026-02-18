@@ -18,7 +18,7 @@ log_error() { echo -e "${RED}✗${NC} $1"; }
 log_step() { echo -e "${BLUE}→${NC} $1"; }
 
 # Create backup directory
-BACKUP_DIR="$HOME/.dotfiles/backups/$(date +%Y%m%d_%H%M%S)"
+BACKUP_DIR="$HOME/Base/dotfiles/backups/$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$BACKUP_DIR"
 
 echo "🔄 Exporting app settings to: $BACKUP_DIR"
@@ -250,7 +250,7 @@ Created: $(date)
 
 1. Run the main dotfiles setup:
    \`\`\`bash
-   cd ~/.dotfiles
+   cd ~/Base/dotfiles
    ./setup.sh
    \`\`\`
 

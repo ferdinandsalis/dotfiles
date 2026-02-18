@@ -241,23 +241,23 @@ main() {
     
     # Dotfiles symlinks
     log_section "Dotfiles Symlinks:"
-    check_symlink ~/.gitconfig ".dotfiles/git/gitconfig"
-    check_symlink ~/.config/fish ".dotfiles/fish"
-    check_symlink ~/.config/helix ".dotfiles/helix"
-    check_symlink ~/.config/btop ".dotfiles/btop"
-    check_symlink ~/.config/bat ".dotfiles/bat"
-    check_symlink ~/.config/lazygit ".dotfiles/lazygit"
-    check_symlink ~/.config/ghostty ".dotfiles/ghostty"
-    check_symlink ~/.Brewfile ".dotfiles/homebrew/Brewfile"
+    check_symlink ~/.gitconfig "Base/dotfiles/git/gitconfig"
+    check_symlink ~/.config/fish "Base/dotfiles/fish"
+    check_symlink ~/.config/helix "Base/dotfiles/helix"
+    check_symlink ~/.config/btop "Base/dotfiles/btop"
+    check_symlink ~/.config/bat "Base/dotfiles/bat"
+    check_symlink ~/.config/lazygit "Base/dotfiles/lazygit"
+    check_symlink ~/.config/ghostty "Base/dotfiles/ghostty"
+    check_symlink ~/.Brewfile "Base/dotfiles/homebrew/Brewfile"
     
     # Configuration files
     log_section "Configuration Files:"
-    check_file ~/.dotfiles/install.conf.yaml
-    check_file ~/.dotfiles/setup.sh
-    check_file ~/.dotfiles/.env.example
+    check_file ~/Base/dotfiles/install.conf.yaml
+    check_file ~/Base/dotfiles/setup.sh
+    check_file ~/Base/dotfiles/.env.example
     
     # Check for .env file
-    if [[ -f ~/.dotfiles/.env ]]; then
+    if [[ -f ~/Base/dotfiles/.env ]]; then
         log_success ".env file exists (personal configuration)"
         ((PASSED++))
     else
@@ -267,7 +267,7 @@ main() {
     
     # Directories
     log_section "Directories:"
-    check_directory ~/.dotfiles
+    check_directory ~/Base/dotfiles
     check_directory ~/.ssh
     check_directory ~/.local/bin
     check_directory ~/projects
