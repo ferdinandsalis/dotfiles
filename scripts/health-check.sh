@@ -268,10 +268,9 @@ main() {
     # Directories
     log_section "Directories:"
     check_directory ~/Base/dotfiles
+    check_directory ~/Base
     check_directory ~/.ssh
     check_directory ~/.local/bin
-    check_directory ~/projects
-    check_directory ~/work
     
     # Git configuration
     log_section "Git Configuration:"

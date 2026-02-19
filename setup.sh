@@ -98,11 +98,6 @@ install_homebrew() {
 
         # Add Homebrew to PATH for this session
         eval "$($BREW_PREFIX/bin/brew shellenv)"
-
-        # Add to shell profile for future sessions
-        if [[ ! -f ~/.zprofile ]] || ! grep -q "$BREW_PREFIX/bin/brew shellenv" ~/.zprofile; then
-            echo 'eval "$('$BREW_PREFIX'/bin/brew shellenv)"' >> ~/.zprofile
-        fi
     else
         log_info "Homebrew already installed"
     fi
@@ -112,6 +107,7 @@ install_homebrew() {
 setup_dotfiles() {
     if [ ! -d "$HOME/Base/dotfiles" ]; then
         log_step "Cloning dotfiles repository..."
+        mkdir -p "$HOME/Base"
         git clone https://github.com/ferdinandsalis/dotfiles.git "$HOME/Base/dotfiles" || {
             log_error "Failed to clone dotfiles repository"
             exit 1
