@@ -77,7 +77,6 @@ Uses Catppuccin themes across all tools:
 ### Environment Variable Management
 - Fish shell exports in `fish/config.fish:3-9`
 - Mise environment variables can be set globally or per-project
-- `MISE_OVERRIDE_TOOL_VERSIONS_FILENAMES=none` disables `.tool-versions` files
 
 ## Critical Dependencies
 
