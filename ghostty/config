@@ -53,7 +53,7 @@ keybind = cmd+shift+up=goto_split:top
 keybind = cmd+shift+down=goto_split:bottom
 
 confirm-close-surface = true
-scrollback-limit = 100000000
+scrollback-limit = 1000000
 
 keybind = global:cmd+grave_accent=toggle_quick_terminal
 keybind = global:cmd+enter=unbind
