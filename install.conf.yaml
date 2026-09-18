@@ -49,6 +49,7 @@
       path: ssh/config
     ~/.ripgreprc: .ripgreprc
     ~/.fdignore: .fdignore
+    ~/.hushlogin: .hushlogin
     ~/Library/Application Support/lazygit/config.yml: lazygit/config.yml
     ~/.default-npm-packages: .default-npm-packages
 
