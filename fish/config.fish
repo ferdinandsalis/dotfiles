@@ -282,11 +282,6 @@ end
 # Keybindings
 bind \cx\ce edit_command_buffer # Ctrl+X Ctrl+E to edit command in editor
 
-# Auto-start SSH agent
-if test -z "$SSH_AUTH_SOCK"
-    eval (ssh-agent -c) >/dev/null
-end
-
 # GPG TTY for signing
 set -x GPG_TTY (tty)
 
