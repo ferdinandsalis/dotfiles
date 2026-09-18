@@ -72,75 +72,13 @@ function __fish_greeting_build -d "Generate greeting text (remi and cali run in 
     set -l pids
 
     if command -v remi >/dev/null
-        python3 -c "
-import json, subprocess
-r = subprocess.run(['remi', 'ls', '--json'], capture_output=True, text=True)
-if r.returncode == 0 and r.stdout.strip():
-    items = json.loads(r.stdout)
-    if items:
-        DIM = '\033[38;2;108;112;134m'
-        TITLE = '\033[38;2;205;214;244m'
-        TAG = '\033[38;2;137;180;250m'
-        DUE = '\033[38;2;249;226;175m'
-        LABEL = '\033[38;2;137;180;250m'
-        FLAG = '\033[38;2;243;139;168m'
-        R = '\033[0m'
-        print(f'{LABEL}📋 {len(items)} pending:{R}')
-        for item in items[:3]:
-            parts = []
-            if item.get('flagged'): parts.append(f'{FLAG}🚩{R}')
-            parts.append(f'{TITLE}{item[\"title\"]}{R}')
-            if item.get('dueDate'): parts.append(f'{DUE}{item[\"dueDate\"][:10]}{R}')
-            tags = item.get('tags', [])
-            if tags: parts.append(f'{TAG}{\" \".join(\"#\" + t for t in tags)}{R}')
-            print('  • ' + '  '.join(parts))
-        if len(items) > 3:
-            print(f'  {DIM}... and {len(items) - 3} more{R}')
-" >$tmpdir/remi 2>/dev/null &
+        python3 $__fish_config_dir/scripts/greeting-remi.py >$tmpdir/remi 2>/dev/null &
         set -a pids $last_pid
     end
 
     # Show upcoming calendar events (today's remaining, or tomorrow's)
     if command -v cali >/dev/null
-        python3 -c "
-import json, subprocess, sys
-from datetime import datetime
-
-def get_events(cmd):
-    r = subprocess.run(cmd, capture_output=True, text=True)
-    return json.loads(r.stdout) if r.returncode == 0 and r.stdout.strip() else []
-
-def format_events(events, now_str=None):
-    if now_str:
-        events = [e for e in events if e['allDay'] or e['start'][11:16] >= now_str or e['end'][11:16] > now_str]
-    lines = []
-    for e in events[:3]:
-        if e['allDay']:
-            lines.append(f'  {ALLDAY}all-day{R}  {TITLE}{e[\"summary\"]}{R}')
-        else:
-            lines.append(f'  {TIME}{e[\"start\"][11:16]}{R}  {TITLE}{e[\"summary\"]}{R}')
-    return lines
-
-DIM = '\033[38;2;108;112;134m'  # overlay0
-TIME = '\033[38;2;249;226;175m'  # yellow
-TITLE = '\033[38;2;205;214;244m'  # text
-ALLDAY = '\033[38;2;245;194;231m'  # pink
-LABEL = '\033[38;2;137;180;250m'  # blue
-R = '\033[0m'
-
-now = datetime.now().strftime('%H:%M')
-today = get_events(['cali', 'today', '--json'])
-lines = format_events(today, now)
-if lines:
-    print(f'{LABEL}📅 Today:{R}')
-    print('\n'.join(lines))
-else:
-    tomorrow = get_events(['cali', 'tomorrow', '--json'])
-    lines = format_events(tomorrow)
-    if lines:
-        print(f'{LABEL}📅 Tomorrow:{R}')
-        print('\n'.join(lines))
-" >$tmpdir/cali 2>/dev/null &
+        python3 $__fish_config_dir/scripts/greeting-cali.py >$tmpdir/cali 2>/dev/null &
         set -a pids $last_pid
     end
 
