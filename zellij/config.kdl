@@ -1,6 +1,6 @@
 default_shell "fish"
 
-theme "catppuccin-macchiato"
+theme "catppuccin-mocha"
 
 pane_frames false
 simplified_ui true
