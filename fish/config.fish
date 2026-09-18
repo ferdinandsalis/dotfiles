@@ -159,6 +159,14 @@ function __fish_greeting_refresh -d "Rebuild the greeting cache"
 end
 
 function fish_greeting
+    # Show the full greeting only on the first terminal of the day; later
+    # shells stay silent. The `hi` alias forces a refresh and print on demand.
+    set -l today (date +%F)
+    if set -q __last_greeting_shown; and test "$__last_greeting_shown" = "$today"
+        return
+    end
+    set -U __last_greeting_shown $today
+
     if not test -f $__greeting_cache
         mkdir -p (dirname $__greeting_cache)
         __fish_greeting_build | tee $__greeting_cache
