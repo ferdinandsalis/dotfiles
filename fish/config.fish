@@ -23,6 +23,22 @@ if command -v zoxide >/dev/null
     zoxide init fish | source
 end
 
+# Tide GC: tide stores each rendered prompt in a universal variable keyed by
+# PID (_tide_prompt_<pid>) and never removes entries for shells that exited
+# abnormally, so fish_variables grows forever (it once reached 1.7MB).
+# Only erase entries whose PID is dead: erasing a live shell's entry breaks
+# its async prompt render (the background render job updates that var).
+set -l stale_tide_prompts
+for tide_var in (set -U --names | string match -r '^_tide_prompt_\d+$')
+    set -l pid (string replace '_tide_prompt_' '' $tide_var)
+    if not kill -0 $pid 2>/dev/null
+        set -a stale_tide_prompts $tide_var
+    end
+end
+if set -q stale_tide_prompts[1]
+    set -e $stale_tide_prompts
+end
+
 
 # FZF Configuration
 if command -v fzf >/dev/null
@@ -44,11 +60,19 @@ end
 # Note: Fish cannot directly source bash scripts.
 # Consider converting ~/.environment.secret.sh to Fish syntax or using direnv
 
-# Show tasks on terminal startup
-function fish_greeting
-    # Show pending reminders
+# Show pending reminders and upcoming events on shell startup.
+# The output is cached so new shells open instantly; a cache older than
+# 10 minutes is shown as-is and rebuilt in the background.
+set -g __greeting_cache ~/.cache/fish/greeting
+set -g __greeting_max_age 600
+
+function __fish_greeting_build -d "Generate greeting text (remi and cali run in parallel)"
+    set -l tmpdir (mktemp -d)
+    touch $tmpdir/remi $tmpdir/cali
+    set -l pids
+
     if command -v remi >/dev/null
-        set -l remi_output (python3 -c "
+        python3 -c "
 import json, subprocess
 r = subprocess.run(['remi', 'ls', '--json'], capture_output=True, text=True)
 if r.returncode == 0 and r.stdout.strip():
@@ -72,17 +96,13 @@ if r.returncode == 0 and r.stdout.strip():
             print('  • ' + '  '.join(parts))
         if len(items) > 3:
             print(f'  {DIM}... and {len(items) - 3} more{R}')
-" 2>/dev/null)
-        if test -n "$remi_output"
-            for line in $remi_output
-                echo "$line"
-            end
-        end
+" >$tmpdir/remi 2>/dev/null &
+        set -a pids $last_pid
     end
 
     # Show upcoming calendar events (today's remaining, or tomorrow's)
     if command -v cali >/dev/null
-        set -l output (python3 -c "
+        python3 -c "
 import json, subprocess, sys
 from datetime import datetime
 
@@ -120,14 +140,36 @@ else:
     if lines:
         print(f'{LABEL}📅 Tomorrow:{R}')
         print('\n'.join(lines))
-" 2>/dev/null)
-        if test -n "$output"
-            for line in $output
-                echo "$line"
-            end
-        end
+" >$tmpdir/cali 2>/dev/null &
+        set -a pids $last_pid
     end
 
+    if set -q pids[1]
+        wait $pids
+    end
+    command cat $tmpdir/remi $tmpdir/cali
+    rm -rf $tmpdir
+end
+
+function __fish_greeting_refresh -d "Rebuild the greeting cache"
+    set -l tmp (mktemp)
+    __fish_greeting_build >$tmp
+    mkdir -p (dirname $__greeting_cache)
+    mv $tmp $__greeting_cache
+end
+
+function fish_greeting
+    if not test -f $__greeting_cache
+        mkdir -p (dirname $__greeting_cache)
+        __fish_greeting_build | tee $__greeting_cache
+        return
+    end
+
+    command cat $__greeting_cache
+    set -l age (math (date +%s) - (stat -f %m $__greeting_cache))
+    if test $age -ge $__greeting_max_age
+        fish -c __fish_greeting_refresh >/dev/null 2>&1 &
+    end
 end
 
 # Interactive Shell Configuration
@@ -157,10 +199,11 @@ if status is-interactive
     alias du="dust"
     alias top="btop"
     alias lzd="lazydocker"  # Docker TUI management
+    alias jrn="~/.pi/agent/skills/dev-journal/journal.sh"
     alias vim="hx"
     alias vi="hx"
     alias t="remi ls"
-    alias hi="fish_greeting"
+    alias hi="__fish_greeting_refresh; and command cat $__greeting_cache"
 
     # Git Aliases
     alias g="git"

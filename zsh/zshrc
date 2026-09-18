@@ -57,3 +57,5 @@ PROMPT='%F{cyan}%~%f %F{yellow}❯%f '
 
 # Local overrides
 [ -f ~/.zshrc.local ] && source ~/.zshrc.local
+
+alias gam="/Users/ferdinand/bin/gamadv-xtd3/gam"

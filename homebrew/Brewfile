@@ -89,6 +89,7 @@ cask "numi"
 cask "lulu"
 
 #: Browsers
+cask "arc"
 cask "firefox"
 cask "google-chrome"
 cask "vivaldi"

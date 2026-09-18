@@ -1,7 +1,6 @@
-# Himalaya Email Configuration
-# https://github.com/soywod/himalaya
+# Himalaya Email Configuration (v2 format)
+# https://github.com/pimalaya/himalaya
 
-# Display settings
 downloads-dir = "~/Downloads"
 
 # =====================================
@@ -11,35 +10,22 @@ downloads-dir = "~/Downloads"
 default = true
 email = "mail@ferdinandsalis.com"
 display-name = "Ferdinand Salis"
-signature = """
---
-Ferdinand Salis
-mail@ferdinandsalis.com
-"""
+signature = "-- \nFerdinand Salis\nmail@ferdinandsalis.com"
 
-# Backend configuration (IMAP)
-backend.type = "imap"
-backend.host = "imap.fastmail.com"
-backend.port = 993
-backend.encryption.type = "tls"
-backend.login = "mail@ferdinandsalis.com"
-backend.auth.type = "password"
-backend.auth.cmd = "security find-generic-password -a mail@ferdinandsalis.com -s himalaya -w"
+mailbox.alias.inbox = "INBOX"
+mailbox.alias.sent = "Sent Items"
+mailbox.alias.drafts = "Drafts"
+mailbox.alias.trash = "Trash"
 
-# Message sending (SMTP)
-message.send.backend.type = "smtp"
-message.send.backend.host = "smtp.fastmail.com"
-message.send.backend.port = 587
-message.send.backend.encryption.type = "start-tls"
-message.send.backend.login = "mail@ferdinandsalis.com"
-message.send.backend.auth.type = "password"
-message.send.backend.auth.cmd = "security find-generic-password -a mail@ferdinandsalis.com -s himalaya -w"
+# IMAP
+imap.server = "imap.fastmail.com"
+imap.sasl.plain.username = "mail@ferdinandsalis.com"
+imap.sasl.plain.password.command = "security find-generic-password -a mail@ferdinandsalis.com -s himalaya -w"
 
-# Folders
-folder.aliases.inbox = "INBOX"
-folder.aliases.sent = "Sent Items"
-folder.aliases.drafts = "Drafts"
-folder.aliases.trash = "Trash"
+# SMTP
+smtp.server = "smtp.fastmail.com"
+smtp.sasl.plain.username = "mail@ferdinandsalis.com"
+smtp.sasl.plain.password.command = "security find-generic-password -a mail@ferdinandsalis.com -s himalaya -w"
 
 # =====================================
 # Account: ferdinand@salis.io
@@ -47,32 +33,19 @@ folder.aliases.trash = "Trash"
 [accounts.salisio]
 email = "ferdinand@salis.io"
 display-name = "Ferdinand Salis"
-signature = """
---
-Ferdinand Salis
-ferdinand@salis.io
-"""
+signature = "-- \nFerdinand Salis\nferdinand@salis.io"
 
-# Backend configuration (IMAP)
-backend.type = "imap"
-backend.host = "imap.fastmail.com"
-backend.port = 993
-backend.encryption.type = "tls"
-backend.login = "ferdinand@salis.io"
-backend.auth.type = "password"
-backend.auth.cmd = "security find-generic-password -a ferdinand@salis.io -s himalaya -w"
+mailbox.alias.inbox = "INBOX"
+mailbox.alias.sent = "Sent Items"
+mailbox.alias.drafts = "Drafts"
+mailbox.alias.trash = "Trash"
 
-# Message sending (SMTP)
-message.send.backend.type = "smtp"
-message.send.backend.host = "smtp.fastmail.com"
-message.send.backend.port = 587
-message.send.backend.encryption.type = "start-tls"
-message.send.backend.login = "ferdinand@salis.io"
-message.send.backend.auth.type = "password"
-message.send.backend.auth.cmd = "security find-generic-password -a ferdinand@salis.io -s himalaya -w"
+# IMAP
+imap.server = "imap.fastmail.com"
+imap.sasl.plain.username = "ferdinand@salis.io"
+imap.sasl.plain.password.command = "security find-generic-password -a ferdinand@salis.io -s himalaya -w"
 
-# Folders
-folder.aliases.inbox = "INBOX"
-folder.aliases.sent = "Sent Items"
-folder.aliases.drafts = "Drafts"
-folder.aliases.trash = "Trash"
+# SMTP
+smtp.server = "smtp.fastmail.com"
+smtp.sasl.plain.username = "ferdinand@salis.io"
+smtp.sasl.plain.password.command = "security find-generic-password -a ferdinand@salis.io -s himalaya -w"

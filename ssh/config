@@ -10,6 +10,10 @@ Host *
     ControlPersist 600
     IdentityAgent "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
 
+Host raspi
+    Hostname raspi.local
+    User raspi
+
 Host github.com
     Hostname github.com
     User git
