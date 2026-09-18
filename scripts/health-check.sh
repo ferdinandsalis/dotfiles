@@ -337,7 +337,6 @@ main() {
         echo ""
         echo "Common fixes:"
         echo "  • Run ./setup.sh to install missing components"
-        echo "  • Run ./scripts/setup-git.sh to configure git"
         echo "  • Run ./scripts/setup-ssh.sh to generate SSH keys"
         echo "  • Copy .env.example to .env and configure your settings"
         exit 1

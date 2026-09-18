@@ -37,9 +37,6 @@ The setup script will:
 After the main setup, run these helper scripts as needed:
 
 ```bash
-# Configure Git
-./scripts/setup-git.sh
-
 # Generate SSH keys
 ./scripts/setup-ssh.sh
 

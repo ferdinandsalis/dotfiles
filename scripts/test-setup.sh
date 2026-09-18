@@ -70,7 +70,6 @@ test_syntax() {
     
     local scripts=(
         "setup.sh"
-        "scripts/setup-git.sh"
         "scripts/setup-ssh.sh"
         "scripts/health-check.sh"
     )
