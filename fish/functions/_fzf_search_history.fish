@@ -1,10 +1,4 @@
 function _fzf_search_history --description "Search command history. Replace the command line with the selected command."
-    # history merge incorporates history changes from other fish sessions
-    # it errors out if called in private mode
-    if test -z "$fish_private_mode"
-        builtin history merge
-    end
-
     if not set --query fzf_history_time_format
         # Reference https://devhints.io/strftime to understand strftime format symbols
         set -f fzf_history_time_format "%m-%d %H:%M:%S"
@@ -15,15 +9,19 @@ function _fzf_search_history --description "Search command history. Replace the 
     # necessary to make regex non-greedy so it won't match into commands containing the char.
     set -f time_prefix_regex '^.*? │ '
     # Delinate commands throughout pipeline using null rather than newlines because commands can be multi-line
+    # Previewing via fish (the _fzf_wrapper default) spawns a config-loading
+    # fish (~100ms) per preview repaint, which starves fzf's input reader while
+    # history streams in. Use /bin/sh + bat instead: plain POSIX, syntax-colored.
+    set -f _fzf_preview_shell /bin/sh
     set -f commands_selected (
-        builtin history --null --show-time="$fzf_history_time_format │ " |
+        _fzf_history_entries $fzf_history_time_format |
         _fzf_wrapper --read0 \
             --print0 \
             --multi \
             --scheme=history \
             --prompt="History> " \
             --query=(commandline) \
-            --preview="string replace --regex '$time_prefix_regex' '' -- {} | fish_indent --ansi" \
+            --preview="echo {} | bat --color=always --language=fish --style=plain" \
             --preview-window="bottom:3:wrap" \
             $fzf_history_opts |
         string split0 |

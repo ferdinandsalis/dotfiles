@@ -2,7 +2,12 @@ function _fzf_wrapper --description "Prepares some environment variables before 
     # Make sure fzf uses fish to execute preview commands, some of which
     # are autoloaded fish functions so don't exist in other shells.
     # Use --function so that it doesn't clobber SHELL outside this function.
-    set -f --export SHELL (command --search fish)
+    # Widgets whose previews are plain POSIX pipelines can set _fzf_preview_shell
+    # (e.g. /bin/sh) to skip a ~100ms config-loading fish spawn per preview.
+    if not set --query _fzf_preview_shell
+        set -f _fzf_preview_shell (command --search fish)
+    end
+    set -f --export SHELL $_fzf_preview_shell
 
     # If neither FZF_DEFAULT_OPTS nor FZF_DEFAULT_OPTS_FILE are set, then set some sane defaults.
     # See https://github.com/junegunn/fzf#environment-variables
