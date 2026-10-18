@@ -170,7 +170,7 @@ sudo defaults write /Library/Preferences/com.apple.loginwindow showInputMenu -bo
 
 # Set the timezone; see `sudo systemsetup -listtimezones` for other values
 # Note: This command may show warnings on newer macOS versions but still works
-sudo systemsetup -settimezone "Europe/Brussels" > /dev/null 2>&1 || true
+sudo systemsetup -settimezone "Europe/Vienna" > /dev/null 2>&1 || true
 
 # Stop iTunes from responding to the keyboard media keys
 launchctl unload -w /System/Library/LaunchAgents/com.apple.rcd.plist 2> /dev/null
