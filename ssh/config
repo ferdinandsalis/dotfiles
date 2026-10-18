@@ -34,3 +34,14 @@ Host bitbucket.org
     Hostname bitbucket.org
     User git
     PreferredAuthentications publickey
+
+Host yelo
+  HostName yelo
+  User root
+
+# Gostling/Vienna Mac mini via Tailscale
+Host mini
+  HostName 100.75.186.48
+  User ferdinand
+  IdentityFile ~/.ssh/id_homelab
+  IdentitiesOnly yes
